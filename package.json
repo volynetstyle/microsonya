@@ -6,6 +6,9 @@
   "packageManager": "pnpm@10.12.1",
   "scripts": {
     "build": "pnpm -r build",
+    "docker:build": "docker compose build",
+    "docker:up": "docker compose up -d",
+    "docker:logs": "docker compose logs -f telegram-bot",
     "typecheck": "pnpm -r typecheck",
     "start": "pnpm --filter @microsonya/telegram-bot start",
     "test": "vitest run"

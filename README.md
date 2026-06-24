@@ -72,3 +72,21 @@ pnpm --filter @microsonya/db migrate
 pnpm build
 pnpm start
 ```
+
+## Docker
+
+Use `.env.docker.example` as the shape for `.env`. The compose setup persists SQLite in the `microsonya-data` volume.
+
+```bash
+pnpm docker:build
+pnpm docker:up
+pnpm docker:logs
+```
+
+Docker Desktop or another Docker daemon must be running before `pnpm docker:build`.
+
+By default the bot calls an LLM on the host at `http://host.docker.internal:11434`. To run an Ollama container too:
+
+```bash
+docker compose --profile ollama up -d
+```

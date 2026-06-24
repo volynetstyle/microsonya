@@ -1,0 +1,32 @@
+services:
+  telegram-bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: microsonya/telegram-bot:local
+    restart: unless-stopped
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      MICROSONYA_DB: /data/microsonya.sqlite
+      LLM_BASE_URL: ${LLM_BASE_URL:-http://host.docker.internal:11434}
+      LLM_MODEL: ${LLM_MODEL:-qwen2.5:7b}
+    volumes:
+      - microsonya-data:/data
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  ollama:
+    image: ollama/ollama:latest
+    profiles:
+      - ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+
+volumes:
+  microsonya-data:
+  ollama-data:
