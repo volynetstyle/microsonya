@@ -1,0 +1,25 @@
+{
+  "name": "@microsonya/telegram-bot",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/main.d.ts",
+      "import": "./dist/main.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "start": "node dist/main.js"
+  },
+  "dependencies": {
+    "@microsonya/db": "workspace:*",
+    "@microsonya/model-gateway": "workspace:*",
+    "@microsonya/shared": "workspace:*",
+    "@microsonya/summarize": "workspace:*",
+    "dotenv": "^16.5.0",
+    "telegraf": "^4.16.3"
+  }
+}
