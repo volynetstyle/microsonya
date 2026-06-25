@@ -3,6 +3,22 @@ import type { SegmentSummary, SummaryRun } from "@microsonya/shared";
 import type { MicrosonyaDb } from "../client.js";
 import { segmentSummaries, summaryRuns } from "../schema.js";
 
+type SummaryRunRow = typeof summaryRuns.$inferSelect;
+
+function mapSummaryRunRow(row: SummaryRunRow): SummaryRun {
+  return {
+    id: row.id,
+    chatId: row.chatId,
+    commandMessageId: row.commandMessageId,
+    createdAt: row.createdAt,
+    fromMessageId: row.fromMessageId,
+    toMessageId: row.toMessageId,
+    mode: row.mode as SummaryRun["mode"],
+    status: row.status as SummaryRun["status"],
+    finalText: row.text,
+  };
+}
+
 export class SummariesRepo {
   constructor(private readonly db: MicrosonyaDb) {}
 
@@ -13,21 +29,9 @@ export class SummariesRepo {
       .where(and(eq(summaryRuns.chatId, chatId), eq(summaryRuns.status, "ok")))
       .orderBy(desc(summaryRuns.createdAt))
       .limit(1)
-      .all()[0];
+      .get();
 
-    return row
-      ? {
-          id: row.id,
-          chatId: row.chatId,
-          commandMessageId: row.commandMessageId,
-          createdAt: row.createdAt,
-          fromMessageId: row.fromMessageId,
-          toMessageId: row.toMessageId,
-          mode: row.mode as SummaryRun["mode"],
-          status: row.status as SummaryRun["status"],
-          finalText: row.text
-        }
-      : undefined;
+    return row ? mapSummaryRunRow(row) : undefined;
   }
 
   saveRun(run: SummaryRun): void {
@@ -42,12 +46,29 @@ export class SummariesRepo {
         toMessageId: run.toMessageId,
         mode: run.mode,
         status: run.status,
-        text: run.finalText
+        text: run.finalText,
+      })
+      .onConflictDoUpdate({
+        target: [summaryRuns.chatId, summaryRuns.commandMessageId],
+        set: {
+          createdAt: run.createdAt,
+          fromMessageId: run.fromMessageId,
+          toMessageId: run.toMessageId,
+          mode: run.mode,
+          status: run.status,
+          text: run.finalText,
+        },
       })
       .run();
   }
 
-  findCachedSegment(chatId: string, fromMessageId: number, toMessageId: number, hash: string): SegmentSummary | undefined {
+  findCachedSegment(
+    chatId: string,
+    fromMessageId: number,
+    toMessageId: number,
+    hash: string,
+    schemaVersion = 1,
+  ): SegmentSummary | undefined {
     const row = this.db
       .select()
       .from(segmentSummaries)
@@ -56,16 +77,19 @@ export class SummariesRepo {
           eq(segmentSummaries.chatId, chatId),
           eq(segmentSummaries.fromMessageId, fromMessageId),
           eq(segmentSummaries.toMessageId, toMessageId),
-          eq(segmentSummaries.hash, hash)
-        )
+          eq(segmentSummaries.hash, hash),
+          eq(segmentSummaries.schemaVersion, schemaVersion),
+        ),
       )
       .limit(1)
-      .all()[0];
+      .get();
 
     return row ? (JSON.parse(row.json) as SegmentSummary) : undefined;
   }
 
-  saveSegment(summary: SegmentSummary): void {
+  saveSegment(summary: SegmentSummary, schemaVersion = 1): void {
+    const now = Date.now();
+
     this.db
       .insert(segmentSummaries)
       .values({
@@ -74,11 +98,26 @@ export class SummariesRepo {
         fromMessageId: summary.fromMessageId,
         toMessageId: summary.toMessageId,
         hash: summary.hash,
+        schemaVersion,
         title: summary.title,
         json: JSON.stringify(summary),
-        createdAt: Date.now()
+        createdAt: now,
+        updatedAt: now,
       })
-      .onConflictDoNothing()
+      .onConflictDoUpdate({
+        target: [
+          segmentSummaries.chatId,
+          segmentSummaries.fromMessageId,
+          segmentSummaries.toMessageId,
+          segmentSummaries.hash,
+          segmentSummaries.schemaVersion,
+        ],
+        set: {
+          title: summary.title,
+          json: JSON.stringify(summary),
+          updatedAt: now,
+        },
+      })
       .run();
   }
 }

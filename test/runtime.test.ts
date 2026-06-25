@@ -1,8 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
-import { MessagesRepo, openDb, SummariesRepo } from "../packages/db/src/index.js";
+import { MessagesRepo, SummariesRepo } from "../packages/db/src/index.js";
 import { ModelGateway, type ModelClient } from "../packages/model-gateway/src/index.js";
 import { segmentMessages, selectSummaryWindow, summarize } from "../packages/summarize/src/index.js";
 import type { ChatMessage } from "../packages/shared/src/index.js";
+import { openTestDb } from "./dbTestUtils.js";
 
 const now = new Date("2026-06-24T12:00:00.000Z").getTime();
 
@@ -54,7 +55,7 @@ describe("segmentMessages", () => {
 
 describe("summarize", () => {
   it("caches segment summaries and reuses them on repeated count summaries", async () => {
-    const { db } = openDb(":memory:");
+    const { db, sqlite } = openTestDb();
     const messages = new MessagesRepo(db);
     const summaries = new SummariesRepo(db);
     messages.save(message(1, now, "hello"));
@@ -82,6 +83,7 @@ describe("summarize", () => {
     await summarize({ messages, summaries, models: new ModelGateway(client) }, command);
 
     expect(client.complete).toHaveBeenCalledTimes(3);
+    sqlite.close();
   });
 });
 

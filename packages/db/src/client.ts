@@ -22,5 +22,5 @@ export function openDb(path = "microsonya.sqlite"): DbClient {
   return {
     sqlite,
     db: drizzle(sqlite, { schema }),
-  };
+  } satisfies DbClient;
 }
