@@ -1,7 +1,7 @@
 import type { ChatMessage, SummaryCommand, SummaryRun } from "@microsonya/shared";
 
-export const MAX_MESSAGES = 500;
-export const MAX_HOURS = 12;
+export const MAX_MESSAGES = 1024
+export const MAX_HOURS = 24;
 
 export function selectSummaryWindow(
   command: SummaryCommand,
