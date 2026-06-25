@@ -1,38 +1,55 @@
-import type { ChatMessage, DiscussionSegment, SegmentReason } from "@microsonya/shared";
+import type {
+  ChatMessage,
+  DiscussionSegment,
+  SegmentReason,
+} from "@microsonya/shared";
 
 export const SEGMENT_TIME_GAP_MS = 30 * 60 * 1000;
 export const SEGMENT_MAX_MESSAGES = 80;
 
-export function segmentMessages(messages: ChatMessage[]): DiscussionSegment[] {
-  const sorted = [...messages].sort((a, b) => a.date - b.date || a.id - b.id);
-  const chunks: Array<{ messages: ChatMessage[]; reason: SegmentReason }> = [];
-  let current: ChatMessage[] = [];
-  let currentReason: SegmentReason = "time_gap";
+type SegmentState = {
+  reason: SegmentReason;
+  messages: ChatMessage[];
+  participants: Set<string>;
+};
 
-  for (const message of sorted) {
-    const previous = current.at(-1);
-    const timeGap = previous !== undefined && message.date - previous.date > SEGMENT_TIME_GAP_MS;
-    const tooLarge = current.length >= SEGMENT_MAX_MESSAGES;
-
-    if (current.length > 0 && (timeGap || tooLarge)) {
-      chunks.push({ messages: current, reason: tooLarge ? "size_limit" : "time_gap" });
-      current = [];
-      currentReason = tooLarge ? "size_limit" : "time_gap";
-    }
-
-    current.push(message);
-  }
-
-  if (current.length > 0) {
-    chunks.push({ messages: current, reason: currentReason });
-  }
-
-  return chunks.map(toSegment);
+function createSegmentState(reason: SegmentReason): SegmentState {
+  return {
+    reason,
+    messages: [],
+    participants: new Set(),
+  };
 }
 
-function toSegment(chunk: { messages: ChatMessage[]; reason: SegmentReason }, index: number): DiscussionSegment {
-  const first = chunk.messages[0];
-  const last = chunk.messages.at(-1);
+function appendMessage(state: SegmentState, message: ChatMessage): void {
+  state.messages.push(message);
+  state.participants.add(message.authorName || message.authorId);
+}
+
+function getCloseReason(
+  state: SegmentState,
+  message: ChatMessage,
+): SegmentReason | undefined {
+  const previous = state.messages.at(-1);
+
+  if (!previous) {
+    return undefined;
+  }
+
+  if (message.date - previous.date > SEGMENT_TIME_GAP_MS) {
+    return "time_gap";
+  }
+
+  if (state.messages.length >= SEGMENT_MAX_MESSAGES) {
+    return "size_limit";
+  }
+
+  return undefined;
+}
+
+function stateToSegment(state: SegmentState, index: number): DiscussionSegment {
+  const first = state.messages[0];
+  const last = state.messages.at(-1);
 
   if (!first || !last) {
     throw new Error("Cannot create a segment from an empty message chunk.");
@@ -45,9 +62,33 @@ function toSegment(chunk: { messages: ChatMessage[]; reason: SegmentReason }, in
     toMessageId: last.id,
     startDate: first.date,
     endDate: last.date,
-    participants: [...new Set(chunk.messages.map((message) => message.authorName || message.authorId))],
-    messageCount: chunk.messages.length,
-    reason: chunk.reason,
-    messages: chunk.messages
+    participants: [...state.participants],
+    messageCount: state.messages.length,
+    reason: state.reason,
+    messages: state.messages,
   };
+}
+
+export function segmentMessages(messages: ChatMessage[]): DiscussionSegment[] {
+  const sorted = [...messages].sort((a, b) => a.date - b.date || a.id - b.id);
+
+  const segments: DiscussionSegment[] = [];
+  let current = createSegmentState("time_gap");
+
+  for (const message of sorted) {
+    const closeReason = getCloseReason(current, message);
+
+    if (current.messages.length > 0 && closeReason) {
+      segments.push(stateToSegment(current, segments.length));
+      current = createSegmentState(closeReason);
+    }
+
+    appendMessage(current, message);
+  }
+
+  if (current.messages.length > 0) {
+    segments.push(stateToSegment(current, segments.length));
+  }
+
+  return segments;
 }

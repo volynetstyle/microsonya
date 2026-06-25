@@ -10,6 +10,20 @@ export type RawSegmentSummary = {
   importance: 0 | 1 | 2 | 3;
 };
 
+const JSON_ANSWER_TEMPLATE = JSON.stringify(
+  {
+    title: "короткий заголовок до 10 слів",
+    summary: ["короткий факт 1", "короткий факт 2"],
+    decisions: ["рішення, якщо було"],
+    openQuestions: ["відкрите питання, якщо було"],
+    jokes: ["важливий жарт або мем, якщо був"],
+    mentionedPeople: ["ім'я або authorId"],
+    importance: 0,
+  },
+  null,
+  2,
+);
+
 export function buildSegmentPrompt(segment: DiscussionSegment): string {
   return [
     "Ти аналізуєш фрагмент групового чату і створюєш структурований підсумок.",
@@ -27,19 +41,7 @@ export function buildSegmentPrompt(segment: DiscussionSegment): string {
     "Поверни тільки валідний JSON без markdown, без пояснень, без ```.",
     "",
     "Схема JSON:",
-    JSON.stringify(
-      {
-        title: "короткий заголовок до 10 слів",
-        summary: ["короткий факт 1", "короткий факт 2"],
-        decisions: ["рішення, якщо було"],
-        openQuestions: ["відкрите питання, якщо було"],
-        jokes: ["важливий жарт або мем, якщо був"],
-        mentionedPeople: ["ім'я або authorId"],
-        importance: 0,
-      },
-      null,
-      2,
-    ),
+    JSON_ANSWER_TEMPLATE,
     "",
     "Повідомлення:",
     formatSegmentMessages(segment),

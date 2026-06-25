@@ -1,8 +1,9 @@
 import { createHash } from "node:crypto";
 import type { ChatMessage } from "@microsonya/shared";
 
-const NULL = "\x00";
-const SEP = "\x1f";
+const ENCD = "utf8";
+const NULL = "\0";
+const SEP = "\u001F";
 
 function updateField(
   hash: ReturnType<typeof createHash>,
@@ -15,7 +16,7 @@ function updateField(
   }
 
   const str = value instanceof Date ? value.toISOString() : value + "";
-  const byteLength = Buffer.byteLength(str, "utf8");
+  const byteLength = Buffer.byteLength(str, ENCD);
 
   // Length-prefix each field instead of relying only on separators.
   // This prevents ambiguous concatenation cases like:
@@ -26,7 +27,7 @@ function updateField(
   // X + "" just fast
   hash.update(byteLength + "");
   hash.update(":");
-  hash.update(str, "utf8");
+  hash.update(str, ENCD);
   hash.update(SEP);
 }
 
