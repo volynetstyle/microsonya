@@ -1,8 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
-import { MessagesRepo, openDb, SummariesRepo } from "../packages/db/src/index.js";
+import { MessagesRepo, SummariesRepo } from "../packages/db/src/index.js";
 import { ModelGateway, type ModelClient } from "../packages/model-gateway/src/index.js";
 import { segmentMessages, selectSummaryWindow, summarize } from "../packages/summarize/src/index.js";
 import type { ChatMessage } from "../packages/shared/src/index.js";
+import { openTestDb } from "./dbTestUtils.js";
 
 const now = new Date("2026-06-24T12:00:00.000Z").getTime();
 
@@ -41,6 +42,15 @@ describe("selectSummaryWindow", () => {
 
     expect(selected.map((item) => item.id)).toEqual([2, 3]);
   });
+
+  it("excludes command messages from summaries", () => {
+    const selected = selectSummaryWindow(
+      { chatId: "chat", commandMessageId: 3, date: now, mode: "count", count: 3 },
+      [message(1, now, "hello"), message(2, now, "/summarize"), message(3, now, "world")]
+    );
+
+    expect(selected.map((item) => item.text)).toEqual(["hello", "world"]);
+  });
 });
 
 describe("segmentMessages", () => {
@@ -54,11 +64,11 @@ describe("segmentMessages", () => {
 
 describe("summarize", () => {
   it("caches segment summaries and reuses them on repeated count summaries", async () => {
-    const { db } = openDb(":memory:");
+    const { db, close } = await openTestDb();
     const messages = new MessagesRepo(db);
     const summaries = new SummariesRepo(db);
-    messages.save(message(1, now, "hello"));
-    messages.save(message(2, now + 1, "world"));
+    await messages.save(message(1, now, "hello"));
+    await messages.save(message(2, now + 1, "world"));
 
     const client: ModelClient = {
       complete: vi.fn(async (_prompt, responseFormat) =>
@@ -81,7 +91,58 @@ describe("summarize", () => {
     await summarize({ messages, summaries, models: new ModelGateway(client) }, command);
     await summarize({ messages, summaries, models: new ModelGateway(client) }, command);
 
-    expect(client.complete).toHaveBeenCalledTimes(3);
+    expect(client.complete).toHaveBeenCalledTimes(1);
+    await close();
+  });
+
+  it("accepts partial segment JSON from weaker models", async () => {
+    const { db, close } = await openTestDb();
+    const messages = new MessagesRepo(db);
+    const summaries = new SummariesRepo(db);
+    await messages.save(message(1, now, "hello"));
+
+    const client: ModelClient = {
+      complete: vi.fn(async (_prompt, responseFormat) =>
+        responseFormat === "json"
+          ? JSON.stringify({
+              title: "Chat",
+              summary: "hello only",
+            })
+          : "unused"
+      )
+    };
+
+    const command = { chatId: "chat", commandMessageId: 2, date: now + 1, mode: "count" as const, count: 1 };
+
+    await expect(
+      summarize({ messages, summaries, models: new ModelGateway(client) }, command)
+    ).resolves.toContain("Chat");
+
+    await close();
+  });
+
+  it("falls back locally when a model never returns segment JSON", async () => {
+    const { db, close } = await openTestDb();
+    const messages = new MessagesRepo(db);
+    const summaries = new SummariesRepo(db);
+    await messages.save(message(1, now, "hello"));
+
+    const client: ModelClient = {
+      complete: vi.fn(async (_prompt, responseFormat) =>
+        responseFormat === "json"
+          ? "I should return JSON, but here is reasoning instead."
+          : "unused"
+      )
+    };
+
+    const command = { chatId: "chat", commandMessageId: 2, date: now + 1, mode: "count" as const, count: 1 };
+
+    await expect(
+      summarize({ messages, summaries, models: new ModelGateway(client) }, command)
+    ).resolves.toContain("Короткий");
+
+    expect(client.complete).toHaveBeenCalledTimes(1);
+    await close();
   });
 });
 

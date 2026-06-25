@@ -1,13 +1,29 @@
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, eq, gte, lte } from "drizzle-orm";
 import type { ChatMessage } from "@microsonya/shared";
 import type { MicrosonyaDb } from "../client.js";
 import { messages } from "../schema.js";
 
+type MessageRow = typeof messages.$inferSelect;
+
+function mapMessageRow(row: MessageRow): ChatMessage {
+  return {
+    id: row.messageId,
+    chatId: row.chatId,
+    date: row.date,
+    authorId: row.authorId,
+    authorName: row.authorName ?? "",
+    text: row.text ?? "",
+    replyToId: row.replyToMessageId ?? undefined,
+    kind: row.kind as ChatMessage["kind"],
+    isCommand: row.isCommand,
+  };
+}
+
 export class MessagesRepo {
   constructor(private readonly db: MicrosonyaDb) {}
 
-  save(message: ChatMessage): void {
-    this.db
+  async save(message: ChatMessage): Promise<void> {
+    await this.db
       .insert(messages)
       .values({
         chatId: message.chatId,
@@ -18,7 +34,7 @@ export class MessagesRepo {
         text: message.text,
         replyToMessageId: message.replyToId,
         kind: message.kind,
-        isCommand: message.isCommand ?? false
+        isCommand: message.isCommand ?? false,
       })
       .onConflictDoUpdate({
         target: [messages.chatId, messages.messageId],
@@ -29,49 +45,53 @@ export class MessagesRepo {
           text: message.text,
           replyToMessageId: message.replyToId,
           kind: message.kind,
-          isCommand: message.isCommand ?? false
-        }
+          isCommand: message.isCommand ?? false,
+        },
       })
-      .run();
+      .execute();
   }
 
-  listByChat(chatId: string): ChatMessage[] {
-    return this.db
+  async listByChat(chatId: string): Promise<ChatMessage[]> {
+    return (
+      await this.db
       .select()
       .from(messages)
       .where(eq(messages.chatId, chatId))
       .orderBy(asc(messages.messageId))
-      .all()
-      .map((row) => ({
-        id: row.messageId,
-        chatId: row.chatId,
-        date: row.date,
-        authorId: row.authorId,
-        authorName: row.authorName ?? "",
-        text: row.text ?? "",
-        replyToId: row.replyToMessageId ?? undefined,
-        kind: row.kind as ChatMessage["kind"],
-        isCommand: row.isCommand
-      }));
+    ).map(mapMessageRow);
   }
 
-  find(chatId: string, messageId: number): ChatMessage | undefined {
-    return this.db
+  async listRangeByChat(
+    chatId: string,
+    fromMessageId: number,
+    toMessageId: number,
+  ): Promise<ChatMessage[]> {
+    return (
+      await this.db
       .select()
       .from(messages)
-      .where(and(eq(messages.chatId, chatId), eq(messages.messageId, messageId)))
+      .where(
+        and(
+          eq(messages.chatId, chatId),
+          gte(messages.messageId, fromMessageId),
+          lte(messages.messageId, toMessageId),
+        ),
+      )
+      .orderBy(asc(messages.messageId))
+    ).map(mapMessageRow);
+  }
+
+  async find(chatId: string, messageId: number): Promise<ChatMessage | undefined> {
+    const row = (
+      await this.db
+      .select()
+      .from(messages)
+      .where(
+        and(eq(messages.chatId, chatId), eq(messages.messageId, messageId)),
+      )
       .limit(1)
-      .all()
-      .map((row) => ({
-        id: row.messageId,
-        chatId: row.chatId,
-        date: row.date,
-        authorId: row.authorId,
-        authorName: row.authorName ?? "",
-        text: row.text ?? "",
-        replyToId: row.replyToMessageId ?? undefined,
-        kind: row.kind as ChatMessage["kind"],
-        isCommand: row.isCommand
-      }))[0];
+    ).at(0);
+
+    return row ? mapMessageRow(row) : undefined;
   }
 }

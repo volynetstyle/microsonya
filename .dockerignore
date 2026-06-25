@@ -1,13 +1,38 @@
-.agents/
-.git/
-.pnpm-store/
-node_modules/
-**/node_modules/
-dist/
-**/dist/
+# Git
+.git
+.gitignore
+
+# Dependencies
+node_modules
+**/node_modules
+.pnpm-store
+
+# Build artifacts
+dist
+**/dist
+coverage
+
+# Environment
 .env
+.env.*
+
+# Databases
 *.sqlite
 *.sqlite-shm
 *.sqlite-wal
+
+# Logs
+*.log
 npm-debug.log*
 pnpm-debug.log*
+
+# IDE
+.vscode
+.idea
+
+# Local tooling
+.agents
+
+# Docker
+Dockerfile
+.dockerignore
