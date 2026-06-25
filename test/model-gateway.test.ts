@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { OpenAiCompatibleClient } from "../packages/model-gateway/src/index.js";
+import { FreeModelSwitch, OpenAiCompatibleClient } from "../packages/model-gateway/src/index.js";
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -91,8 +91,39 @@ describe("OpenAiCompatibleClient", () => {
     });
     expect(client.getFreeModelSwitchSnapshot()[0]).toMatchObject({
       id: "first:free",
-      failures: 1,
+      fail: 1,
+      fail429: 1,
     });
+  });
+});
+
+describe("FreeModelSwitch", () => {
+  it("uses neutral unknown success and clamps latency penalty", () => {
+    const router = new FreeModelSwitch([
+      {
+        id: "slow-known",
+        label: "Slow known",
+        context: 0,
+        kind: "summary",
+        priority: 100,
+      },
+      {
+        id: "unknown",
+        label: "Unknown",
+        context: 0,
+        kind: "summary",
+        priority: 100,
+      },
+    ]);
+
+    router.reportSuccess("slow-known", 60_000);
+
+    const snapshot = router.snapshot();
+    const slowKnown = snapshot.find((item) => item.id === "slow-known");
+    const unknown = snapshot.find((item) => item.id === "unknown");
+
+    expect(slowKnown?.score).toBeGreaterThan(99);
+    expect(unknown?.score).toBeCloseTo(106.5);
   });
 });
 

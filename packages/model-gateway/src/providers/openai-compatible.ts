@@ -93,7 +93,7 @@ export class OpenAiCompatibleClient implements ModelClient {
     let lastError: unknown;
 
     for (let round = 0; round <= maxRounds; round++) {
-      const route = this.freeSwitch.getRoute(this.options.routeLimit ?? 5);
+      const route = this.freeSwitch.getRoute(this.options.routeLimit ?? 2);
 
       if (route.length === 0) {
         await sleep(this.freeSwitch.getWaitUntilNextAvailableMs());
@@ -101,11 +101,13 @@ export class OpenAiCompatibleClient implements ModelClient {
       }
 
       for (const model of route) {
+        const startedAt = Date.now();
+
         try {
           const response = await this.request(
             this.createBody(prompt, responseFormat, model),
           );
-          this.freeSwitch.reportSuccess(model);
+          this.freeSwitch.reportSuccess(model, Date.now() - startedAt);
 
           return response;
         } catch (error) {
@@ -294,7 +296,7 @@ function toModelProfiles(models: string[]): FreeModelProfile[] {
     label: model,
     context: 0,
     kind: "summary",
-    priority: models.length - index,
+    priority: (models.length - index) * 10,
   }));
 }
 

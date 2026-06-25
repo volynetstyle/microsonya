@@ -26,7 +26,10 @@ const models = new ModelGateway(
     baseUrl: config.llmBaseUrl,
     apiKey: config.llmApiKey,
     model: config.llmModel,
-    models: config.llmModels,
+    models: filterQuarantinedModels(
+      config.llmModels,
+      config.llmQuarantineModels,
+    ),
   }),
 );
 
@@ -56,14 +59,28 @@ bot.on("message", async (ctx) => {
       return;
     }
 
+    const summarizeStartedAt = Date.now();
     const summaryText = await summarize(
       { messages, summaries, models },
       command,
     );
+    const summarizeMs = Date.now() - summarizeStartedAt;
 
+    const replyStartedAt = Date.now();
     await ctx.reply(summaryText);
+    console.log(
+      "Summary command completed",
+      safeStringify({
+        chatId: command.chatId,
+        commandMessageId: command.commandMessageId,
+        summarizeMs,
+        replyMs: Date.now() - replyStartedAt,
+        totalMs: Date.now() - summarizeStartedAt,
+      }),
+    );
+    logModelStats(models.getModelStats());
   } catch (error) {
-    console.error("Failed to process Telegram update", error);
+    console.error("Failed to process Telegram update", formatErrorForLog(error));
 
     if (isModelRateLimitError(error)) {
       await ctx.reply(formatRateLimitMessage(error));
@@ -100,4 +117,58 @@ function getRetryAfterSeconds(message: string): number | undefined {
   }
 
   return Number(match[1]);
+}
+
+function formatErrorForLog(error: unknown): string {
+  if (!(error instanceof Error)) {
+    return safeStringify(error);
+  }
+
+  return safeStringify({
+    name: error.name,
+    message: error.message,
+    stack: error.stack,
+    status: (error as { status?: unknown }).status,
+    body: truncateString((error as { body?: unknown }).body),
+  });
+}
+
+function safeStringify(value: unknown): string {
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return String(value);
+  }
+}
+
+function truncateString(value: unknown): unknown {
+  if (typeof value !== "string") {
+    return value;
+  }
+
+  return value.length > 2_000 ? `${value.slice(0, 2_000)}...` : value;
+}
+
+function filterQuarantinedModels(
+  models: string[] | undefined,
+  quarantine: string[] | undefined,
+): string[] | undefined {
+  if (!models || !quarantine?.length) {
+    return models;
+  }
+
+  const blocked = new Set(quarantine);
+  return models.filter((model) => !blocked.has(model));
+}
+
+function logModelStats(stats: unknown[]): void {
+  if (stats.length === 0) {
+    return;
+  }
+
+  try {
+    console.table(stats);
+  } catch {
+    console.log("Model stats", safeStringify(stats));
+  }
 }

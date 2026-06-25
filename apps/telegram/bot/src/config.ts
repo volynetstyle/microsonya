@@ -20,6 +20,7 @@ export type AppConfig = {
   llmBaseUrl: string;
   llmModel?: string;
   llmModels?: string[];
+  llmQuarantineModels?: string[];
   llmApiKey?: string;
 };
 
@@ -40,6 +41,7 @@ export function readConfig(): AppConfig {
     llmBaseUrl: process.env.LLM_BASE_URL ?? "https://openrouter.ai/api/v1/",
     llmModel: process.env.LLM_MODEL,
     llmModels: parseModels(process.env.LLM_MODELS),
+    llmQuarantineModels: parseModels(process.env.LLM_QUARANTINE_MODELS),
     llmApiKey: process.env.LLM_API_KEY ?? process.env.OPENROUTER_TOKEN
   };
 }

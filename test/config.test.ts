@@ -33,11 +33,16 @@ describe("readConfig", () => {
     process.env.TELEGRAM_BOT_TOKEN = "telegram-token";
     process.env.DATABASE_URL = "postgresql://localhost/microsonya";
     process.env.LLM_MODELS = "first:free, second:free,, third:free ";
+    process.env.LLM_QUARANTINE_MODELS = "bad:free, worse:free";
 
     expect(readConfig().llmModels).toEqual([
       "first:free",
       "second:free",
       "third:free",
+    ]);
+    expect(readConfig().llmQuarantineModels).toEqual([
+      "bad:free",
+      "worse:free",
     ]);
   });
 

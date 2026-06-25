@@ -91,7 +91,57 @@ describe("summarize", () => {
     await summarize({ messages, summaries, models: new ModelGateway(client) }, command);
     await summarize({ messages, summaries, models: new ModelGateway(client) }, command);
 
-    expect(client.complete).toHaveBeenCalledTimes(3);
+    expect(client.complete).toHaveBeenCalledTimes(1);
+    await close();
+  });
+
+  it("accepts partial segment JSON from weaker models", async () => {
+    const { db, close } = await openTestDb();
+    const messages = new MessagesRepo(db);
+    const summaries = new SummariesRepo(db);
+    await messages.save(message(1, now, "hello"));
+
+    const client: ModelClient = {
+      complete: vi.fn(async (_prompt, responseFormat) =>
+        responseFormat === "json"
+          ? JSON.stringify({
+              title: "Chat",
+              summary: "hello only",
+            })
+          : "unused"
+      )
+    };
+
+    const command = { chatId: "chat", commandMessageId: 2, date: now + 1, mode: "count" as const, count: 1 };
+
+    await expect(
+      summarize({ messages, summaries, models: new ModelGateway(client) }, command)
+    ).resolves.toContain("Chat");
+
+    await close();
+  });
+
+  it("falls back locally when a model never returns segment JSON", async () => {
+    const { db, close } = await openTestDb();
+    const messages = new MessagesRepo(db);
+    const summaries = new SummariesRepo(db);
+    await messages.save(message(1, now, "hello"));
+
+    const client: ModelClient = {
+      complete: vi.fn(async (_prompt, responseFormat) =>
+        responseFormat === "json"
+          ? "I should return JSON, but here is reasoning instead."
+          : "unused"
+      )
+    };
+
+    const command = { chatId: "chat", commandMessageId: 2, date: now + 1, mode: "count" as const, count: 1 };
+
+    await expect(
+      summarize({ messages, summaries, models: new ModelGateway(client) }, command)
+    ).resolves.toContain("Короткий");
+
+    expect(client.complete).toHaveBeenCalledTimes(1);
     await close();
   });
 });
