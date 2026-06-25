@@ -6,6 +6,8 @@
   "packageManager": "pnpm@10.12.1",
   "scripts": {
     "build": "pnpm -r build",
+    "db:generate": "pnpm --filter @microsonya/db generate",
+    "db:migrate": "pnpm --filter @microsonya/db migrate",
     "docker:build": "docker compose build",
     "docker:up": "docker compose up -d",
     "docker:logs": "docker compose logs -f telegram-bot",

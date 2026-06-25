@@ -80,7 +80,10 @@ bot.on("message", async (ctx) => {
     );
     logModelStats(models.getModelStats());
   } catch (error) {
-    console.error("Failed to process Telegram update", formatErrorForLog(error));
+    console.error(
+      "Failed to process Telegram update",
+      formatErrorForLog(error),
+    );
 
     if (isModelRateLimitError(error)) {
       await ctx.reply(formatRateLimitMessage(error));
@@ -88,7 +91,7 @@ bot.on("message", async (ctx) => {
     }
 
     await ctx.reply(
-      "Не получилось сделать summary. Я уже залогировал ошибку, попробуй ещё раз чуть позже.",
+      "Не вдалося підготувати підсумок. Я вже зафіксував помилку. Спробуй ще раз трохи пізніше.",
     );
   }
 });
@@ -96,17 +99,20 @@ bot.on("message", async (ctx) => {
 await bot.launch();
 
 function isModelRateLimitError(error: unknown): error is Error {
-  return error instanceof Error && error.message.includes("Model request failed: 429");
+  return (
+    error instanceof Error &&
+    error.message.includes("Model request failed: 429")
+  );
 }
 
 function formatRateLimitMessage(error: Error): string {
   const retryAfter = getRetryAfterSeconds(error.message);
 
   if (retryAfter) {
-    return `Модель временно упёрлась в rate limit. Попробуй ещё раз примерно через ${retryAfter} сек.`;
+    return `Зараз модель обробляє занадто багато запитів. Спробуй ще раз приблизно через ${retryAfter} с.`;
   }
 
-  return "Модель временно упёрлась в rate limit. Попробуй ещё раз через минуту.";
+  return "Зараз модель обробляє занадто багато запитів. Спробуй ще раз трохи пізніше.";
 }
 
 function getRetryAfterSeconds(message: string): number | undefined {
