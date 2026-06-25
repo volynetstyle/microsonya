@@ -17,7 +17,7 @@ export function openDb(connectionString = requiredDatabaseUrl()): DbClient {
     pool,
     db: drizzle(pool, { schema }),
     close: () => pool.end(),
-  };
+  } satisfies DbClient;
 }
 
 function requiredDatabaseUrl(): string {
