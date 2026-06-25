@@ -5,6 +5,6 @@ export default defineConfig({
   out: "./packages/db/src/migrations",
   dialect: "sqlite",
   dbCredentials: {
-    url: process.env.MICROSONYA_DB ?? "microsonya.sqlite"
-  }
+    url: process.env.MICROSONYA_DB ?? "microsonya.sqlite",
+  },
 });
