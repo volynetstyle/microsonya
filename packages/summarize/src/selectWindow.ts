@@ -60,6 +60,7 @@ function isSummarizableMessage(chatId: string) {
   return (message: ChatMessage): boolean =>
     message.chatId === chatId &&
     message.kind === "text" &&
+    !message.isCommand &&
     message.text.trim() !== "";
 }
 

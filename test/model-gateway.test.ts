@@ -47,6 +47,53 @@ describe("OpenAiCompatibleClient", () => {
       response_format: { type: "json_object" },
     });
   });
+
+  it("falls back to the next configured model after a retryable rate limit", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            error: {
+              metadata: {
+                retry_after_seconds: 1,
+              },
+            },
+          }),
+          {
+            status: 429,
+            headers: { "Retry-After": "1" },
+          },
+        ),
+      )
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({ choices: [{ message: { content: "ok" } }] }),
+          { status: 200 },
+        ),
+      );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const client = new OpenAiCompatibleClient({
+      baseUrl: "https://openrouter.ai/api/v1",
+      models: ["first:free", "second:free"],
+      maxRetries: 0,
+    });
+
+    await expect(client.complete("hello")).resolves.toBe("ok");
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body))).toMatchObject({
+      model: "first:free",
+    });
+    expect(JSON.parse(String(fetchMock.mock.calls[1]?.[1]?.body))).toMatchObject({
+      model: "second:free",
+    });
+    expect(client.getFreeModelSwitchSnapshot()[0]).toMatchObject({
+      id: "first:free",
+      failures: 1,
+    });
+  });
 });
 
 function mockFetch() {

@@ -18,7 +18,8 @@ export type AppConfig = {
   telegramToken: string;
   databaseUrl: string;
   llmBaseUrl: string;
-  llmModel: string;
+  llmModel?: string;
+  llmModels?: string[];
   llmApiKey?: string;
 };
 
@@ -31,12 +32,33 @@ export function readConfig(): AppConfig {
   if (!databaseUrl) {
     throw new Error("DATABASE_URL is required.");
   }
+  validateDatabaseUrl(databaseUrl);
 
   return {
     telegramToken,
     databaseUrl,
     llmBaseUrl: process.env.LLM_BASE_URL ?? "https://openrouter.ai/api/v1/",
-    llmModel: process.env.LLM_MODEL ?? "qwen/qwen3-next-80b-a3b-instruct:free",
+    llmModel: process.env.LLM_MODEL,
+    llmModels: parseModels(process.env.LLM_MODELS),
     llmApiKey: process.env.LLM_API_KEY ?? process.env.OPENROUTER_TOKEN
   };
+}
+
+function validateDatabaseUrl(databaseUrl: string): void {
+  try {
+    new URL(databaseUrl);
+  } catch {
+    throw new Error(
+      "DATABASE_URL must be a valid Postgres URL. Encode special password characters, for example # as %23.",
+    );
+  }
+}
+
+function parseModels(value: string | undefined): string[] | undefined {
+  const models = value
+    ?.split(",")
+    .map((model) => model.trim())
+    .filter(Boolean);
+
+  return models && models.length > 0 ? models : undefined;
 }

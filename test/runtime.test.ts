@@ -42,6 +42,15 @@ describe("selectSummaryWindow", () => {
 
     expect(selected.map((item) => item.id)).toEqual([2, 3]);
   });
+
+  it("excludes command messages from summaries", () => {
+    const selected = selectSummaryWindow(
+      { chatId: "chat", commandMessageId: 3, date: now, mode: "count", count: 3 },
+      [message(1, now, "hello"), message(2, now, "/summarize"), message(3, now, "world")]
+    );
+
+    expect(selected.map((item) => item.text)).toEqual(["hello", "world"]);
+  });
 });
 
 describe("segmentMessages", () => {
