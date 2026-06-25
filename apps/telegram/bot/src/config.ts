@@ -1,4 +1,18 @@
-import "dotenv/config";
+import { existsSync } from "node:fs";
+import { resolve } from "node:path";
+import { config as loadEnv } from "dotenv";
+
+loadEnv();
+
+for (const envPath of [
+  resolve(process.cwd(), ".env"),
+  resolve(process.cwd(), "../../.env"),
+  resolve(process.cwd(), "../../../.env"),
+]) {
+  if (existsSync(envPath)) {
+    loadEnv({ path: envPath });
+  }
+}
 
 export type AppConfig = {
   telegramToken: string;

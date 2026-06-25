@@ -10,6 +10,7 @@
     "docker:up": "docker compose up -d",
     "docker:logs": "docker compose logs -f telegram-bot",
     "typecheck": "pnpm -r typecheck",
+    "start": "pnpm bot:start",
     "bot:start": "pnpm --filter @microsonya/telegram-bot start",
     "test": "vitest run"
   },
