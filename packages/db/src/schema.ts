@@ -1,19 +1,21 @@
 import {
+  bigint,
+  boolean,
   index,
   integer,
+  pgTable,
   primaryKey,
-  sqliteTable,
   text,
   uniqueIndex,
-} from "drizzle-orm/sqlite-core";
+} from "drizzle-orm/pg-core";
 
-export const messages = sqliteTable(
+export const messages = pgTable(
   "messages",
   {
     chatId: text("chat_id").notNull(),
     messageId: integer("message_id").notNull(),
 
-    date: integer("date").notNull(),
+    date: bigint("date", { mode: "number" }).notNull(),
 
     authorId: text("author_id").notNull(),
     authorName: text("author_name"),
@@ -24,9 +26,7 @@ export const messages = sqliteTable(
 
     kind: text("kind").notNull().default("text"),
 
-    isCommand: integer("is_command", { mode: "boolean" })
-      .notNull()
-      .default(false),
+    isCommand: boolean("is_command").notNull().default(false),
   },
   (table) => [
     primaryKey({
@@ -39,7 +39,7 @@ export const messages = sqliteTable(
   ],
 );
 
-export const summaryRuns = sqliteTable(
+export const summaryRuns = pgTable(
   "summary_runs",
   {
     id: text("id").primaryKey(),
@@ -51,7 +51,7 @@ export const summaryRuns = sqliteTable(
     fromMessageId: integer("from_message_id").notNull(),
     toMessageId: integer("to_message_id").notNull(),
 
-    createdAt: integer("created_at").notNull(),
+    createdAt: bigint("created_at", { mode: "number" }).notNull(),
 
     mode: text("mode").notNull(),
     status: text("status").notNull(),
@@ -74,7 +74,7 @@ export const summaryRuns = sqliteTable(
   ],
 );
 
-export const segmentSummaries = sqliteTable(
+export const segmentSummaries = pgTable(
   "segment_summaries",
   {
     id: text("id").primaryKey(),
@@ -91,8 +91,8 @@ export const segmentSummaries = sqliteTable(
     title: text("title").notNull(),
     json: text("json").notNull(),
 
-    createdAt: integer("created_at").notNull(),
-    updatedAt: integer("updated_at").notNull(),
+    createdAt: bigint("created_at", { mode: "number" }).notNull(),
+    updatedAt: bigint("updated_at", { mode: "number" }).notNull(),
   },
   (table) => [
     uniqueIndex("idx_segment_summaries_cache").on(

@@ -16,8 +16,8 @@ export type SummarizeRuntimeDeps = {
 export async function summarize(deps: SummarizeRuntimeDeps, command: SummaryCommand): Promise<string> {
   const messages = selectSummaryWindow(
     command,
-    deps.messages.listByChat(command.chatId),
-    deps.summaries.findLastRun(command.chatId)
+    await deps.messages.listByChat(command.chatId),
+    await deps.summaries.findLastRun(command.chatId)
   );
 
   if (messages.length === 0) {
@@ -29,7 +29,7 @@ export async function summarize(deps: SummarizeRuntimeDeps, command: SummaryComm
 
   for (const segment of segments) {
     const hash = hashMessages(segment.messages);
-    const cached = deps.summaries.findCachedSegment(segment.chatId, segment.fromMessageId, segment.toMessageId, hash);
+    const cached = await deps.summaries.findCachedSegment(segment.chatId, segment.fromMessageId, segment.toMessageId, hash);
 
     if (cached) {
       segmentSummaries.push(cached);
@@ -37,7 +37,7 @@ export async function summarize(deps: SummarizeRuntimeDeps, command: SummaryComm
     }
 
     const summary = await deps.models.summarizeSegment(segment, hash, buildSegmentPrompt(segment));
-    deps.summaries.saveSegment(summary);
+    await deps.summaries.saveSegment(summary);
     segmentSummaries.push(summary);
   }
 
@@ -61,6 +61,6 @@ export async function summarize(deps: SummarizeRuntimeDeps, command: SummaryComm
     finalText: finalSummary.text
   };
 
-  deps.summaries.saveRun(run);
+  await deps.summaries.saveRun(run);
   return finalSummary.text;
 }

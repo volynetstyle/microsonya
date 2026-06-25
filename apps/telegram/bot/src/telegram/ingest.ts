@@ -4,12 +4,12 @@ import type { ChatMessage } from "@microsonya/shared";
 export function ingestMessage(
   messages: MessagesRepo,
   message: ChatMessage,
-): void {
+): Promise<void> {
   if (!isSummarizableMessage(message)) {
-    return;
+    return Promise.resolve();
   }
 
-  messages.save(message);
+  return messages.save(message);
 }
 
 export function isSummarizableMessage(message: ChatMessage): boolean {

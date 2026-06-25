@@ -22,20 +22,21 @@ function mapSummaryRunRow(row: SummaryRunRow): SummaryRun {
 export class SummariesRepo {
   constructor(private readonly db: MicrosonyaDb) {}
 
-  findLastRun(chatId: string): SummaryRun | undefined {
-    const row = this.db
+  async findLastRun(chatId: string): Promise<SummaryRun | undefined> {
+    const row = (
+      await this.db
       .select()
       .from(summaryRuns)
       .where(and(eq(summaryRuns.chatId, chatId), eq(summaryRuns.status, "ok")))
       .orderBy(desc(summaryRuns.createdAt))
       .limit(1)
-      .get();
+    ).at(0);
 
     return row ? mapSummaryRunRow(row) : undefined;
   }
 
-  saveRun(run: SummaryRun): void {
-    this.db
+  async saveRun(run: SummaryRun): Promise<void> {
+    await this.db
       .insert(summaryRuns)
       .values({
         id: run.id,
@@ -59,17 +60,18 @@ export class SummariesRepo {
           text: run.finalText,
         },
       })
-      .run();
+      .execute();
   }
 
-  findCachedSegment(
+  async findCachedSegment(
     chatId: string,
     fromMessageId: number,
     toMessageId: number,
     hash: string,
     schemaVersion = 1,
-  ): SegmentSummary | undefined {
-    const row = this.db
+  ): Promise<SegmentSummary | undefined> {
+    const row = (
+      await this.db
       .select()
       .from(segmentSummaries)
       .where(
@@ -82,15 +84,15 @@ export class SummariesRepo {
         ),
       )
       .limit(1)
-      .get();
+    ).at(0);
 
     return row ? (JSON.parse(row.json) as SegmentSummary) : undefined;
   }
 
-  saveSegment(summary: SegmentSummary, schemaVersion = 1): void {
+  async saveSegment(summary: SegmentSummary, schemaVersion = 1): Promise<void> {
     const now = Date.now();
 
-    this.db
+    await this.db
       .insert(segmentSummaries)
       .values({
         id: summary.segmentId,
@@ -118,6 +120,6 @@ export class SummariesRepo {
           updatedAt: now,
         },
       })
-      .run();
+      .execute();
   }
 }

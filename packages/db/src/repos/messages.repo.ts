@@ -22,8 +22,8 @@ function mapMessageRow(row: MessageRow): ChatMessage {
 export class MessagesRepo {
   constructor(private readonly db: MicrosonyaDb) {}
 
-  save(message: ChatMessage): void {
-    this.db
+  async save(message: ChatMessage): Promise<void> {
+    await this.db
       .insert(messages)
       .values({
         chatId: message.chatId,
@@ -48,25 +48,26 @@ export class MessagesRepo {
           isCommand: message.isCommand ?? false,
         },
       })
-      .run();
+      .execute();
   }
 
-  listByChat(chatId: string): ChatMessage[] {
-    return this.db
+  async listByChat(chatId: string): Promise<ChatMessage[]> {
+    return (
+      await this.db
       .select()
       .from(messages)
       .where(eq(messages.chatId, chatId))
       .orderBy(asc(messages.messageId))
-      .all()
-      .map(mapMessageRow);
+    ).map(mapMessageRow);
   }
 
-  listRangeByChat(
+  async listRangeByChat(
     chatId: string,
     fromMessageId: number,
     toMessageId: number,
-  ): ChatMessage[] {
-    return this.db
+  ): Promise<ChatMessage[]> {
+    return (
+      await this.db
       .select()
       .from(messages)
       .where(
@@ -77,19 +78,19 @@ export class MessagesRepo {
         ),
       )
       .orderBy(asc(messages.messageId))
-      .all()
-      .map(mapMessageRow);
+    ).map(mapMessageRow);
   }
 
-  find(chatId: string, messageId: number): ChatMessage | undefined {
-    const row = this.db
+  async find(chatId: string, messageId: number): Promise<ChatMessage | undefined> {
+    const row = (
+      await this.db
       .select()
       .from(messages)
       .where(
         and(eq(messages.chatId, chatId), eq(messages.messageId, messageId)),
       )
       .limit(1)
-      .get();
+    ).at(0);
 
     return row ? mapMessageRow(row) : undefined;
   }

@@ -12,7 +12,7 @@ import { ingestMessage } from "./telegram/ingest.js";
 
 const config = readConfig();
 
-const { db } = openDb(config.dbPath);
+const { db } = openDb(config.databaseUrl);
 
 const messages = new MessagesRepo(db);
 const summaries = new SummariesRepo(db);
@@ -33,7 +33,7 @@ bot.on(message("text"), async (ctx) => {
   const date = telegramMessage.date * 1000;
   const text = telegramMessage.text;
 
-  ingestMessage(messages, {
+  await ingestMessage(messages, {
     id: telegramMessage.message_id,
     chatId,
     date,

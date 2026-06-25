@@ -1,26 +1,31 @@
-import Database from "better-sqlite3";
-import {
-  drizzle,
-  type BetterSQLite3Database,
-} from "drizzle-orm/better-sqlite3";
+import { drizzle, type NodePgDatabase } from "drizzle-orm/node-postgres";
+import pg from "pg";
 import * as schema from "./schema.js";
 
-export type MicrosonyaDb = BetterSQLite3Database<typeof schema>;
+export type MicrosonyaDb = NodePgDatabase<typeof schema>;
 
 export type DbClient = {
-  sqlite: Database.Database;
+  pool: pg.Pool;
   db: MicrosonyaDb;
+  close(): Promise<void>;
 };
 
-export function openDb(path = "microsonya.sqlite"): DbClient {
-  const sqlite = new Database(path);
-
-  sqlite.pragma("journal_mode = WAL");
-  sqlite.pragma("foreign_keys = ON");
-  sqlite.pragma("busy_timeout = 5000");
+export function openDb(connectionString = requiredDatabaseUrl()): DbClient {
+  const pool = new pg.Pool({ connectionString });
 
   return {
-    sqlite,
-    db: drizzle(sqlite, { schema }),
-  } satisfies DbClient;
+    pool,
+    db: drizzle(pool, { schema }),
+    close: () => pool.end(),
+  };
+}
+
+function requiredDatabaseUrl(): string {
+  const databaseUrl = process.env.DATABASE_URL;
+
+  if (!databaseUrl) {
+    throw new Error("DATABASE_URL is required.");
+  }
+
+  return databaseUrl;
 }

@@ -14,7 +14,7 @@ The bot is deliberately not smart. The runtime is.
 
 ```text
 apps/
-  telegram-bot/
+  telegram/bot/
 packages/
   db/
   model-gateway/
@@ -34,7 +34,7 @@ No embeddings, person graph, vector DB, or long-term memory are required for V0.
 
 ## Packages
 
-- `@microsonya/db`: Drizzle schema, SQLite client, repositories.
+- `@microsonya/db`: Drizzle Postgres schema, client, and repositories.
 - `@microsonya/summarize`: window selection, segmentation, prompts, summary orchestration.
 - `@microsonya/model-gateway`: model provider abstraction and OpenAI-compatible/Ollama clients.
 - `@microsonya/shared`: shared types and errors.
@@ -55,7 +55,7 @@ pnpm build
 pnpm test
 ```
 
-Set `TELEGRAM_BOT_TOKEN` and point `LLM_BASE_URL` / `LLM_MODEL` at an OpenAI-compatible endpoint. Ollama's OpenAI-compatible `/v1/chat/completions` endpoint works with the default base URL.
+Set `TELEGRAM_BOT_TOKEN` and `DATABASE_URL`. By default the examples point the model gateway at OpenRouter's OpenAI-compatible endpoint and a free model.
 
 ## Drizzle
 
@@ -75,7 +75,7 @@ pnpm start
 
 ## Docker
 
-Use `.env.docker.example` as the shape for `.env`. The compose setup persists SQLite in the `microsonya-data` volume.
+Use `.env.docker.example` as the shape for `.env`. The compose setup starts a local Postgres container and stores its data in the `postgres-data` volume.
 
 ```bash
 pnpm docker:build
@@ -85,8 +85,4 @@ pnpm docker:logs
 
 Docker Desktop or another Docker daemon must be running before `pnpm docker:build`.
 
-By default the bot calls an LLM on the host at `http://host.docker.internal:11434`. To run an Ollama container too:
-
-```bash
-docker compose --profile ollama up -d
-```
+For Render, use the web service Dockerfile and set `DATABASE_URL`, `TELEGRAM_BOT_TOKEN`, `LLM_BASE_URL`, `LLM_MODEL`, and `LLM_API_KEY`/`OPENROUTER_TOKEN` in the service environment.

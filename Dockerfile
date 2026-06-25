@@ -11,7 +11,7 @@ RUN apt-get update \
   && apt-get install -y --no-install-recommends python3 make g++ \
   && rm -rf /var/lib/apt/lists/*
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY apps/telegram-bot/package.json apps/telegram-bot/package.json
+COPY apps/telegram/bot/package.json apps/telegram/bot/package.json
 COPY packages/db/package.json packages/db/package.json
 COPY packages/model-gateway/package.json packages/model-gateway/package.json
 COPY packages/shared/package.json packages/shared/package.json
@@ -24,11 +24,7 @@ RUN pnpm build
 
 FROM base AS runtime
 ENV NODE_ENV="production"
-ENV MICROSONYA_DB="/data/microsonya.sqlite"
-RUN useradd --create-home --shell /usr/sbin/nologin microsonya \
-  && mkdir -p /data \
-  && chown -R microsonya:microsonya /data
+RUN useradd --create-home --shell /usr/sbin/nologin microsonya
 COPY --from=build --chown=microsonya:microsonya /app /app
 USER microsonya
-VOLUME ["/data"]
-CMD ["node", "apps/telegram-bot/dist/main.js"]
+CMD ["node", "apps/telegram/bot/dist/main.js"]
