@@ -1,19 +1,22 @@
-import { openDb, type DbClient } from "../packages/db/src/index.js";
+import { PGlite } from "@electric-sql/pglite";
+import { drizzle } from "drizzle-orm/pglite";
+import * as schema from "../packages/db/src/schema.js";
+import type { DbClient, MicrosonyaDb } from "../packages/db/src/index.js";
 
-export function openTestDb(): DbClient {
-  const client = openDb(":memory:");
+export async function openTestDb(): Promise<DbClient> {
+  const client = new PGlite();
 
-  client.sqlite.exec(`
+  await client.exec(`
     CREATE TABLE messages (
       chat_id TEXT NOT NULL,
       message_id INTEGER NOT NULL,
-      date INTEGER NOT NULL,
+      date BIGINT NOT NULL,
       author_id TEXT NOT NULL,
       author_name TEXT,
       text TEXT,
       reply_to_message_id INTEGER,
       kind TEXT NOT NULL DEFAULT 'text',
-      is_command INTEGER NOT NULL DEFAULT 0,
+      is_command BOOLEAN NOT NULL DEFAULT false,
       PRIMARY KEY (chat_id, message_id)
     );
 
@@ -26,7 +29,7 @@ export function openTestDb(): DbClient {
       command_message_id INTEGER NOT NULL,
       from_message_id INTEGER NOT NULL,
       to_message_id INTEGER NOT NULL,
-      created_at INTEGER NOT NULL,
+      created_at BIGINT NOT NULL,
       mode TEXT NOT NULL,
       status TEXT NOT NULL,
       text TEXT NOT NULL
@@ -49,8 +52,8 @@ export function openTestDb(): DbClient {
       model TEXT,
       title TEXT NOT NULL,
       json TEXT NOT NULL,
-      created_at INTEGER NOT NULL,
-      updated_at INTEGER NOT NULL
+      created_at BIGINT NOT NULL,
+      updated_at BIGINT NOT NULL
     );
 
     CREATE UNIQUE INDEX idx_segment_summaries_cache
@@ -67,5 +70,9 @@ export function openTestDb(): DbClient {
       ON segment_summaries (chat_id, created_at);
   `);
 
-  return client;
+  return {
+    pool: undefined as never,
+    db: drizzle(client, { schema }) as unknown as MicrosonyaDb,
+    close: () => client.close(),
+  };
 }

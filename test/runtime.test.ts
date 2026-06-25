@@ -55,11 +55,11 @@ describe("segmentMessages", () => {
 
 describe("summarize", () => {
   it("caches segment summaries and reuses them on repeated count summaries", async () => {
-    const { db, sqlite } = openTestDb();
+    const { db, close } = await openTestDb();
     const messages = new MessagesRepo(db);
     const summaries = new SummariesRepo(db);
-    messages.save(message(1, now, "hello"));
-    messages.save(message(2, now + 1, "world"));
+    await messages.save(message(1, now, "hello"));
+    await messages.save(message(2, now + 1, "world"));
 
     const client: ModelClient = {
       complete: vi.fn(async (_prompt, responseFormat) =>
@@ -83,7 +83,7 @@ describe("summarize", () => {
     await summarize({ messages, summaries, models: new ModelGateway(client) }, command);
 
     expect(client.complete).toHaveBeenCalledTimes(3);
-    sqlite.close();
+    await close();
   });
 });
 
