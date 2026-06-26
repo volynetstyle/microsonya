@@ -26,7 +26,11 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-microsonya}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-microsonya}
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-microsonya} -d $${POSTGRES_DB:-microsonya}"]
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U $${POSTGRES_USER:-microsonya} -d $${POSTGRES_DB:-microsonya}",
+        ]
       interval: 5s
       timeout: 3s
       retries: 10

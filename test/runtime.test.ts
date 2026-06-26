@@ -1,7 +1,14 @@
 import { describe, expect, it, vi } from "vitest";
 import { MessagesRepo, SummariesRepo } from "../packages/db/src/index.js";
-import { ModelGateway, type ModelClient } from "../packages/model-gateway/src/index.js";
-import { segmentMessages, selectSummaryWindow, summarize } from "../packages/summarize/src/index.js";
+import {
+  ModelGateway,
+  type ModelClient,
+} from "../packages/model-gateway/src/index.js";
+import {
+  segmentMessages,
+  selectSummaryWindow,
+  summarize,
+} from "../packages/summarize/src/index.js";
 import type { ChatMessage } from "../packages/shared/src/index.js";
 import { openTestDb } from "./dbTestUtils.js";
 
@@ -12,7 +19,7 @@ describe("selectSummaryWindow", () => {
     const messages = [
       message(1, now - 13 * 60 * 60 * 1000),
       message(2, now - 60_000),
-      message(3, now)
+      message(3, now),
     ];
 
     const selected = selectSummaryWindow(
@@ -27,8 +34,8 @@ describe("selectSummaryWindow", () => {
         toMessageId: 2,
         mode: "recent",
         status: "ok",
-        finalText: "done"
-      }
+        finalText: "done",
+      },
     );
 
     expect(selected.map((item) => item.id)).toEqual([3]);
@@ -36,8 +43,14 @@ describe("selectSummaryWindow", () => {
 
   it("supports explicit count mode", () => {
     const selected = selectSummaryWindow(
-      { chatId: "chat", commandMessageId: 5, date: now, mode: "count", count: 2 },
-      [message(1, now), message(2, now), message(3, now)]
+      {
+        chatId: "chat",
+        commandMessageId: 5,
+        date: now,
+        mode: "count",
+        count: 2,
+      },
+      [message(1, now), message(2, now), message(3, now)],
     );
 
     expect(selected.map((item) => item.id)).toEqual([2, 3]);
@@ -45,8 +58,18 @@ describe("selectSummaryWindow", () => {
 
   it("excludes command messages from summaries", () => {
     const selected = selectSummaryWindow(
-      { chatId: "chat", commandMessageId: 3, date: now, mode: "count", count: 3 },
-      [message(1, now, "hello"), message(2, now, "/summarize"), message(3, now, "world")]
+      {
+        chatId: "chat",
+        commandMessageId: 3,
+        date: now,
+        mode: "count",
+        count: 3,
+      },
+      [
+        message(1, now, "hello"),
+        message(2, now, "/summarize"),
+        message(3, now, "world"),
+      ],
     );
 
     expect(selected.map((item) => item.text)).toEqual(["hello", "world"]);
@@ -55,7 +78,10 @@ describe("selectSummaryWindow", () => {
 
 describe("segmentMessages", () => {
   it("splits messages after a 30 minute gap", () => {
-    const segments = segmentMessages([message(1, now), message(2, now + 31 * 60 * 1000)]);
+    const segments = segmentMessages([
+      message(1, now),
+      message(2, now + 31 * 60 * 1000),
+    ]);
 
     expect(segments).toHaveLength(2);
     expect(segments[0]?.reason).toBe("time_gap");
@@ -80,16 +106,28 @@ describe("summarize", () => {
               openQuestions: [],
               jokes: [],
               mentionedPeople: ["Alice"],
-              importance: 1
+              importance: 1,
             })
-          : "summary"
-      )
+          : "summary",
+      ),
     };
 
-    const command = { chatId: "chat", commandMessageId: 3, date: now + 2, mode: "count" as const, count: 2 };
+    const command = {
+      chatId: "chat",
+      commandMessageId: 3,
+      date: now + 2,
+      mode: "count" as const,
+      count: 2,
+    };
 
-    await summarize({ messages, summaries, models: new ModelGateway(client) }, command);
-    await summarize({ messages, summaries, models: new ModelGateway(client) }, command);
+    await summarize(
+      { messages, summaries, models: new ModelGateway(client) },
+      command,
+    );
+    await summarize(
+      { messages, summaries, models: new ModelGateway(client) },
+      command,
+    );
 
     expect(client.complete).toHaveBeenCalledTimes(1);
     await close();
@@ -108,14 +146,23 @@ describe("summarize", () => {
               title: "Chat",
               summary: "hello only",
             })
-          : "unused"
-      )
+          : "unused",
+      ),
     };
 
-    const command = { chatId: "chat", commandMessageId: 2, date: now + 1, mode: "count" as const, count: 1 };
+    const command = {
+      chatId: "chat",
+      commandMessageId: 2,
+      date: now + 1,
+      mode: "count" as const,
+      count: 1,
+    };
 
     await expect(
-      summarize({ messages, summaries, models: new ModelGateway(client) }, command)
+      summarize(
+        { messages, summaries, models: new ModelGateway(client) },
+        command,
+      ),
     ).resolves.toContain("Chat");
 
     await close();
@@ -131,14 +178,23 @@ describe("summarize", () => {
       complete: vi.fn(async (_prompt, responseFormat) =>
         responseFormat === "json"
           ? "I should return JSON, but here is reasoning instead."
-          : "unused"
-      )
+          : "unused",
+      ),
     };
 
-    const command = { chatId: "chat", commandMessageId: 2, date: now + 1, mode: "count" as const, count: 1 };
+    const command = {
+      chatId: "chat",
+      commandMessageId: 2,
+      date: now + 1,
+      mode: "count" as const,
+      count: 1,
+    };
 
     await expect(
-      summarize({ messages, summaries, models: new ModelGateway(client) }, command)
+      summarize(
+        { messages, summaries, models: new ModelGateway(client) },
+        command,
+      ),
     ).resolves.toContain("Короткий");
 
     expect(client.complete).toHaveBeenCalledTimes(1);
@@ -146,7 +202,11 @@ describe("summarize", () => {
   });
 });
 
-function message(id: number, date: number, text = `message ${id}`): ChatMessage {
+function message(
+  id: number,
+  date: number,
+  text = `message ${id}`,
+): ChatMessage {
   return {
     id,
     chatId: "chat",
@@ -155,6 +215,6 @@ function message(id: number, date: number, text = `message ${id}`): ChatMessage 
     authorName: "Alice",
     text,
     kind: "text",
-    isCommand: text.startsWith("/")
+    isCommand: text.startsWith("/"),
   };
 }

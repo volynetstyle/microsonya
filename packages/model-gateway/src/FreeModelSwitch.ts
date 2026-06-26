@@ -80,7 +80,9 @@ export class FreeModelSwitch {
     if (failure.status === 429) {
       state.fail429 += 1;
     }
-    state.lastError = JSON.stringify(failure.body ?? failure.status ?? "unknown");
+    state.lastError = JSON.stringify(
+      failure.body ?? failure.status ?? "unknown",
+    );
     state.cooldownUntil =
       Date.now() +
       (failure.retryAfterMs ??
@@ -170,7 +172,10 @@ export class FreeModelSwitch {
     return state;
   }
 
-  private defaultCooldownMs(status: number | undefined, failures: number): number {
+  private defaultCooldownMs(
+    status: number | undefined,
+    failures: number,
+  ): number {
     if (status === 429) {
       return Math.min(60_000, 5_000 * failures);
     }

@@ -46,9 +46,7 @@ export function parseRetryAfterMs(error: unknown): number | undefined {
 export function isRetryableModelError(error: unknown): boolean {
   const status = (error as { status?: number })?.status;
 
-  return [408, 409, 425, 429, 500, 502, 503, 504, 529].includes(
-    status ?? 0,
-  );
+  return [408, 409, 425, 429, 500, 502, 503, 504, 529].includes(status ?? 0);
 }
 
 function readRetryAfterHeader(
@@ -60,8 +58,8 @@ function readRetryAfterHeader(
 
   const raw =
     headers instanceof Headers
-      ? headers.get("Retry-After") ?? headers.get("retry-after")
-      : headers["Retry-After"] ?? headers["retry-after"];
+      ? (headers.get("Retry-After") ?? headers.get("retry-after"))
+      : (headers["Retry-After"] ?? headers["retry-after"]);
 
   if (!raw) {
     return undefined;

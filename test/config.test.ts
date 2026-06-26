@@ -50,6 +50,8 @@ describe("readConfig", () => {
     process.env.TELEGRAM_BOT_TOKEN = "telegram-token";
     process.env.DATABASE_URL = "postgresql://user:pass#@localhost/db";
 
-    expect(() => readConfig()).toThrow(/DATABASE_URL must be a valid Postgres URL/);
+    expect(() => readConfig()).toThrow(
+      /DATABASE_URL must be a valid Postgres URL/,
+    );
   });
 });

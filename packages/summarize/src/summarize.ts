@@ -1,7 +1,11 @@
 import { randomUUID } from "node:crypto";
 import type { MessagesRepo, SummariesRepo } from "@microsonya/db";
 import type { ModelGateway } from "@microsonya/model-gateway";
-import type { SegmentSummary, SummaryCommand, SummaryRun } from "@microsonya/shared";
+import type {
+  SegmentSummary,
+  SummaryCommand,
+  SummaryRun,
+} from "@microsonya/shared";
 import { hashMessages } from "./hashMessages.js";
 import { buildSegmentPrompt } from "./prompts.js";
 import { segmentMessages } from "./segmentMessages.js";
@@ -15,11 +19,14 @@ export type SummarizeRuntimeDeps = {
 
 const pendingSegmentSummaries = new Map<string, Promise<unknown>>();
 
-export async function summarize(deps: SummarizeRuntimeDeps, command: SummaryCommand): Promise<string> {
+export async function summarize(
+  deps: SummarizeRuntimeDeps,
+  command: SummaryCommand,
+): Promise<string> {
   const messages = selectSummaryWindow(
     command,
     await deps.messages.listByChat(command.chatId),
-    await deps.summaries.findLastRun(command.chatId)
+    await deps.summaries.findLastRun(command.chatId),
   );
 
   if (messages.length === 0) {
@@ -31,7 +38,12 @@ export async function summarize(deps: SummarizeRuntimeDeps, command: SummaryComm
 
   for (const segment of segments) {
     const hash = hashMessages(segment.messages);
-    const cached = await deps.summaries.findCachedSegment(segment.chatId, segment.fromMessageId, segment.toMessageId, hash);
+    const cached = await deps.summaries.findCachedSegment(
+      segment.chatId,
+      segment.fromMessageId,
+      segment.toMessageId,
+      hash,
+    );
 
     if (cached) {
       segmentSummaries.push(cached);
@@ -39,7 +51,7 @@ export async function summarize(deps: SummarizeRuntimeDeps, command: SummaryComm
     }
 
     const summary = await summarizeOnce(`${segment.id}:${hash}`, () =>
-      deps.models.summarizeSegment(segment, hash, buildSegmentPrompt(segment))
+      deps.models.summarizeSegment(segment, hash, buildSegmentPrompt(segment)),
     );
     await deps.summaries.saveSegment(summary);
     segmentSummaries.push(summary);
@@ -62,14 +74,17 @@ export async function summarize(deps: SummarizeRuntimeDeps, command: SummaryComm
     toMessageId: last.id,
     mode: command.mode,
     status: "ok",
-    finalText
+    finalText,
   };
 
   await deps.summaries.saveRun(run);
   return finalText;
 }
 
-async function summarizeOnce<T>(key: string, run: () => Promise<T>): Promise<T> {
+async function summarizeOnce<T>(
+  key: string,
+  run: () => Promise<T>,
+): Promise<T> {
   const existing = pendingSegmentSummaries.get(key) as Promise<T> | undefined;
 
   if (existing) {
@@ -90,9 +105,18 @@ function renderFinalSummary(summaries: SegmentSummary[]): string {
     summaries.find((summary) => summary.importance > 0)?.title ||
     summaries[0]?.title ||
     "Підсумок";
-  const facts = uniqueFlatMap(summaries, (summary) => summary.summary).slice(0, 8);
-  const decisions = uniqueFlatMap(summaries, (summary) => summary.decisions).slice(0, 5);
-  const questions = uniqueFlatMap(summaries, (summary) => summary.openQuestions).slice(0, 5);
+  const facts = uniqueFlatMap(summaries, (summary) => summary.summary).slice(
+    0,
+    8,
+  );
+  const decisions = uniqueFlatMap(
+    summaries,
+    (summary) => summary.decisions,
+  ).slice(0, 5);
+  const questions = uniqueFlatMap(
+    summaries,
+    (summary) => summary.openQuestions,
+  ).slice(0, 5);
 
   return [
     title,
@@ -104,7 +128,9 @@ function renderFinalSummary(summaries: SegmentSummary[]): string {
     "",
     "Відкриті питання:",
     ...formatSection(questions, "Відкритих питань не зафіксовано."),
-  ].join("\n").trim();
+  ]
+    .join("\n")
+    .trim();
 }
 
 function uniqueFlatMap(

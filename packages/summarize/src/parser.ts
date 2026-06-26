@@ -9,7 +9,7 @@ export function parseSegmentSummaryJson(
     fromMessageId: number;
     toMessageId: number;
     hash: string;
-  }
+  },
 ): SegmentSummary {
   const parsed = parseJsonObject(raw);
   const data = normalizeRawSegmentSummary(parsed);
@@ -27,7 +27,7 @@ export function parseSegmentSummaryJson(
     openQuestions: data.openQuestions,
     jokes: data.jokes,
     mentionedPeople: data.mentionedPeople,
-    importance: data.importance
+    importance: data.importance,
   };
 }
 
@@ -75,7 +75,7 @@ function normalizeRawSegmentSummary(value: unknown): RawSegmentSummary {
     openQuestions: readStringArray(value.openQuestions),
     jokes: readStringArray(value.jokes),
     mentionedPeople: unique(readStringArray(value.mentionedPeople)),
-    importance: readImportance(value.importance)
+    importance: readImportance(value.importance),
   };
 }
 

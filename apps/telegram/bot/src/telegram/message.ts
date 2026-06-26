@@ -63,10 +63,10 @@ export function toChatMessage(message: TelegramMessageLike): ChatMessage {
 export function isForwardedMessage(message: TelegramMessageLike): boolean {
   return Boolean(
     message.forward_origin ??
-      message.forward_date ??
-      message.forward_from ??
-      message.forward_sender_name ??
-      message.forward_from_chat,
+    message.forward_date ??
+    message.forward_from ??
+    message.forward_sender_name ??
+    message.forward_from_chat,
   );
 }
 
@@ -188,9 +188,17 @@ function getMessageKind(message: TelegramMessageLike): MessageKind {
 }
 
 function formatUserName(user: TelegramUser): string {
-  return [user.first_name, user.last_name].filter(Boolean).join(" ") || user.username || String(user.id);
+  return (
+    [user.first_name, user.last_name].filter(Boolean).join(" ") ||
+    user.username ||
+    String(user.id)
+  );
 }
 
 function formatChatName(chat: TelegramChat): string {
-  return [chat.title, chat.first_name, chat.last_name, chat.username].filter(Boolean).join(" ") || String(chat.id);
+  return (
+    [chat.title, chat.first_name, chat.last_name, chat.username]
+      .filter(Boolean)
+      .join(" ") || String(chat.id)
+  );
 }

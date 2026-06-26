@@ -1,5 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { FreeModelSwitch, OpenAiCompatibleClient } from "../packages/model-gateway/src/index.js";
+import {
+  FreeModelSwitch,
+  OpenAiCompatibleClient,
+} from "../packages/model-gateway/src/index.js";
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -83,10 +86,14 @@ describe("OpenAiCompatibleClient", () => {
     await expect(client.complete("hello")).resolves.toBe("ok");
 
     expect(fetchMock).toHaveBeenCalledTimes(2);
-    expect(JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body))).toMatchObject({
+    expect(
+      JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body)),
+    ).toMatchObject({
       model: "first:free",
     });
-    expect(JSON.parse(String(fetchMock.mock.calls[1]?.[1]?.body))).toMatchObject({
+    expect(
+      JSON.parse(String(fetchMock.mock.calls[1]?.[1]?.body)),
+    ).toMatchObject({
       model: "second:free",
     });
     expect(client.getFreeModelSwitchSnapshot()[0]).toMatchObject({

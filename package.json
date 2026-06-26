@@ -12,6 +12,10 @@
     "docker:up": "docker compose up -d",
     "docker:logs": "docker compose logs -f telegram-bot",
     "typecheck": "pnpm -r typecheck",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "format:json": "prettier --write \"**/*.{json,jsonc}\"",
+    "format:json:check": "prettier --check \"**/*.{json,jsonc}\"",
     "start": "pnpm bot:start",
     "bot:start": "pnpm --filter @microsonya/telegram-bot start",
     "test": "vitest run"
@@ -22,13 +26,12 @@
     "dotenv": "^16.5.0",
     "drizzle-orm": "^0.44.7",
     "pg": "^8.22.0",
+    "prettier": "^3.8.4",
     "tsx": "^4.20.3",
     "typescript": "^5.8.3",
     "vitest": "^3.2.4"
   },
   "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild"
-    ]
+    "onlyBuiltDependencies": ["esbuild"]
   }
 }

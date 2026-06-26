@@ -54,10 +54,10 @@ export class MessagesRepo {
   async listByChat(chatId: string): Promise<ChatMessage[]> {
     return (
       await this.db
-      .select()
-      .from(messages)
-      .where(eq(messages.chatId, chatId))
-      .orderBy(asc(messages.messageId))
+        .select()
+        .from(messages)
+        .where(eq(messages.chatId, chatId))
+        .orderBy(asc(messages.messageId))
     ).map(mapMessageRow);
   }
 
@@ -68,28 +68,31 @@ export class MessagesRepo {
   ): Promise<ChatMessage[]> {
     return (
       await this.db
-      .select()
-      .from(messages)
-      .where(
-        and(
-          eq(messages.chatId, chatId),
-          gte(messages.messageId, fromMessageId),
-          lte(messages.messageId, toMessageId),
-        ),
-      )
-      .orderBy(asc(messages.messageId))
+        .select()
+        .from(messages)
+        .where(
+          and(
+            eq(messages.chatId, chatId),
+            gte(messages.messageId, fromMessageId),
+            lte(messages.messageId, toMessageId),
+          ),
+        )
+        .orderBy(asc(messages.messageId))
     ).map(mapMessageRow);
   }
 
-  async find(chatId: string, messageId: number): Promise<ChatMessage | undefined> {
+  async find(
+    chatId: string,
+    messageId: number,
+  ): Promise<ChatMessage | undefined> {
     const row = (
       await this.db
-      .select()
-      .from(messages)
-      .where(
-        and(eq(messages.chatId, chatId), eq(messages.messageId, messageId)),
-      )
-      .limit(1)
+        .select()
+        .from(messages)
+        .where(
+          and(eq(messages.chatId, chatId), eq(messages.messageId, messageId)),
+        )
+        .limit(1)
     ).at(0);
 
     return row ? mapMessageRow(row) : undefined;
