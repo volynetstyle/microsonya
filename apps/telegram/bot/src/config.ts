@@ -16,7 +16,8 @@ for (const envPath of [
 
 export type AppConfig = {
   telegramToken: string;
-  databaseUrl: string;
+  disabledServices: ReadonlySet<ExternalService>;
+  databaseUrl?: string;
   llmBaseUrl: string;
   llmModel?: string;
   llmModels?: string[];
@@ -24,19 +25,27 @@ export type AppConfig = {
   llmApiKey?: string;
 };
 
+export type ExternalService = "db" | "llm";
+
 export function readConfig(): AppConfig {
   const telegramToken = process.env.TELEGRAM_BOT_TOKEN;
   if (!telegramToken) {
     throw new Error("TELEGRAM_BOT_TOKEN is required.");
   }
+  const disabledServices = parseDisabledServices(
+    process.env.MICROSONYA_DISABLED_SERVICES,
+  );
   const databaseUrl = process.env.DATABASE_URL;
-  if (!databaseUrl) {
+  if (!databaseUrl && !disabledServices.has("db")) {
     throw new Error("DATABASE_URL is required.");
   }
-  validateDatabaseUrl(databaseUrl);
+  if (databaseUrl) {
+    validateDatabaseUrl(databaseUrl);
+  }
 
   return {
     telegramToken,
+    disabledServices,
     databaseUrl,
     llmBaseUrl: process.env.LLM_BASE_URL ?? "https://openrouter.ai/api/v1/",
     llmModel: process.env.LLM_MODEL,
@@ -63,4 +72,36 @@ function parseModels(value: string | undefined): string[] | undefined {
     .filter(Boolean);
 
   return models && models.length > 0 ? models : undefined;
+}
+
+function parseDisabledServices(value: string | undefined): ReadonlySet<ExternalService> {
+  const services = new Set<ExternalService>();
+
+  for (const service of parseModels(value) ?? []) {
+    switch (service.toLowerCase()) {
+      case "database":
+      case "postgres":
+      case "postgresql":
+        services.add("db");
+        break;
+      case "models":
+      case "model":
+      case "openrouter":
+      case "openai":
+        services.add("llm");
+        break;
+      case "db":
+        services.add("db");
+        break;
+      case "llm":
+        services.add("llm");
+        break;
+      default:
+        throw new Error(
+          `Unknown disabled service "${service}". Supported values: db, llm.`,
+        );
+    }
+  }
+
+  return services;
 }

@@ -133,7 +133,8 @@ pnpm start
 | Name | Required | Description |
 | --- | --- | --- |
 | `TELEGRAM_BOT_TOKEN` | Yes | Token for the Telegram bot. |
-| `DATABASE_URL` | Yes for local commands | Postgres connection string used by Drizzle and local bot runs. |
+| `MICROSONYA_DISABLED_SERVICES` | No | Comma-separated services to disable for local exploration. Supported values: `db`, `llm`. Aliases such as `postgres`, `database`, `openrouter`, and `openai` are accepted. |
+| `DATABASE_URL` | Yes unless `db` is disabled | Postgres connection string used by Drizzle and local bot runs. |
 | `OPENROUTER_TOKEN` | Usually | OpenRouter API token. Used when `LLM_API_KEY` is not set. |
 | `LLM_API_KEY` | Usually | Generic OpenAI-compatible API key. Takes precedence over `OPENROUTER_TOKEN`. |
 | `LLM_BASE_URL` | No | OpenAI-compatible base URL. Defaults to `https://openrouter.ai/api/v1/`. |
@@ -146,6 +147,18 @@ pnpm start
 | `POSTGRES_PORT` | Docker only | Host port mapped to Postgres. Defaults to `5432`. |
 
 To use a local Ollama or other OpenAI-compatible endpoint, change `LLM_BASE_URL`, `LLM_MODEL`, and `LLM_API_KEY` according to that provider.
+
+For bot-only exploration without Postgres persistence, set:
+
+```env
+MICROSONYA_DISABLED_SERVICES=db
+```
+
+In this mode messages are kept in memory for the current process only. To inspect Telegram message parsing and bot behavior without calling an external model provider, use:
+
+```env
+MICROSONYA_DISABLED_SERVICES=db,llm
+```
 
 ## Telegram Commands
 

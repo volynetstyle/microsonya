@@ -46,6 +46,37 @@ describe("readConfig", () => {
     ]);
   });
 
+  it("allows database settings to be disabled for bot-only exploration", () => {
+    process.env.TELEGRAM_BOT_TOKEN = "telegram-token";
+    process.env.MICROSONYA_DISABLED_SERVICES = "db";
+    delete process.env.DATABASE_URL;
+
+    expect(readConfig()).toMatchObject({
+      telegramToken: "telegram-token",
+      databaseUrl: undefined,
+    });
+    expect(readConfig().disabledServices.has("db")).toBe(true);
+  });
+
+  it("parses disabled service aliases", () => {
+    process.env.TELEGRAM_BOT_TOKEN = "telegram-token";
+    process.env.DATABASE_URL = "postgresql://localhost/microsonya";
+    process.env.MICROSONYA_DISABLED_SERVICES = "postgres,openrouter";
+
+    const config = readConfig();
+
+    expect(config.disabledServices.has("db")).toBe(true);
+    expect(config.disabledServices.has("llm")).toBe(true);
+  });
+
+  it("rejects unknown disabled services", () => {
+    process.env.TELEGRAM_BOT_TOKEN = "telegram-token";
+    process.env.DATABASE_URL = "postgresql://localhost/microsonya";
+    process.env.MICROSONYA_DISABLED_SERVICES = "cache";
+
+    expect(() => readConfig()).toThrow(/Unknown disabled service "cache"/);
+  });
+
   it("fails early for invalid database urls", () => {
     process.env.TELEGRAM_BOT_TOKEN = "telegram-token";
     process.env.DATABASE_URL = "postgresql://user:pass#@localhost/db";
