@@ -34,7 +34,11 @@ export type SummaryRun = {
   finalText: string;
 };
 
-export type SegmentReason = "time_gap" | "reply_cluster" | "topic_shift" | "size_limit";
+export type SegmentReason =
+  | "time_gap"
+  | "reply_cluster"
+  | "topic_shift"
+  | "size_limit";
 
 export type DiscussionSegment = {
   id: string;

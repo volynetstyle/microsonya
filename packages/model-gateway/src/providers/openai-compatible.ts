@@ -79,7 +79,9 @@ export class OpenAiCompatibleClient implements ModelClient {
     }
 
     if (this.options.model) {
-      return this.requestWithModels(prompt, responseFormat, [this.options.model]);
+      return this.requestWithModels(prompt, responseFormat, [
+        this.options.model,
+      ]);
     }
 
     return this.requestWithFreeSwitch(prompt, responseFormat);

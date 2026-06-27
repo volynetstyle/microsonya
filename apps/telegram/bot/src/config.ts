@@ -51,7 +51,7 @@ export function readConfig(): AppConfig {
     llmModel: process.env.LLM_MODEL,
     llmModels: parseModels(process.env.LLM_MODELS),
     llmQuarantineModels: parseModels(process.env.LLM_QUARANTINE_MODELS),
-    llmApiKey: process.env.LLM_API_KEY ?? process.env.OPENROUTER_TOKEN
+    llmApiKey: process.env.LLM_API_KEY ?? process.env.OPENROUTER_TOKEN,
   };
 }
 

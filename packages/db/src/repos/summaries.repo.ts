@@ -25,11 +25,13 @@ export class SummariesRepo {
   async findLastRun(chatId: string): Promise<SummaryRun | undefined> {
     const row = (
       await this.db
-      .select()
-      .from(summaryRuns)
-      .where(and(eq(summaryRuns.chatId, chatId), eq(summaryRuns.status, "ok")))
-      .orderBy(desc(summaryRuns.createdAt))
-      .limit(1)
+        .select()
+        .from(summaryRuns)
+        .where(
+          and(eq(summaryRuns.chatId, chatId), eq(summaryRuns.status, "ok")),
+        )
+        .orderBy(desc(summaryRuns.createdAt))
+        .limit(1)
     ).at(0);
 
     return row ? mapSummaryRunRow(row) : undefined;
@@ -72,18 +74,18 @@ export class SummariesRepo {
   ): Promise<SegmentSummary | undefined> {
     const row = (
       await this.db
-      .select()
-      .from(segmentSummaries)
-      .where(
-        and(
-          eq(segmentSummaries.chatId, chatId),
-          eq(segmentSummaries.fromMessageId, fromMessageId),
-          eq(segmentSummaries.toMessageId, toMessageId),
-          eq(segmentSummaries.hash, hash),
-          eq(segmentSummaries.schemaVersion, schemaVersion),
-        ),
-      )
-      .limit(1)
+        .select()
+        .from(segmentSummaries)
+        .where(
+          and(
+            eq(segmentSummaries.chatId, chatId),
+            eq(segmentSummaries.fromMessageId, fromMessageId),
+            eq(segmentSummaries.toMessageId, toMessageId),
+            eq(segmentSummaries.hash, hash),
+            eq(segmentSummaries.schemaVersion, schemaVersion),
+          ),
+        )
+        .limit(1)
     ).at(0);
 
     return row ? (JSON.parse(row.json) as SegmentSummary) : undefined;

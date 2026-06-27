@@ -1,0 +1,10 @@
+node_modules
+dist
+coverage
+.turbo
+
+pnpm-lock.yaml
+packages/db/src/migrations/**/*.sql
+packages/db/src/migrations/meta/*.json
+apps/telegram/bot/data
+data
