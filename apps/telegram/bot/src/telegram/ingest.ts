@@ -1,8 +1,11 @@
-import type { MessagesRepo } from "@microsonya/db";
 import type { ChatMessage } from "@microsonya/shared";
 
+export type MessageSink = {
+  save(message: ChatMessage): Promise<void>;
+};
+
 export function ingestMessage(
-  messages: MessagesRepo,
+  messages: MessageSink,
   message: ChatMessage,
 ): Promise<void> {
   if (!isSummarizableMessage(message)) {

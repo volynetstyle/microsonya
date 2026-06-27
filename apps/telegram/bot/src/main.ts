@@ -7,6 +7,10 @@ import { summarize } from "@microsonya/summarize";
 import { Telegraf } from "telegraf";
 import { parseSummaryCommand } from "./commands/summarize.js";
 import { readConfig } from "./config.js";
+import {
+  InMemoryMessagesRepo,
+  InMemorySummariesRepo,
+} from "./runtime/inMemoryStorage.js";
 import { ingestMessage } from "./telegram/ingest.js";
 import {
   isForwardedMessage,
@@ -16,22 +20,26 @@ import {
 
 const config = readConfig();
 
-const { db } = openDb(config.databaseUrl);
+const storage = config.disabledServices.has("db")
+  ? {
+      messages: new InMemoryMessagesRepo(),
+      summaries: new InMemorySummariesRepo(),
+    }
+  : openPostgresStorage(requiredConfigValue(config.databaseUrl, "DATABASE_URL"));
 
-const messages = new MessagesRepo(db);
-const summaries = new SummariesRepo(db);
-
-const models = new ModelGateway(
-  new OpenAiCompatibleClient({
-    baseUrl: config.llmBaseUrl,
-    apiKey: config.llmApiKey,
-    model: config.llmModel,
-    models: filterQuarantinedModels(
-      config.llmModels,
-      config.llmQuarantineModels,
-    ),
-  }),
-);
+const models = config.disabledServices.has("llm")
+  ? undefined
+  : new ModelGateway(
+      new OpenAiCompatibleClient({
+        baseUrl: config.llmBaseUrl,
+        apiKey: config.llmApiKey,
+        model: config.llmModel,
+        models: filterQuarantinedModels(
+          config.llmModels,
+          config.llmQuarantineModels,
+        ),
+      }),
+    );
 
 const bot = new Telegraf(config.telegramToken);
 
@@ -40,7 +48,7 @@ bot.on("message", async (ctx) => {
     const telegramMessage = ctx.message as TelegramMessageLike;
     const chatMessage = toChatMessage(telegramMessage);
 
-    await ingestMessage(messages, chatMessage);
+    await ingestMessage(storage.messages, chatMessage);
 
     const text = telegramMessage.text;
 
@@ -59,9 +67,16 @@ bot.on("message", async (ctx) => {
       return;
     }
 
+    if (!models) {
+      await ctx.reply(
+        "Summaries are disabled because MICROSONYA_DISABLED_SERVICES includes llm.",
+      );
+      return;
+    }
+
     const summarizeStartedAt = Date.now();
     const summaryText = await summarize(
-      { messages, summaries, models },
+      { messages: storage.messages, summaries: storage.summaries, models },
       command,
     );
     const summarizeMs = Date.now() - summarizeStartedAt;
@@ -177,4 +192,21 @@ function logModelStats(stats: unknown[]): void {
   } catch {
     console.log("Model stats", safeStringify(stats));
   }
+}
+
+function openPostgresStorage(databaseUrl: string) {
+  const { db } = openDb(databaseUrl);
+
+  return {
+    messages: new MessagesRepo(db),
+    summaries: new SummariesRepo(db),
+  };
+}
+
+function requiredConfigValue<T>(value: T | undefined, name: string): T {
+  if (value === undefined) {
+    throw new Error(`${name} is required.`);
+  }
+
+  return value;
 }

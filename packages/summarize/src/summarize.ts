@@ -11,10 +11,17 @@ import { buildSegmentPrompt } from "./prompts.js";
 import { segmentMessages } from "./segmentMessages.js";
 import { selectSummaryWindow } from "./selectWindow.js";
 
+export type SummaryMessagesRepo = Pick<MessagesRepo, "listByChat">;
+export type SummaryRunsRepo = Pick<
+  SummariesRepo,
+  "findCachedSegment" | "findLastRun" | "saveRun" | "saveSegment"
+>;
+export type SummaryModels = Pick<ModelGateway, "summarizeSegment">;
+
 export type SummarizeRuntimeDeps = {
-  messages: MessagesRepo;
-  summaries: SummariesRepo;
-  models: ModelGateway;
+  messages: SummaryMessagesRepo;
+  summaries: SummaryRunsRepo;
+  models: SummaryModels;
 };
 
 const pendingSegmentSummaries = new Map<string, Promise<unknown>>();
