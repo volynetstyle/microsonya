@@ -10,14 +10,21 @@ for (const envPath of [
   resolve(process.cwd(), "../../../.env"),
 ]) {
   if (existsSync(envPath)) {
-    loadEnv({ path: envPath });
+    loadEnv({ path: envPath, override: false });
   }
 }
 
+export type StorageMode = "postgres" | "memory";
+export type ModelsMode = "openai-compatible" | "disabled";
+
 export type AppConfig = {
   telegramToken: string;
-  disabledServices: ReadonlySet<ExternalService>;
+
+  storageMode: StorageMode;
+  modelsMode: ModelsMode;
+
   databaseUrl?: string;
+
   llmBaseUrl: string;
   llmModel?: string;
   llmModels?: string[];
@@ -25,83 +32,131 @@ export type AppConfig = {
   llmApiKey?: string;
 };
 
-export type ExternalService = "db" | "llm";
-
 export function readConfig(): AppConfig {
-  const telegramToken = process.env.TELEGRAM_BOT_TOKEN;
-  if (!telegramToken) {
-    throw new Error("TELEGRAM_BOT_TOKEN is required.");
-  }
-  const disabledServices = parseDisabledServices(
-    process.env.MICROSONYA_DISABLED_SERVICES,
-  );
+  const telegramToken = requiredEnv("TELEGRAM_BOT_TOKEN");
+
+  const storageMode = parseStorageMode(process.env.STORAGE_MODE);
+  const modelsMode = parseModelsMode(process.env.MODELS_MODE);
+
   const databaseUrl = process.env.DATABASE_URL;
-  if (!databaseUrl && !disabledServices.has("db")) {
-    throw new Error("DATABASE_URL is required.");
-  }
-  if (databaseUrl) {
+
+  if (storageMode === "postgres") {
+    if (!databaseUrl) {
+      throw new Error("DATABASE_URL is required when STORAGE_MODE=postgres.");
+    }
+
     validateDatabaseUrl(databaseUrl);
+  }
+
+  const llmBaseUrl = process.env.LLM_BASE_URL ?? "https://openrouter.ai/api/v1/";
+  const llmModel = process.env.LLM_MODEL;
+  const llmApiKey = process.env.LLM_API_KEY ?? process.env.OPENROUTER_TOKEN;
+
+  if (modelsMode === "openai-compatible") {
+    if (!llmModel) {
+      throw new Error("LLM_MODEL is required when MODELS_MODE=openai-compatible.");
+    }
+
+    if (!llmApiKey) {
+      throw new Error(
+        "LLM_API_KEY or OPENROUTER_TOKEN is required when MODELS_MODE=openai-compatible.",
+      );
+    }
   }
 
   return {
     telegramToken,
-    disabledServices,
+
+    storageMode,
+    modelsMode,
+
     databaseUrl,
-    llmBaseUrl: process.env.LLM_BASE_URL ?? "https://openrouter.ai/api/v1/",
-    llmModel: process.env.LLM_MODEL,
-    llmModels: parseModels(process.env.LLM_MODELS),
-    llmQuarantineModels: parseModels(process.env.LLM_QUARANTINE_MODELS),
-    llmApiKey: process.env.LLM_API_KEY ?? process.env.OPENROUTER_TOKEN,
+
+    llmBaseUrl,
+    llmModel,
+    llmModels: parseList(process.env.LLM_MODELS),
+    llmQuarantineModels: parseList(process.env.LLM_QUARANTINE_MODELS),
+    llmApiKey,
   };
 }
 
+function requiredEnv(name: string): string {
+  const value = process.env[name];
+
+  if (!value) {
+    throw new Error(`${name} is required.`);
+  }
+
+  return value;
+}
+
+function parseStorageMode(value: string | undefined): StorageMode {
+  switch (normalizeMode(value ?? "postgres")) {
+    case "postgres":
+    case "postgresql":
+    case "database":
+    case "db":
+      return "postgres";
+
+    case "memory":
+    case "inmemory":
+    case "in-memory":
+    case "mem":
+      return "memory";
+
+    default:
+      throw new Error(
+        `Unknown STORAGE_MODE "${value}". Supported values: postgres, memory.`,
+      );
+  }
+}
+
+function parseModelsMode(value: string | undefined): ModelsMode {
+  switch (normalizeMode(value ?? "openai-compatible")) {
+    case "openai-compatible":
+    case "openai":
+    case "openrouter":
+    case "llm":
+    case "enabled":
+      return "openai-compatible";
+
+    case "disabled":
+    case "none":
+    case "off":
+      return "disabled";
+
+    default:
+      throw new Error(
+        `Unknown MODELS_MODE "${value}". Supported values: openai-compatible, disabled.`,
+      );
+  }
+}
+
+function normalizeMode(value: string): string {
+  return value.trim().toLowerCase();
+}
+
 function validateDatabaseUrl(databaseUrl: string): void {
+  let url: URL;
+
   try {
-    new URL(databaseUrl);
+    url = new URL(databaseUrl);
   } catch {
     throw new Error(
       "DATABASE_URL must be a valid Postgres URL. Encode special password characters, for example # as %23.",
     );
   }
+
+  if (url.protocol !== "postgres:" && url.protocol !== "postgresql:") {
+    throw new Error("DATABASE_URL must use postgres:// or postgresql://.");
+  }
 }
 
-function parseModels(value: string | undefined): string[] | undefined {
-  const models = value
+function parseList(value: string | undefined): string[] | undefined {
+  const items = value
     ?.split(",")
-    .map((model) => model.trim())
+    .map((item) => item.trim())
     .filter(Boolean);
 
-  return models && models.length > 0 ? models : undefined;
-}
-
-function parseDisabledServices(value: string | undefined): ReadonlySet<ExternalService> {
-  const services = new Set<ExternalService>();
-
-  for (const service of parseModels(value) ?? []) {
-    switch (service.toLowerCase()) {
-      case "database":
-      case "postgres":
-      case "postgresql":
-        services.add("db");
-        break;
-      case "models":
-      case "model":
-      case "openrouter":
-      case "openai":
-        services.add("llm");
-        break;
-      case "db":
-        services.add("db");
-        break;
-      case "llm":
-        services.add("llm");
-        break;
-      default:
-        throw new Error(
-          `Unknown disabled service "${service}". Supported values: db, llm.`,
-        );
-    }
-  }
-
-  return services;
+  return items && items.length > 0 ? items : undefined;
 }
