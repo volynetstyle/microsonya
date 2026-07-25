@@ -1,6 +1,10 @@
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { config as loadEnv } from "dotenv";
+import {
+  DEFAULT_MERGE_MODEL,
+  FREE_SUMMARY_MODELS,
+} from "@microsonya/model-gateway";
 
 loadEnv();
 
@@ -25,11 +29,21 @@ export type AppConfig = {
 
   databaseUrl?: string;
 
-  llmBaseUrl: string;
-  llmModel?: string;
-  llmModels?: string[];
-  llmQuarantineModels?: string[];
-  llmApiKey?: string;
+  llm: {
+    baseUrl: string;
+    apiKey?: string;
+
+    /**
+     * Models available for use after excluding quarantined models.
+     */
+    models?: string[];
+    mergeModel: string;
+
+    /**
+     * Models explicitly forbidden from use.
+     */
+    quarantineModels?: string[];
+  };
 };
 
 export function readConfig(): AppConfig {
@@ -48,13 +62,26 @@ export function readConfig(): AppConfig {
     validateDatabaseUrl(databaseUrl);
   }
 
-  const llmBaseUrl = process.env.LLM_BASE_URL ?? "https://openrouter.ai/api/v1/";
-  const llmModel = process.env.LLM_MODEL;
+  const llmBaseUrl =
+    process.env.LLM_BASE_URL ?? "https://openrouter.ai/api/v1/";
+
+  const configuredModels = parseList(
+    process.env.LLM_MODELS ??
+      process.env.LLM_MODEL ??
+      FREE_SUMMARY_MODELS.map((model) => model.id).join(","),
+  );
+
+  const quarantineModels = parseList(process.env.LLM_QUARANTINE_MODELS);
+
+  const models = excludeValues(configuredModels, quarantineModels);
+
   const llmApiKey = process.env.LLM_API_KEY ?? process.env.OPENROUTER_TOKEN;
 
   if (modelsMode === "openai-compatible") {
-    if (!llmModel) {
-      throw new Error("LLM_MODEL is required when MODELS_MODE=openai-compatible.");
+    if (!models?.length) {
+      throw new Error(
+        "At least one usable model is required when MODELS_MODE=openai-compatible. Configure LLM_MODELS or LLM_MODEL and ensure not all models are quarantined.",
+      );
     }
 
     if (!llmApiKey) {
@@ -72,16 +99,18 @@ export function readConfig(): AppConfig {
 
     databaseUrl,
 
-    llmBaseUrl,
-    llmModel,
-    llmModels: parseList(process.env.LLM_MODELS),
-    llmQuarantineModels: parseList(process.env.LLM_QUARANTINE_MODELS),
-    llmApiKey,
+    llm: {
+      baseUrl: llmBaseUrl,
+      apiKey: llmApiKey,
+      models,
+      mergeModel: process.env.LLM_MERGE_MODEL ?? DEFAULT_MERGE_MODEL,
+      quarantineModels,
+    },
   };
 }
 
 function requiredEnv(name: string): string {
-  const value = process.env[name];
+  const value = process.env[name]?.trim();
 
   if (!value) {
     throw new Error(`${name} is required.`);
@@ -152,11 +181,33 @@ function validateDatabaseUrl(databaseUrl: string): void {
   }
 }
 
+function excludeValues(
+  values: string[] | undefined,
+  excluded: string[] | undefined,
+): string[] | undefined {
+  if (!values?.length) {
+    return undefined;
+  }
+
+  if (!excluded?.length) {
+    return values;
+  }
+
+  const excludedSet = new Set(excluded);
+  const result = values.filter((value) => !excludedSet.has(value));
+
+  return result.length > 0 ? result : undefined;
+}
+
 function parseList(value: string | undefined): string[] | undefined {
   const items = value
     ?.split(",")
     .map((item) => item.trim())
     .filter(Boolean);
 
-  return items && items.length > 0 ? items : undefined;
+  if (!items?.length) {
+    return undefined;
+  }
+
+  return [...new Set(items)];
 }

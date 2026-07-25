@@ -11,7 +11,7 @@ apps/
   telegram/bot/        Telegram adapter and command handling
 packages/
   db/                  Drizzle schema, migrations, and repositories
-  model-gateway/       OpenAI-compatible model client and fallback logic
+  model-gateway/       AI SDK provider boundary and structured generation
   shared/              Shared types and errors
   summarize/           Window selection, segmentation, prompts, and summary runtime
 ```
@@ -51,7 +51,7 @@ That makes it testable without Telegram and keeps the chat product behavior in o
 
 ### 3. Model Gateway: provider boundary
 
-The model gateway hides provider details from the runtime. It knows how to call an OpenAI-compatible endpoint, parse model output, repair or fall back from weak JSON responses, and rotate through configured free models.
+The model gateway hides provider details from the runtime. It uses AI SDK Core for text and Zod-validated structured generation, the OpenRouter AI SDK provider for server-side model fallback, and the generic OpenAI-compatible provider for local services such as Ollama.
 
 The runtime asks for a segment summary or final merge. It does not care whether the answer came from OpenRouter, Ollama, a local model, or another compatible API.
 
@@ -130,34 +130,37 @@ pnpm start
 
 ## Environment Variables
 
-| Name | Required | Description |
-| --- | --- | --- |
-| `TELEGRAM_BOT_TOKEN` | Yes | Token for the Telegram bot. |
-| `MICROSONYA_DISABLED_SERVICES` | No | Comma-separated services to disable for local exploration. Supported values: `db`, `llm`. Aliases such as `postgres`, `database`, `openrouter`, and `openai` are accepted. |
-| `DATABASE_URL` | Yes unless `db` is disabled | Postgres connection string used by Drizzle and local bot runs. |
-| `OPENROUTER_TOKEN` | Usually | OpenRouter API token. Used when `LLM_API_KEY` is not set. |
-| `LLM_API_KEY` | Usually | Generic OpenAI-compatible API key. Takes precedence over `OPENROUTER_TOKEN`. |
-| `LLM_BASE_URL` | No | OpenAI-compatible base URL. Defaults to `https://openrouter.ai/api/v1/`. |
-| `LLM_MODEL` | No | Single model to use. If empty, the fallback list is used. |
-| `LLM_MODELS` | No | Comma-separated fallback model list. |
-| `LLM_QUARANTINE_MODELS` | No | Comma-separated models to remove from the fallback list. |
-| `POSTGRES_DB` | Docker only | Database name for the Compose Postgres service. |
-| `POSTGRES_USER` | Docker only | Database user for the Compose Postgres service. |
-| `POSTGRES_PASSWORD` | Docker only | Database password for the Compose Postgres service. |
-| `POSTGRES_PORT` | Docker only | Host port mapped to Postgres. Defaults to `5432`. |
+| Name                    | Required                    | Description                                                                  |
+| ----------------------- | --------------------------- | ---------------------------------------------------------------------------- |
+| `TELEGRAM_BOT_TOKEN`    | Yes                         | Token for the Telegram bot.                                                  |
+| `STORAGE_MODE`          | No                          | `postgres` (default) or `memory`.                                            |
+| `MODELS_MODE`           | No                          | `openai-compatible` (default) or `disabled`.                                 |
+| `DATABASE_URL`          | Yes unless `db` is disabled | Postgres connection string used by Drizzle and local bot runs.               |
+| `OPENROUTER_TOKEN`      | Usually                     | OpenRouter API token. Used when `LLM_API_KEY` is not set.                    |
+| `LLM_API_KEY`           | Usually                     | Generic OpenAI-compatible API key. Takes precedence over `OPENROUTER_TOKEN`. |
+| `LLM_BASE_URL`          | No                          | OpenAI-compatible base URL. Defaults to `https://openrouter.ai/api/v1/`.     |
+| `LLM_MODEL`             | No                          | Single segment-summary model. If empty, the fallback list is used.           |
+| `LLM_MODELS`            | No                          | Ordered OpenRouter fallback for structured segment summaries.                |
+| `LLM_MERGE_MODEL`       | No                          | Plain-text merge model. Defaults to `openrouter/free`.                       |
+| `LLM_QUARANTINE_MODELS` | No                          | Comma-separated models to remove from the fallback list.                     |
+| `POSTGRES_DB`           | Docker only                 | Database name for the Compose Postgres service.                              |
+| `POSTGRES_USER`         | Docker only                 | Database user for the Compose Postgres service.                              |
+| `POSTGRES_PASSWORD`     | Docker only                 | Database password for the Compose Postgres service.                          |
+| `POSTGRES_PORT`         | Docker only                 | Host port mapped to Postgres. Defaults to `5432`.                            |
 
-To use a local Ollama or other OpenAI-compatible endpoint, change `LLM_BASE_URL`, `LLM_MODEL`, and `LLM_API_KEY` according to that provider.
+To use a local Ollama or another OpenAI-compatible endpoint, change `LLM_BASE_URL`, `LLM_MODEL`, `LLM_MERGE_MODEL`, and `LLM_API_KEY` according to that provider. Multiple `LLM_MODELS` are sent to OpenRouter as one server-side fallback route; generic compatible endpoints use the first configured model. Segment summaries default to temperature `0.1`, a 1000-token output limit, strict structured output, and providers that support every requested parameter. Plain-text merges use `openrouter/free` by default.
 
 For bot-only exploration without Postgres persistence, set:
 
 ```env
-MICROSONYA_DISABLED_SERVICES=db
+STORAGE_MODE=memory
 ```
 
 In this mode messages are kept in memory for the current process only. To inspect Telegram message parsing and bot behavior without calling an external model provider, use:
 
 ```env
-MICROSONYA_DISABLED_SERVICES=db,llm
+STORAGE_MODE=memory
+MODELS_MODE=disabled
 ```
 
 ## Telegram Commands

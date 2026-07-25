@@ -1,36 +1,18 @@
-import {
-  ModelGateway,
-  OpenAiCompatibleClient,
-} from "@microsonya/model-gateway";
+import { AiSdkModelClient, ModelGateway } from "@microsonya/model-gateway";
 import type { AppConfig } from "./config.js";
-import { requiredConfigValue } from "./errors.js";
 
 export function createModels(config: AppConfig): ModelGateway | undefined {
-  if (config.disabledServices.has("llm")) {
+  if (config.modelsMode === "disabled") {
     return undefined;
   }
 
   return new ModelGateway(
-    new OpenAiCompatibleClient({
-      baseUrl: requiredConfigValue(config.llmBaseUrl, "LLM_BASE_URL"),
-      apiKey: requiredConfigValue(config.llmApiKey, "LLM_API_KEY"),
-      model: requiredConfigValue(config.llmModel, "LLM_MODEL"),
-      models: filterQuarantinedModels(
-        config.llmModels,
-        config.llmQuarantineModels,
-      ),
+    new AiSdkModelClient({
+      baseUrl: config.llm.baseUrl,
+      apiKey: config.llm.apiKey,
+      models: config.llm.models ?? [],
+      mergeModel: config.llm.mergeModel,
+      appName: "Microsonya",
     }),
   );
-}
-
-function filterQuarantinedModels(
-  models: string[] | undefined,
-  quarantine: string[] | undefined,
-): string[] | undefined {
-  if (!models || !quarantine?.length) {
-    return models;
-  }
-
-  const blocked = new Set(quarantine);
-  return models.filter((model) => !blocked.has(model));
 }

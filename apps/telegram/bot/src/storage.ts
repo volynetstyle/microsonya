@@ -12,7 +12,7 @@ export type Storage = {
 };
 
 export function createStorage(config: AppConfig): Storage {
-  if (config.disabledServices.has("db")) {
+  if (config.storageMode === "memory") {
     return createInMemoryStorage();
   }
 

@@ -62,15 +62,3 @@ function truncateString(value: unknown): unknown {
 
   return value.length > 2_000 ? `${value.slice(0, 2_000)}...` : value;
 }
-
-export function logModelStats(stats: unknown[]): void {
-  if (stats.length === 0) {
-    return;
-  }
-
-  try {
-    console.table(stats);
-  } catch {
-    console.log("Model stats", safeStringify(stats));
-  }
-}

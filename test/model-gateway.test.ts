@@ -1,151 +1,143 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
-import {
-  FreeModelSwitch,
-  OpenAiCompatibleClient,
-} from "../packages/model-gateway/src/index.js";
+import { describe, expect, it, vi } from "vitest";
+import { z } from "zod";
+import { AiSdkModelClient } from "../packages/model-gateway/src/index.js";
 
-afterEach(() => {
-  vi.unstubAllGlobals();
-});
-
-describe("OpenAiCompatibleClient", () => {
+describe("AiSdkModelClient", () => {
   it("uses the OpenAI-compatible /v1 chat completions endpoint for bare base URLs", async () => {
     const fetchMock = mockFetch();
-    const client = new OpenAiCompatibleClient({
+    const client = new AiSdkModelClient({
       baseUrl: "http://localhost:11434",
-      model: "qwen2.5:7b",
+      models: ["qwen2.5:7b"],
       maxRetries: 0,
+      fetch: fetchMock,
     });
 
-    await client.complete("hello");
+    await client.generateText("hello");
 
     expect(String(fetchMock.mock.calls[0]?.[0])).toBe(
       "http://localhost:11434/v1/chat/completions",
     );
   });
 
-  it("does not duplicate /v1 when the base URL already includes it", async () => {
+  it("does not duplicate /v1 and keeps compatible-provider headers", async () => {
     const fetchMock = mockFetch();
-    const client = new OpenAiCompatibleClient({
-      baseUrl: "https://openrouter.ai/api/v1",
+    const client = new AiSdkModelClient({
+      baseUrl: "https://models.example.test/api/v1",
       apiKey: "token",
-      model: "openai/gpt-4o-mini",
+      models: ["model"],
       appName: "Microsonya",
       referer: "https://example.test",
       maxRetries: 0,
+      fetch: fetchMock,
     });
 
-    await client.complete("hello", "json");
+    await client.generateText("hello");
 
     const [, init] = fetchMock.mock.calls[0] ?? [];
+    const headers = new Headers(init?.headers);
+
     expect(String(fetchMock.mock.calls[0]?.[0])).toBe(
-      "https://openrouter.ai/api/v1/chat/completions",
+      "https://models.example.test/api/v1/chat/completions",
     );
-    expect(init?.headers).toMatchObject({
-      authorization: "Bearer token",
-      "HTTP-Referer": "https://example.test",
-      "X-Title": "Microsonya",
-    });
-    expect(JSON.parse(String(init?.body))).toMatchObject({
-      response_format: { type: "json_object" },
-    });
+    expect(headers.get("authorization")).toBe("Bearer token");
+    expect(headers.get("HTTP-Referer")).toBe("https://example.test");
+    expect(headers.get("X-Title")).toBe("Microsonya");
   });
 
-  it("falls back to the next configured model after a retryable rate limit", async () => {
-    const fetchMock = vi
-      .fn()
-      .mockResolvedValueOnce(
-        new Response(
-          JSON.stringify({
-            error: {
-              metadata: {
-                retry_after_seconds: 1,
-              },
-            },
-          }),
-          {
-            status: 429,
-            headers: { "Retry-After": "1" },
+  it("delegates model fallback and structured-output healing to OpenRouter", async () => {
+    const fetchMock = mockFetch({
+      choices: [
+        {
+          message: {
+            role: "assistant",
+            content: '{"title":"Chat"}',
           },
-        ),
-      )
-      .mockResolvedValueOnce(
-        new Response(
-          JSON.stringify({ choices: [{ message: { content: "ok" } }] }),
-          { status: 200 },
-        ),
-      );
-    vi.stubGlobal("fetch", fetchMock);
-
-    const client = new OpenAiCompatibleClient({
-      baseUrl: "https://openrouter.ai/api/v1",
-      models: ["first:free", "second:free"],
+          finish_reason: "stop",
+        },
+      ],
+    });
+    const client = new AiSdkModelClient({
+      baseUrl: "https://openrouter.ai/api/v1/",
+      apiKey: "token",
+      models: ["first:free", "second:free", "third:free"],
       maxRetries: 0,
+      fetch: fetchMock,
     });
 
-    await expect(client.complete("hello")).resolves.toBe("ok");
+    await expect(
+      client.generateObject("hello", z.object({ title: z.string() })),
+    ).resolves.toEqual({ title: "Chat" });
 
-    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(
       JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body)),
     ).toMatchObject({
       model: "first:free",
+      models: ["second:free", "third:free"],
+      plugins: [{ id: "response-healing" }],
+      provider: {
+        require_parameters: true,
+      },
+      response_format: {
+        type: "json_schema",
+      },
+      temperature: 0.1,
+      max_tokens: 1000,
     });
-    expect(
-      JSON.parse(String(fetchMock.mock.calls[1]?.[1]?.body)),
-    ).toMatchObject({
-      model: "second:free",
+  });
+
+  it("uses a separate lightweight OpenRouter model for text merges", async () => {
+    const fetchMock = mockFetch();
+    const client = new AiSdkModelClient({
+      baseUrl: "https://openrouter.ai/api/v1",
+      apiKey: "token",
+      models: ["segment-primary", "segment-fallback"],
+      mergeModel: "openrouter/free",
+      fetch: fetchMock,
     });
-    expect(client.getFreeModelSwitchSnapshot()[0]).toMatchObject({
-      id: "first:free",
-      fail: 1,
-      fail429: 1,
+
+    await expect(client.generateText("merge")).resolves.toBe("ok");
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const body = JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body));
+
+    expect(body).toMatchObject({
+      model: "openrouter/free",
+      temperature: 0.1,
+      max_tokens: 1000,
     });
+    expect(body).not.toHaveProperty("models");
+    expect(body).not.toHaveProperty("plugins");
   });
 });
 
-describe("FreeModelSwitch", () => {
-  it("uses neutral unknown success and clamps latency penalty", () => {
-    const router = new FreeModelSwitch([
+function mockFetch(
+  body: unknown = {
+    choices: [
       {
-        id: "slow-known",
-        label: "Slow known",
-        context: 0,
-        kind: "summary",
-        priority: 100,
+        message: { role: "assistant", content: "ok" },
+        finish_reason: "stop",
       },
-      {
-        id: "unknown",
-        label: "Unknown",
-        context: 0,
-        kind: "summary",
-        priority: 100,
-      },
-    ]);
-
-    router.reportSuccess("slow-known", 60_000);
-
-    const snapshot = router.snapshot();
-    const slowKnown = snapshot.find((item) => item.id === "slow-known");
-    const unknown = snapshot.find((item) => item.id === "unknown");
-
-    expect(slowKnown?.score).toBeGreaterThan(99);
-    expect(unknown?.score).toBeCloseTo(106.5);
-  });
-});
-
-function mockFetch() {
-  const fetchMock = vi.fn(async () => {
+    ],
+  },
+) {
+  return vi.fn(async () => {
     return new Response(
-      JSON.stringify({ choices: [{ message: { content: "ok" } }] }),
+      JSON.stringify({
+        id: "completion-id",
+        created: 1,
+        model: "test-model",
+        usage: {
+          prompt_tokens: 1,
+          completion_tokens: 1,
+          total_tokens: 2,
+        },
+        ...body,
+      }),
       {
         status: 200,
         headers: { "content-type": "application/json" },
       },
     );
   });
-
-  vi.stubGlobal("fetch", fetchMock);
-
-  return fetchMock;
 }

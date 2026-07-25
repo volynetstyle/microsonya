@@ -7,3 +7,4 @@ dist/
 *.sqlite-wal
 bot.log
 bot.err.log
+research/

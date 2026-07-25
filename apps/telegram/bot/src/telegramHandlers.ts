@@ -12,7 +12,6 @@ import {
   formatErrorForLog,
   formatRateLimitMessage,
   isModelRateLimitError,
-  logModelStats,
   safeStringify,
 } from "./errors.js";
 
@@ -42,9 +41,7 @@ export function createMessageHandler(services: AppServices) {
       }
 
       if (!services.models) {
-        await ctx.reply(
-          "Підсумки вимкнені, бо MICROSONYA_DISABLED_SERVICES містить llm.",
-        );
+        await ctx.reply("Підсумки вимкнені, бо MODELS_MODE=disabled.");
         return;
       }
 
@@ -74,8 +71,6 @@ export function createMessageHandler(services: AppServices) {
           totalMs: Date.now() - startedAt,
         }),
       );
-
-      logModelStats(services.models.getModelStats());
     } catch (error) {
       console.error(
         "Failed to process Telegram update",

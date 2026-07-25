@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { MessagesRepo, SummariesRepo } from "../packages/db/src/index.js";
 import {
+  InvalidModelOutputError,
   ModelGateway,
   type ModelClient,
 } from "../packages/model-gateway/src/index.js";
@@ -97,19 +98,16 @@ describe("summarize", () => {
     await messages.save(message(2, now + 1, "world"));
 
     const client: ModelClient = {
-      complete: vi.fn(async (_prompt, responseFormat) =>
-        responseFormat === "json"
-          ? JSON.stringify({
-              title: "Chat",
-              summary: ["hello world"],
-              decisions: [],
-              openQuestions: [],
-              jokes: [],
-              mentionedPeople: ["Alice"],
-              importance: 1,
-            })
-          : "summary",
-      ),
+      generateText: vi.fn(async () => "summary"),
+      generateObject: vi.fn(async () => ({
+        title: "Chat",
+        summary: ["hello world"],
+        decisions: [],
+        openQuestions: [],
+        jokes: [],
+        mentionedPeople: ["Alice"],
+        importance: 1 as const,
+      })),
     };
 
     const command = {
@@ -129,7 +127,7 @@ describe("summarize", () => {
       command,
     );
 
-    expect(client.complete).toHaveBeenCalledTimes(1);
+    expect(client.generateObject).toHaveBeenCalledTimes(1);
     await close();
   });
 
@@ -140,13 +138,12 @@ describe("summarize", () => {
     await messages.save(message(1, now, "hello"));
 
     const client: ModelClient = {
-      complete: vi.fn(async (_prompt, responseFormat) =>
-        responseFormat === "json"
-          ? JSON.stringify({
-              title: "Chat",
-              summary: "hello only",
-            })
-          : "unused",
+      generateText: vi.fn(async () => "unused"),
+      generateObject: vi.fn(async (_prompt, schema) =>
+        schema.parse({
+          title: "Chat",
+          summary: "hello only",
+        }),
       ),
     };
 
@@ -175,11 +172,10 @@ describe("summarize", () => {
     await messages.save(message(1, now, "hello"));
 
     const client: ModelClient = {
-      complete: vi.fn(async (_prompt, responseFormat) =>
-        responseFormat === "json"
-          ? "I should return JSON, but here is reasoning instead."
-          : "unused",
-      ),
+      generateText: vi.fn(async () => "unused"),
+      generateObject: vi.fn(async () => {
+        throw new InvalidModelOutputError();
+      }),
     };
 
     const command = {
@@ -197,7 +193,7 @@ describe("summarize", () => {
       ),
     ).resolves.toContain("Короткий");
 
-    expect(client.complete).toHaveBeenCalledTimes(1);
+    expect(client.generateObject).toHaveBeenCalledTimes(1);
     await close();
   });
 });

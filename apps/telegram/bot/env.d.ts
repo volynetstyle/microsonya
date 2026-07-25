@@ -8,6 +8,7 @@ declare global {
       LLM_BASE_URL?: string;
       LLM_MODEL?: string;
       LLM_MODELS?: string;
+      LLM_MERGE_MODEL?: string;
       LLM_QUARANTINE_MODELS?: string;
       LLM_API_KEY?: string;
       OPENROUTER_TOKEN?: string;

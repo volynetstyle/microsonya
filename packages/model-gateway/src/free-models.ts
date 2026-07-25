@@ -10,9 +10,9 @@ export type FreeModelProfile = {
 
 export const FREE_SUMMARY_MODELS: FreeModelProfile[] = [
   {
-    id: "nvidia/nemotron-3-nano-30b-a3b:free",
-    label: "NVIDIA Nemotron 3 Nano 30B A3B",
-    context: 262_144,
+    id: "nvidia/nemotron-3-super-120b-a12b:free",
+    label: "NVIDIA Nemotron 3 Super 120B A12B",
+    context: 1_000_000,
     kind: "summary",
     priority: 100,
   },
@@ -21,37 +21,32 @@ export const FREE_SUMMARY_MODELS: FreeModelProfile[] = [
     label: "OpenAI GPT-OSS 20B",
     context: 131_072,
     kind: "summary",
-    priority: 95,
-  },
-  {
-    id: "nvidia/nemotron-nano-9b-v2:free",
-    label: "NVIDIA Nemotron Nano 9B v2",
-    context: 262_144,
-    kind: "summary",
     priority: 90,
-  },
-  {
-    id: "google/gemma-4-31b-it:free",
-    label: "Google Gemma 4 31B",
-    context: 262_144,
-    kind: "summary",
-    priority: 60,
   },
   {
     id: "google/gemma-4-26b-a4b-it:free",
     label: "Google Gemma 4 26B A4B",
     context: 262_144,
     kind: "summary",
-    priority: 30,
+    priority: 80,
   },
   {
-    id: "qwen/qwen3-next-80b-a3b-instruct:free",
-    label: "Qwen3 Next 80B A3B Instruct",
-    context: 262_144,
+    id: "nvidia/nemotron-nano-9b-v2:free",
+    label: "NVIDIA Nemotron Nano 9B v2",
+    context: 32_000,
     kind: "summary",
-    priority: 10,
+    priority: 70,
+  },
+  {
+    id: "openrouter/free",
+    label: "OpenRouter Free Models Router",
+    context: 0,
+    kind: "fallback",
+    priority: 1,
   },
 ];
+
+export const DEFAULT_MERGE_MODEL = "openrouter/free";
 
 export const SAFETY_MODEL = {
   id: "nvidia/nemotron-3.5-content-safety:free",

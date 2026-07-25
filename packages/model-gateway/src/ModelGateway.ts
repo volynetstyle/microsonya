@@ -4,7 +4,7 @@ import type {
   FinalSummary,
   SegmentSummary,
 } from "@microsonya/shared";
-import type { ModelClient } from "./ModelClient.js";
+import { InvalidModelOutputError, type ModelClient } from "./ModelClient.js";
 
 const stringArraySchema = z.preprocess((value) => {
   if (Array.isArray(value)) {
@@ -42,8 +42,7 @@ export class ModelGateway {
     hash: string,
     prompt: string,
   ): Promise<SegmentSummary> {
-    const raw = await this.client.complete(prompt, "json");
-    const parsed = await this.parseOrRepairSegmentSummary(raw, segment);
+    const parsed = await this.generateSegmentSummary(prompt, segment);
 
     return {
       segmentId: segment.id,
@@ -59,26 +58,27 @@ export class ModelGateway {
     _summaries: SegmentSummary[],
     prompt: string,
   ): Promise<FinalSummary> {
-    return { text: await this.client.complete(prompt, "text") };
+    return { text: await this.client.generateText(prompt) };
   }
 
-  getModelStats(): unknown[] {
-    return this.client.getFreeModelSwitchSnapshot?.() ?? [];
-  }
-
-  private async parseOrRepairSegmentSummary(
-    raw: string,
+  private async generateSegmentSummary(
+    prompt: string,
     segment: DiscussionSegment,
   ): Promise<z.infer<typeof segmentSummarySchema>> {
     try {
-      return segmentSummarySchema.parse(extractJsonObject(raw));
+      return segmentSummarySchema.parse(
+        await this.client.generateObject(prompt, segmentSummarySchema),
+      );
     } catch (error) {
+      if (!(error instanceof InvalidModelOutputError)) {
+        throw error;
+      }
+
       console.warn(
-        "Model returned non-JSON segment summary; using local fallback",
+        "Model returned an invalid segment summary; using local fallback",
         safeStringify({
           segmentId: segment.id,
-          error: error instanceof Error ? error.message : String(error),
-          raw: raw.slice(0, 500),
+          error: error.message,
         }),
       );
 
@@ -108,28 +108,6 @@ function buildFallbackSegmentSummary(
     mentionedPeople: [...new Set(segment.participants)].slice(0, 10),
     importance: facts.length > 0 ? 1 : 0,
   };
-}
-
-function extractJsonObject(raw: string): unknown {
-  const cleaned = raw
-    .trim()
-    .replace(/^```json\s*/i, "")
-    .replace(/^```\s*/i, "")
-    .replace(/```$/i, "")
-    .trim();
-
-  try {
-    return JSON.parse(cleaned);
-  } catch {
-    const start = cleaned.indexOf("{");
-    const end = cleaned.lastIndexOf("}");
-
-    if (start === -1 || end === -1 || end <= start) {
-      throw new Error(`Model did not return JSON: ${raw.slice(0, 500)}`);
-    }
-
-    return JSON.parse(cleaned.slice(start, end + 1));
-  }
 }
 
 function safeStringify(value: unknown): string {
