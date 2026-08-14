@@ -108,4 +108,34 @@ describe("readConfig", () => {
       /DATABASE_URL must be a valid Postgres URL/,
     );
   });
+
+  it("configures the production Ollama router and permits local auth-free APIs", () => {
+    process.env.TELEGRAM_BOT_TOKEN = "telegram-token";
+    process.env.STORAGE_MODE = "memory";
+    process.env.LLM_BASE_URL = "http://localhost:11434/v1";
+    process.env.LLM_ROUTER_MODE = "production";
+    delete process.env.DATABASE_URL;
+    delete process.env.LLM_API_KEY;
+    delete process.env.OPENROUTER_TOKEN;
+
+    expect(readConfig().llm.router).toEqual({
+      cheapModel: "gpt-oss:20b",
+      defaultModel: "qwen3.5:9b",
+      qualityModel: "deepseek-v4-pro:cloud",
+      defaultMinInputTokens: 2_000,
+      qualityMinInputTokens: 12_000,
+      failureThreshold: 3,
+      circuitCooldownMs: 30_000,
+    });
+  });
+
+  it("validates production router thresholds", () => {
+    process.env.TELEGRAM_BOT_TOKEN = "telegram-token";
+    process.env.DATABASE_URL = "postgresql://localhost/microsonya";
+    process.env.LLM_ROUTER_MODE = "production";
+    process.env.LLM_ROUTER_DEFAULT_MIN_INPUT_TOKENS = "100";
+    process.env.LLM_ROUTER_QUALITY_MIN_INPUT_TOKENS = "100";
+
+    expect(() => readConfig()).toThrow(/must be greater/);
+  });
 });

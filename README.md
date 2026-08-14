@@ -130,25 +130,31 @@ pnpm start
 
 ## Environment Variables
 
-| Name                    | Required                    | Description                                                                  |
-| ----------------------- | --------------------------- | ---------------------------------------------------------------------------- |
-| `TELEGRAM_BOT_TOKEN`    | Yes                         | Token for the Telegram bot.                                                  |
-| `STORAGE_MODE`          | No                          | `postgres` (default) or `memory`.                                            |
-| `MODELS_MODE`           | No                          | `openai-compatible` (default) or `disabled`.                                 |
-| `DATABASE_URL`          | Yes unless `db` is disabled | Postgres connection string used by Drizzle and local bot runs.               |
-| `OPENROUTER_TOKEN`      | Usually                     | OpenRouter API token. Used when `LLM_API_KEY` is not set.                    |
-| `LLM_API_KEY`           | Usually                     | Generic OpenAI-compatible API key. Takes precedence over `OPENROUTER_TOKEN`. |
-| `LLM_BASE_URL`          | No                          | OpenAI-compatible base URL. Defaults to `https://openrouter.ai/api/v1/`.     |
-| `LLM_MODEL`             | No                          | Single segment-summary model. If empty, the fallback list is used.           |
-| `LLM_MODELS`            | No                          | Ordered OpenRouter fallback for structured segment summaries.                |
-| `LLM_MERGE_MODEL`       | No                          | Plain-text merge model. Defaults to `openrouter/free`.                       |
-| `LLM_QUARANTINE_MODELS` | No                          | Comma-separated models to remove from the fallback list.                     |
-| `POSTGRES_DB`           | Docker only                 | Database name for the Compose Postgres service.                              |
-| `POSTGRES_USER`         | Docker only                 | Database user for the Compose Postgres service.                              |
-| `POSTGRES_PASSWORD`     | Docker only                 | Database password for the Compose Postgres service.                          |
-| `POSTGRES_PORT`         | Docker only                 | Host port mapped to Postgres. Defaults to `5432`.                            |
+| Name                       | Required                    | Description                                                                  |
+| -------------------------- | --------------------------- | ---------------------------------------------------------------------------- |
+| `TELEGRAM_BOT_TOKEN`       | Yes                         | Token for the Telegram bot.                                                  |
+| `STORAGE_MODE`             | No                          | `postgres` (default) or `memory`.                                            |
+| `MODELS_MODE`              | No                          | `openai-compatible` (default) or `disabled`.                                 |
+| `DATABASE_URL`             | Yes unless `db` is disabled | Postgres connection string used by Drizzle and local bot runs.               |
+| `OPENROUTER_TOKEN`         | Usually                     | OpenRouter API token. Used when `LLM_API_KEY` is not set.                    |
+| `LLM_API_KEY`              | Usually                     | Generic OpenAI-compatible API key. Takes precedence over `OPENROUTER_TOKEN`. |
+| `LLM_BASE_URL`             | No                          | OpenAI-compatible base URL. Defaults to `https://openrouter.ai/api/v1/`.     |
+| `LLM_MODEL`                | No                          | Single segment-summary model. If empty, the fallback list is used.           |
+| `LLM_MODELS`               | No                          | Ordered OpenRouter fallback for structured segment summaries.                |
+| `LLM_MERGE_MODEL`          | No                          | Plain-text merge model. Defaults to `openrouter/free`.                       |
+| `LLM_QUARANTINE_MODELS`    | No                          | Comma-separated models to remove from the fallback list.                     |
+| `LLM_ROUTER_MODE`          | No                          | `production` enables local three-tier routing; default is `disabled`.        |
+| `LLM_ROUTER_CHEAP_MODEL`   | Router only                 | Cheap tier; defaults to `gpt-oss:20b`.                                       |
+| `LLM_ROUTER_DEFAULT_MODEL` | Router only                 | Default tier; defaults to `qwen3.5:9b`.                                      |
+| `LLM_ROUTER_QUALITY_MODEL` | Router only                 | Quality tier; defaults to `deepseek-v4-pro:cloud`.                           |
+| `POSTGRES_DB`              | Docker only                 | Database name for the Compose Postgres service.                              |
+| `POSTGRES_USER`            | Docker only                 | Database user for the Compose Postgres service.                              |
+| `POSTGRES_PASSWORD`        | Docker only                 | Database password for the Compose Postgres service.                          |
+| `POSTGRES_PORT`            | Docker only                 | Host port mapped to Postgres. Defaults to `5432`.                            |
 
 To use a local Ollama or another OpenAI-compatible endpoint, change `LLM_BASE_URL`, `LLM_MODEL`, `LLM_MERGE_MODEL`, and `LLM_API_KEY` according to that provider. Multiple `LLM_MODELS` are sent to OpenRouter as one server-side fallback route; generic compatible endpoints use the first configured model. Segment summaries default to temperature `0.1`, a 1000-token output limit, strict structured output, and providers that support every requested parameter. Plain-text merges use `openrouter/free` by default.
+
+For production routing through Ollama, set `LLM_ROUTER_MODE=production`. Prompts below 2,000 estimated tokens use the cheap model, prompts from 2,000 to 11,999 use the default model, and larger prompts use the quality model. Failures escalate toward the quality tier and then degrade to any remaining tier. Three consecutive failures open that model's circuit for 30 seconds. Thresholds and circuit settings can be changed with `LLM_ROUTER_DEFAULT_MIN_INPUT_TOKENS`, `LLM_ROUTER_QUALITY_MIN_INPUT_TOKENS`, `LLM_ROUTER_FAILURE_THRESHOLD`, and `LLM_ROUTER_CIRCUIT_COOLDOWN_MS`.
 
 For bot-only exploration without Postgres persistence, set:
 

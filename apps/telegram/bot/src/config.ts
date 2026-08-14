@@ -21,6 +21,16 @@ for (const envPath of [
 export type StorageMode = "postgres" | "memory";
 export type ModelsMode = "openai-compatible" | "disabled";
 
+export type ProductionRouterConfig = {
+  cheapModel: string;
+  defaultModel: string;
+  qualityModel: string;
+  defaultMinInputTokens: number;
+  qualityMinInputTokens: number;
+  failureThreshold: number;
+  circuitCooldownMs: number;
+};
+
 export type AppConfig = {
   telegramToken: string;
 
@@ -43,6 +53,7 @@ export type AppConfig = {
      * Models explicitly forbidden from use.
      */
     quarantineModels?: string[];
+    router?: ProductionRouterConfig;
   };
 };
 
@@ -76,6 +87,7 @@ export function readConfig(): AppConfig {
   const models = excludeValues(configuredModels, quarantineModels);
 
   const llmApiKey = process.env.LLM_API_KEY ?? process.env.OPENROUTER_TOKEN;
+  const router = parseProductionRouterConfig();
 
   if (modelsMode === "openai-compatible") {
     if (!models?.length) {
@@ -84,7 +96,7 @@ export function readConfig(): AppConfig {
       );
     }
 
-    if (!llmApiKey) {
+    if (!llmApiKey && !isLoopbackUrl(llmBaseUrl)) {
       throw new Error(
         "LLM_API_KEY or OPENROUTER_TOKEN is required when MODELS_MODE=openai-compatible.",
       );
@@ -105,8 +117,76 @@ export function readConfig(): AppConfig {
       models,
       mergeModel: process.env.LLM_MERGE_MODEL ?? DEFAULT_MERGE_MODEL,
       quarantineModels,
+      router,
     },
   };
+}
+
+function parseProductionRouterConfig(): ProductionRouterConfig | undefined {
+  const mode = normalizeMode(process.env.LLM_ROUTER_MODE ?? "disabled");
+  if (["disabled", "off", "none"].includes(mode)) {
+    return undefined;
+  }
+  if (mode !== "production" && mode !== "enabled" && mode !== "on") {
+    throw new Error(
+      `Unknown LLM_ROUTER_MODE "${process.env.LLM_ROUTER_MODE}". Supported values: production, disabled.`,
+    );
+  }
+
+  const defaultMinInputTokens = parseNonNegativeInteger(
+    "LLM_ROUTER_DEFAULT_MIN_INPUT_TOKENS",
+    2_000,
+  );
+  const qualityMinInputTokens = parseNonNegativeInteger(
+    "LLM_ROUTER_QUALITY_MIN_INPUT_TOKENS",
+    12_000,
+  );
+  if (qualityMinInputTokens <= defaultMinInputTokens) {
+    throw new Error(
+      "LLM_ROUTER_QUALITY_MIN_INPUT_TOKENS must be greater than LLM_ROUTER_DEFAULT_MIN_INPUT_TOKENS.",
+    );
+  }
+
+  return {
+    cheapModel: process.env.LLM_ROUTER_CHEAP_MODEL?.trim() || "gpt-oss:20b",
+    defaultModel: process.env.LLM_ROUTER_DEFAULT_MODEL?.trim() || "qwen3.5:9b",
+    qualityModel:
+      process.env.LLM_ROUTER_QUALITY_MODEL?.trim() || "deepseek-v4-pro:cloud",
+    defaultMinInputTokens,
+    qualityMinInputTokens,
+    failureThreshold: parsePositiveInteger("LLM_ROUTER_FAILURE_THRESHOLD", 3),
+    circuitCooldownMs: parsePositiveInteger(
+      "LLM_ROUTER_CIRCUIT_COOLDOWN_MS",
+      30_000,
+    ),
+  };
+}
+
+function parseNonNegativeInteger(name: string, fallback: number): number {
+  const raw = process.env[name]?.trim();
+  if (!raw) return fallback;
+  const value = Number(raw);
+  if (!Number.isSafeInteger(value) || value < 0) {
+    throw new Error(`${name} must be a non-negative integer.`);
+  }
+  return value;
+}
+
+function parsePositiveInteger(name: string, fallback: number): number {
+  const value = parseNonNegativeInteger(name, fallback);
+  if (value === 0) throw new Error(`${name} must be a positive integer.`);
+  return value;
+}
+
+function isLoopbackUrl(value: string): boolean {
+  try {
+    const hostname = new URL(value).hostname.toLowerCase();
+    return (
+      hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1"
+    );
+  } catch {
+    return false;
+  }
 }
 
 function requiredEnv(name: string): string {
