@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@microsonya/db": "workspace:*",
+    "@microsonya/discourse": "workspace:*",
     "@microsonya/model-gateway": "workspace:*",
     "@microsonya/shared": "workspace:*",
     "@microsonya/summarize": "workspace:*",

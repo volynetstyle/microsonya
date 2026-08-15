@@ -48,6 +48,7 @@ export type AppConfig = {
      */
     models?: string[];
     mergeModel: string;
+    memoryModel: string;
 
     /**
      * Models explicitly forbidden from use.
@@ -116,6 +117,7 @@ export function readConfig(): AppConfig {
       apiKey: llmApiKey,
       models,
       mergeModel: process.env.LLM_MERGE_MODEL ?? DEFAULT_MERGE_MODEL,
+      memoryModel: process.env.LLM_MEMORY_MODEL?.trim() || "gpt-oss:20b-cloud",
       quarantineModels,
       router,
     },
@@ -258,6 +260,11 @@ function validateDatabaseUrl(databaseUrl: string): void {
 
   if (url.protocol !== "postgres:" && url.protocol !== "postgresql:") {
     throw new Error("DATABASE_URL must use postgres:// or postgresql://.");
+  }
+  if (url.hash) {
+    throw new Error(
+      "DATABASE_URL must be a valid Postgres URL. Encode special password characters, for example # as %23.",
+    );
   }
 }
 

@@ -2,6 +2,7 @@ import {
   AiSdkModelClient,
   ModelGateway,
   ProductionModelRouterClient,
+  type ModelCallTelemetry,
   type ProductionModelTier,
 } from "@microsonya/model-gateway";
 import type { AppConfig } from "./config.js";
@@ -18,6 +19,7 @@ export function createModels(config: AppConfig): ModelGateway | undefined {
       models: [model],
       mergeModel: model,
       appName: "Microsonya",
+      onTelemetry: logModelTelemetry,
     });
 
   if (config.llm.router) {
@@ -65,6 +67,27 @@ export function createModels(config: AppConfig): ModelGateway | undefined {
       models: config.llm.models ?? [],
       mergeModel: config.llm.mergeModel,
       appName: "Microsonya",
+      onTelemetry: logModelTelemetry,
     }),
   );
+}
+
+export function createMemoryModels(
+  config: AppConfig,
+): ModelGateway | undefined {
+  if (config.modelsMode === "disabled") return undefined;
+  return new ModelGateway(
+    new AiSdkModelClient({
+      baseUrl: config.llm.baseUrl,
+      apiKey: config.llm.apiKey,
+      models: [config.llm.memoryModel],
+      mergeModel: config.llm.memoryModel,
+      appName: "Microsonya",
+      onTelemetry: logModelTelemetry,
+    }),
+  );
+}
+
+function logModelTelemetry(event: ModelCallTelemetry): void {
+  console.info("Model call telemetry", JSON.stringify(event));
 }

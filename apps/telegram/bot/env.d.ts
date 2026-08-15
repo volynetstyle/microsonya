@@ -9,6 +9,7 @@ declare global {
       LLM_MODEL?: string;
       LLM_MODELS?: string;
       LLM_MERGE_MODEL?: string;
+      LLM_MEMORY_MODEL?: string;
       LLM_QUARANTINE_MODELS?: string;
       LLM_ROUTER_MODE?: string;
       LLM_ROUTER_CHEAP_MODEL?: string;
