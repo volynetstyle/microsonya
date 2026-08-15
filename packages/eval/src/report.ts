@@ -26,6 +26,7 @@ type TelemetryKey = (typeof telemetryKeys)[number];
 
 export type AggregateRow = {
   model: string;
+  pipeline: string;
   representation: string;
   transformation: string;
   reasoning: string;
@@ -47,52 +48,82 @@ type StageSignal = {
 
 const stageSignals: StageSignal[] = [
   {
-    stage: "thread-reconstruction",
-    signal: "majorThreadRecall",
+    stage: "extractor",
+    signal: "eventRecall",
     direction: "higher-is-better",
-    select: (run) => run.metrics.majorThreadRecall,
+    select: (run) => run.extractorMetrics?.eventRecall ?? null,
   },
   {
-    stage: "semantic-extraction",
+    stage: "extractor",
+    signal: "eventPrecision",
+    direction: "higher-is-better",
+    select: (run) => run.extractorMetrics?.eventPrecision ?? null,
+  },
+  {
+    stage: "extractor",
+    signal: "attributionAccuracy",
+    direction: "higher-is-better",
+    select: (run) => run.extractorMetrics?.attributionAccuracy ?? null,
+  },
+  {
+    stage: "extractor",
+    signal: "evidenceCorrectness",
+    direction: "higher-is-better",
+    select: (run) => run.extractorMetrics?.evidenceCorrectness ?? null,
+  },
+  {
+    stage: "extractor",
+    signal: "relationIntegrity",
+    direction: "higher-is-better",
+    select: (run) => run.extractorMetrics?.relationIntegrity ?? null,
+  },
+  {
+    stage: "reducer",
+    signal: "lifecycleInvariantViolations",
+    direction: "lower-is-better",
+    select: (run) => run.reducerMetrics?.lifecycleInvariantViolations ?? null,
+  },
+  {
+    stage: "projection",
     signal: "weightedClaimRecall",
     direction: "higher-is-better",
     select: (run) => run.metrics.weightedClaimRecall,
   },
   {
-    stage: "semantic-extraction",
+    stage: "projection",
     signal: "goldClaimPrecision",
     direction: "higher-is-better",
     select: (run) => run.metrics.goldClaimPrecision,
   },
   {
-    stage: "factual-grounding",
-    signal: "evidencePrecision",
-    direction: "higher-is-better",
-    select: (run) => run.metrics.evidencePrecision,
-  },
-  {
-    stage: "factual-grounding",
-    signal: "unknownEvidenceIds",
-    direction: "lower-is-better",
-    select: (run) => run.metrics.unknownEvidenceIds,
-  },
-  {
-    stage: "salience-selection",
+    stage: "projection",
     signal: "forbiddenRate",
     direction: "lower-is-better",
     select: (run) => run.metrics.forbiddenRate,
   },
   {
-    stage: "salience-selection",
+    stage: "projection",
     signal: "noiseRetention",
     direction: "lower-is-better",
     select: (run) => run.metrics.noiseRetention,
   },
   {
-    stage: "compression",
-    signal: "claimCount",
-    direction: "descriptive",
-    select: (run) => run.metrics.claimCount,
+    stage: "end-to-end",
+    signal: "durationMs",
+    direction: "lower-is-better",
+    select: (run) => run.usage.durationMs,
+  },
+  {
+    stage: "end-to-end",
+    signal: "modelCalls",
+    direction: "lower-is-better",
+    select: (run) => run.operationalMetrics?.modelCalls ?? null,
+  },
+  {
+    stage: "end-to-end",
+    signal: "semanticAmplification",
+    direction: "lower-is-better",
+    select: (run) => run.operationalMetrics?.semanticAmplification ?? null,
   },
 ];
 
@@ -100,11 +131,21 @@ export function runsToCsv(runs: StoredRun[]): string {
   const headers = [
     "case",
     "model",
+    "pipeline",
     "representation",
     "transformation",
     "reasoning",
     "seed",
     "status",
+    "modelCalls",
+    "sourceMessageWindows",
+    "semanticInterpretations",
+    "semanticAmplification",
+    "extractorEventRecall",
+    "extractorEventPrecision",
+    "attributionAccuracy",
+    "relationIntegrity",
+    "lifecycleInvariantViolations",
     "validJson",
     "schemaValid",
     "topics",
@@ -133,11 +174,21 @@ export function runsToCsv(runs: StoredRun[]): string {
   const rows = runs.map((run) => [
     run.case,
     run.model,
+    run.pipeline ?? "deterministic-shell",
     run.representation,
     run.transformation ?? "identity",
     run.reasoning,
     run.seed,
     run.status,
+    run.operationalMetrics?.modelCalls,
+    run.operationalMetrics?.sourceMessageWindows,
+    run.operationalMetrics?.semanticInterpretations,
+    run.operationalMetrics?.semanticAmplification,
+    run.extractorMetrics?.eventRecall,
+    run.extractorMetrics?.eventPrecision,
+    run.extractorMetrics?.attributionAccuracy,
+    run.extractorMetrics?.relationIntegrity,
+    run.reducerMetrics?.lifecycleInvariantViolations,
     run.metrics.validJson,
     run.metrics.schemaValid,
     run.metrics.topicCount,
@@ -171,6 +222,7 @@ export function aggregateRuns(runs: StoredRun[]): AggregateRow[] {
   for (const run of runs) {
     const key = JSON.stringify([
       run.model,
+      run.pipeline ?? "deterministic-shell",
       run.representation,
       run.transformation ?? "identity",
       run.reasoning,
@@ -182,6 +234,7 @@ export function aggregateRuns(runs: StoredRun[]): AggregateRow[] {
     const first = group[0]!;
     const row = {
       model: first.model,
+      pipeline: first.pipeline ?? "deterministic-shell",
       representation: first.representation,
       transformation: first.transformation ?? "identity",
       reasoning: first.reasoning,
@@ -218,6 +271,7 @@ export function aggregateRuns(runs: StoredRun[]): AggregateRow[] {
 export function aggregatesToCsv(rows: AggregateRow[]): string {
   const headers = [
     "model",
+    "pipeline",
     "representation",
     "transformation",
     "reasoning",
@@ -241,6 +295,7 @@ export function aggregatesToCsv(rows: AggregateRow[]): string {
 export function stagesToCsv(runs: StoredRun[]): string {
   const headers = [
     "model",
+    "pipeline",
     "representation",
     "transformation",
     "reasoning",
@@ -255,6 +310,7 @@ export function stagesToCsv(runs: StoredRun[]): string {
   for (const run of runs.filter((item) => item.status === "ok")) {
     const key = JSON.stringify([
       run.model,
+      run.pipeline ?? "deterministic-shell",
       run.representation,
       run.transformation ?? "identity",
       run.reasoning,
@@ -271,6 +327,7 @@ export function stagesToCsv(runs: StoredRun[]): string {
       return [
         [
           first.model,
+          first.pipeline ?? "deterministic-shell",
           first.representation,
           first.transformation ?? "identity",
           first.reasoning,
@@ -287,11 +344,70 @@ export function stagesToCsv(runs: StoredRun[]): string {
   return toCsv(headers, rows);
 }
 
+export function extractorVarianceToCsv(runs: StoredRun[]): string {
+  const headers = [
+    "case",
+    "model",
+    "pipeline",
+    "representation",
+    "transformation",
+    "reasoning",
+    "nRuns",
+    "nPairs",
+    "eventSetJaccardMean",
+    "edgeSetJaccardMean",
+  ];
+  const groups = new Map<string, StoredRun[]>();
+  for (const run of runs.filter((item) => item.reconstruction)) {
+    const key = JSON.stringify([
+      run.case,
+      run.model,
+      run.pipeline ?? "deterministic-shell",
+      run.representation,
+      run.transformation ?? "identity",
+      run.reasoning,
+    ]);
+    groups.set(key, [...(groups.get(key) ?? []), run]);
+  }
+  const rows = [...groups.values()].flatMap((group) => {
+    if (group.length < 2) return [];
+    const pairs: Array<[StoredRun, StoredRun]> = [];
+    for (let left = 0; left < group.length; left += 1) {
+      for (let right = left + 1; right < group.length; right += 1) {
+        pairs.push([group[left]!, group[right]!]);
+      }
+    }
+    const first = group[0]!;
+    return [
+      [
+        first.case,
+        first.model,
+        first.pipeline ?? "deterministic-shell",
+        first.representation,
+        first.transformation ?? "identity",
+        first.reasoning,
+        group.length,
+        pairs.length,
+        mean(
+          pairs.map(([left, right]) =>
+            jaccard(eventSet(left), eventSet(right)),
+          ),
+        ),
+        mean(
+          pairs.map(([left, right]) => jaccard(edgeSet(left), edgeSet(right))),
+        ),
+      ],
+    ];
+  });
+  return toCsv(headers, rows);
+}
+
 export function printRunTable(runs: StoredRun[]): void {
   console.table(
     runs.map((run) => ({
       case: run.case,
       model: run.model,
+      pipeline: run.pipeline ?? "deterministic-shell",
       repr: run.representation,
       reasoning: run.reasoning,
       seed: run.seed,
@@ -308,6 +424,7 @@ export function printAggregateTable(rows: AggregateRow[]): void {
   console.table(
     rows.map((row) => ({
       model: row.model,
+      pipeline: row.pipeline,
       representation: row.representation,
       transform: row.transformation,
       reasoning: row.reasoning,
@@ -373,4 +490,32 @@ function formatMetric(value: number | null): string {
 function formatMeanStd(meanValue: number | null, std: number | null): string {
   if (meanValue === null || std === null) return "-";
   return `${meanValue.toFixed(2)} ± ${std.toFixed(2)}`;
+}
+
+function eventSet(run: StoredRun): Set<string> {
+  return new Set(
+    run.reconstruction?.events.map((event) =>
+      JSON.stringify([
+        [...event.evidence].sort((a, b) => a - b),
+        event.speaker,
+        event.speechAct,
+        event.commitment,
+        event.epistemicStatus,
+      ]),
+    ) ?? [],
+  );
+}
+
+function edgeSet(run: StoredRun): Set<string> {
+  return new Set(
+    run.reconstruction?.events.flatMap((event) =>
+      event.refersTo.map((target) => `${event.id}->${target}`),
+    ) ?? [],
+  );
+}
+
+function jaccard(left: Set<string>, right: Set<string>): number {
+  const union = new Set([...left, ...right]);
+  if (union.size === 0) return 1;
+  return [...left].filter((item) => right.has(item)).length / union.size;
 }

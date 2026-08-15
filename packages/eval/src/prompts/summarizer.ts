@@ -20,3 +20,32 @@ export function buildSummarizerPrompt(
         : undefined;
   return buildDiscoursePrompt(serializedMessages, representation, guide);
 }
+
+export function buildDirectSummaryPrompt(
+  serializedMessages: string,
+  representation: Representation,
+): string {
+  return [
+    "Summarize the Telegram conversation directly. Preserve attribution and cite only source message IDs. Do not invent decisions or leave answered questions open.",
+    "Return JSON only, with exactly this shape:",
+    JSON.stringify(
+      {
+        title: "Short title",
+        topics: [
+          {
+            id: "short-kebab-id",
+            title: "Topic title",
+            claims: [{ text: "Attributed claim", evidence: [17] }],
+          },
+        ],
+        decisions: [{ text: "Settled action", evidence: [18] }],
+        openQuestions: [{ text: "Unresolved question", evidence: [19] }],
+      },
+      null,
+      2,
+    ),
+    `Input representation: ${representation}`,
+    "Messages:",
+    serializedMessages,
+  ].join("\n\n");
+}

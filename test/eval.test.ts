@@ -3,7 +3,10 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { createServer } from "node:http";
 import { runOllama } from "../packages/eval/src/ollama.js";
-import { parseDiscourseReconstruction } from "../packages/eval/src/parse.js";
+import {
+  parseDiscourseReconstruction,
+  parseProjectedSummary,
+} from "../packages/eval/src/parse.js";
 import { aggregateRuns } from "../packages/eval/src/report.js";
 import {
   frontierRows,
@@ -233,6 +236,19 @@ describe("QA factuality", () => {
 });
 
 describe("strict model output parsing", () => {
+  it("parses the direct-summary ablation contract independently", () => {
+    expect(
+      parseProjectedSummary(
+        JSON.stringify({
+          title: "Direct",
+          topics: [],
+          decisions: [],
+          openQuestions: [],
+        }),
+      ),
+    ).toMatchObject({ validJson: true, schemaValid: true });
+  });
+
   const valid = JSON.stringify({
     title: "Reconstruction",
     events: [],
@@ -470,7 +486,7 @@ describe("eval fixtures", () => {
 });
 
 describe("eval aggregation", () => {
-  it("counts parse failures as zero operational quality", () => {
+  it("reports failures separately instead of folding them into quality", () => {
     const successful = {
       case: "case",
       model: "model",
@@ -519,14 +535,15 @@ describe("eval aggregation", () => {
     } satisfies StoredRun;
 
     const rows = frontierRows([successful, failed]);
-    expect(rows[0]!.qualityMean).toBeCloseTo(1);
+    expect(rows[0]).toMatchObject({ okRate: 1, recallMean: 1 });
     expect(rows[1]).toMatchObject({
       reasoning: "medium",
       okRuns: 0,
-      qualityMean: 0,
+      okRate: 0,
+      recallMean: null,
     });
-    expect(reasoningPairedToCsv([successful, failed])).toContain(
-      "low,medium,1,1,-1.000000",
+    expect(reasoningPairedToCsv([successful, failed])).not.toContain(
+      "low,medium,weightedClaimRecall",
     );
   });
 

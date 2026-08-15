@@ -11,22 +11,28 @@ import {
   frontierToCsv,
   reasoningPairedToCsv,
 } from "./frontier.js";
-import { projectDiscourse } from "@microsonya/discourse";
-import { parseDiscourseReconstruction } from "./parse.js";
+import { projectDiscourseState, reduceDiscourse } from "@microsonya/discourse";
+import {
+  parseDiscourseReconstruction,
+  parseProjectedSummary,
+} from "./parse.js";
 import { pairedComparisons, pairedRowsToCsv } from "./paired.js";
 import {
   buildSummarizerPrompt,
+  buildDirectSummaryPrompt,
   SUMMARIZER_PROMPT_VERSION,
 } from "./prompts/summarizer.js";
 import {
   aggregateRuns,
   aggregatesToCsv,
+  extractorVarianceToCsv,
   printAggregateTable,
   printRunTable,
   runsToCsv,
   stagesToCsv,
 } from "./report.js";
 import { emptyScore, scoreSummary } from "./score.js";
+import { scoreExtractor, scoreReducer } from "./stageScore.js";
 import { serialize } from "./serializers/index.js";
 import { transformMessages } from "./transform.js";
 import {
@@ -36,6 +42,7 @@ import {
   type EvalMessage,
   type Experiment,
   type Gold,
+  type Pipeline,
   type Reasoning,
   type Representation,
   type StoredRun,
@@ -79,6 +86,7 @@ async function main(
     const runCount =
       experiment.cases.length *
       experiment.models.length *
+      experiment.pipelines.length *
       experiment.representations.length *
       experiment.reasoning.length *
       experiment.seeds.length *
@@ -98,58 +106,63 @@ async function main(
     for (const transformation of experiment.transformations) {
       const messages = transformMessages(canonicalMessages, transformation);
       for (const model of experiment.models) {
-        for (const representation of experiment.representations) {
-          for (const reasoning of experiment.reasoning) {
-            for (const seed of experiment.seeds) {
-              const outputPath = resultPath(
-                resultsRoot,
-                caseName,
-                model,
-                representation,
-                reasoning,
-                seed,
-                transformation,
-              );
-              const prepared = prepareRun(
-                messages,
-                model,
-                representation,
-                reasoning,
-                seed,
-                experiment,
-              );
-              const existing = await readExisting(outputPath);
-              if (existing && !overwrite) {
-                assertSameInputs(
-                  existing,
-                  prepared.inputHash,
-                  prepared.promptHash,
+        for (const pipeline of experiment.pipelines) {
+          for (const representation of experiment.representations) {
+            for (const reasoning of experiment.reasoning) {
+              for (const seed of experiment.seeds) {
+                const outputPath = resultPath(
+                  resultsRoot,
+                  caseName,
+                  model,
+                  pipeline,
+                  representation,
+                  reasoning,
+                  seed,
+                  transformation,
                 );
-                runs.push(existing);
-                continue;
-              }
+                const prepared = prepareRun(
+                  messages,
+                  model,
+                  pipeline,
+                  representation,
+                  reasoning,
+                  seed,
+                  experiment,
+                );
+                const existing = await readExisting(outputPath);
+                if (existing && !overwrite) {
+                  assertSameInputs(
+                    existing,
+                    prepared.inputHash,
+                    prepared.promptHash,
+                  );
+                  runs.push(existing);
+                  continue;
+                }
 
-              console.log(
-                `Running ${caseName} | ${transformation} | ${model} | ${representation} | ${reasoning} | seed ${seed}`,
-              );
-              const run = await executeRun(
-                caseName,
-                model,
-                representation,
-                reasoning,
-                seed,
-                transformation,
-                prepared,
-                messages,
-                gold,
-              );
-              await mkdir(path.dirname(outputPath), { recursive: true });
-              await writeFile(
-                outputPath,
-                `${JSON.stringify(run, null, 2)}\n`,
-                "utf8",
-              );
-              runs.push(run);
+                console.log(
+                  `Running ${caseName} | ${transformation} | ${model} | ${representation} | ${reasoning} | seed ${seed}`,
+                );
+                const run = await executeRun(
+                  caseName,
+                  model,
+                  pipeline,
+                  representation,
+                  reasoning,
+                  seed,
+                  transformation,
+                  prepared,
+                  messages,
+                  gold,
+                );
+                await mkdir(path.dirname(outputPath), { recursive: true });
+                await writeFile(
+                  outputPath,
+                  `${JSON.stringify(run, null, 2)}\n`,
+                  "utf8",
+                );
+                runs.push(run);
+              }
             }
           }
         }
@@ -179,6 +192,11 @@ async function main(
     "utf8",
   );
   await writeFile(
+    path.join(resultsRoot, "extractor-variance.csv"),
+    extractorVarianceToCsv(runs),
+    "utf8",
+  );
+  await writeFile(
     path.join(resultsRoot, "mutations.csv"),
     mutationRowsToCsv(mutationOutcomes(runs, experiment)),
     "utf8",
@@ -201,6 +219,7 @@ async function main(
 function prepareRun(
   messages: EvalMessage[],
   model: string,
+  pipeline: Pipeline,
   representation: Representation,
   reasoning: Reasoning,
   seed: number,
@@ -212,7 +231,10 @@ function prepareRun(
   promptVersion: string;
 } {
   const serialized = serialize(representation, messages);
-  const prompt = buildSummarizerPrompt(serialized, representation);
+  const prompt =
+    pipeline === "direct"
+      ? buildDirectSummaryPrompt(serialized, representation)
+      : buildSummarizerPrompt(serialized, representation);
   return {
     prompt,
     inputHash: hash(JSON.stringify(messages)),
@@ -224,6 +246,7 @@ function prepareRun(
 async function executeRun(
   caseName: string,
   model: string,
+  pipeline: Pipeline,
   representation: Representation,
   reasoning: Reasoning,
   seed: number,
@@ -235,6 +258,7 @@ async function executeRun(
   const base = {
     case: caseName,
     model,
+    pipeline,
     representation,
     reasoning,
     seed,
@@ -253,6 +277,37 @@ async function executeRun(
       baseUrl: process.env.OLLAMA_BASE_URL,
       apiKey: process.env.OLLAMA_API_KEY,
     });
+    if (pipeline === "direct") {
+      const parsed = parseProjectedSummary(response.content);
+      if (!parsed.schemaValid) {
+        return {
+          ...base,
+          status: "parse_failure",
+          raw: response.content,
+          thinking: response.thinking,
+          parsed: null,
+          parseError: parsed.error,
+          usage: response.usage,
+          operationalMetrics: operationalMetrics(),
+          metrics: emptyScore(parsed.validJson, false),
+        };
+      }
+      return {
+        ...base,
+        status: "ok",
+        raw: response.content,
+        thinking: response.thinking,
+        parsed: parsed.parsed,
+        usage: response.usage,
+        operationalMetrics: operationalMetrics(),
+        metrics: scoreSummary(
+          parsed.parsed,
+          gold,
+          new Set(messages.map((message) => message.id)),
+        ),
+      };
+    }
+
     const parsed = parseDiscourseReconstruction(response.content);
     if (!parsed.schemaValid) {
       return {
@@ -263,11 +318,13 @@ async function executeRun(
         parsed: null,
         parseError: parsed.error,
         usage: response.usage,
+        operationalMetrics: operationalMetrics(),
         metrics: emptyScore(parsed.validJson, false),
       };
     }
 
-    const projection = projectDiscourse(parsed.parsed);
+    const state = reduceDiscourse(parsed.parsed);
+    const projection = projectDiscourseState(state);
     return {
       ...base,
       status: "ok",
@@ -275,6 +332,10 @@ async function executeRun(
       thinking: response.thinking,
       parsed: projection.summary,
       reconstruction: parsed.parsed,
+      state,
+      extractorMetrics: scoreExtractor(parsed.parsed, messages, gold),
+      reducerMetrics: scoreReducer(state, projection.summary),
+      operationalMetrics: operationalMetrics(),
       projectionDiagnostics: projection.diagnostics,
       usage: response.usage,
       metrics: scoreSummary(
@@ -298,6 +359,7 @@ async function executeRun(
       usage: {
         durationMs: error instanceof OllamaRequestError ? error.durationMs : 0,
       },
+      operationalMetrics: operationalMetrics(),
       metrics: emptyScore(),
     };
   }
@@ -345,6 +407,7 @@ function resultPath(
   root: string,
   caseName: string,
   model: string,
+  pipeline: Pipeline,
   representation: Representation,
   reasoning: Reasoning,
   seed: number,
@@ -354,6 +417,7 @@ function resultPath(
     root,
     caseName,
     safePathPart(model),
+    pipeline,
     representation,
     reasoning,
   );
@@ -364,6 +428,15 @@ function resultPath(
       : ["transformation", transformation]),
     `seed-${seed}.json`,
   );
+}
+
+function operationalMetrics() {
+  return {
+    modelCalls: 1,
+    sourceMessageWindows: 1,
+    semanticInterpretations: 1,
+    semanticAmplification: 1,
+  } as const;
 }
 
 async function readExisting(filePath: string): Promise<StoredRun | null> {

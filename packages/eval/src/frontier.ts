@@ -1,15 +1,16 @@
-import type { Score, StoredRun } from "./types.js";
+import type { StoredRun } from "./types.js";
 
 export type FrontierRow = {
   model: string;
+  pipeline: string;
   representation: string;
   transformation: string;
   reasoning: string;
   n: number;
   okRuns: number;
-  qualityMean: number | null;
-  qualityStd: number | null;
+  okRate: number;
   recallMean: number | null;
+  goldClaimPrecisionMean: number | null;
   evidencePrecisionMean: number | null;
   falseOpenQuestionRateMean: number | null;
   noiseRetentionMean: number | null;
@@ -21,34 +22,12 @@ export type FrontierRow = {
   latencyMsMean: number | null;
 };
 
-export function operationalQuality(metrics: Score): number | null {
-  const values = [
-    metrics.weightedClaimRecall,
-    metrics.goldClaimPrecision,
-    metrics.evidencePrecision,
-    metrics.falseOpenQuestionRate,
-    metrics.noiseRetention,
-  ];
-  if (values.some((value) => value === null)) return null;
-  return (
-    0.35 * metrics.weightedClaimRecall! +
-    0.1 * metrics.goldClaimPrecision! +
-    0.25 * metrics.evidencePrecision! +
-    0.1 * (1 - metrics.forbiddenRate) +
-    0.1 * (1 - metrics.falseOpenQuestionRate!) +
-    0.1 * (1 - metrics.noiseRetention!)
-  );
-}
-
-function runQuality(run: StoredRun): number | null {
-  return run.status === "ok" ? operationalQuality(run.metrics) : 0;
-}
-
 export function frontierRows(runs: StoredRun[]): FrontierRow[] {
   const groups = new Map<string, StoredRun[]>();
   for (const run of runs) {
     const key = JSON.stringify([
       run.model,
+      run.pipeline ?? "deterministic-shell",
       run.representation,
       run.transformation ?? "identity",
       run.reasoning,
@@ -68,18 +47,20 @@ export function frontierRows(runs: StoredRun[]): FrontierRow[] {
       if (thinkingTokens === undefined || finalTokens === undefined) return [];
       return [thinkingTokens / (thinkingTokens + finalTokens)];
     });
-    const quality = numbers(group.map(runQuality));
     return {
       model: first.model,
+      pipeline: first.pipeline ?? "deterministic-shell",
       representation: first.representation,
       transformation: first.transformation ?? "identity",
       reasoning: first.reasoning,
       n: group.length,
       okRuns: ok.length,
-      qualityMean: mean(quality),
-      qualityStd: std(quality),
+      okRate: ok.length / group.length,
       recallMean: mean(
         numbers(ok.map((run) => run.metrics.weightedClaimRecall)),
+      ),
+      goldClaimPrecisionMean: mean(
+        numbers(ok.map((run) => run.metrics.goldClaimPrecision)),
       ),
       evidencePrecisionMean: mean(
         numbers(ok.map((run) => run.metrics.evidencePrecision)),
@@ -107,14 +88,15 @@ export function frontierRows(runs: StoredRun[]): FrontierRow[] {
 export function frontierToCsv(rows: FrontierRow[]): string {
   const headers: Array<keyof FrontierRow> = [
     "model",
+    "pipeline",
     "representation",
     "transformation",
     "reasoning",
     "n",
     "okRuns",
-    "qualityMean",
-    "qualityStd",
+    "okRate",
     "recallMean",
+    "goldClaimPrecisionMean",
     "evidencePrecisionMean",
     "falseOpenQuestionRateMean",
     "noiseRetentionMean",
@@ -132,21 +114,19 @@ export function reasoningPairedToCsv(runs: StoredRun[]): string {
   const headers = [
     "baseline",
     "target",
+    "measure",
     "nCases",
     "nPairs",
-    "qualityDelta",
-    "qualityCiLow",
-    "qualityCiHigh",
-    "thinkingTokensDelta",
-    "finalTokensDelta",
-    "latencyMsDelta",
+    "delta",
+    "ciLow",
+    "ciHigh",
   ];
   const modes = [...new Set(runs.map((run) => run.reasoning))];
   const baselineMode = modes.includes("low") ? "low" : modes[0]!;
   const baseline = new Map(
     runs
       .filter((run) => run.reasoning === baselineMode)
-      .map((run) => [`${run.case}\0${run.seed}`, run]),
+      .map((run) => [pairKey(run), run]),
   );
   const rows = modes
     .filter((mode) => mode !== baselineMode)
@@ -154,46 +134,76 @@ export function reasoningPairedToCsv(runs: StoredRun[]): string {
       const pairs = runs
         .filter((run) => run.reasoning === target)
         .flatMap((run) => {
-          const base = baseline.get(`${run.case}\0${run.seed}`);
-          if (!base) return [];
-          const left = runQuality(base);
-          const right = runQuality(run);
-          if (left === null || right === null) return [];
-          return [
-            {
-              caseName: run.case,
-              quality: right - left,
-              thinking:
-                (run.usage.thinkingTextTokenCount ?? 0) -
-                (base.usage.thinkingTextTokenCount ?? 0),
-              final:
-                (run.usage.finalTextTokenCount ?? 0) -
-                (base.usage.finalTextTokenCount ?? 0),
-              latency: run.usage.durationMs - base.usage.durationMs,
-            },
-          ];
+          const base = baseline.get(pairKey(run));
+          if (!base || base.status !== "ok" || run.status !== "ok") return [];
+          return [{ caseName: run.case, baseline: base, target: run }];
         });
       if (pairs.length === 0) return [];
-      const caseMeans = [...group(pairs, (pair) => pair.caseName).values()].map(
-        (items) => mean(items.map((item) => item.quality))!,
-      );
-      const [low, high] = bootstrap(caseMeans);
-      return [
+      const measures = [
         [
-          baselineMode,
-          target,
-          caseMeans.length,
-          pairs.length,
-          mean(caseMeans),
-          low,
-          high,
-          mean(pairs.map((pair) => pair.thinking)),
-          mean(pairs.map((pair) => pair.final)),
-          mean(pairs.map((pair) => pair.latency)),
+          "weightedClaimRecall",
+          (run: StoredRun) => run.metrics.weightedClaimRecall,
         ],
-      ];
+        [
+          "goldClaimPrecision",
+          (run: StoredRun) => run.metrics.goldClaimPrecision,
+        ],
+        [
+          "evidencePrecision",
+          (run: StoredRun) => run.metrics.evidencePrecision,
+        ],
+        ["forbiddenRate", (run: StoredRun) => run.metrics.forbiddenRate],
+        [
+          "falseOpenQuestionRate",
+          (run: StoredRun) => run.metrics.falseOpenQuestionRate,
+        ],
+        ["noiseRetention", (run: StoredRun) => run.metrics.noiseRetention],
+        [
+          "thinkingTokens",
+          (run: StoredRun) => run.usage.thinkingTextTokenCount,
+        ],
+        ["finalTokens", (run: StoredRun) => run.usage.finalTextTokenCount],
+        ["latencyMs", (run: StoredRun) => run.usage.durationMs],
+      ] as const;
+      return measures.flatMap(([name, select]) => {
+        const observations = pairs.flatMap((pair) => {
+          const left = select(pair.baseline);
+          const right = select(pair.target);
+          return left == null || right == null
+            ? []
+            : [{ caseName: pair.caseName, delta: right - left }];
+        });
+        if (observations.length === 0) return [];
+        const caseMeans = [
+          ...group(observations, (item) => item.caseName).values(),
+        ].map((items) => mean(items.map((item) => item.delta))!);
+        const [low, high] = bootstrap(caseMeans);
+        return [
+          [
+            baselineMode,
+            target,
+            name,
+            caseMeans.length,
+            observations.length,
+            mean(caseMeans),
+            low,
+            high,
+          ],
+        ];
+      });
     });
   return csv(headers, rows);
+}
+
+function pairKey(run: StoredRun): string {
+  return [
+    run.case,
+    run.model,
+    run.pipeline ?? "deterministic-shell",
+    run.representation,
+    run.transformation ?? "identity",
+    run.seed,
+  ].join("\0");
 }
 
 function bootstrap(values: number[]): [number, number] {
@@ -230,15 +240,6 @@ function mean(values: number[]): number | null {
   return values.length === 0
     ? null
     : values.reduce((sum, value) => sum + value, 0) / values.length;
-}
-function std(values: number[]): number | null {
-  const average = mean(values);
-  return average === null
-    ? null
-    : Math.sqrt(
-        values.reduce((sum, value) => sum + (value - average) ** 2, 0) /
-          values.length,
-      );
 }
 function csv(
   headers: readonly string[],

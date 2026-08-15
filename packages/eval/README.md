@@ -56,13 +56,10 @@ fully disabled. The experiment therefore records the observed thinking and
 final-text token counts with the model's Harmony tokenizer instead of treating
 the level labels as token counts.
 
-`frontier.csv` reports cost/quality points. Its operational quality proxy is
-`0.35 claim recall + 0.10 gold precision + 0.25 evidence precision + 0.10
-forbidden compliance + 0.10 open-question compliance + 0.10 noise compliance`.
-It is a declared product proxy, not a universal quality score. Parse/request
-failures receive quality zero. `reasoning-paired.csv` compares every target
-level with `low` by case and seed, then produces a 95% cluster-bootstrap
-interval over cases.
+`frontier.csv` reports a Pareto table of quality dimensions, tokens, latency,
+and run success. It deliberately does not collapse them into one quality
+score. `reasoning-paired.csv` compares every target level with `low` separately
+for every metric and produces a 95% cluster-bootstrap interval over cases.
 
 ## Behavioral evaluation
 
@@ -88,12 +85,38 @@ byte-identical replay, exposing sensitivity beyond the provider's noise floor.
 pnpm eval --experiment behavioral-v1
 ```
 
-`stages.csv` reorganizes deterministic signals by failure layer: thread
-reconstruction, semantic extraction, evidence grounding, salience selection,
-and compression. These are diagnostic projections of the end-to-end output,
-not yet independently prompted pipeline stages. In particular,
-`evidencePrecision` measures attribution against curated content units; it is
-not a general factuality or QA score.
+`stages.csv` keeps the contracts separate:
+
+- extractor: event recall/precision, speaker attribution, evidence validity,
+  and relation integrity;
+- reducer: lifecycle invariant violations;
+- projection: recall, precision, forbidden promotion, and noise retention;
+- end-to-end: latency, calls, and semantic amplification.
+
+Extractor event recall/precision currently align event evidence with curated
+content units. They are an explicit proxy until cases contain a separately
+annotated event log. `extractor-variance.csv` measures pairwise event-set and
+edge-set Jaccard across repeated runs. Reducer correctness is tested without an
+LLM by replaying synthetic event logs into exact state snapshots.
+
+Experiments may set `pipelines` to `direct`, `deterministic-shell`, or both.
+The direct path asks for the final projection in one call. The shell path asks
+only for discourse events, reduces them deterministically, then projects the
+state. Both record `semanticAmplification = semanticInterpretations /
+sourceMessageWindows`; it is 1 for either one-call path and grows when another
+independent semantic pass is introduced.
+
+The stronger-model screening is intentionally split into validateable configs:
+
+```bash
+pnpm eval --experiment qwen397-smoke --validate-only
+pnpm eval --experiment qwen397-screening-v1 --validate-only
+pnpm eval --experiment deepseek-v4-screening-v1 --validate-only
+```
+
+The repository currently has 13 adversarial/real cases, so the full Qwen grid
+contains 130 calls (13 cases × 2 pipelines × 5 seeds) and DeepSeek contains 78.
+Run the one-call Qwen smoke before authorizing either paid grid.
 
 Mutation experiments declare a baseline case, a minimally changed mutant, and
 expected content-unit/category transitions. `mutations.csv` reports how often

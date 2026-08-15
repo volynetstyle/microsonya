@@ -14,13 +14,15 @@ type DeltaMetric = (typeof deltaMetrics)[number];
 type PairDimension =
   | "transformation"
   | "transformation-vs-replay"
-  | "representation";
+  | "representation"
+  | "pipeline";
 
 export type PairedRow = {
   dimension: PairDimension;
   baseline: string;
   target: string;
   model: string;
+  pipeline: string;
   representation: string;
   transformation: string;
   reasoning: string;
@@ -45,6 +47,7 @@ export function pairedComparisons(
   return [
     ...transformationComparisons(runs, experiment),
     ...representationComparisons(runs, experiment),
+    ...pipelineComparisons(runs, experiment),
   ];
 }
 
@@ -54,6 +57,7 @@ export function pairedRowsToCsv(rows: PairedRow[]): string {
     "baseline",
     "target",
     "model",
+    "pipeline",
     "representation",
     "transformation",
     "reasoning",
@@ -88,24 +92,33 @@ function transformationComparisons(
     (item) => item !== baseline,
   )) {
     for (const model of experiment.models) {
-      for (const representation of experiment.representations) {
-        for (const reasoning of experiment.reasoning) {
-          const scoped = runs.filter(
-            (run) =>
-              run.model === model &&
-              run.representation === representation &&
-              run.reasoning === reasoning,
-          );
-          rows.push(
-            ...compare(
-              "transformation",
-              baseline,
-              target,
-              scoped.filter((run) => transformationOf(run) === baseline),
-              scoped.filter((run) => transformationOf(run) === target),
-              { model, representation, transformation: "*", reasoning },
-            ),
-          );
+      for (const pipeline of experiment.pipelines) {
+        for (const representation of experiment.representations) {
+          for (const reasoning of experiment.reasoning) {
+            const scoped = runs.filter(
+              (run) =>
+                run.model === model &&
+                pipelineOf(run) === pipeline &&
+                run.representation === representation &&
+                run.reasoning === reasoning,
+            );
+            rows.push(
+              ...compare(
+                "transformation",
+                baseline,
+                target,
+                scoped.filter((run) => transformationOf(run) === baseline),
+                scoped.filter((run) => transformationOf(run) === target),
+                {
+                  model,
+                  pipeline,
+                  representation,
+                  transformation: "*",
+                  reasoning,
+                },
+              ),
+            );
+          }
         }
       }
     }
@@ -115,26 +128,35 @@ function transformationComparisons(
       (item) => item !== "identity" && item !== "identity-replay",
     )) {
       for (const model of experiment.models) {
-        for (const representation of experiment.representations) {
-          for (const reasoning of experiment.reasoning) {
-            const scoped = runs.filter(
-              (run) =>
-                run.model === model &&
-                run.representation === representation &&
-                run.reasoning === reasoning,
-            );
-            rows.push(
-              ...compare(
-                "transformation-vs-replay",
-                "identity-replay",
-                target,
-                scoped.filter(
-                  (run) => transformationOf(run) === "identity-replay",
+        for (const pipeline of experiment.pipelines) {
+          for (const representation of experiment.representations) {
+            for (const reasoning of experiment.reasoning) {
+              const scoped = runs.filter(
+                (run) =>
+                  run.model === model &&
+                  pipelineOf(run) === pipeline &&
+                  run.representation === representation &&
+                  run.reasoning === reasoning,
+              );
+              rows.push(
+                ...compare(
+                  "transformation-vs-replay",
+                  "identity-replay",
+                  target,
+                  scoped.filter(
+                    (run) => transformationOf(run) === "identity-replay",
+                  ),
+                  scoped.filter((run) => transformationOf(run) === target),
+                  {
+                    model,
+                    pipeline,
+                    representation,
+                    transformation: "*",
+                    reasoning,
+                  },
                 ),
-                scoped.filter((run) => transformationOf(run) === target),
-                { model, representation, transformation: "*", reasoning },
-              ),
-            );
+              );
+            }
           }
         }
       }
@@ -151,24 +173,75 @@ function representationComparisons(
   const rows: PairedRow[] = [];
   for (const target of experiment.representations.slice(1)) {
     for (const model of experiment.models) {
-      for (const transformation of experiment.transformations) {
-        for (const reasoning of experiment.reasoning) {
-          const scoped = runs.filter(
-            (run) =>
-              run.model === model &&
-              transformationOf(run) === transformation &&
-              run.reasoning === reasoning,
-          );
-          rows.push(
-            ...compare(
-              "representation",
-              baseline,
-              target,
-              scoped.filter((run) => run.representation === baseline),
-              scoped.filter((run) => run.representation === target),
-              { model, representation: "*", transformation, reasoning },
-            ),
-          );
+      for (const pipeline of experiment.pipelines) {
+        for (const transformation of experiment.transformations) {
+          for (const reasoning of experiment.reasoning) {
+            const scoped = runs.filter(
+              (run) =>
+                run.model === model &&
+                pipelineOf(run) === pipeline &&
+                transformationOf(run) === transformation &&
+                run.reasoning === reasoning,
+            );
+            rows.push(
+              ...compare(
+                "representation",
+                baseline,
+                target,
+                scoped.filter((run) => run.representation === baseline),
+                scoped.filter((run) => run.representation === target),
+                {
+                  model,
+                  pipeline,
+                  representation: "*",
+                  transformation,
+                  reasoning,
+                },
+              ),
+            );
+          }
+        }
+      }
+    }
+  }
+  return rows;
+}
+
+function pipelineComparisons(
+  runs: StoredRun[],
+  experiment: Experiment,
+): PairedRow[] {
+  const baseline = experiment.pipelines[0]!;
+  const rows: PairedRow[] = [];
+  for (const target of experiment.pipelines.slice(1)) {
+    for (const model of experiment.models) {
+      for (const representation of experiment.representations) {
+        for (const transformation of experiment.transformations) {
+          for (const reasoning of experiment.reasoning) {
+            const scoped = runs.filter(
+              (run) =>
+                run.model === model &&
+                run.representation === representation &&
+                transformationOf(run) === transformation &&
+                run.reasoning === reasoning,
+            );
+            rows.push(
+              ...compare(
+                "pipeline",
+                baseline,
+                target,
+                scoped.filter((run) => pipelineOf(run) === baseline),
+                scoped.filter((run) => pipelineOf(run) === target),
+                {
+                  model,
+                  pipeline: "*",
+                  representation,
+                  transformation,
+                  reasoning,
+                },
+              ),
+            );
+          }
         }
       }
     }
@@ -184,7 +257,7 @@ function compare(
   targetRuns: StoredRun[],
   scope: Pick<
     PairedRow,
-    "model" | "representation" | "transformation" | "reasoning"
+    "model" | "pipeline" | "representation" | "transformation" | "reasoning"
   >,
 ): PairedRow[] {
   const targets = new Map(
@@ -260,7 +333,7 @@ function summarize(
   observations: Array<{ caseName: string; value: number }>,
   scope: Pick<
     PairedRow,
-    "model" | "representation" | "transformation" | "reasoning"
+    "model" | "pipeline" | "representation" | "transformation" | "reasoning"
   >,
 ): PairedRow {
   const grouped = new Map<string, number[]>();
@@ -334,6 +407,10 @@ function mulberry32(seed: number): () => number {
 
 function transformationOf(run: StoredRun): string {
   return run.transformation ?? "identity";
+}
+
+function pipelineOf(run: StoredRun): string {
+  return run.pipeline ?? "deterministic-shell";
 }
 
 function csv(value: unknown): string {

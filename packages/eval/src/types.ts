@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type {
   DiscourseReconstruction,
+  DiscourseState,
   ProjectedSummary,
 } from "@microsonya/discourse";
 export type {
@@ -29,6 +30,9 @@ export type Transformation = z.infer<typeof transformationSchema>;
 
 export const reasoningSchema = z.enum(["low", "medium", "high"]);
 export type Reasoning = z.infer<typeof reasoningSchema>;
+
+export const pipelineSchema = z.enum(["direct", "deterministic-shell"]);
+export type Pipeline = z.infer<typeof pipelineSchema>;
 
 export const messageSchema = z
   .object({
@@ -121,6 +125,7 @@ export const experimentSchema = z
     representations: z.array(representationSchema).min(1),
     reasoning: z.array(reasoningSchema).min(1),
     seeds: z.array(z.number().int()).min(1),
+    pipelines: z.array(pipelineSchema).min(1).default(["deterministic-shell"]),
     transformations: z.array(transformationSchema).min(1).default(["identity"]),
     mutations: z.array(mutationRelationSchema).default([]),
     promptVersion: z.string().min(1).default("v1"),
@@ -129,6 +134,29 @@ export const experimentSchema = z
 
 export type Experiment = z.infer<typeof experimentSchema>;
 export type MutationExpectation = z.infer<typeof mutationExpectationSchema>;
+
+export type ExtractorMetrics = {
+  eventCount: number;
+  eventRecall: number | null;
+  eventPrecision: number | null;
+  attributionAccuracy: number | null;
+  evidenceCorrectness: number | null;
+  relationIntegrity: number | null;
+};
+
+export type ReducerMetrics = {
+  deterministic: true;
+  lifecycleInvariantViolations: number;
+  resolvedQuestions: number;
+  supersededEvents: number;
+};
+
+export type OperationalMetrics = {
+  modelCalls: number;
+  sourceMessageWindows: number;
+  semanticInterpretations: number;
+  semanticAmplification: number;
+};
 
 export type StructuralMetrics = {
   validJson: boolean;
@@ -158,6 +186,7 @@ export type Score = StructuralMetrics & {
 
 export type StoredRun = {
   case: string;
+  pipeline?: Pipeline;
   transformation?: Transformation;
   model: string;
   representation: Representation;
@@ -171,6 +200,10 @@ export type StoredRun = {
   thinking: string;
   parsed: ProjectedSummary | null;
   reconstruction?: DiscourseReconstruction | null;
+  state?: DiscourseState | null;
+  extractorMetrics?: ExtractorMetrics;
+  reducerMetrics?: ReducerMetrics;
+  operationalMetrics?: OperationalMetrics;
   projectionDiagnostics?: {
     decisionCandidates: number;
     decisionsRejectedByInvariant: number;

@@ -1,0 +1,10 @@
+{
+  "cases": ["discourse-state-lifecycle"],
+  "models": ["qwen3.5:397b-cloud"],
+  "pipelines": ["deterministic-shell"],
+  "representations": ["pipe-v3"],
+  "reasoning": ["low"],
+  "seeds": [1],
+  "transformations": ["identity"],
+  "promptVersion": "v4"
+}
