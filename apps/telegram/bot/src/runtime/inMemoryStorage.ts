@@ -1,4 +1,9 @@
-import type { ChatMessage, MemoryState, SummaryRun } from "@microsonya/shared";
+import type {
+  ChatMessage,
+  MemoryState,
+  MemoryUpdate,
+  SummaryRun,
+} from "@microsonya/shared";
 import type { SegmentReconstruction } from "@microsonya/discourse";
 import type { MessageSink } from "../telegram/ingest.js";
 
@@ -29,7 +34,7 @@ export type SummaryRunsStore = {
 
 export type MemoryStateStore = {
   findState(chatId: string): Promise<MemoryState | undefined>;
-  saveState(state: MemoryState, expectedVersion: number): Promise<boolean>;
+  saveState(update: MemoryUpdate, expectedVersion: number): Promise<boolean>;
 };
 
 export class InMemoryMessagesRepo implements MessageSink, SummaryMessagesStore {
@@ -112,9 +117,10 @@ export class InMemoryMemoriesRepo implements MemoryStateStore {
   }
 
   async saveState(
-    state: MemoryState,
+    update: MemoryUpdate,
     expectedVersion: number,
   ): Promise<boolean> {
+    const { state } = update;
     const currentVersion = this.states.get(state.chatId)?.version ?? 0;
     if (
       currentVersion !== expectedVersion ||

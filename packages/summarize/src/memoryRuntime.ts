@@ -1,4 +1,9 @@
-import type { ChatMessage, MemoryOp, MemoryState } from "@microsonya/shared";
+import type {
+  ChatMessage,
+  MemoryOp,
+  MemoryState,
+  MemoryUpdate,
+} from "@microsonya/shared";
 import { hashMessages } from "./hashMessages.js";
 import {
   DEFAULT_MAX_RELEVANT_MEMORY,
@@ -8,6 +13,7 @@ import {
 import { reconcileMemoryOps, validateMemoryOps } from "./memoryOps.js";
 import { buildMemoryOpsPrompt, MEMORY_PROMPT_VERSION } from "./memoryPrompt.js";
 import { advanceMemoryWatermark, applyMemoryOps } from "./memoryState.js";
+import { createMemoryTable } from "./memoryTable.js";
 
 export type MemoryOpsModel = {
   extractMemoryOps(prompt: string): Promise<MemoryOp[]>;
@@ -25,9 +31,9 @@ export async function processChatDelta(
   previousState: MemoryState,
   newMessages: readonly ChatMessage[],
   options: ProcessChatDeltaOptions,
-): Promise<MemoryState> {
+): Promise<MemoryUpdate> {
   const normalized = normalizeMessages(previousState, newMessages);
-  if (normalized.length === 0) return previousState;
+  if (normalized.length === 0) return { state: previousState, operations: [] };
 
   const semanticMessages = normalized.filter(
     (message) =>
@@ -41,8 +47,9 @@ export async function processChatDelta(
     return advanceMemoryWatermark(previousState, toMessageId);
   }
 
+  const table = createMemoryTable(previousState);
   const relevantMemory = retrieveRelevantMemory(
-    previousState,
+    table,
     semanticMessages,
     options.maxRelevantMemory ?? DEFAULT_MAX_RELEVANT_MEMORY,
   );
@@ -51,13 +58,14 @@ export async function processChatDelta(
   );
   const { valid } = validateMemoryOps(
     proposedOps,
-    previousState,
+    table,
     new Set(semanticMessages.map((message) => message.id)),
   );
 
   return applyMemoryOps(
     previousState,
-    reconcileMemoryOps(valid, previousState),
+    table,
+    reconcileMemoryOps(valid, table),
     {
       chatId: previousState.chatId,
       fromMessageId: normalized[0]!.id,

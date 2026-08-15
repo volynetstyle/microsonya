@@ -196,7 +196,6 @@ describe("summarize", () => {
           evidence: [1],
         }),
       ],
-      operations: [expect.objectContaining({ id: "mop_000001" })],
     });
     await close();
   });

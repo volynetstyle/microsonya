@@ -77,5 +77,9 @@ export interface MemoryState {
   nextMemorySequence: number;
   nextOperationSequence: number;
   items: MemoryItem[];
+}
+
+export interface MemoryUpdate {
+  state: MemoryState;
   operations: AppliedMemoryOp[];
 }

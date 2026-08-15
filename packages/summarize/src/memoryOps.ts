@@ -1,5 +1,10 @@
-import type { MemoryItem, MemoryOp, MemoryState } from "@microsonya/shared";
+import type { MemoryItem, MemoryOp } from "@microsonya/shared";
 import { normalizeMemoryText } from "./memoryInput.js";
+import {
+  findActiveMemory,
+  memoryIdentity,
+  type MemoryTable,
+} from "./memoryTable.js";
 
 const MAX_MEMORY_TEXT_LENGTH = 2_000;
 
@@ -11,16 +16,14 @@ export type ValidatedMemoryOps = {
 
 export function validateMemoryOps(
   operations: readonly MemoryOp[],
-  state: MemoryState,
+  table: MemoryTable,
   allowedEvidence: ReadonlySet<number>,
 ): ValidatedMemoryOps {
   const valid: MemoryOp[] = [];
   const rejected: RejectedMemoryOp[] = [];
-  const items = new Map(state.items.map((item) => [item.id, item]));
-
   for (const rawOperation of operations) {
     const operation = normalizeOperation(rawOperation);
-    const reason = validateOperation(operation, items, allowedEvidence);
+    const reason = validateOperation(operation, table.byId, allowedEvidence);
     if (reason) rejected.push({ op: rawOperation, reason });
     else valid.push(operation);
   }
@@ -29,13 +32,8 @@ export function validateMemoryOps(
 
 export function reconcileMemoryOps(
   operations: readonly MemoryOp[],
-  state: MemoryState,
+  table: MemoryTable,
 ): MemoryOp[] {
-  const activeByIdentity = new Map(
-    state.items
-      .filter((item) => item.status === "active")
-      .map((item) => [memoryIdentity(item.kind, item.text), item]),
-  );
   const seenTerminalTargets = new Set<string>();
   const pendingCreates = new Map<string, number>();
   const reconciled: MemoryOp[] = [];
@@ -43,7 +41,7 @@ export function reconcileMemoryOps(
   for (const operation of operations) {
     if (operation.type === "create") {
       const identity = memoryIdentity(operation.kind, operation.text);
-      const existing = activeByIdentity.get(identity);
+      const existing = findActiveMemory(table, operation.kind, operation.text);
       if (existing) {
         reconciled.push({
           type: "support",
@@ -169,10 +167,6 @@ function mergeAdjacentSupports(operations: readonly MemoryOp[]): MemoryOp[] {
     merged.push(structuredClone(operation));
   }
   return merged;
-}
-
-function memoryIdentity(kind: MemoryItem["kind"], text: string): string {
-  return `${kind}:${normalizeMemoryText(text).toLocaleLowerCase("en-US")}`;
 }
 
 function unionEvidence(left: number[], right: number[]): number[] {

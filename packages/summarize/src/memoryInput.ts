@@ -1,5 +1,6 @@
 import type { ChatMessage, MemoryItem, MemoryState } from "@microsonya/shared";
 import type { NormalizedMemoryMessage } from "./memoryPrompt.js";
+import { tokenizeMemoryText, type MemoryTable } from "./memoryTable.js";
 
 export const DEFAULT_MAX_RELEVANT_MEMORY = 50;
 
@@ -7,66 +8,58 @@ export function normalizeMessages(
   state: MemoryState,
   messages: readonly ChatMessage[],
 ): NormalizedMemoryMessage[] {
-  const byId = new Map<number, ChatMessage>();
   const watermark = state.processedThroughMessageId ?? -1;
 
-  for (const message of messages) {
-    if (message.chatId !== state.chatId || message.id <= watermark) continue;
-    byId.set(message.id, message);
-  }
+  const ordered = [
+    ...new Map(
+      messages
+        .filter(
+          (message) =>
+            message.chatId === state.chatId && message.id > watermark,
+        )
+        .map((message) => [message.id, message] as const),
+    ).values(),
+  ].sort((a, b) => a.id - b.id);
 
-  const ordered = [...byId.values()].sort((left, right) => left.id - right.id);
-  const authorAliases = new Map<string, string>();
+  const aliases = new Map<string, string>();
 
-  return ordered.map((message, index) => {
-    let authorAlias = authorAliases.get(message.authorId);
-    if (!authorAlias) {
-      authorAlias = `participant_${authorAliases.size + 1}`;
-      authorAliases.set(message.authorId, authorAlias);
-    }
-
-    return {
-      ...message,
-      date: Number.isFinite(message.date) ? Math.trunc(message.date) : 0,
-      authorName: message.authorName.trim(),
-      text: normalizeMemoryText(message.text),
-      replyToId:
-        message.replyToId !== undefined && message.replyToId > 0
-          ? Math.trunc(message.replyToId)
-          : undefined,
-      order: index + 1,
-      authorAlias,
-    };
-  });
+  return ordered.map((message, index) => ({
+    ...message,
+    date: finiteInteger(message.date),
+    authorName: message.authorName.trim(),
+    text: normalizeMemoryText(message.text),
+    replyToId: positiveInteger(message.replyToId),
+    order: index + 1,
+    authorAlias: getAuthorAlias(aliases, message.authorId),
+  }));
 }
 
 export function retrieveRelevantMemory(
-  state: MemoryState,
+  table: MemoryTable,
   messages: readonly NormalizedMemoryMessage[],
   maxItems = DEFAULT_MAX_RELEVANT_MEMORY,
 ): MemoryItem[] {
   if (maxItems <= 0) return [];
 
-  const queryTokens = new Set(
-    messages.flatMap((message) => tokenize(message.text)),
-  );
+  const scores = new Map<string, number>();
+  for (const token of new Set(
+    messages.flatMap(({ text }) => tokenizeMemoryText(text)),
+  )) {
+    for (const id of table.tokenIndex.get(token) ?? []) {
+      scores.set(id, (scores.get(id) ?? 0) + 10);
+    }
+  }
 
-  return state.items
-    .filter((item) => item.status === "active")
-    .map((item) => ({
-      item,
-      score:
-        tokenize(item.text).filter((token) => queryTokens.has(token)).length *
-          10 +
-        (item.kind === "open_question" ? 4 : 0) +
-        Math.min(item.lastUpdatedMessageId / 1_000_000, 1),
-    }))
-    .sort(
-      (left, right) =>
-        right.score - left.score ||
-        right.item.lastUpdatedMessageId - left.item.lastUpdatedMessageId ||
-        left.item.id.localeCompare(right.item.id),
-    )
+  for (const id of table.activeByKind.get("open_question") ?? []) {
+    scores.set(id, scores.get(id) ?? 0);
+  }
+
+  return [...scores]
+    .flatMap(([id, score]) => {
+      const item = table.byId.get(id);
+      return item ? [{ item, score: score + memoryScore(item) }] : [];
+    })
+    .sort(compareMemoryCandidates)
     .slice(0, maxItems)
     .map(({ item }) => item);
 }
@@ -75,10 +68,45 @@ export function normalizeMemoryText(text: string): string {
   return text.normalize("NFKC").replace(/\s+/gu, " ").trim();
 }
 
-function tokenize(text: string): string[] {
+function memoryScore(item: MemoryItem): number {
   return (
-    normalizeMemoryText(text)
-      .toLocaleLowerCase("en-US")
-      .match(/[\p{L}\p{N}_-]{3,}/gu) ?? []
+    Number(item.kind === "open_question") * 4 +
+    Math.min(item.lastUpdatedMessageId / 1_000_000, 1)
   );
+}
+
+function compareMemoryCandidates(
+  a: { item: MemoryItem; score: number },
+  b: { item: MemoryItem; score: number },
+): number {
+  return (
+    b.score - a.score ||
+    b.item.lastUpdatedMessageId - a.item.lastUpdatedMessageId ||
+    a.item.id.localeCompare(b.item.id)
+  );
+}
+
+function getAuthorAlias(
+  aliases: Map<string, string>,
+  authorId: string,
+): string {
+  let alias = aliases.get(authorId);
+
+  if (!alias) {
+    alias = `participant_${aliases.size + 1}`;
+    aliases.set(authorId, alias);
+  }
+
+  return alias;
+}
+
+function finiteInteger(value: number): number {
+  return Number.isFinite(value) ? Math.trunc(value) : 0;
+}
+
+function positiveInteger(value: number | undefined): number | undefined {
+  if (value === undefined || !Number.isFinite(value)) return undefined;
+
+  const integer = Math.trunc(value);
+  return integer > 0 ? integer : undefined;
 }

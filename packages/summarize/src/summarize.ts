@@ -3,6 +3,7 @@ import type { MessagesRepo, SummariesRepo } from "@microsonya/db";
 import type { ModelGateway } from "@microsonya/model-gateway";
 import type {
   MemoryState,
+  MemoryUpdate,
   SummaryCommand,
   SummaryRun,
 } from "@microsonya/shared";
@@ -36,7 +37,7 @@ export type MemoryModels = {
 
 export type MemoryStateRepo = {
   findState(chatId: string): Promise<MemoryState | undefined>;
-  saveState(state: MemoryState, expectedVersion: number): Promise<boolean>;
+  saveState(update: MemoryUpdate, expectedVersion: number): Promise<boolean>;
 };
 
 export type SummarizeRuntimeDeps = {
@@ -341,7 +342,7 @@ async function processAndSaveMemoryDeltas(
       watermarkBefore: previousState.processedThroughMessageId,
     };
 
-    const nextState = await trace.span("memory.process", meta, () =>
+    const update = await trace.span("memory.process", meta, () =>
       processChatDelta(previousState, delta, {
         model: {
           extractMemoryOps: (prompt) =>
@@ -360,10 +361,10 @@ async function processAndSaveMemoryDeltas(
       }),
     );
 
-    if (nextState === previousState) return;
+    if (update.state === previousState) return;
 
     const saved = await trace.span("memory.persist", { memoryBatch }, () =>
-      deps.memory.saveState(nextState, previousState.version),
+      deps.memory.saveState(update, previousState.version),
     );
 
     if (saved) {

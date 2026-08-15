@@ -1,10 +1,9 @@
-import { and, asc, eq, lte } from "drizzle-orm";
-import type { AppliedMemoryOp, MemoryState } from "@microsonya/shared";
+import { and, eq } from "drizzle-orm";
+import type { MemoryState, MemoryUpdate } from "@microsonya/shared";
 import type { MicrosonyaDb } from "../client.js";
 import { memoryOperations, memoryStates } from "../schema.js";
 
 type MemoryStateRow = typeof memoryStates.$inferSelect;
-type MemoryOperationRow = typeof memoryOperations.$inferSelect;
 
 export class MemoriesRepo {
   constructor(private readonly db: MicrosonyaDb) {}
@@ -20,25 +19,15 @@ export class MemoriesRepo {
 
     if (!stateRow) return undefined;
 
-    const operationRows = await this.db
-      .select()
-      .from(memoryOperations)
-      .where(
-        and(
-          eq(memoryOperations.chatId, chatId),
-          lte(memoryOperations.stateVersion, stateRow.version),
-        ),
-      )
-      .orderBy(asc(memoryOperations.stateVersion), asc(memoryOperations.id));
-
-    return mapMemoryState(stateRow, operationRows);
+    return mapMemoryState(stateRow);
   }
 
   async saveState(
-    state: MemoryState,
+    update: MemoryUpdate,
     expectedVersion: number,
   ): Promise<boolean> {
-    assertTransitionShape(state, expectedVersion);
+    const { state, operations } = update;
+    assertTransitionShape(update, expectedVersion);
 
     return this.db.transaction(async (tx) => {
       const values = {
@@ -75,13 +64,9 @@ export class MemoriesRepo {
 
       if (saved.length === 0) return false;
 
-      const newOperations = state.operations.filter(
-        (operation) => operation.stateVersion === state.version,
-      );
-
-      if (newOperations.length > 0) {
+      if (operations.length > 0) {
         await tx.insert(memoryOperations).values(
-          newOperations.map((operation) => ({
+          operations.map((operation) => ({
             chatId: operation.chatId,
             id: operation.id,
             itemId: operation.itemId,
@@ -103,10 +88,7 @@ export class MemoriesRepo {
   }
 }
 
-function mapMemoryState(
-  state: MemoryStateRow,
-  operations: MemoryOperationRow[],
-): MemoryState {
+function mapMemoryState(state: MemoryStateRow): MemoryState {
   return {
     chatId: state.chatId,
     version: state.version,
@@ -114,46 +96,29 @@ function mapMemoryState(
     nextMemorySequence: state.nextMemorySequence,
     nextOperationSequence: state.nextOperationSequence,
     items: state.items,
-    operations: operations.map(mapMemoryOperation),
-  };
-}
-
-function mapMemoryOperation(row: MemoryOperationRow): AppliedMemoryOp {
-  return {
-    id: row.id,
-    itemId: row.itemId,
-    createdItemId: row.createdItemId ?? undefined,
-    op: row.op,
-    chatId: row.chatId,
-    fromMessageId: row.fromMessageId,
-    toMessageId: row.toMessageId,
-    inputHash: row.inputHash,
-    model: row.model,
-    promptVersion: row.promptVersion,
-    stateVersion: row.stateVersion,
-    createdAt: row.createdAt,
   };
 }
 
 function assertTransitionShape(
-  state: MemoryState,
+  update: MemoryUpdate,
   expectedVersion: number,
 ): void {
+  const { state, operations } = update;
   if (state.version !== expectedVersion + 1) {
     throw new Error(
       `Memory state version ${state.version} must follow expected version ${expectedVersion}`,
     );
   }
 
-  for (const operation of state.operations) {
+  for (const operation of operations) {
     if (operation.chatId !== state.chatId) {
       throw new Error(
         `Memory operation ${operation.id} belongs to another chat`,
       );
     }
-    if (operation.stateVersion > state.version) {
+    if (operation.stateVersion !== state.version) {
       throw new Error(
-        `Memory operation ${operation.id} is newer than materialized state`,
+        `Memory operation ${operation.id} has an invalid state version`,
       );
     }
   }

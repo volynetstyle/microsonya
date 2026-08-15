@@ -8,6 +8,7 @@ import type {
   AppliedMemoryOp,
   ChatMessage,
   MemoryState,
+  MemoryUpdate,
   SummaryRun,
 } from "../packages/shared/src/index.js";
 import type { SegmentReconstruction } from "../packages/discourse/src/types.js";
@@ -75,7 +76,10 @@ describe("MemoriesRepo", () => {
     const first = memoryState();
 
     await expect(repo.saveState(first, 0)).resolves.toBe(true);
-    await expect(repo.findState("chat-a")).resolves.toEqual(first);
+    await expect(repo.findState("chat-a")).resolves.toEqual(first.state);
+    await expect(repo.findState("chat-a")).resolves.not.toHaveProperty(
+      "operations",
+    );
 
     const support: AppliedMemoryOp = {
       id: "mop_000002",
@@ -90,23 +94,25 @@ describe("MemoriesRepo", () => {
       stateVersion: 2,
       createdAt: 200,
     };
-    const second: MemoryState = {
-      ...first,
-      version: 2,
-      processedThroughMessageId: 2,
-      nextOperationSequence: 3,
-      items: first.items.map((item) => ({
-        ...item,
-        evidence: [1, 2],
-        lastUpdatedMessageId: 2,
-      })),
-      operations: [...first.operations, support],
+    const second: MemoryUpdate = {
+      state: {
+        ...first.state,
+        version: 2,
+        processedThroughMessageId: 2,
+        nextOperationSequence: 3,
+        items: first.state.items.map((item) => ({
+          ...item,
+          evidence: [1, 2],
+          lastUpdatedMessageId: 2,
+        })),
+      },
+      operations: [support],
     };
 
     await expect(repo.saveState(second, 1)).resolves.toBe(true);
-    await expect(repo.findState("chat-a")).resolves.toEqual(second);
+    await expect(repo.findState("chat-a")).resolves.toEqual(second.state);
     await expect(repo.saveState(second, 1)).resolves.toBe(false);
-    await expect(repo.findState("chat-a")).resolves.toEqual(second);
+    await expect(repo.findState("chat-a")).resolves.toEqual(second.state);
   });
 
   it("keeps chats isolated", async () => {
@@ -269,7 +275,7 @@ function segment(
   };
 }
 
-function memoryState(): MemoryState {
+function memoryState(): MemoryUpdate {
   const operation: AppliedMemoryOp = {
     id: "mop_000001",
     itemId: "mem_000001",
@@ -291,22 +297,24 @@ function memoryState(): MemoryState {
   };
 
   return {
-    chatId: "chat-a",
-    version: 1,
-    processedThroughMessageId: 1,
-    nextMemorySequence: 2,
-    nextOperationSequence: 2,
-    items: [
-      {
-        id: "mem_000001",
-        kind: "decision",
-        text: "Use PostgreSQL",
-        status: "active",
-        evidence: [1],
-        createdAtMessageId: 1,
-        lastUpdatedMessageId: 1,
-      },
-    ],
+    state: {
+      chatId: "chat-a",
+      version: 1,
+      processedThroughMessageId: 1,
+      nextMemorySequence: 2,
+      nextOperationSequence: 2,
+      items: [
+        {
+          id: "mem_000001",
+          kind: "decision",
+          text: "Use PostgreSQL",
+          status: "active",
+          evidence: [1],
+          createdAtMessageId: 1,
+          lastUpdatedMessageId: 1,
+        },
+      ],
+    },
     operations: [operation],
   };
 }

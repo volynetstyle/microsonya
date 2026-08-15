@@ -3,7 +3,15 @@ import type {
   MemoryItem,
   MemoryOp,
   MemoryState,
+  MemoryUpdate,
 } from "@microsonya/shared";
+import {
+  addActiveIndexes,
+  createMemoryTable,
+  removeActiveIndexes,
+  snapshotMemoryTable,
+  type MemoryTable,
+} from "./memoryTable.js";
 
 export type ApplyMemoryMetadata = {
   chatId: string;
@@ -23,58 +31,68 @@ export function createMemoryState(chatId: string): MemoryState {
     nextMemorySequence: 1,
     nextOperationSequence: 1,
     items: [],
-    operations: [],
   };
 }
 
 export function advanceMemoryWatermark(
   previousState: MemoryState,
   toMessageId: number,
-): MemoryState {
+): MemoryUpdate {
   return {
-    ...previousState,
-    version: previousState.version + 1,
-    processedThroughMessageId: toMessageId,
+    state: {
+      ...previousState,
+      version: previousState.version + 1,
+      processedThroughMessageId: toMessageId,
+      items: previousState.items.map(cloneItem),
+    },
+    operations: [],
   };
 }
 
 export function applyMemoryOps(
   previousState: MemoryState,
+  table: MemoryTable,
   operations: readonly MemoryOp[],
   metadata: ApplyMemoryMetadata,
-): MemoryState {
-  const state = cloneState(previousState);
-  const nextVersion = state.version + 1;
-  state.version = nextVersion;
-  state.processedThroughMessageId = metadata.toMessageId;
+): MemoryUpdate {
+  const state: MemoryState = {
+    ...previousState,
+    version: previousState.version + 1,
+    processedThroughMessageId: metadata.toMessageId,
+  };
+  const appliedOperations: AppliedMemoryOp[] = [];
 
   for (const operation of operations) {
-    const applied = applyOperation(state, operation);
-    const record: AppliedMemoryOp = {
+    const applied = applyOperation(table, state, operation);
+    appliedOperations.push({
       id: formatId("mop", state.nextOperationSequence++),
       itemId: applied.itemId,
       createdItemId: applied.createdItemId,
-      op: operation,
+      op: structuredClone(operation),
       chatId: metadata.chatId,
       fromMessageId: metadata.fromMessageId,
       toMessageId: metadata.toMessageId,
       inputHash: metadata.inputHash,
       model: metadata.model,
       promptVersion: metadata.promptVersion,
-      stateVersion: nextVersion,
+      stateVersion: state.version,
       createdAt: metadata.createdAt,
-    };
-    state.operations.push(record);
+    });
   }
 
-  return state;
+  return {
+    state: { ...state, items: snapshotMemoryTable(table) },
+    operations: appliedOperations,
+  };
 }
 
 export function materializeMemoryState(
   chatId: string,
   operationLog: readonly AppliedMemoryOp[],
 ): MemoryState {
-  const state = createMemoryState(chatId);
+  let state = createMemoryState(chatId);
+  const table = createMemoryTable(state);
+
   for (const record of operationLog) {
     if (record.chatId !== chatId) {
       throw new Error(
@@ -82,7 +100,15 @@ export function materializeMemoryState(
       );
     }
 
-    const applied = applyOperation(state, structuredClone(record.op));
+    state = {
+      ...state,
+      version: Math.max(state.version, record.stateVersion),
+      processedThroughMessageId: Math.max(
+        state.processedThroughMessageId ?? -1,
+        record.toMessageId,
+      ),
+    };
+    const applied = applyOperation(table, state, structuredClone(record.op));
     if (
       applied.itemId !== record.itemId ||
       applied.createdItemId !== record.createdItemId
@@ -91,28 +117,24 @@ export function materializeMemoryState(
         `Memory operation ${record.id} has inconsistent runtime IDs`,
       );
     }
-
-    state.operations.push({ ...record, op: structuredClone(record.op) });
-    state.version = Math.max(state.version, record.stateVersion);
-    state.processedThroughMessageId = Math.max(
-      state.processedThroughMessageId ?? -1,
-      record.toMessageId,
-    );
     state.nextOperationSequence = Math.max(
       state.nextOperationSequence,
       parseSequence(record.id, "mop") + 1,
     );
   }
-  return state;
+
+  return { ...state, items: snapshotMemoryTable(table) };
 }
 
 function applyOperation(
+  table: MemoryTable,
   state: MemoryState,
   operation: MemoryOp,
 ): { itemId: string; createdItemId?: string } {
   const lastMessageId = Math.max(...operation.evidence);
   if (operation.type === "create") {
     const item = createItem(
+      table,
       state,
       operation.kind,
       operation.text,
@@ -121,12 +143,11 @@ function applyOperation(
     return { itemId: item.id, createdItemId: item.id };
   }
 
-  const target = state.items.find((item) => item.id === operation.targetId);
-  if (!target) {
+  const target = table.byId.get(operation.targetId);
+  if (!target)
     throw new Error(
       `Validated memory target disappeared: ${operation.targetId}`,
     );
-  }
 
   target.evidence = unionEvidence(target.evidence, operation.evidence);
   target.lastUpdatedMessageId = lastMessageId;
@@ -134,18 +155,24 @@ function applyOperation(
     case "support":
       break;
     case "update":
+      removeActiveIndexes(table, target);
       target.text = operation.text;
+      addActiveIndexes(table, target);
       break;
     case "resolve":
+      removeActiveIndexes(table, target);
       target.status = "resolved";
       target.resolution = operation.text;
       break;
     case "retract":
+      removeActiveIndexes(table, target);
       target.status = "retracted";
       break;
     case "supersede": {
+      removeActiveIndexes(table, target);
       target.status = "superseded";
       const replacement = createItem(
+        table,
         state,
         target.kind,
         operation.replacement,
@@ -159,6 +186,7 @@ function applyOperation(
 }
 
 function createItem(
+  table: MemoryTable,
   state: MemoryState,
   kind: MemoryItem["kind"],
   text: string,
@@ -173,22 +201,13 @@ function createItem(
     createdAtMessageId: Math.min(...evidence),
     lastUpdatedMessageId: Math.max(...evidence),
   };
-  state.items.push(item);
+  table.byId.set(item.id, item);
+  addActiveIndexes(table, item);
   return item;
 }
 
-function cloneState(state: MemoryState): MemoryState {
-  return {
-    ...state,
-    items: state.items.map((item) => ({
-      ...item,
-      evidence: [...item.evidence],
-    })),
-    operations: state.operations.map((operation) => ({
-      ...operation,
-      op: structuredClone(operation.op),
-    })),
-  };
+function cloneItem(item: MemoryItem): MemoryItem {
+  return { ...item, evidence: [...item.evidence] };
 }
 
 function formatId(prefix: string, sequence: number): string {

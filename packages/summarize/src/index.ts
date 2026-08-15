@@ -4,6 +4,7 @@ export * from "./memoryOps.js";
 export * from "./memoryPrompt.js";
 export * from "./memoryRuntime.js";
 export * from "./memoryState.js";
+export * from "./memoryTable.js";
 export * from "./memoryView.js";
 export * from "./prompts.js";
 export * from "./renderSummary.js";

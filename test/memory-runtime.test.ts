@@ -6,8 +6,11 @@ import {
 } from "../packages/model-gateway/src/index.js";
 import {
   createMemoryState,
+  createMemoryTable,
+  findActiveMemory,
   materializeMemoryState,
   processChatDelta,
+  retrieveRelevantMemory,
   renderMemorySummary,
   type MemoryOpsModel,
 } from "../packages/summarize/src/index.js";
@@ -38,7 +41,7 @@ describe("processChatDelta", () => {
       },
     );
 
-    expect(first.items).toEqual([
+    expect(first.state.items).toEqual([
       expect.objectContaining({
         id: "mem_000001",
         kind: "open_question",
@@ -60,7 +63,7 @@ describe("processChatDelta", () => {
     expect(first.operations[0]?.inputHash).toMatch(/^[a-f0-9]{64}$/);
 
     const second = await processChatDelta(
-      first,
+      first.state,
       [message(502, "No Redis. PostgreSQL remains sufficient.")],
       {
         model: model(
@@ -78,15 +81,15 @@ describe("processChatDelta", () => {
       },
     );
 
-    expect(second.items[0]).toMatchObject({
+    expect(second.state.items[0]).toMatchObject({
       id: "mem_000001",
       status: "resolved",
       resolution: "Redis will not be introduced; PostgreSQL remains sufficient",
       evidence: [501, 502],
       lastUpdatedMessageId: 502,
     });
-    expect(second.version).toBe(2);
-    expect(second.processedThroughMessageId).toBe(502);
+    expect(second.state.version).toBe(2);
+    expect(second.state.processedThroughMessageId).toBe(502);
     expect(prompts[1]).toContain(
       "[mem_000001] kind=open_question status=active",
     );
@@ -114,8 +117,8 @@ describe("processChatDelta", () => {
       { model: runtimeModel },
     );
 
-    expect(first.version).toBe(1);
-    expect(first.processedThroughMessageId).toBe(3);
+    expect(first.state.version).toBe(1);
+    expect(first.state.processedThroughMessageId).toBe(3);
     expect(extractMemoryOps).toHaveBeenCalledTimes(1);
     const prompt = extractMemoryOps.mock.calls[0]?.[0] ?? "";
     expect(prompt.indexOf("[2] order=1")).toBeLessThan(
@@ -124,10 +127,15 @@ describe("processChatDelta", () => {
     expect(prompt).toContain("third, canonical duplicate");
     expect(prompt).toContain("[3] order=2 author=participant_1 replyTo=2");
 
-    const second = await processChatDelta(first, [message(2), message(3)], {
-      model: runtimeModel,
-    });
-    expect(second).toBe(first);
+    const second = await processChatDelta(
+      first.state,
+      [message(2), message(3)],
+      {
+        model: runtimeModel,
+      },
+    );
+    expect(second.state).toBe(first.state);
+    expect(second.operations).toEqual([]);
     expect(extractMemoryOps).toHaveBeenCalledTimes(1);
   });
 
@@ -148,7 +156,7 @@ describe("processChatDelta", () => {
     );
 
     const second = await processChatDelta(
-      first,
+      first.state,
       [message(2, "PostgreSQL remains the choice")],
       {
         model: model([
@@ -164,14 +172,14 @@ describe("processChatDelta", () => {
       },
     );
 
-    expect(second.items).toHaveLength(1);
-    expect(second.items[0]).toMatchObject({
+    expect(second.state.items).toHaveLength(1);
+    expect(second.state.items[0]).toMatchObject({
       id: "mem_000001",
       status: "active",
       evidence: [1, 2],
     });
-    expect(second.operations).toHaveLength(2);
-    expect(second.operations[1]?.op).toEqual({
+    expect(second.operations).toHaveLength(1);
+    expect(second.operations[0]?.op).toEqual({
       type: "support",
       targetId: "mem_000001",
       evidence: [2],
@@ -195,7 +203,7 @@ describe("processChatDelta", () => {
     );
 
     const next = await processChatDelta(
-      initial,
+      initial.state,
       [message(11, "Actually, keep PostgreSQL")],
       {
         model: model([
@@ -209,7 +217,7 @@ describe("processChatDelta", () => {
       },
     );
 
-    expect(next.items).toEqual([
+    expect(next.state.items).toEqual([
       expect.objectContaining({
         id: "mem_000001",
         text: "Use Redis",
@@ -223,17 +231,19 @@ describe("processChatDelta", () => {
         evidence: [11],
       }),
     ]);
-    expect(next.operations[1]).toMatchObject({
+    expect(next.operations[0]).toMatchObject({
       itemId: "mem_000001",
       createdItemId: "mem_000002",
     });
 
-    const rebuilt = materializeMemoryState("chat", next.operations);
-    expect(rebuilt.items).toEqual(next.items);
-    expect(rebuilt.operations).toEqual(next.operations);
-    expect(rebuilt.nextMemorySequence).toBe(next.nextMemorySequence);
-    expect(rebuilt.nextOperationSequence).toBe(next.nextOperationSequence);
-    expect(renderMemorySummary(next)).toBe(
+    const log = [...initial.operations, ...next.operations];
+    const rebuilt = materializeMemoryState("chat", log);
+    expect(rebuilt.items).toEqual(next.state.items);
+    expect(rebuilt.nextMemorySequence).toBe(next.state.nextMemorySequence);
+    expect(rebuilt.nextOperationSequence).toBe(
+      next.state.nextOperationSequence,
+    );
+    expect(renderMemorySummary(next.state)).toBe(
       ["Decisions", "- Use PostgreSQL"].join("\n"),
     );
   });
@@ -245,9 +255,56 @@ describe("processChatDelta", () => {
       model: { extractMemoryOps },
     });
 
-    expect(state.version).toBe(1);
-    expect(state.processedThroughMessageId).toBe(7);
+    expect(state.state.version).toBe(1);
+    expect(state.state.processedThroughMessageId).toBe(7);
     expect(extractMemoryOps).not.toHaveBeenCalled();
+  });
+});
+
+describe("MemoryTable", () => {
+  it("indexes active identity, open questions, and token postings", () => {
+    const state = {
+      ...createMemoryState("chat"),
+      items: [
+        {
+          id: "mem_000001",
+          kind: "decision" as const,
+          text: "Use PostgreSQL for persistence",
+          status: "active" as const,
+          evidence: [1],
+          createdAtMessageId: 1,
+          lastUpdatedMessageId: 1,
+        },
+        {
+          id: "mem_000002",
+          kind: "open_question" as const,
+          text: "Who owns Redis caching?",
+          status: "active" as const,
+          evidence: [2],
+          createdAtMessageId: 2,
+          lastUpdatedMessageId: 2,
+        },
+      ],
+    };
+    const table = createMemoryTable(state);
+
+    expect(
+      findActiveMemory(table, "decision", " use postgresql for persistence "),
+    ).toMatchObject({
+      id: "mem_000001",
+    });
+    expect(
+      retrieveRelevantMemory(table, [
+        {
+          ...message(3, "PostgreSQL replication"),
+          order: 1,
+          authorAlias: "participant_1",
+        },
+      ]),
+    ).toEqual([
+      expect.objectContaining({ id: "mem_000001" }),
+      expect.objectContaining({ id: "mem_000002" }),
+    ]);
   });
 });
 
