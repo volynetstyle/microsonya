@@ -1,104 +1,27 @@
-import type { DiscussionSegment, SegmentSummary } from "@microsonya/shared";
-
-export type RawSegmentSummary = {
-  title: string;
-  summary: string[];
-  decisions: string[];
-  openQuestions: string[];
-  jokes: string[];
-  mentionedPeople: string[];
-  importance: 0 | 1 | 2 | 3;
-};
-
-const JSON_ANSWER_TEMPLATE = JSON.stringify(
-  {
-    title: "короткий заголовок до 10 слів",
-    summary: ["короткий факт 1", "короткий факт 2"],
-    decisions: ["рішення, якщо було"],
-    openQuestions: ["відкрите питання, якщо було"],
-    jokes: ["важливий жарт або мем, якщо був"],
-    mentionedPeople: ["ім'я або authorId"],
-    importance: 0,
-  },
-  null,
-  2,
-);
+import {
+  buildDiscoursePrompt,
+  PIPE_V3_LANGUAGE_GUIDE,
+  serializePipeV3,
+  type DiscourseMessage,
+} from "@microsonya/discourse";
+import type { DiscussionSegment } from "@microsonya/shared";
 
 export function buildSegmentPrompt(segment: DiscussionSegment): string {
+  const messages: DiscourseMessage[] = segment.messages.map((message) => ({
+    id: message.id,
+    user: message.authorName.trim() || message.authorId,
+    time: new Date(message.date).toISOString(),
+    replyTo: message.replyToId,
+    text: message.text || undefined,
+    media: message.kind,
+  }));
+
   return [
-    "Ти аналізуєш фрагмент групового чату і створюєш структурований підсумок.",
-    "",
-    "Правила:",
-    "- Використовуй тільки інформацію з повідомлень.",
-    "- Не вигадуй факти, наміри, емоції або рішення.",
-    "- Якщо рішень немає, поверни порожній масив decisions.",
-    "- Якщо відкритих питань немає, поверни порожній масив openQuestions.",
-    "- Якщо жарти або меми не важливі для контексту, поверни порожній масив jokes.",
-    "- mentionedPeople має містити тільки людей, яких прямо згадували або які брали участь у важливій частині обговорення.",
-    "- summary має бути списком коротких фактів, а не одним абзацом.",
-    "- importance: 0 = шум, 1 = незначне, 2 = корисне, 3 = важливе.",
-    "",
-    "Поверни тільки валідний JSON без markdown, без пояснень, без ```.",
-    "",
-    "Схема JSON:",
-    JSON_ANSWER_TEMPLATE,
-    "",
-    "Повідомлення:",
-    formatSegmentMessages(segment),
-  ].join("\n");
-}
-
-export function buildMergePrompt(summaries: SegmentSummary[]): string {
-  return [
-    "Ти створюєш короткий Telegram-підсумок групового чату на основі JSON-підсумків сегментів.",
-    "",
-    "Правила:",
-    "- Об'єднай дублікати.",
-    "- Залиш тільки важливе.",
-    "- Не приписуй людям думки, яких немає у сегментах.",
-    "- Якщо рішень немає, напиши: Рішень не зафіксовано.",
-    "- Якщо відкритих питань немає, напиши: Відкритих питань не зафіксовано.",
-    "- Не використовуй markdown-таблиці.",
-    "- Стиль: коротко, природно, як Telegram-повідомлення.",
-    "",
-    "Формат:",
-    "Заголовок",
-    "",
-    "• Ключовий пункт",
-    "• Ключовий пункт",
-    "",
-    "Рішення:",
-    "• ...",
-    "",
-    "Відкриті питання:",
-    "• ...",
-    "",
-    "Висновок:",
-    "короткий висновок",
-    "",
-    "JSON-підсумки сегментів:",
-    JSON.stringify(summaries, null, 2),
-  ].join("\n");
-}
-
-function formatSegmentMessages(segment: DiscussionSegment): string {
-  return segment.messages
-    .map((message) => {
-      const date = formatMessageDate(message.date);
-      const author = message.authorName?.trim() || message.authorId;
-      const text = message.text?.trim() || "[non-text message]";
-
-      return `[${date}] ${author}: ${text}`;
-    })
-    .join("\n");
-}
-
-function formatMessageDate(value: string | number | Date): string {
-  const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
-    return String(value);
-  }
-
-  return date.toISOString();
+    buildDiscoursePrompt(
+      serializePipeV3(messages),
+      "pipe-v3",
+      PIPE_V3_LANGUAGE_GUIDE,
+    ),
+    "Output language requirement: write title, topicTitle, statement, and action values in Ukrainian. Preserve speaker identifiers. Keep JSON property names, event ids, and topicId values English-compatible.",
+  ].join("\n\n");
 }

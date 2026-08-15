@@ -1,5 +1,6 @@
 import { and, desc, eq } from "drizzle-orm";
-import type { SegmentSummary, SummaryRun } from "@microsonya/shared";
+import type { SegmentReconstruction } from "@microsonya/discourse";
+import type { SummaryRun } from "@microsonya/shared";
 import type { MicrosonyaDb } from "../client.js";
 import { segmentSummaries, summaryRuns } from "../schema.js";
 
@@ -65,13 +66,13 @@ export class SummariesRepo {
       .execute();
   }
 
-  async findCachedSegment(
+  async findCachedReconstruction(
     chatId: string,
     fromMessageId: number,
     toMessageId: number,
     hash: string,
     schemaVersion = 1,
-  ): Promise<SegmentSummary | undefined> {
+  ): Promise<SegmentReconstruction | undefined> {
     const row = (
       await this.db
         .select()
@@ -88,23 +89,26 @@ export class SummariesRepo {
         .limit(1)
     ).at(0);
 
-    return row ? (JSON.parse(row.json) as SegmentSummary) : undefined;
+    return row ? (JSON.parse(row.json) as SegmentReconstruction) : undefined;
   }
 
-  async saveSegment(summary: SegmentSummary, schemaVersion = 1): Promise<void> {
+  async saveReconstruction(
+    segment: SegmentReconstruction,
+    schemaVersion = 1,
+  ): Promise<void> {
     const now = Date.now();
 
     await this.db
       .insert(segmentSummaries)
       .values({
-        id: summary.segmentId,
-        chatId: summary.chatId,
-        fromMessageId: summary.fromMessageId,
-        toMessageId: summary.toMessageId,
-        hash: summary.hash,
+        id: segment.segmentId,
+        chatId: segment.chatId,
+        fromMessageId: segment.fromMessageId,
+        toMessageId: segment.toMessageId,
+        hash: segment.hash,
         schemaVersion,
-        title: summary.title,
-        json: JSON.stringify(summary),
+        title: segment.reconstruction.title,
+        json: JSON.stringify(segment),
         createdAt: now,
         updatedAt: now,
       })
@@ -117,8 +121,8 @@ export class SummariesRepo {
           segmentSummaries.schemaVersion,
         ],
         set: {
-          title: summary.title,
-          json: JSON.stringify(summary),
+          title: segment.reconstruction.title,
+          json: JSON.stringify(segment),
           updatedAt: now,
         },
       })

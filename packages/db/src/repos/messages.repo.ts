@@ -1,4 +1,4 @@
-import { and, asc, eq, gte, lte } from "drizzle-orm";
+import { and, asc, eq, gt, gte, lte } from "drizzle-orm";
 import type { ChatMessage } from "@microsonya/shared";
 import type { MicrosonyaDb } from "../client.js";
 import { messages } from "../schema.js";
@@ -78,6 +78,26 @@ export class MessagesRepo {
           ),
         )
         .orderBy(asc(messages.messageId))
+    ).map(mapMessageRow);
+  }
+
+  async listAfterByChat(
+    chatId: string,
+    afterMessageId: number,
+    limit: number,
+  ): Promise<ChatMessage[]> {
+    return (
+      await this.db
+        .select()
+        .from(messages)
+        .where(
+          and(
+            eq(messages.chatId, chatId),
+            gt(messages.messageId, afterMessageId),
+          ),
+        )
+        .orderBy(asc(messages.messageId))
+        .limit(limit)
     ).map(mapMessageRow);
   }
 
