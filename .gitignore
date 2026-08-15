@@ -6,5 +6,8 @@ dist/
 *.sqlite-shm
 *.sqlite-wal
 bot.log
+bot.err
 bot.err.log
+.ollama-serve.*.log
 research/
+packages/eval/results/

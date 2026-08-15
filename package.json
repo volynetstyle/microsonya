@@ -16,6 +16,9 @@
     "format:check": "prettier --check .",
     "format:json": "prettier --write \"**/*.{json,jsonc}\"",
     "format:json:check": "prettier --check \"**/*.{json,jsonc}\"",
+    "eval": "pnpm --filter @microsonya/eval eval",
+    "eval:reconstruct": "pnpm --filter @microsonya/eval reconstruct",
+    "eval:factuality": "pnpm --filter @microsonya/eval factuality",
     "start": "pnpm bot:start",
     "bot:start": "pnpm --filter @microsonya/telegram-bot start",
     "test": "vitest run"
