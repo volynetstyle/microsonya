@@ -1,10 +1,16 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { MessagesRepo, SummariesRepo } from "../packages/db/src/index.js";
+import {
+  MemoriesRepo,
+  MessagesRepo,
+  SummariesRepo,
+} from "../packages/db/src/index.js";
 import type {
+  AppliedMemoryOp,
   ChatMessage,
-  SegmentSummary,
+  MemoryState,
   SummaryRun,
 } from "../packages/shared/src/index.js";
+import type { SegmentReconstruction } from "../packages/discourse/src/types.js";
 import { openTestDb } from "./dbTestUtils.js";
 
 const clients: Awaited<ReturnType<typeof openTestDb>>[] = [];
@@ -57,6 +63,57 @@ describe("MessagesRepo", () => {
       (await repo.listRangeByChat("chat-a", 2, 3)).map((item) => item.id),
     ).toEqual([2, 3]);
     await expect(repo.find("chat-a", 404)).resolves.toBeUndefined();
+    await expect(repo.listAfterByChat("chat-a", 1, 1)).resolves.toEqual([
+      message({ id: 2 }),
+    ]);
+  });
+});
+
+describe("MemoriesRepo", () => {
+  it("atomically persists materialized state and its append-only operation log", async () => {
+    const { repo } = await setupMemories();
+    const first = memoryState();
+
+    await expect(repo.saveState(first, 0)).resolves.toBe(true);
+    await expect(repo.findState("chat-a")).resolves.toEqual(first);
+
+    const support: AppliedMemoryOp = {
+      id: "mop_000002",
+      itemId: "mem_000001",
+      op: { type: "support", targetId: "mem_000001", evidence: [2] },
+      chatId: "chat-a",
+      fromMessageId: 2,
+      toMessageId: 2,
+      inputHash: "hash-2",
+      model: "test-model",
+      promptVersion: "memory-ops-v1",
+      stateVersion: 2,
+      createdAt: 200,
+    };
+    const second: MemoryState = {
+      ...first,
+      version: 2,
+      processedThroughMessageId: 2,
+      nextOperationSequence: 3,
+      items: first.items.map((item) => ({
+        ...item,
+        evidence: [1, 2],
+        lastUpdatedMessageId: 2,
+      })),
+      operations: [...first.operations, support],
+    };
+
+    await expect(repo.saveState(second, 1)).resolves.toBe(true);
+    await expect(repo.findState("chat-a")).resolves.toEqual(second);
+    await expect(repo.saveState(second, 1)).resolves.toBe(false);
+    await expect(repo.findState("chat-a")).resolves.toEqual(second);
+  });
+
+  it("keeps chats isolated", async () => {
+    const { repo } = await setupMemories();
+    await repo.saveState(memoryState(), 0);
+
+    await expect(repo.findState("chat-b")).resolves.toBeUndefined();
   });
 });
 
@@ -120,34 +177,30 @@ describe("SummariesRepo", () => {
 
   it("caches segments by chat, range, hash, and schema version", async () => {
     const { repo } = await setupSummaries();
-    const summary = segment({ hash: "hash-a", title: "Original" });
+    const summary = segment({ hash: "hash-a" }, "Original");
 
-    await repo.saveSegment(summary);
+    await repo.saveReconstruction(summary);
 
     await expect(
-      repo.findCachedSegment("chat-a", 1, 3, "hash-a"),
+      repo.findCachedReconstruction("chat-a", 1, 3, "hash-a"),
     ).resolves.toEqual(summary);
     await expect(
-      repo.findCachedSegment("chat-a", 1, 3, "hash-a", 2),
+      repo.findCachedReconstruction("chat-a", 1, 3, "hash-a", 2),
     ).resolves.toBeUndefined();
     await expect(
-      repo.findCachedSegment("chat-a", 1, 3, "hash-b"),
+      repo.findCachedReconstruction("chat-a", 1, 3, "hash-b"),
     ).resolves.toBeUndefined();
   });
 
   it("updates cached segment JSON on cache-key conflict", async () => {
     const { repo } = await setupSummaries();
 
-    await repo.saveSegment(segment({ title: "Before", summary: ["old"] }));
-    await repo.saveSegment(
-      segment({ title: "After", summary: ["new"], importance: 3 }),
-    );
+    await repo.saveReconstruction(segment({}, "Before"));
+    await repo.saveReconstruction(segment({}, "After"));
 
     await expect(
-      repo.findCachedSegment("chat-a", 1, 3, "hash-a"),
-    ).resolves.toEqual(
-      segment({ title: "After", summary: ["new"], importance: 3 }),
-    );
+      repo.findCachedReconstruction("chat-a", 1, 3, "hash-a"),
+    ).resolves.toEqual(segment({}, "After"));
   });
 });
 
@@ -163,6 +216,13 @@ async function setupSummaries() {
   clients.push(client);
 
   return { repo: new SummariesRepo(client.db) };
+}
+
+async function setupMemories() {
+  const client = await openTestDb();
+  clients.push(client);
+
+  return { repo: new MemoriesRepo(client.db) };
 }
 
 function message(overrides: Partial<ChatMessage> = {}): ChatMessage {
@@ -194,20 +254,59 @@ function run(overrides: Partial<SummaryRun> = {}): SummaryRun {
   };
 }
 
-function segment(overrides: Partial<SegmentSummary> = {}): SegmentSummary {
+function segment(
+  overrides: Partial<SegmentReconstruction> = {},
+  title = "Segment",
+): SegmentReconstruction {
   return {
     segmentId: "segment-a",
     chatId: "chat-a",
     fromMessageId: 1,
     toMessageId: 3,
     hash: "hash-a",
-    title: "Segment",
-    summary: ["summary"],
-    decisions: [],
-    openQuestions: [],
-    jokes: [],
-    mentionedPeople: ["Alice"],
-    importance: 1,
+    reconstruction: { title, events: [] },
     ...overrides,
+  };
+}
+
+function memoryState(): MemoryState {
+  const operation: AppliedMemoryOp = {
+    id: "mop_000001",
+    itemId: "mem_000001",
+    createdItemId: "mem_000001",
+    op: {
+      type: "create",
+      kind: "decision",
+      text: "Use PostgreSQL",
+      evidence: [1],
+    },
+    chatId: "chat-a",
+    fromMessageId: 1,
+    toMessageId: 1,
+    inputHash: "hash-1",
+    model: "test-model",
+    promptVersion: "memory-ops-v1",
+    stateVersion: 1,
+    createdAt: 100,
+  };
+
+  return {
+    chatId: "chat-a",
+    version: 1,
+    processedThroughMessageId: 1,
+    nextMemorySequence: 2,
+    nextOperationSequence: 2,
+    items: [
+      {
+        id: "mem_000001",
+        kind: "decision",
+        text: "Use PostgreSQL",
+        status: "active",
+        evidence: [1],
+        createdAtMessageId: 1,
+        lastUpdatedMessageId: 1,
+      },
+    ],
+    operations: [operation],
   };
 }

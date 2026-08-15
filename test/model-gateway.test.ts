@@ -23,6 +23,115 @@ describe("AiSdkModelClient", () => {
     );
   });
 
+  it("uses Ollama native JSON mode for structured output", async () => {
+    const onTelemetry = vi.fn();
+    const fetchMock = mockFetch({
+      message: {
+        role: "assistant",
+        content: '{"title":"Chat"}',
+        thinking: "Check the schema.",
+      },
+      prompt_eval_count: 80,
+      eval_count: 50,
+      total_duration: 2_000_000_000,
+      load_duration: 100_000_000,
+      prompt_eval_duration: 400_000_000,
+      eval_duration: 1_000_000_000,
+      done_reason: "stop",
+    });
+    const client = new AiSdkModelClient({
+      baseUrl: "http://localhost:11434/v1",
+      models: ["gpt-oss:120b-cloud"],
+      maxRetries: 0,
+      fetch: fetchMock,
+      onTelemetry,
+    });
+
+    await expect(
+      client.generateObject("hello", z.object({ title: z.string() }), {
+        operation: "segment-summary",
+        chatId: "chat",
+        commandMessageId: 7,
+        segmentId: "segment",
+        maxOutputTokens: 4_672,
+      }),
+    ).resolves.toEqual({ title: "Chat" });
+
+    const body = JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body));
+    expect(String(fetchMock.mock.calls[0]?.[0])).toBe(
+      "http://localhost:11434/api/chat",
+    );
+    expect(body).toMatchObject({
+      model: "gpt-oss:120b-cloud",
+      stream: false,
+      think: "low",
+      format: "json",
+      options: expect.objectContaining({ num_predict: 4_672 }),
+    });
+    expect(onTelemetry).toHaveBeenCalledWith(
+      expect.objectContaining({
+        operation: "segment-summary",
+        chatId: "chat",
+        commandMessageId: 7,
+        segmentId: "segment",
+        model: "gpt-oss:120b-cloud",
+        status: "ok",
+        usage: expect.objectContaining({
+          inputTokens: 80,
+          generatedTokens: 50,
+          outputTokens: expect.any(Number),
+          reasoningTokens: expect.any(Number),
+          ollamaTotalMs: 2000,
+          loadMs: 100,
+          promptEvalMs: 400,
+          evalMs: 1000,
+          doneReason: "stop",
+        }),
+      }),
+    );
+  });
+
+  it("propagates user cancellation to the active Ollama request", async () => {
+    const onTelemetry = vi.fn();
+    const fetchMock = vi.fn(
+      async (_input: string | URL | Request, init?: RequestInit) =>
+        new Promise<Response>((_resolve, reject) => {
+          init?.signal?.addEventListener(
+            "abort",
+            () => reject(init.signal?.reason),
+            { once: true },
+          );
+        }),
+    );
+    const client = new AiSdkModelClient({
+      baseUrl: "http://localhost:11434/v1",
+      models: ["gpt-oss:120b-cloud"],
+      fetch: fetchMock,
+      onTelemetry,
+    });
+    const controller = new AbortController();
+    const request = client.generateObject(
+      "hello",
+      z.object({ title: z.string() }),
+      {
+        operation: "segment-summary",
+        chatId: "chat",
+        commandMessageId: 7,
+      },
+      controller.signal,
+    );
+
+    controller.abort(new DOMException("Cancelled", "AbortError"));
+
+    await expect(request).rejects.toMatchObject({ name: "AbortError" });
+    expect(onTelemetry).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: "error",
+        error: "Cancelled",
+      }),
+    );
+  });
+
   it("does not duplicate /v1 and keeps compatible-provider headers", async () => {
     const fetchMock = mockFetch();
     const client = new AiSdkModelClient({
@@ -85,8 +194,8 @@ describe("AiSdkModelClient", () => {
       response_format: {
         type: "json_schema",
       },
-      temperature: 0.1,
-      max_tokens: 1000,
+      temperature: 1,
+      max_tokens: 2048,
     });
   });
 
@@ -107,8 +216,8 @@ describe("AiSdkModelClient", () => {
 
     expect(body).toMatchObject({
       model: "openrouter/free",
-      temperature: 0.1,
-      max_tokens: 1000,
+      temperature: 1,
+      max_tokens: 2048,
     });
     expect(body).not.toHaveProperty("models");
     expect(body).not.toHaveProperty("plugins");

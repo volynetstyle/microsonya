@@ -68,6 +68,37 @@ export async function openTestDb(): Promise<DbClient> {
       ON segment_summaries (chat_id, from_message_id, to_message_id);
     CREATE INDEX idx_segment_summaries_chat_created
       ON segment_summaries (chat_id, created_at);
+
+    CREATE TABLE memory_states (
+      chat_id TEXT PRIMARY KEY,
+      version INTEGER NOT NULL,
+      processed_through_message_id INTEGER,
+      next_memory_sequence INTEGER NOT NULL,
+      next_operation_sequence INTEGER NOT NULL,
+      items JSONB NOT NULL,
+      updated_at BIGINT NOT NULL
+    );
+
+    CREATE TABLE memory_operations (
+      chat_id TEXT NOT NULL REFERENCES memory_states (chat_id),
+      id TEXT NOT NULL,
+      item_id TEXT NOT NULL,
+      created_item_id TEXT,
+      op JSONB NOT NULL,
+      from_message_id INTEGER NOT NULL,
+      to_message_id INTEGER NOT NULL,
+      input_hash TEXT NOT NULL,
+      model TEXT NOT NULL,
+      prompt_version TEXT NOT NULL,
+      state_version INTEGER NOT NULL,
+      created_at BIGINT NOT NULL,
+      PRIMARY KEY (chat_id, id)
+    );
+
+    CREATE INDEX idx_memory_operations_chat_state
+      ON memory_operations (chat_id, state_version);
+    CREATE INDEX idx_memory_operations_chat_range
+      ON memory_operations (chat_id, from_message_id, to_message_id);
   `);
 
   return {

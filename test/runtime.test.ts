@@ -1,5 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
-import { MessagesRepo, SummariesRepo } from "../packages/db/src/index.js";
+import {
+  MemoriesRepo,
+  MessagesRepo,
+  SummariesRepo,
+} from "../packages/db/src/index.js";
 import {
   InvalidModelOutputError,
   ModelGateway,
@@ -8,7 +12,10 @@ import {
 import {
   segmentMessages,
   selectSummaryWindow,
+  reconstructionOutputTokenBudget,
   summarize,
+  type SummaryWaterfallEvent,
+  waitForMemoryIdle,
 } from "../packages/summarize/src/index.js";
 import type { ChatMessage } from "../packages/shared/src/index.js";
 import { openTestDb } from "./dbTestUtils.js";
@@ -89,25 +96,43 @@ describe("segmentMessages", () => {
   });
 });
 
+describe("reconstructionOutputTokenBudget", () => {
+  it("scales with segment size and stays within safe bounds", () => {
+    expect(reconstructionOutputTokenBudget(1)).toBe(2_048);
+    expect(reconstructionOutputTokenBudget(13)).toBe(4_672);
+    expect(reconstructionOutputTokenBudget(100)).toBe(8_192);
+  });
+});
+
 describe("summarize", () => {
-  it("caches segment summaries and reuses them on repeated count summaries", async () => {
+  it("persists semantic memory and reuses cached segment reconstructions", async () => {
     const { db, close } = await openTestDb();
     const messages = new MessagesRepo(db);
+    const memory = new MemoriesRepo(db);
     const summaries = new SummariesRepo(db);
     await messages.save(message(1, now, "hello"));
     await messages.save(message(2, now + 1, "world"));
 
-    const client: ModelClient = {
+    const summaryClient: ModelClient = {
       generateText: vi.fn(async () => "summary"),
-      generateObject: vi.fn(async () => ({
-        title: "Chat",
-        summary: ["hello world"],
-        decisions: [],
-        openQuestions: [],
-        jokes: [],
-        mentionedPeople: ["Alice"],
-        importance: 1 as const,
-      })),
+      generateObject: vi.fn(async (_prompt, schema) => {
+        return schema.parse(reconstruction("hello world", [1, 2]));
+      }),
+    };
+    const memoryClient: ModelClient = {
+      generateText: vi.fn(async () => "unused"),
+      generateObject: vi.fn(async (_prompt, schema) => {
+        return schema.parse({
+          operations: [
+            {
+              type: "create",
+              kind: "decision",
+              text: "Remember hello world",
+              evidence: [1],
+            },
+          ],
+        });
+      }),
     };
 
     const command = {
@@ -119,31 +144,80 @@ describe("summarize", () => {
     };
 
     await summarize(
-      { messages, summaries, models: new ModelGateway(client) },
+      {
+        memory,
+        messages,
+        summaries,
+        models: new ModelGateway(summaryClient),
+        memoryModels: new ModelGateway(memoryClient),
+        onTrace: vi.fn(),
+      },
       command,
     );
+    await waitForMemoryIdle("chat");
     await summarize(
-      { messages, summaries, models: new ModelGateway(client) },
+      {
+        memory,
+        messages,
+        summaries,
+        models: new ModelGateway(summaryClient),
+        memoryModels: new ModelGateway(memoryClient),
+        onTrace: vi.fn(),
+      },
       command,
     );
+    await waitForMemoryIdle("chat");
 
-    expect(client.generateObject).toHaveBeenCalledTimes(1);
+    expect(summaryClient.generateObject).toHaveBeenCalledTimes(1);
+    expect(memoryClient.generateObject).toHaveBeenCalledTimes(1);
+    expect(memoryClient.generateObject).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.anything(),
+      expect.objectContaining({
+        operation: "memory-extraction",
+        chatId: "chat",
+        commandMessageId: 3,
+        memoryBatch: 1,
+        messageCount: 2,
+        fromMessageId: 1,
+        toMessageId: 2,
+        watermarkBefore: null,
+      }),
+      undefined,
+    );
+    await expect(memory.findState("chat")).resolves.toMatchObject({
+      version: 1,
+      processedThroughMessageId: 2,
+      items: [
+        expect.objectContaining({
+          id: "mem_000001",
+          kind: "decision",
+          text: "Remember hello world",
+          evidence: [1],
+        }),
+      ],
+      operations: [expect.objectContaining({ id: "mop_000001" })],
+    });
     await close();
   });
 
-  it("accepts partial segment JSON from weaker models", async () => {
+  it("accepts the evidence-grounded eval summary contract", async () => {
     const { db, close } = await openTestDb();
     const messages = new MessagesRepo(db);
+    const memory = new MemoriesRepo(db);
     const summaries = new SummariesRepo(db);
     await messages.save(message(1, now, "hello"));
 
-    const client: ModelClient = {
+    const summaryClient: ModelClient = {
+      generateText: vi.fn(async () => "unused"),
+      generateObject: vi.fn(async (_prompt, schema) => {
+        return schema.parse(reconstruction("hello only", [1]));
+      }),
+    };
+    const memoryClient: ModelClient = {
       generateText: vi.fn(async () => "unused"),
       generateObject: vi.fn(async (_prompt, schema) =>
-        schema.parse({
-          title: "Chat",
-          summary: "hello only",
-        }),
+        schema.parse({ operations: [] }),
       ),
     };
 
@@ -157,26 +231,41 @@ describe("summarize", () => {
 
     await expect(
       summarize(
-        { messages, summaries, models: new ModelGateway(client) },
+        {
+          memory,
+          messages,
+          summaries,
+          models: new ModelGateway(summaryClient),
+          memoryModels: new ModelGateway(memoryClient),
+          onTrace: vi.fn(),
+        },
         command,
       ),
     ).resolves.toContain("Chat");
+    await waitForMemoryIdle("chat");
 
     await close();
   });
 
-  it("falls back locally when a model never returns segment JSON", async () => {
+  it("does not disguise invalid model JSON as a local summary", async () => {
     const { db, close } = await openTestDb();
     const messages = new MessagesRepo(db);
+    const memory = new MemoriesRepo(db);
     const summaries = new SummariesRepo(db);
     await messages.save(message(1, now, "hello"));
 
-    const client: ModelClient = {
+    const summaryClient: ModelClient = {
       generateText: vi.fn(async () => "unused"),
       generateObject: vi.fn(async () => {
         throw new InvalidModelOutputError();
       }),
     };
+    const memoryClient: ModelClient = {
+      generateText: vi.fn(async () => "unused"),
+      generateObject: vi.fn(async (_prompt, schema) =>
+        schema.parse({ operations: [] }),
+      ),
+    };
 
     const command = {
       chatId: "chat",
@@ -188,12 +277,134 @@ describe("summarize", () => {
 
     await expect(
       summarize(
-        { messages, summaries, models: new ModelGateway(client) },
+        {
+          memory,
+          messages,
+          summaries,
+          models: new ModelGateway(summaryClient),
+          memoryModels: new ModelGateway(memoryClient),
+          onTrace: vi.fn(),
+        },
         command,
       ),
-    ).resolves.toContain("Короткий");
+    ).rejects.toBeInstanceOf(InvalidModelOutputError);
 
-    expect(client.generateObject).toHaveBeenCalledTimes(1);
+    expect(summaryClient.generateObject).toHaveBeenCalledTimes(1);
+    await waitForMemoryIdle("chat");
+    expect(memoryClient.generateObject).toHaveBeenCalledTimes(1);
+    await close();
+  });
+
+  it("runs independent segments concurrently within the configured limit", async () => {
+    const { db, close } = await openTestDb();
+    const messages = new MessagesRepo(db);
+    const memory = new MemoriesRepo(db);
+    const summaries = new SummariesRepo(db);
+    for (let index = 0; index < 4; index += 1) {
+      await messages.save(message(index + 1, now + index * 31 * 60 * 1000));
+    }
+
+    let active = 0;
+    let peak = 0;
+    const summaryClient: ModelClient = {
+      generateText: vi.fn(async () => "unused"),
+      generateObject: vi.fn(async (_prompt, schema) => {
+        active += 1;
+        peak = Math.max(peak, active);
+        await new Promise((resolve) => setTimeout(resolve, 20));
+        active -= 1;
+        return schema.parse({ title: "Chat", events: [] });
+      }),
+    };
+    const memoryClient: ModelClient = {
+      generateText: vi.fn(async () => "unused"),
+      generateObject: vi.fn(async (_prompt, schema) =>
+        schema.parse({ operations: [] }),
+      ),
+    };
+    const trace: SummaryWaterfallEvent[] = [];
+
+    await summarize(
+      {
+        memory,
+        messages,
+        summaries,
+        models: new ModelGateway(summaryClient),
+        memoryModels: new ModelGateway(memoryClient),
+        segmentConcurrency: 2,
+        onTrace: (event) => trace.push(event),
+      },
+      {
+        chatId: "chat",
+        commandMessageId: 5,
+        date: now + 4 * 31 * 60 * 1000,
+        mode: "count",
+        count: 4,
+      },
+    );
+
+    expect(summaryClient.generateObject).toHaveBeenCalledTimes(4);
+    expect(peak).toBe(2);
+    expect(
+      trace.filter((event) => event.stage === "segment.cache"),
+    ).toHaveLength(4);
+    expect(
+      trace.filter(
+        (event) =>
+          event.stage === "segment.cache" && event.cacheStatus === "miss",
+      ),
+    ).toHaveLength(4);
+    await waitForMemoryIdle("chat");
+    await close();
+  });
+
+  it("returns the summary without waiting for background memory extraction", async () => {
+    const { db, close } = await openTestDb();
+    const messages = new MessagesRepo(db);
+    const memory = new MemoriesRepo(db);
+    const summaries = new SummariesRepo(db);
+    await messages.save(message(1, now, "hello"));
+
+    let releaseMemory!: () => void;
+    const memoryGate = new Promise<void>((resolve) => {
+      releaseMemory = resolve;
+    });
+    const summaryClient: ModelClient = {
+      generateText: vi.fn(async () => "unused"),
+      generateObject: vi.fn(async (_prompt, schema) =>
+        schema.parse({ title: "Chat", events: [] }),
+      ),
+    };
+    const memoryClient: ModelClient = {
+      generateText: vi.fn(async () => "unused"),
+      generateObject: vi.fn(async (_prompt, schema) => {
+        await memoryGate;
+        return schema.parse({ operations: [] });
+      }),
+    };
+
+    await expect(
+      summarize(
+        {
+          memory,
+          messages,
+          summaries,
+          models: new ModelGateway(summaryClient),
+          memoryModels: new ModelGateway(memoryClient),
+          onTrace: vi.fn(),
+        },
+        {
+          chatId: "chat",
+          commandMessageId: 2,
+          date: now + 1,
+          mode: "count",
+          count: 1,
+        },
+      ),
+    ).resolves.toContain("Chat");
+
+    releaseMemory();
+    await waitForMemoryIdle("chat");
     await close();
   });
 });
@@ -212,5 +423,31 @@ function message(
     text,
     kind: "text",
     isCommand: text.startsWith("/"),
+  };
+}
+
+function reconstruction(statement: string, evidence: number[]) {
+  return {
+    title: "Chat",
+    events: [
+      {
+        id: `m${evidence[0]}`,
+        topicId: "greeting",
+        topicTitle: "Greeting",
+        speaker: "User",
+        statement,
+        speechAct: "assertion",
+        literalness: "literal",
+        commitment: "none",
+        epistemicStatus: "claimed",
+        settled: false,
+        action: null,
+        refersTo: [],
+        stance: "neutral",
+        semanticImportance: 0.7,
+        confidence: 1,
+        evidence,
+      },
+    ],
   };
 }

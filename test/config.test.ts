@@ -54,6 +54,7 @@ describe("readConfig", () => {
     delete process.env.LLM_MODEL;
     delete process.env.LLM_MODELS;
     delete process.env.LLM_MERGE_MODEL;
+    delete process.env.LLM_MEMORY_MODEL;
     delete process.env.LLM_QUARANTINE_MODELS;
 
     const config = readConfig();
@@ -66,6 +67,15 @@ describe("readConfig", () => {
       "openrouter/free",
     ]);
     expect(config.llm.mergeModel).toBe("openrouter/free");
+    expect(config.llm.memoryModel).toBe("gpt-oss:20b-cloud");
+  });
+
+  it("allows a dedicated smaller memory model", () => {
+    process.env.TELEGRAM_BOT_TOKEN = "telegram-token";
+    process.env.DATABASE_URL = "postgresql://localhost/microsonya";
+    process.env.LLM_MEMORY_MODEL = "memory-small";
+
+    expect(readConfig().llm.memoryModel).toBe("memory-small");
   });
 
   it("allows in-memory storage for bot-only exploration", () => {
@@ -102,6 +112,7 @@ describe("readConfig", () => {
 
   it("fails early for invalid database urls", () => {
     process.env.TELEGRAM_BOT_TOKEN = "telegram-token";
+    process.env.STORAGE_MODE = "postgres";
     process.env.DATABASE_URL = "postgresql://user:pass#@localhost/db";
 
     expect(() => readConfig()).toThrow(
