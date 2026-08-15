@@ -1,113 +1,168 @@
 import { z } from "zod";
-import type {
-  DiscussionSegment,
-  FinalSummary,
-  SegmentSummary,
-} from "@microsonya/shared";
-import { InvalidModelOutputError, type ModelClient } from "./ModelClient.js";
+import {
+  discourseReconstructionSchema,
+  type DiscourseReconstruction,
+  type SegmentReconstruction,
+} from "@microsonya/discourse";
+import type { DiscussionSegment, MemoryOp } from "@microsonya/shared";
+import {
+  InvalidModelOutputError,
+  type ModelCallContext,
+  type ModelClient,
+} from "./ModelClient.js";
 
-const stringArraySchema = z.preprocess((value) => {
-  if (Array.isArray(value)) {
-    return value;
-  }
-
-  if (typeof value === "string" && value.trim() !== "") {
-    return [value];
-  }
-
-  return [];
-}, z.array(z.string()));
-
-const segmentSummarySchema = z.object({
-  title: z.string().default(""),
-  summary: stringArraySchema.default([]),
-  decisions: stringArraySchema.default([]),
-  openQuestions: stringArraySchema.default([]),
-  jokes: stringArraySchema.default([]),
-  mentionedPeople: stringArraySchema.default([]),
-  importance: z.coerce
-    .number()
-    .int()
-    .min(0)
-    .max(3)
-    .catch(0)
-    .transform((value) => value as 0 | 1 | 2 | 3),
+const evidenceSchema = z.array(z.number().int().positive()).min(1);
+const memoryTextSchema = z.string().trim().min(1).max(2_000);
+const memoryKindSchema = z.enum([
+  "fact",
+  "decision",
+  "open_question",
+  "plan",
+  "result",
+]);
+const memoryOpSchema = z.discriminatedUnion("type", [
+  z.object({
+    type: z.literal("create"),
+    kind: memoryKindSchema,
+    text: memoryTextSchema,
+    evidence: evidenceSchema,
+  }),
+  z.object({
+    type: z.literal("support"),
+    targetId: z.string().min(1),
+    evidence: evidenceSchema,
+  }),
+  z.object({
+    type: z.literal("update"),
+    targetId: z.string().min(1),
+    text: memoryTextSchema,
+    evidence: evidenceSchema,
+  }),
+  z.object({
+    type: z.literal("resolve"),
+    targetId: z.string().min(1),
+    text: memoryTextSchema,
+    evidence: evidenceSchema,
+  }),
+  z.object({
+    type: z.literal("supersede"),
+    targetId: z.string().min(1),
+    replacement: memoryTextSchema,
+    evidence: evidenceSchema,
+  }),
+  z.object({
+    type: z.literal("retract"),
+    targetId: z.string().min(1),
+    evidence: evidenceSchema,
+  }),
+]);
+const memoryOpsResponseSchema = z.object({
+  operations: z.array(memoryOpSchema).default([]),
 });
 
 export class ModelGateway {
   constructor(private readonly client: ModelClient) {}
 
-  async summarizeSegment(
+  async reconstructSegment(
     segment: DiscussionSegment,
     hash: string,
     prompt: string,
-  ): Promise<SegmentSummary> {
-    const parsed = await this.generateSegmentSummary(prompt, segment);
-
+    context?: ModelCallContext,
+    signal?: AbortSignal,
+  ): Promise<SegmentReconstruction> {
+    const reconstruction = await this.generateSegmentReconstruction(
+      prompt,
+      segment,
+      context,
+      signal,
+    );
     return {
       segmentId: segment.id,
       chatId: segment.chatId,
       fromMessageId: segment.fromMessageId,
       toMessageId: segment.toMessageId,
       hash,
-      ...parsed,
+      reconstruction,
     };
   }
 
-  async mergeSummaries(
-    _summaries: SegmentSummary[],
+  async extractMemoryOps(
     prompt: string,
-  ): Promise<FinalSummary> {
-    return { text: await this.client.generateText(prompt) };
-  }
-
-  private async generateSegmentSummary(
-    prompt: string,
-    segment: DiscussionSegment,
-  ): Promise<z.infer<typeof segmentSummarySchema>> {
+    context?: ModelCallContext,
+    signal?: AbortSignal,
+  ): Promise<MemoryOp[]> {
     try {
-      return segmentSummarySchema.parse(
-        await this.client.generateObject(prompt, segmentSummarySchema),
+      const response = memoryOpsResponseSchema.parse(
+        await this.client.generateObject(
+          prompt,
+          memoryOpsResponseSchema,
+          context,
+          signal,
+        ),
       );
+      return response.operations;
     } catch (error) {
-      if (!(error instanceof InvalidModelOutputError)) {
+      if (
+        !(error instanceof InvalidModelOutputError) &&
+        !(error instanceof z.ZodError)
+      ) {
         throw error;
       }
 
       console.warn(
-        "Model returned an invalid segment summary; using local fallback",
+        "Model returned invalid memory operations; applying no memory changes",
+        safeStringify({ error: error.message }),
+      );
+      return [];
+    }
+  }
+
+  private async generateSegmentReconstruction(
+    prompt: string,
+    segment: DiscussionSegment,
+    context?: ModelCallContext,
+    signal?: AbortSignal,
+  ): Promise<DiscourseReconstruction> {
+    let output: unknown;
+
+    try {
+      output = await this.client.generateObject(
+        prompt,
+        discourseReconstructionSchema,
+        context,
+        signal,
+      );
+      return discourseReconstructionSchema.parse(output);
+    } catch (error) {
+      if (
+        !(error instanceof InvalidModelOutputError) &&
+        !(error instanceof z.ZodError)
+      ) {
+        throw error;
+      }
+
+      const invalidOutput =
+        error instanceof InvalidModelOutputError
+          ? error
+          : new InvalidModelOutputError({
+              cause: error,
+              rawText: safeStringify(output),
+            });
+
+      console.error(
+        "Model returned an invalid discourse reconstruction; segment was not cached",
         safeStringify({
           segmentId: segment.id,
-          error: error.message,
+          fromMessageId: segment.fromMessageId,
+          toMessageId: segment.toMessageId,
+          error: invalidOutput.message,
+          rawResponseChars: invalidOutput.rawText?.length,
         }),
       );
 
-      return buildFallbackSegmentSummary(segment);
+      throw invalidOutput;
     }
   }
-}
-
-function buildFallbackSegmentSummary(
-  segment: DiscussionSegment,
-): z.infer<typeof segmentSummarySchema> {
-  const facts = segment.messages
-    .filter((message) => message.text.trim() !== "")
-    .slice(0, 5)
-    .map((message) => {
-      const author = message.authorName.trim() || message.authorId;
-      return `${author}: ${message.text.trim()}`;
-    });
-
-  return {
-    title: "Короткий фрагмент чату",
-    summary:
-      facts.length > 0 ? facts : ["Не вдалося структурувати зміст сегмента."],
-    decisions: [],
-    openQuestions: [],
-    jokes: [],
-    mentionedPeople: [...new Set(segment.participants)].slice(0, 10),
-    importance: facts.length > 0 ? 1 : 0,
-  };
 }
 
 function safeStringify(value: unknown): string {

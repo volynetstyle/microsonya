@@ -1,0 +1,19 @@
+{
+  "cases": [
+    "real-job-search-abroad",
+    "real-ai-development",
+    "real-fop-calculator",
+    "real-ai-tools-interleaved"
+  ],
+  "models": ["gpt-oss:120b-cloud"],
+  "representations": ["pipe-v3"],
+  "transformations": [
+    "identity",
+    "identity-replay",
+    "rename-users",
+    "shift-timestamps"
+  ],
+  "reasoning": ["low"],
+  "seeds": [1, 2, 3, 4, 5],
+  "promptVersion": "v1"
+}

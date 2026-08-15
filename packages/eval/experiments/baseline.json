@@ -1,0 +1,8 @@
+{
+  "cases": ["real-ai-development"],
+  "models": ["gpt-oss:20b-cloud", "gpt-oss:120b-cloud"],
+  "representations": ["jsonl", "pipe", "natural"],
+  "reasoning": ["low"],
+  "seeds": [1, 2, 3, 4, 5],
+  "promptVersion": "v1"
+}

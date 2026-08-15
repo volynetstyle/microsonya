@@ -1,0 +1,15 @@
+{
+  "threads": [{ "id": "meeting-frustration", "weight": 3 }],
+  "claims": [],
+  "forbidden": [
+    {
+      "id": "goat-herding-plan",
+      "text": "A plans to herd goats.",
+      "type": "sarcasm_literalization",
+      "patterns": ["піде пасти кіз", "планує пасти кіз", "plans to herd goats"]
+    }
+  ],
+  "decisions": [],
+  "openQuestions": [],
+  "noiseEvidence": []
+}

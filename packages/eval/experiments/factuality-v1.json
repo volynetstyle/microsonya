@@ -1,0 +1,17 @@
+{
+  "sourceExperiment": "pipe-language-v3",
+  "cases": [
+    "real-job-search-abroad",
+    "real-ai-development",
+    "real-fop-calculator",
+    "real-ai-tools-interleaved"
+  ],
+  "sourceModel": "gpt-oss:120b-cloud",
+  "sourceRepresentation": "pipe-v3",
+  "sourceReasoning": "low",
+  "sourceSeeds": [1],
+  "variants": ["original", "rotated-evidence"],
+  "judgeModel": "gpt-oss:120b-cloud",
+  "judgeReasoning": "low",
+  "judgePromptVersion": "qa-factuality-v1"
+}

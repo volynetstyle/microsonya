@@ -1,0 +1,19 @@
+{
+  "threads": [{ "id": "optimization-hypothetical", "weight": 3 }],
+  "claims": [],
+  "forbidden": [
+    {
+      "id": "optimization-request",
+      "text": "A was asked to optimize.",
+      "type": "hypothetical_literalization",
+      "patterns": [
+        "a попросили оптимізувати",
+        "його попросили оптимізувати",
+        "was asked to optimize"
+      ]
+    }
+  ],
+  "decisions": [],
+  "openQuestions": [],
+  "noiseEvidence": []
+}

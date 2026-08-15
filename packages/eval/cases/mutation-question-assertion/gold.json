@@ -1,0 +1,16 @@
+{
+  "threads": [{ "id": "website-availability", "weight": 3 }],
+  "claims": [
+    {
+      "id": "website-unavailable.assertion",
+      "thread": "website-availability",
+      "weight": 3,
+      "text": "This is unavailable on the website.",
+      "evidence": [1]
+    }
+  ],
+  "forbidden": [],
+  "decisions": [],
+  "openQuestions": [],
+  "noiseEvidence": []
+}

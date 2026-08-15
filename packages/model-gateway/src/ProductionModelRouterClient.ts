@@ -1,5 +1,5 @@
 import type { z } from "zod";
-import type { ModelClient } from "./ModelClient.js";
+import type { ModelCallContext, ModelClient } from "./ModelClient.js";
 
 export type ProductionModelTier = "cheap" | "default" | "quality";
 
@@ -67,13 +67,24 @@ export class ProductionModelRouterClient implements ModelClient {
     }
   }
 
-  generateText(prompt: string): Promise<string> {
-    return this.execute(prompt, (client) => client.generateText(prompt));
+  generateText(
+    prompt: string,
+    context?: ModelCallContext,
+    signal?: AbortSignal,
+  ): Promise<string> {
+    return this.execute(prompt, (client) =>
+      client.generateText(prompt, context, signal),
+    );
   }
 
-  generateObject<T>(prompt: string, schema: z.ZodType<T>): Promise<T> {
+  generateObject<T>(
+    prompt: string,
+    schema: z.ZodType<T>,
+    context?: ModelCallContext,
+    signal?: AbortSignal,
+  ): Promise<T> {
     return this.execute(prompt, (client) =>
-      client.generateObject(prompt, schema),
+      client.generateObject(prompt, schema, context, signal),
     );
   }
 

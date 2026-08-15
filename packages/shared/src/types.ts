@@ -52,22 +52,3 @@ export type DiscussionSegment = {
   reason: SegmentReason;
   messages: ChatMessage[];
 };
-
-export type SegmentSummary = {
-  segmentId: string;
-  chatId: string;
-  fromMessageId: number;
-  toMessageId: number;
-  hash: string;
-  title: string;
-  summary: string[];
-  decisions: string[];
-  openQuestions: string[];
-  jokes: string[];
-  mentionedPeople: string[];
-  importance: 0 | 1 | 2 | 3;
-};
-
-export type FinalSummary = {
-  text: string;
-};

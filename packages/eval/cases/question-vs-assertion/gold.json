@@ -1,0 +1,22 @@
+{
+  "threads": [{ "id": "website-availability", "weight": 3 }],
+  "claims": [],
+  "forbidden": [
+    {
+      "id": "website-unavailable",
+      "text": "Цього немає на сайті",
+      "type": "question_as_assertion",
+      "patterns": ["цього немає на сайті", "недоступне на сайті"]
+    }
+  ],
+  "decisions": [],
+  "openQuestions": [
+    {
+      "id": "website-availability.question",
+      "weight": 2,
+      "text": "Is this available on the website?",
+      "evidence": [1]
+    }
+  ],
+  "noiseEvidence": []
+}

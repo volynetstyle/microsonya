@@ -1,0 +1,9 @@
+{
+  "cases": ["discourse-state-lifecycle"],
+  "models": ["gpt-oss:120b-cloud"],
+  "representations": ["pipe-v3"],
+  "transformations": ["identity"],
+  "reasoning": ["low"],
+  "seeds": [1],
+  "promptVersion": "v4"
+}

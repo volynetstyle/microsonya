@@ -1,0 +1,11 @@
+{
+  "source": "apps/telegram/collector/data/telegram-collector.jsonl",
+  "selection": [[86398, 86427]],
+  "sourceMessageIds": [
+    86398, 86399, 86400, 86401, 86402, 86403, 86404, 86405, 86406, 86407, 86408,
+    86409, 86410, 86411, 86412, 86413, 86414, 86415, 86416, 86417, 86418, 86419,
+    86420, 86421, 86422, 86423, 86424, 86425, 86426, 86427
+  ],
+  "sourceChatHash": "22a4379aebdff24f2d5f6c498f9c101d7f6838d3d5cb1914289d0b6fc2c3992a",
+  "externalReplyTargets": {}
+}

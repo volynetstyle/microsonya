@@ -1,0 +1,99 @@
+{
+  "threads": [
+    { "id": "job-search-abroad", "weight": 3 },
+    { "id": "language-integration", "weight": 3 },
+    { "id": "life-in-austria", "weight": 2 },
+    { "id": "networking-abroad", "weight": 1 }
+  ],
+  "claims": [
+    {
+      "id": "networking.participants-abroad",
+      "thread": "networking-abroad",
+      "weight": 1,
+      "text": "Учасники знайшли в чаті людей, які живуть або мають знайомих в Австрії та Польщі.",
+      "evidence": [1, 3, 12, 13]
+    },
+    {
+      "id": "job-search.two-months",
+      "thread": "job-search-abroad",
+      "weight": 3,
+      "text": "P3 знайшов роботу в Австрії приблизно за два місяці й радить шукати через LinkedIn.",
+      "evidence": [16, 17, 18, 20]
+    },
+    {
+      "id": "job-search.conversion",
+      "thread": "job-search-abroad",
+      "weight": 3,
+      "text": "За словами P3, близько ста відгуків із трьома роками досвіду дали лише три співбесіди.",
+      "evidence": [21, 23]
+    },
+    {
+      "id": "job-search.local-language-filter",
+      "thread": "job-search-abroad",
+      "weight": 3,
+      "text": "Більшість вакансій вимагали місцеву мову, хоча іноді людей брали і без доброго знання мови.",
+      "evidence": [26, 27, 29]
+    },
+    {
+      "id": "job-search.education-observation",
+      "thread": "job-search-abroad",
+      "weight": 1,
+      "text": "Учасники обговорили приклад кандидата без комерційного досвіду та думку, що вища освіта рідко є вирішальною.",
+      "evidence": [28, 32, 35]
+    },
+    {
+      "id": "job-search.salary-compromise",
+      "thread": "job-search-abroad",
+      "weight": 2,
+      "text": "Через терміновість пошуку P3 погодився на мінімальну зарплату, хоча рівень позиції передбачав вищу.",
+      "evidence": [34, 36, 37, 39]
+    },
+    {
+      "id": "language.work-vs-daily-life",
+      "thread": "language-integration",
+      "weight": 3,
+      "text": "Робоче спілкування відбувається англійською, але місцева мова лишається бар'єром у повсякденному житті.",
+      "evidence": [15, 43, 44, 47, 51, 52, 53, 54, 55]
+    },
+    {
+      "id": "language.learning-motivation",
+      "thread": "language-integration",
+      "weight": 2,
+      "text": "P3 почав вивчати німецьку через дискомфорт у побутових ситуаціях.",
+      "evidence": [47, 49]
+    },
+    {
+      "id": "austria.outlook",
+      "thread": "life-in-austria",
+      "weight": 2,
+      "text": "P3 вважає Австрію найкращим із розглянутих варіантів, хоча співмешканець песимістично оцінює майбутнє країни.",
+      "evidence": [58, 60]
+    }
+  ],
+  "forbidden": [
+    {
+      "id": "friend-is-speaker",
+      "text": "P1 запросили на middle-співбесіду без комерційного досвіду.",
+      "type": "anecdote_subject_confusion",
+      "patterns": [
+        "P1 запросили на співбесіду без комерційного досвіду",
+        "P1 had no commercial experience"
+      ]
+    },
+    {
+      "id": "warsaw-decided",
+      "text": "P3 вирішив поїхати на подію у Варшаві.",
+      "type": "hypothetical_as_decision",
+      "patterns": ["P3 вирішив поїхати у Варшаву", "P3 decided to go to Warsaw"]
+    },
+    {
+      "id": "b2-established",
+      "text": "P3 володіє німецькою на рівні B2.",
+      "type": "advice_as_fact",
+      "patterns": ["P3 має рівень B2", "P3 speaks German at B2"]
+    }
+  ],
+  "decisions": [],
+  "openQuestions": [],
+  "noiseEvidence": [4, 5, 6, 7, 8, 10, 11, 19, 22, 38, 42, 48, 56, 57]
+}

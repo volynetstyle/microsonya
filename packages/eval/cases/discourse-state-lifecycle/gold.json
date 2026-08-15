@@ -1,0 +1,70 @@
+{
+  "threads": [
+    { "id": "candidate-networking", "weight": 2 },
+    { "id": "career-strategy", "weight": 3 },
+    { "id": "historical-dispute", "weight": 2 }
+  ],
+  "claims": [
+    {
+      "id": "networking.answer",
+      "thread": "candidate-networking",
+      "weight": 2,
+      "text": "За порадою P2, для потрапляння до списку кандидатів варто бути активним у професійних спільнотах.",
+      "evidence": [1, 2]
+    },
+    {
+      "id": "career.goal-dependent-strategy",
+      "thread": "career-strategy",
+      "weight": 3,
+      "text": "P2 пояснив, що вибір між шириною і глибиною навичок залежить від цілі: ширина допомагає швидше отримати роботу, а глибина — професійно рости у вибраному напрямі.",
+      "evidence": [6, 7, 8]
+    },
+    {
+      "id": "history.contested-claim",
+      "thread": "historical-dispute",
+      "weight": 2,
+      "text": "P1 стверджував, що радянський блок випереджав США в обговорюваних питаннях, але P4 заперечив надмірно широке узагальнення.",
+      "evidence": [9, 10]
+    }
+  ],
+  "forbidden": [
+    {
+      "id": "joke-becomes-decision",
+      "text": "Вирішили найняти 30 джунів з одним роком досвіду.",
+      "type": "claim_type_error:joke_to_decision",
+      "patterns": [
+        "вирішили найняти 30 джунів",
+        "прийняти на роботу 30 джунів",
+        "decided to hire 30 junior developers",
+        "intends to take 30 junior developers"
+      ]
+    },
+    {
+      "id": "opinion-becomes-decision",
+      "text": "Вирішили надавати перевагу кмітливості над формальним досвідом.",
+      "type": "claim_type_error:opinion_to_decision",
+      "patterns": [
+        "вирішили надавати перевагу кмітливості",
+        "віддати перевагу кмітливості"
+      ]
+    },
+    {
+      "id": "speaker-becomes-narrator",
+      "text": "Радянський блок випереджав США.",
+      "type": "epistemic_attribution_error:speaker_to_narrator",
+      "patterns": [
+        "радянський блок випереджав США",
+        "США не були передовою країною"
+      ]
+    },
+    {
+      "id": "sarcasm-becomes-fact",
+      "text": "Існує лише один гендер — радянська людина.",
+      "type": "claim_type_error:joke_to_fact",
+      "patterns": ["існує лише один гендер", "один гендер — радянська людина"]
+    }
+  ],
+  "decisions": [],
+  "openQuestions": [],
+  "noiseEvidence": [3, 4, 11, 12]
+}

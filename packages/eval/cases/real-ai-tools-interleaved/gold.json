@@ -1,0 +1,108 @@
+{
+  "threads": [
+    { "id": "ai-tooling", "weight": 3 },
+    { "id": "bus-passenger", "weight": 2 },
+    { "id": "diploma-cover", "weight": 2 },
+    { "id": "pc-case", "weight": 1 }
+  ],
+  "claims": [
+    {
+      "id": "ai-tooling.capability-view",
+      "thread": "ai-tooling",
+      "weight": 3,
+      "text": "P1 вважає, що складні можливості AI значною мірою забезпечують інструменти, приклади та MCP, а не абстрактний інтелект.",
+      "evidence": [1, 2]
+    },
+    {
+      "id": "ai-tooling.old-model-experiment",
+      "thread": "ai-tooling",
+      "weight": 3,
+      "text": "P1 хоче перевірити стару модель із сучасним toolkit, але підозрює, що мале контекстне вікно буде обмеженням.",
+      "evidence": [3]
+    },
+    {
+      "id": "ai-tooling.instinctgpt-result",
+      "thread": "ai-tooling",
+      "weight": 3,
+      "text": "P2 навів InstinctGPT як приклад великого приросту від зовнішнього runtime, який не компенсує нестачу базових здібностей моделі.",
+      "evidence": [3, 8]
+    },
+    {
+      "id": "ai-tooling.model-comparison",
+      "thread": "ai-tooling",
+      "weight": 2,
+      "text": "P1 зауважив, що кількість активних параметрів і спеціалізація навчання можуть бути кориснішими за загальну кількість параметрів.",
+      "evidence": [8, 14]
+    },
+    {
+      "id": "bus-passenger.repeated-encounter",
+      "thread": "bus-passenger",
+      "weight": 2,
+      "text": "P1 вдруге зустрів у автобусі того самого ексцентричного пасажира й описав його гучну поведінку з попередньої поїздки.",
+      "evidence": [4, 5, 7, 9, 10]
+    },
+    {
+      "id": "diploma-cover.prices",
+      "thread": "diploma-cover",
+      "weight": 2,
+      "text": "Учасники порівняли ціни на обкладинки дипломів: для Богдана назвали 650 грн, інші заплатили близько 47 і 30 грн.",
+      "evidence": [22, 23, 24, 25]
+    },
+    {
+      "id": "diploma-cover.low-value",
+      "thread": "diploma-cover",
+      "weight": 1,
+      "text": "Кілька учасників вважають дорогу обкладинку диплома непотрібною річчю.",
+      "evidence": [26, 27, 28, 29]
+    },
+    {
+      "id": "pc-case.three-gpus",
+      "thread": "pc-case",
+      "weight": 1,
+      "text": "P1 повідомив, що вмістив три маленькі відеокарти у корпус, розрахований на одну, за допомогою стяжок і сили.",
+      "evidence": [30]
+    }
+  ],
+  "forbidden": [
+    {
+      "id": "experiment-completed",
+      "text": "P1 уже протестував стару модель із сучасним toolkit.",
+      "type": "intent_as_completed_action",
+      "patterns": [
+        "P1 уже протестував стару модель",
+        "P1 already tested an old model"
+      ]
+    },
+    {
+      "id": "old-models-cannot-work",
+      "text": "Старі моделі точно не можуть працювати із сучасними інструментами.",
+      "type": "hypothesis_as_fact",
+      "patterns": [
+        "старі моделі не можуть працювати",
+        "old models cannot work with modern tools"
+      ]
+    },
+    {
+      "id": "passenger-vomited",
+      "text": "Пасажир блював у автобусі.",
+      "type": "sound_as_event",
+      "patterns": ["пасажир блював", "passenger vomited"]
+    },
+    {
+      "id": "diploma-cover-paid-650",
+      "text": "Богдан заплатив 650 грн за обкладинку.",
+      "type": "requested_price_as_payment",
+      "patterns": ["Богдан заплатив 650", "Bohdan paid 650"]
+    }
+  ],
+  "decisions": [],
+  "openQuestions": [
+    {
+      "id": "ai-tooling.coder-models",
+      "weight": 1,
+      "text": "Чому спеціалізовані coder-моделі, попри очевидну ідею, відкидають або використовують менше?",
+      "evidence": [14]
+    }
+  ],
+  "noiseEvidence": [6, 11, 12, 13, 15, 16, 17, 18, 19, 20, 21]
+}

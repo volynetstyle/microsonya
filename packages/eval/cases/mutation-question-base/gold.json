@@ -1,0 +1,25 @@
+{
+  "threads": [{ "id": "website-availability", "weight": 3 }],
+  "claims": [],
+  "forbidden": [
+    {
+      "id": "website-unavailable.assertion",
+      "text": "This is unavailable on the website.",
+      "type": "question-as-assertion",
+      "patterns": [
+        "is unavailable on the website",
+        "is not available on the website"
+      ]
+    }
+  ],
+  "decisions": [],
+  "openQuestions": [
+    {
+      "id": "website-availability.question",
+      "weight": 3,
+      "text": "Is this unavailable on the website?",
+      "evidence": [1]
+    }
+  ],
+  "noiseEvidence": []
+}

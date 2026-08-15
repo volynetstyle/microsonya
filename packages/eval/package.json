@@ -1,5 +1,5 @@
 {
-  "name": "@microsonya/model-gateway",
+  "name": "@microsonya/eval",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -11,15 +11,15 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "eval": "tsx src/run.ts",
+    "reconstruct": "tsx src/runReconstruction.ts",
+    "factuality": "tsx src/runFactuality.ts",
+    "import:collector": "tsx src/importCollector.ts"
   },
   "dependencies": {
-    "@ai-sdk/openai-compatible": "^3.0.14",
     "@microsonya/discourse": "workspace:*",
-    "@microsonya/shared": "workspace:*",
-    "@openrouter/ai-sdk-provider": "^3.0.0",
-    "ai": "^7.0.37",
     "gpt-tokenizer": "^3.4.0",
-    "zod": "^3.25.67"
+    "zod": "^3.25.76"
   }
 }
