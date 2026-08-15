@@ -41,6 +41,13 @@ export type DiscourseReconstruction = z.infer<
   typeof discourseReconstructionSchema
 >;
 
+export type DiscourseState = {
+  title: string;
+  events: DiscourseEvent[];
+  resolvedQuestionIds: string[];
+  supersededEventIds: string[];
+};
+
 export type SegmentReconstruction = {
   segmentId: string;
   chatId: string;
@@ -50,13 +57,32 @@ export type SegmentReconstruction = {
   reconstruction: DiscourseReconstruction;
 };
 
-export type EvidenceItem = { text: string; evidence: number[] };
-export type ProjectedSummary = {
-  title: string;
-  topics: Array<{ id: string; title: string; claims: EvidenceItem[] }>;
-  decisions: EvidenceItem[];
-  openQuestions: EvidenceItem[];
-};
+export const evidenceItemSchema = z
+  .object({
+    text: z.string().min(1),
+    evidence: z.array(z.number().int().positive()),
+  })
+  .strict();
+
+export const projectedSummarySchema = z
+  .object({
+    title: z.string().min(1),
+    topics: z.array(
+      z
+        .object({
+          id: z.string().min(1),
+          title: z.string().min(1),
+          claims: z.array(evidenceItemSchema),
+        })
+        .strict(),
+    ),
+    decisions: z.array(evidenceItemSchema),
+    openQuestions: z.array(evidenceItemSchema),
+  })
+  .strict();
+
+export type EvidenceItem = z.infer<typeof evidenceItemSchema>;
+export type ProjectedSummary = z.infer<typeof projectedSummarySchema>;
 
 export type ProjectionDiagnostics = {
   decisionCandidates: number;

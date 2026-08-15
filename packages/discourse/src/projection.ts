@@ -1,8 +1,10 @@
 import { isDecision } from "./invariants.js";
+import { reduceDiscourse } from "./reducer.js";
 import { rankBySalience } from "./salience.js";
 import type {
   DiscourseEvent,
   DiscourseReconstruction,
+  DiscourseState,
   ProjectedSummary,
   ProjectionDiagnostics,
 } from "./types.js";
@@ -15,36 +17,29 @@ export function projectDiscourse(reconstruction: DiscourseReconstruction): {
   summary: ProjectedSummary;
   diagnostics: ProjectionDiagnostics;
 } {
-  const eventsById = new Map(
-    reconstruction.events.map((event) => [event.id, event]),
-  );
-  const decisionCandidates = reconstruction.events.filter(
+  return projectDiscourseState(reduceDiscourse(reconstruction));
+}
+
+export function projectDiscourseState(state: DiscourseState): {
+  summary: ProjectedSummary;
+  diagnostics: ProjectionDiagnostics;
+} {
+  const resolvedQuestionIds = new Set(state.resolvedQuestionIds);
+  const suppressedClaimIds = new Set(state.supersededEventIds);
+  const decisionCandidates = state.events.filter(
     (event) => event.action !== null || event.commitment !== "none",
   );
   const decisions = rankBySalience(decisionCandidates.filter(isDecision))
     .slice(0, MAX_DECISIONS)
     .map(toEvidenceItem);
 
-  const resolvedQuestionIds = new Set(
-    reconstruction.events
-      .filter((event) => event.speechAct === "answer")
-      .flatMap((event) => event.refersTo)
-      .filter((id) => eventsById.get(id)?.speechAct === "question"),
-  );
-  const suppressedClaimIds = new Set([
-    ...reconstruction.events
-      .filter((event) => event.literalness === "ironic")
-      .flatMap((event) => event.refersTo),
-    ...reconstruction.events
-      .filter(
-        (event) =>
-          event.speechAct === "correction" &&
-          event.epistemicStatus === "accepted",
-      )
-      .flatMap((event) => event.refersTo),
-  ]);
+  for (const id of state.events
+    .filter((event) => event.literalness === "ironic")
+    .flatMap((event) => event.refersTo)) {
+    suppressedClaimIds.add(id);
+  }
   const openQuestions = rankBySalience(
-    reconstruction.events.filter(
+    state.events.filter(
       (event) =>
         event.speechAct === "question" && !resolvedQuestionIds.has(event.id),
     ),
@@ -52,7 +47,7 @@ export function projectDiscourse(reconstruction: DiscourseReconstruction): {
     .slice(0, MAX_OPEN_QUESTIONS)
     .map(toEvidenceItem);
   const claimEvents = rankBySalience(
-    reconstruction.events.filter(
+    state.events.filter(
       (event) => isClaim(event) && !suppressedClaimIds.has(event.id),
     ),
   ).slice(0, MAX_CLAIMS);
@@ -67,7 +62,7 @@ export function projectDiscourse(reconstruction: DiscourseReconstruction): {
   });
 
   return {
-    summary: { title: reconstruction.title, topics, decisions, openQuestions },
+    summary: { title: state.title, topics, decisions, openQuestions },
     diagnostics: {
       decisionCandidates: decisionCandidates.length,
       decisionsRejectedByInvariant:

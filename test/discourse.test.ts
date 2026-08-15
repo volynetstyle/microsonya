@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { projectDiscourse } from "../packages/discourse/src/projection.js";
+import {
+  projectDiscourse,
+  projectDiscourseState,
+} from "../packages/discourse/src/projection.js";
+import { reduceDiscourse } from "../packages/discourse/src/reducer.js";
 import type { DiscourseEvent } from "../packages/discourse/src/types.js";
 
 describe("deterministic discourse projection", () => {
@@ -66,6 +70,78 @@ describe("deterministic discourse projection", () => {
     expect(
       projected.summary.topics.flatMap((topic) => topic.claims),
     ).not.toContainEqual(expect.objectContaining({ evidence: [11] }));
+  });
+
+  it("replays a synthetic lifecycle into an exact state snapshot", () => {
+    const events = [
+      event({ id: "q1", speechAct: "question", evidence: [1] }),
+      event({
+        id: "p1",
+        speechAct: "proposal",
+        action: "Choose A",
+        evidence: [2],
+      }),
+      event({
+        id: "p2",
+        speechAct: "proposal",
+        action: "Choose B",
+        evidence: [3],
+      }),
+      event({
+        id: "d1",
+        speechAct: "answer",
+        commitment: "explicit",
+        epistemicStatus: "accepted",
+        settled: true,
+        action: "Choose A",
+        refersTo: ["q1", "p1"],
+        evidence: [4],
+      }),
+      event({
+        id: "c1",
+        speechAct: "correction",
+        epistemicStatus: "accepted",
+        refersTo: ["d1"],
+        statement: "Choose C instead",
+        evidence: [5],
+      }),
+    ];
+
+    const state = reduceDiscourse({ title: "Lifecycle", events });
+    expect(state).toEqual({
+      title: "Lifecycle",
+      events,
+      resolvedQuestionIds: ["q1"],
+      supersededEventIds: ["d1"],
+    });
+    expect(projectDiscourseState(state).summary.openQuestions).toEqual([]);
+  });
+
+  it("is idempotent under replay and equivalent under input reordering", () => {
+    const first = event({ id: "m1", evidence: [1] });
+    const second = event({ id: "m2", evidence: [2] });
+    const canonical = reduceDiscourse({
+      title: "Replay",
+      events: [first, second],
+    });
+    expect(
+      reduceDiscourse({ title: "Replay", events: [first, second, first] }),
+    ).toEqual(canonical);
+    expect(
+      reduceDiscourse({ title: "Replay", events: [second, first] }),
+    ).toEqual(canonical);
+  });
+
+  it("rejects conflicting events with the same id", () => {
+    expect(() =>
+      reduceDiscourse({
+        title: "Conflict",
+        events: [
+          event({ id: "m1", statement: "A", evidence: [1] }),
+          event({ id: "m1", statement: "B", evidence: [1] }),
+        ],
+      }),
+    ).toThrow("Conflicting discourse event id: m1");
   });
 });
 
