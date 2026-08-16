@@ -96,6 +96,9 @@ importers:
       '@microsonya/discourse':
         specifier: workspace:*
         version: link:../discourse
+      dotenv:
+        specifier: 16.5.0
+        version: 16.5.0
       gpt-tokenizer:
         specifier: ^3.4.0
         version: 3.4.0
@@ -1057,6 +1060,10 @@ packages:
   detect-libc@2.1.2:
     resolution: {integrity: sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ==}
     engines: {node: '>=8'}
+
+  dotenv@16.5.0:
+    resolution: {integrity: sha512-m/C+AwOAr9/W1UOIZUo232ejMNnJAJtYQjUbHoNTBNTJSvqzzDh7vnrei3o3r3m9blf6ZoDkvcw0VmozNRFJxg==}
+    engines: {node: '>=12'}
 
   dotenv@16.6.1:
     resolution: {integrity: sha512-uBq4egWHTcTt33a72vpSG0z3HnPuIl6NqYcTrKEg2azoEyl2hpW0zqlxysq2pK9HlDIHyHyakeYaYnSAwd8bow==}
@@ -2180,6 +2187,8 @@ snapshots:
 
   detect-libc@2.1.2:
     optional: true
+
+  dotenv@16.5.0: {}
 
   dotenv@16.6.1: {}
 

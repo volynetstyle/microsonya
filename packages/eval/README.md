@@ -25,8 +25,9 @@ Ollama must be running and able to access the models named by the experiment:
 pnpm eval --experiment representation-v1
 ```
 
-Set `OLLAMA_BASE_URL` to use a host other than `http://localhost:11434`; direct
-Ollama Cloud access also reads `OLLAMA_API_KEY`. Existing runs are resumed. Pass
+Set `OLLAMA_BASE_URL=https://ollama.com` for direct Cloud API access. The eval
+runner loads `OLLAMA_API_KEY` from the workspace `.env` and sends it as a Bearer
+token. Direct API model tags omit the local `-cloud` suffix. Existing runs are resumed. Pass
 `--overwrite` to intentionally replace runs with the same
 experiment/case/model/representation/reasoning/seed path.
 

@@ -3,6 +3,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { z } from "zod";
+import { config as loadEnv } from "dotenv";
 import { countTokens } from "gpt-tokenizer/encoding/o200k_harmony";
 import { OllamaRequestError, runOllama } from "./ollama.js";
 import { mutationOutcomes, mutationRowsToCsv } from "./mutation.js";
@@ -50,6 +51,7 @@ import {
 } from "./types.js";
 
 const packageRoot = fileURLToPath(new URL("..", import.meta.url));
+loadEnv({ path: path.resolve(packageRoot, "../../.env") });
 const args = parseArgs(process.argv.slice(2));
 
 await main(args.experiment, args.overwrite, args.validateOnly);

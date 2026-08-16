@@ -1,6 +1,6 @@
 {
   "cases": ["discourse-state-lifecycle"],
-  "models": ["qwen3.5:cloud"],
+  "models": ["qwen3.5"],
   "pipelines": ["deterministic-shell"],
   "representations": ["pipe-v3"],
   "reasoning": ["low"],

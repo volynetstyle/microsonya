@@ -14,7 +14,7 @@
     "real-job-search-abroad",
     "sarcasm"
   ],
-  "models": ["qwen3.5:397b-cloud"],
+  "models": ["qwen3.5:397b"],
   "pipelines": ["direct", "deterministic-shell"],
   "representations": ["pipe-v3"],
   "reasoning": ["low"],

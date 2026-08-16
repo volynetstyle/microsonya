@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@microsonya/discourse": "workspace:*",
+    "dotenv": "16.5.0",
     "gpt-tokenizer": "^3.4.0",
     "zod": "^3.25.76"
   }
