@@ -15,6 +15,7 @@
     "eval": "tsx src/run.ts",
     "reconstruct": "tsx src/runReconstruction.ts",
     "factuality": "tsx src/runFactuality.ts",
+    "selective": "tsx src/runSelectiveAblation.ts",
     "import:collector": "tsx src/importCollector.ts"
   },
   "dependencies": {

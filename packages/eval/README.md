@@ -119,6 +119,20 @@ The repository currently has 13 adversarial/real cases, so the full Qwen grid
 contains 130 calls (13 cases × 2 pipelines × 5 seeds) and DeepSeek contains 78.
 Run the one-call Qwen smoke before authorizing either paid grid.
 
+## Selective projection ablation
+
+Reuse stored DeepSeek direct summaries as candidate claims and test cheap,
+deterministic selection without another model call:
+
+```bash
+pnpm --filter @microsonya/eval selective
+```
+
+The ablation sweeps hard top-k, minimum evidence count, model order, evidence
+count, and reply-centrality ranking. It reports the in-sample precision/recall
+frontier and uses leave-one-case-out policy selection so an apparently good
+threshold is not evaluated only on the cases that selected it.
+
 Mutation experiments declare a baseline case, a minimally changed mutant, and
 expected content-unit/category transitions. `mutations.csv` reports how often
 the baseline passed, the mutant passed, and both sides crossed the intended

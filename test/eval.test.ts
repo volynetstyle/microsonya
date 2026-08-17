@@ -29,6 +29,7 @@ import {
   type StoredRun,
 } from "../packages/eval/src/types.js";
 import { transformMessages } from "../packages/eval/src/transform.js";
+import { selectSummaryClaims } from "../packages/eval/src/selective.js";
 import {
   parseReconstruction,
   scoreReconstruction,
@@ -350,6 +351,36 @@ describe("Ollama eval client", () => {
 });
 
 describe("deterministic eval scoring", () => {
+  it("selects claims deterministically from observable evidence topology", () => {
+    const summary: ProjectedSummary = {
+      title: "x",
+      topics: [
+        {
+          id: "topic",
+          title: "Topic",
+          claims: [
+            { text: "isolated", evidence: [1] },
+            { text: "central", evidence: [2] },
+          ],
+        },
+      ],
+      decisions: [],
+      openQuestions: [],
+    };
+    const selected = selectSummaryClaims(
+      summary,
+      [
+        { id: 1, user: "A", time: "10:00", text: "one" },
+        { id: 2, user: "B", time: "10:01", text: "two" },
+        { id: 3, user: "C", time: "10:02", replyTo: 2, text: "reply" },
+      ],
+      { topK: 1, minEvidence: 1, rankBy: "reply-centrality" },
+    );
+    expect(selected.topics[0]?.claims).toEqual([
+      { text: "central", evidence: [2] },
+    ]);
+  });
+
   const gold = goldSchema.parse({
     threads: [{ id: "critical-thread", weight: 3 }],
     claims: [
