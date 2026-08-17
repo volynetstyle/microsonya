@@ -125,9 +125,18 @@ function aggregate(items: Evaluated[]) {
     predictedClaims: predicted,
     matchedClaims: matched,
     weightedRecall: totalWeight === 0 ? null : matchedWeight / totalWeight,
+    macroRecall: mean(items.map((item) => item.score.weightedClaimRecall)),
     microPrecision: predicted === 0 ? null : matched / predicted,
+    macroPrecision: mean(items.map((item) => item.score.goldClaimPrecision)),
     evidencePrecision: citations === 0 ? null : supportedCitations / citations,
   };
+}
+
+function mean(values: Array<number | null>): number | null {
+  const present = values.filter((value): value is number => value !== null);
+  return present.length === 0
+    ? null
+    : present.reduce((sum, value) => sum + value, 0) / present.length;
 }
 
 function choose<
