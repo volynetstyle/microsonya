@@ -6,4 +6,4 @@ const app = createApp(readConfig());
 process.once("SIGINT", () => app.stop("SIGINT"));
 process.once("SIGTERM", () => app.stop("SIGTERM"));
 
-await app.start();
+void (await app.start());
