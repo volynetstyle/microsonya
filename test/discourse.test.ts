@@ -2,9 +2,9 @@ import { describe, expect, it } from "vitest";
 import {
   projectDiscourse,
   projectDiscourseState,
-} from "../packages/discourse/src/projection.js";
-import { reduceDiscourse } from "../packages/discourse/src/reducer.js";
-import type { DiscourseEvent } from "../packages/discourse/src/types.js";
+} from "../experimental/discourse/src/projection.js";
+import { reduceDiscourse } from "../experimental/discourse/src/reducer.js";
+import type { DiscourseEvent } from "../experimental/discourse/src/types.js";
 
 describe("deterministic discourse projection", () => {
   it("requires positive commitment evidence for decisions", () => {

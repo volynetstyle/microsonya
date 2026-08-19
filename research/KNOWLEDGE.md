@@ -64,14 +64,14 @@ reproduction package.
 
 ### Model/eval analysis
 
-Model eval реализован в [`packages/eval`](../packages/eval/). Основные
+Model eval реализован в [`experimental/eval`](../experimental/eval/). Основные
 artifacts/commands:
 
 - `model-screening-v1`: 13 cases × 3 models × 2 pipelines;
 - `selective`: offline DeepSeek claim-selection ablation без новых model calls;
-- [`packages/eval/README.md`](../packages/eval/README.md) — contract и metrics;
-- [`packages/eval/src/report.ts`](../packages/eval/src/report.ts) — stage reports;
-- [`packages/eval/src/runSelectiveAblation.ts`](../packages/eval/src/runSelectiveAblation.ts)
+- [`experimental/eval/README.md`](../experimental/eval/README.md) — contract и metrics;
+- [`experimental/eval/src/report.ts`](../experimental/eval/src/report.ts) — stage reports;
+- [`experimental/eval/src/runSelectiveAblation.ts`](../experimental/eval/src/runSelectiveAblation.ts)
   — top-k/evidence/reply-centrality sweep.
 
 ## 3. Dataset contract and limitations

@@ -1,10 +1,11 @@
-import type { DiscourseMessage } from "./types.js";
+import type { DiscourseMessage } from "./production.js";
 
 export const PIPE_V3_LANGUAGE_GUIDE = [
-  "Grammar: #ID|AUTHOR_JSON|TIME_JSON|^PARENT|KIND_JSON|TEXT_JSON_OR_NULL",
-  "^0 means no explicit parent; ^N is a direct reply to message #N. Cite message IDs in evidence.",
-  "Rows are chronological. Reply edges define conversation branches; row adjacency does not.",
-  "Encoding describes structure, not importance.",
+  "Граматика рядка: #ID|AUTHOR_JSON|TIME_JSON|^PARENT|KIND_JSON|TEXT_JSON_OR_NULL",
+  "^0 означає відсутність явного reply; ^N означає пряму відповідь на повідомлення #N.",
+  "Рядки розташовані хронологічно.",
+  "Reply-зв'язки допомагають визначати, до якої гілки розмови належить повідомлення.",
+  "Посилайся на ID повідомлень у полі evidence.",
 ].join("\n");
 
 export function serializePipeV3(messages: DiscourseMessage[]): string {
