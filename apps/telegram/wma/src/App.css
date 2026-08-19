@@ -1,0 +1,374 @@
+/* Telegram theme tokens. src/telegram/webapp.ts overwrites these with the
+   host client's real themeParams via inline styles on <html> (which always
+   win the cascade), so the values below are only the fallback for testing
+   in a plain browser outside Telegram — kept close to Telegram's own
+   default light/dark palettes. */
+:root {
+  color-scheme: light dark;
+
+  --tg-bg: #ffffff;
+  --tg-secondary-bg: #f0f0f0;
+  --tg-section-bg: #ffffff;
+  --tg-text: #000000;
+  --tg-hint: #707579;
+  --tg-subtitle: #707579;
+  --tg-link: #2563eb;
+  --tg-button: #2563eb;
+  --tg-button-text: #ffffff;
+  --tg-accent: #2563eb;
+  --tg-destructive: #df3f40;
+
+  /* Not a Telegram theme param — derived so borders track the current
+     palette instead of being hardcoded to one scheme. */
+  --tg-border: color-mix(in srgb, var(--tg-hint) 30%, transparent);
+  --tg-accent-soft: color-mix(
+    in srgb,
+    var(--tg-accent) 12%,
+    var(--tg-section-bg)
+  );
+  --tg-accent-border: color-mix(in srgb, var(--tg-accent) 30%, transparent);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --tg-bg: #17212b;
+    --tg-secondary-bg: #0e1621;
+    --tg-section-bg: #1c2733;
+    --tg-text: #ffffff;
+    --tg-hint: #7d8b99;
+    --tg-subtitle: #7d8b99;
+    --tg-link: #62bcf9;
+    --tg-button: #5288c1;
+    --tg-button-text: #ffffff;
+    --tg-accent: #62bcf9;
+    --tg-destructive: #ec3942;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--tg-secondary-bg);
+  color: var(--tg-text);
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    sans-serif;
+  overflow-wrap: anywhere;
+}
+
+.screen {
+  max-width: 30rem;
+  margin: 0 auto;
+  /* src/telegram/webapp.ts sets --tg-viewport-stable-height from Telegram's
+     own measurement (some WebViews disagree with 100vh); 100dvh is the
+     plain-browser fallback — both self-correct for mobile toolbars instead
+     of the old 100vh jump-scroll. */
+  min-height: var(--tg-viewport-stable-height, 100dvh);
+  background: var(--tg-section-bg);
+  padding-bottom: calc(
+    2rem +
+      max(
+        var(--tg-content-safe-area-bottom, 0px),
+        env(safe-area-inset-bottom, 0px)
+      )
+  );
+}
+
+.chat-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  /* Extra top padding clears the iOS notch / Android cutout / Telegram's
+     own header bar — the background still paints full-bleed behind it
+     since the padding lives on this element, not a wrapper. */
+  padding: calc(
+      1rem +
+        max(var(--tg-content-safe-area-top, 0px), env(safe-area-inset-top, 0px))
+    )
+    1.25rem 1rem;
+  border-bottom: 1px solid var(--tg-border);
+  position: sticky;
+  top: 0;
+  background: var(--tg-section-bg);
+  z-index: 1;
+}
+
+.chat-title {
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+.chat-total {
+  color: var(--tg-hint);
+  font-size: 0.85rem;
+}
+
+.topic-list {
+  list-style: none;
+  margin: 0;
+  padding: 0.75rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.topic-card {
+  --accordion-radius: 0.5rem;
+  --accordion-gap: 0.5rem;
+}
+
+.accordion > .topic-card > .topic-trigger {
+  display: block;
+  padding: 0;
+  cursor: pointer;
+}
+
+.accordion > .topic-card > .accordion-content {
+  padding: 0;
+}
+
+.topic-header {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: var(--accordion-padding-y) var(--accordion-padding-x);
+  background: none;
+  border: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.topic-chevron {
+  color: var(--tg-accent);
+  font-size: 0.75rem;
+  line-height: 1.6;
+  flex-shrink: 0;
+  transition: transform 160ms ease;
+}
+
+.topic-card[open] .topic-chevron {
+  transform: rotate(90deg);
+}
+
+.topic-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.topic-title {
+  font-weight: 500;
+  font-size: 1rem;
+}
+
+.topic-meta {
+  color: var(--tg-hint);
+  font-size: 0.8rem;
+}
+
+.topic-summary {
+  display: block;
+  width: 100%;
+  background: none;
+  border: none;
+  border-top: 1px solid var(--tg-border);
+  padding: var(--accordion-padding-y) var(--accordion-padding-x);
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.topic-card[open] .topic-summary {
+  display: none;
+}
+
+.topic-preview {
+  display: block;
+  margin: 0 0 0.5rem;
+  color: var(--tg-hint);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.topic-key-points {
+  color: var(--tg-accent);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.moment-list {
+  list-style: none;
+  margin: 0;
+  padding: var(--accordion-padding-y) var(--accordion-padding-x);
+  border-top: 1px solid var(--tg-border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.moment {
+  display: flex;
+  gap: 0.75rem;
+  padding-left: 0.6rem;
+  border-left: 2px solid var(--tg-border);
+}
+
+.moment-time {
+  flex-shrink: 0;
+  width: 2.8rem;
+  padding-top: 0.15rem;
+  color: var(--tg-hint);
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.moment-body {
+  min-width: 0;
+}
+
+.moment-title {
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+
+.moment-text {
+  margin: 0.2rem 0 0;
+  color: var(--tg-hint);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.quote-card {
+  margin-top: 0.6rem;
+  padding: 0;
+  background: var(--tg-accent-soft);
+  border-radius: 0.5rem;
+  border: 1px solid var(--tg-accent-border);
+}
+
+.accordion > .quote-card > .quote-trigger {
+  padding: 0;
+  cursor: pointer;
+}
+
+.accordion > .quote-card > .quote-expanded {
+  padding: 0;
+}
+
+.quote-card-content {
+  padding: 0.6rem 0.75rem;
+}
+
+.quote-trigger-expanded {
+  display: none;
+}
+
+.quote-card[open] .quote-trigger-collapsed {
+  display: none;
+}
+
+.quote-card[open] .quote-trigger-expanded {
+  display: inline-block;
+  padding-top: 0.6rem;
+}
+
+.quote-text {
+  margin: 0;
+  font-size: 0.88rem;
+  font-style: italic;
+  line-height: 1.4;
+}
+
+.quote-author {
+  display: block;
+  margin-top: 0.3rem;
+  color: var(--tg-hint);
+  font-size: 0.78rem;
+}
+
+.quote-toggle {
+  display: inline-block;
+  margin-top: 0.4rem;
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--tg-accent);
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-left: 0.75rem;
+}
+
+/* Static pre-hydration skeleton — see Document.tsx. Fixed overlay so its
+   removal (App.tsx's mount effect) is a single-frame disappearance rather
+   than the real content stacking below it while both are in flow. */
+.skeleton-overlay {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: var(--tg-secondary-bg);
+}
+
+.skeleton-overlay .screen {
+  min-height: 0;
+  padding-bottom: 1rem;
+}
+
+.skeleton-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: calc(
+      1rem +
+        max(var(--tg-content-safe-area-top, 0px), env(safe-area-inset-top, 0px))
+    )
+    1.25rem 1rem;
+  border-bottom: 1px solid var(--tg-border);
+}
+
+.skeleton-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin: 0 1rem 0.75rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--tg-border);
+  border-radius: 0.75rem;
+}
+
+.skeleton-line {
+  border-radius: 0.25rem;
+  background: linear-gradient(
+    90deg,
+    var(--tg-border) 25%,
+    color-mix(in srgb, var(--tg-border) 50%, transparent) 50%,
+    var(--tg-border) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-line {
+    animation: none;
+  }
+}
