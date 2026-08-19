@@ -11,6 +11,7 @@ export type SummaryWaterfallEvent = {
   cacheStatus?: "hit" | "miss";
   messageCount?: number;
   segmentCount?: number;
+  episodeCount?: number;
   completedSegments?: number;
   promptChars?: number;
   fromMessageId?: number;

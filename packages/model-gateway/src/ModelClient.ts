@@ -1,7 +1,11 @@
 import type { z } from "zod";
 
 export type ModelCallContext = {
-  operation: "segment-summary" | "memory-extraction" | "summary-merge";
+  operation:
+    | "segment-summary"
+    | "memory-extraction"
+    | "summary-merge"
+    | "summary-render";
   chatId?: string;
   commandMessageId?: number;
   segmentId?: string;
@@ -13,7 +17,7 @@ export type ModelCallContext = {
   maxOutputTokens?: number;
 };
 
-export type ModelCallUsage = {
+export type ModelUsage = {
   inputTokens?: number;
   outputTokens?: number;
   reasoningTokens?: number;
@@ -30,7 +34,7 @@ export type ModelCallTelemetry = ModelCallContext & {
   model: string;
   durationMs: number;
   status: "ok" | "error";
-  usage?: ModelCallUsage;
+  usage?: ModelUsage;
   error?: string;
 };
 

@@ -97,6 +97,12 @@ export class SummariesRepo {
     schemaVersion = 1,
   ): Promise<void> {
     const now = Date.now();
+    const reconstruction = segment.reconstruction as unknown as {
+      title?: string;
+      claims?: Array<{ topic: string }>;
+    };
+    const storageTitle =
+      reconstruction.claims?.[0]?.topic ?? reconstruction.title ?? "Claims";
 
     await this.db
       .insert(segmentSummaries)
@@ -107,7 +113,7 @@ export class SummariesRepo {
         toMessageId: segment.toMessageId,
         hash: segment.hash,
         schemaVersion,
-        title: segment.reconstruction.title,
+        title: storageTitle,
         json: JSON.stringify(segment),
         createdAt: now,
         updatedAt: now,
@@ -121,7 +127,7 @@ export class SummariesRepo {
           segmentSummaries.schemaVersion,
         ],
         set: {
-          title: segment.reconstruction.title,
+          title: storageTitle,
           json: JSON.stringify(segment),
           updatedAt: now,
         },

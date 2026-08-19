@@ -11,7 +11,7 @@ import type {
   MemoryUpdate,
   SummaryRun,
 } from "../packages/shared/src/index.js";
-import type { SegmentReconstruction } from "../packages/discourse/src/types.js";
+import type { SegmentReconstruction } from "../packages/discourse/src/production.js";
 import { openTestDb } from "./dbTestUtils.js";
 
 const clients: Awaited<ReturnType<typeof openTestDb>>[] = [];

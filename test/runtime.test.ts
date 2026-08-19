@@ -6,7 +6,7 @@ import {
 } from "../packages/db/src/index.js";
 import {
   InvalidModelOutputError,
-  ModelGateway,
+  SummarizationModelService,
   type ModelClient,
 } from "../packages/model-gateway/src/index.js";
 import {
@@ -115,8 +115,12 @@ describe("summarize", () => {
 
     const summaryClient: ModelClient = {
       generateText: vi.fn(async () => "summary"),
-      generateObject: vi.fn(async (_prompt, schema) => {
-        return schema.parse(reconstruction("hello world", [1, 2]));
+      generateObject: vi.fn(async (_prompt, schema, context) => {
+        return schema.parse(
+          context?.operation === "summary-render"
+            ? rendered("hello world")
+            : reconstruction("hello world", [1, 2]),
+        );
       }),
     };
     const memoryClient: ModelClient = {
@@ -148,8 +152,8 @@ describe("summarize", () => {
         memory,
         messages,
         summaries,
-        models: new ModelGateway(summaryClient),
-        memoryModels: new ModelGateway(memoryClient),
+        models: new SummarizationModelService(summaryClient),
+        memoryModels: new SummarizationModelService(memoryClient),
         onTrace: vi.fn(),
       },
       command,
@@ -160,15 +164,24 @@ describe("summarize", () => {
         memory,
         messages,
         summaries,
-        models: new ModelGateway(summaryClient),
-        memoryModels: new ModelGateway(memoryClient),
+        models: new SummarizationModelService(summaryClient),
+        memoryModels: new SummarizationModelService(memoryClient),
         onTrace: vi.fn(),
       },
       command,
     );
     await waitForMemoryIdle("chat");
 
-    expect(summaryClient.generateObject).toHaveBeenCalledTimes(1);
+    expect(summaryClient.generateObject).toHaveBeenCalledTimes(3);
+    expect(summaryClient.generateObject).toHaveBeenCalledWith(
+      expect.stringContaining('"claims"'),
+      expect.anything(),
+      expect.anything(),
+      undefined,
+    );
+    expect(summaryClient.generateObject.mock.calls[0]?.[0]).not.toContain(
+      '"events"',
+    );
     expect(memoryClient.generateObject).toHaveBeenCalledTimes(1);
     expect(memoryClient.generateObject).toHaveBeenCalledWith(
       expect.any(String),
@@ -209,8 +222,12 @@ describe("summarize", () => {
 
     const summaryClient: ModelClient = {
       generateText: vi.fn(async () => "unused"),
-      generateObject: vi.fn(async (_prompt, schema) => {
-        return schema.parse(reconstruction("hello only", [1]));
+      generateObject: vi.fn(async (_prompt, schema, context) => {
+        return schema.parse(
+          context?.operation === "summary-render"
+            ? rendered("hello only")
+            : reconstruction("hello only", [1]),
+        );
       }),
     };
     const memoryClient: ModelClient = {
@@ -234,13 +251,13 @@ describe("summarize", () => {
           memory,
           messages,
           summaries,
-          models: new ModelGateway(summaryClient),
-          memoryModels: new ModelGateway(memoryClient),
+          models: new SummarizationModelService(summaryClient),
+          memoryModels: new SummarizationModelService(memoryClient),
           onTrace: vi.fn(),
         },
         command,
       ),
-    ).resolves.toContain("Chat");
+    ).resolves.toBe("Коротко: hello only");
     await waitForMemoryIdle("chat");
 
     await close();
@@ -280,8 +297,8 @@ describe("summarize", () => {
           memory,
           messages,
           summaries,
-          models: new ModelGateway(summaryClient),
-          memoryModels: new ModelGateway(memoryClient),
+          models: new SummarizationModelService(summaryClient),
+          memoryModels: new SummarizationModelService(memoryClient),
           onTrace: vi.fn(),
         },
         command,
@@ -307,12 +324,15 @@ describe("summarize", () => {
     let peak = 0;
     const summaryClient: ModelClient = {
       generateText: vi.fn(async () => "unused"),
-      generateObject: vi.fn(async (_prompt, schema) => {
+      generateObject: vi.fn(async (_prompt, schema, context) => {
+        if (context?.operation === "summary-render") {
+          return schema.parse(rendered("змістовних тверджень немає."));
+        }
         active += 1;
         peak = Math.max(peak, active);
         await new Promise((resolve) => setTimeout(resolve, 20));
         active -= 1;
-        return schema.parse({ title: "Chat", events: [] });
+        return schema.parse({ claims: [] });
       }),
     };
     const memoryClient: ModelClient = {
@@ -328,8 +348,8 @@ describe("summarize", () => {
         memory,
         messages,
         summaries,
-        models: new ModelGateway(summaryClient),
-        memoryModels: new ModelGateway(memoryClient),
+        models: new SummarizationModelService(summaryClient),
+        memoryModels: new SummarizationModelService(memoryClient),
         segmentConcurrency: 2,
         onTrace: (event) => trace.push(event),
       },
@@ -342,7 +362,7 @@ describe("summarize", () => {
       },
     );
 
-    expect(summaryClient.generateObject).toHaveBeenCalledTimes(4);
+    expect(summaryClient.generateObject).toHaveBeenCalledTimes(5);
     expect(peak).toBe(2);
     expect(
       trace.filter((event) => event.stage === "segment.cache"),
@@ -370,8 +390,12 @@ describe("summarize", () => {
     });
     const summaryClient: ModelClient = {
       generateText: vi.fn(async () => "unused"),
-      generateObject: vi.fn(async (_prompt, schema) =>
-        schema.parse({ title: "Chat", events: [] }),
+      generateObject: vi.fn(async (_prompt, schema, context) =>
+        schema.parse(
+          context?.operation === "summary-render"
+            ? rendered("змістовних тверджень немає.")
+            : { claims: [] },
+        ),
       ),
     };
     const memoryClient: ModelClient = {
@@ -388,8 +412,8 @@ describe("summarize", () => {
           memory,
           messages,
           summaries,
-          models: new ModelGateway(summaryClient),
-          memoryModels: new ModelGateway(memoryClient),
+          models: new SummarizationModelService(summaryClient),
+          memoryModels: new SummarizationModelService(memoryClient),
           onTrace: vi.fn(),
         },
         {
@@ -400,7 +424,7 @@ describe("summarize", () => {
           count: 1,
         },
       ),
-    ).resolves.toContain("Chat");
+    ).resolves.toBe("Коротко: змістовних тверджень немає.");
 
     releaseMemory();
     await waitForMemoryIdle("chat");
@@ -427,26 +451,16 @@ function message(
 
 function reconstruction(statement: string, evidence: number[]) {
   return {
-    title: "Chat",
-    events: [
+    claims: [
       {
-        id: `m${evidence[0]}`,
-        topicId: "greeting",
-        topicTitle: "Greeting",
-        speaker: "User",
-        statement,
-        speechAct: "assertion",
-        literalness: "literal",
-        commitment: "none",
-        epistemicStatus: "claimed",
-        settled: false,
-        action: null,
-        refersTo: [],
-        stance: "neutral",
-        semanticImportance: 0.7,
-        confidence: 1,
+        topic: "Greeting",
+        text: statement,
         evidence,
       },
     ],
   };
+}
+
+function rendered(summary: string) {
+  return { title: "Chat", summary: `Коротко: ${summary}` };
 }

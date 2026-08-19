@@ -1,29 +1,98 @@
 import { describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 import {
-  AiSdkModelClient,
-  ProductionModelRouterClient,
-  type ModelClient,
+  AiSdkGenerator,
+  createAiSdkModel,
+  createSummarizationModelService,
+  loadModelConfig,
+  OllamaStructuredGenerator,
 } from "../packages/model-gateway/src/index.js";
 
-describe("AiSdkModelClient", () => {
+describe("AiSdkGenerator", () => {
   it("uses the OpenAI-compatible /v1 chat completions endpoint for bare base URLs", async () => {
     const fetchMock = mockFetch();
-    const client = new AiSdkModelClient({
-      baseUrl: "http://localhost:11434",
-      models: ["qwen2.5:7b"],
+    const generator = new AiSdkGenerator({
+      model: createAiSdkModel({
+        baseUrl: "http://localhost:11434",
+        modelId: "qwen2.5:7b",
+        fetch: fetchMock,
+      }),
+      modelId: "qwen2.5:7b",
       maxRetries: 0,
-      fetch: fetchMock,
     });
 
-    await client.generateText("hello");
+    await generator.generateText("hello");
 
     expect(String(fetchMock.mock.calls[0]?.[0])).toBe(
       "http://localhost:11434/v1/chat/completions",
     );
   });
 
-  it("uses Ollama native JSON mode for structured output", async () => {
+  it("does not duplicate /v1 and keeps compatible-provider headers", async () => {
+    const fetchMock = mockFetch();
+    const generator = new AiSdkGenerator({
+      model: createAiSdkModel({
+        baseUrl: "https://models.example.test/api/v1",
+        apiKey: "token",
+        modelId: "model",
+        appName: "Microsonya",
+        referer: "https://example.test",
+        fetch: fetchMock,
+      }),
+      modelId: "model",
+      maxRetries: 0,
+    });
+
+    await generator.generateText("hello");
+
+    const [, init] = fetchMock.mock.calls[0] ?? [];
+    const headers = new Headers(init?.headers);
+
+    expect(String(fetchMock.mock.calls[0]?.[0])).toBe(
+      "https://models.example.test/api/v1/chat/completions",
+    );
+    expect(headers.get("authorization")).toBe("Bearer token");
+    expect(headers.get("HTTP-Referer")).toBe("https://example.test");
+    expect(headers.get("X-Title")).toBe("Microsonya");
+  });
+
+  it("generates schema-constrained objects", async () => {
+    const fetchMock = mockFetch({
+      choices: [
+        {
+          message: { role: "assistant", content: '{"title":"Chat"}' },
+          finish_reason: "stop",
+        },
+      ],
+    });
+    const generator = new AiSdkGenerator({
+      model: createAiSdkModel({
+        baseUrl: "https://models.example.test/api/v1",
+        apiKey: "token",
+        modelId: "first-model",
+        fetch: fetchMock,
+      }),
+      modelId: "first-model",
+      maxRetries: 0,
+    });
+
+    await expect(
+      generator.generateObject("hello", z.object({ title: z.string() })),
+    ).resolves.toEqual({ title: "Chat" });
+
+    expect(
+      JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body)),
+    ).toMatchObject({
+      model: "first-model",
+      response_format: { type: "json_schema" },
+      temperature: 1,
+      max_tokens: 2048,
+    });
+  });
+});
+
+describe("OllamaStructuredGenerator", () => {
+  it("uses Ollama native JSON mode and normalizes usage", async () => {
     const onTelemetry = vi.fn();
     const fetchMock = mockFetch({
       message: {
@@ -39,16 +108,15 @@ describe("AiSdkModelClient", () => {
       eval_duration: 1_000_000_000,
       done_reason: "stop",
     });
-    const client = new AiSdkModelClient({
-      baseUrl: "http://localhost:11434/v1",
-      models: ["gpt-oss:120b-cloud"],
-      maxRetries: 0,
+    const generator = new OllamaStructuredGenerator({
+      baseUrl: "http://localhost:11434",
+      model: "gpt-oss:120b-cloud",
       fetch: fetchMock,
       onTelemetry,
     });
 
     await expect(
-      client.generateObject("hello", z.object({ title: z.string() }), {
+      generator.generateObject("hello", z.object({ title: z.string() }), {
         operation: "segment-summary",
         chatId: "chat",
         commandMessageId: 7,
@@ -91,7 +159,7 @@ describe("AiSdkModelClient", () => {
     );
   });
 
-  it("propagates user cancellation to the active Ollama request", async () => {
+  it("propagates user cancellation to the active request", async () => {
     const onTelemetry = vi.fn();
     const fetchMock = vi.fn(
       async (_input: string | URL | Request, init?: RequestInit) =>
@@ -103,21 +171,17 @@ describe("AiSdkModelClient", () => {
           );
         }),
     );
-    const client = new AiSdkModelClient({
-      baseUrl: "http://localhost:11434/v1",
-      models: ["gpt-oss:120b-cloud"],
+    const generator = new OllamaStructuredGenerator({
+      baseUrl: "http://localhost:11434",
+      model: "gpt-oss:120b-cloud",
       fetch: fetchMock,
       onTelemetry,
     });
     const controller = new AbortController();
-    const request = client.generateObject(
+    const request = generator.generateObject(
       "hello",
       z.object({ title: z.string() }),
-      {
-        operation: "segment-summary",
-        chatId: "chat",
-        commandMessageId: 7,
-      },
+      { operation: "segment-summary", chatId: "chat", commandMessageId: 7 },
       controller.signal,
     );
 
@@ -125,180 +189,88 @@ describe("AiSdkModelClient", () => {
 
     await expect(request).rejects.toMatchObject({ name: "AbortError" });
     expect(onTelemetry).toHaveBeenCalledWith(
-      expect.objectContaining({
-        status: "error",
-        error: "Cancelled",
-      }),
+      expect.objectContaining({ status: "error", error: "Cancelled" }),
     );
   });
 
-  it("does not duplicate /v1 and keeps compatible-provider headers", async () => {
-    const fetchMock = mockFetch();
-    const client = new AiSdkModelClient({
-      baseUrl: "https://models.example.test/api/v1",
-      apiKey: "token",
-      models: ["model"],
-      appName: "Microsonya",
-      referer: "https://example.test",
-      maxRetries: 0,
+  it("defaults the call context so an unqualified call does not crash", async () => {
+    const fetchMock = mockFetch({ message: { role: "assistant", content: "{}" } });
+    const generator = new OllamaStructuredGenerator({
+      baseUrl: "http://localhost:11434",
+      model: "model",
       fetch: fetchMock,
     });
 
-    await client.generateText("hello");
+    await expect(generator.generateObject("hello", z.object({}))).resolves.toEqual(
+      {},
+    );
+  });
 
-    const [, init] = fetchMock.mock.calls[0] ?? [];
-    const headers = new Headers(init?.headers);
+  it("strips a /v1 suffix since Ollama's native API is always at the origin", async () => {
+    const fetchMock = mockFetch({ message: { role: "assistant", content: "{}" } });
+    const generator = new OllamaStructuredGenerator({
+      baseUrl: "http://localhost:11434/v1",
+      model: "model",
+      fetch: fetchMock,
+    });
+
+    await generator.generateObject("hello", z.object({}));
 
     expect(String(fetchMock.mock.calls[0]?.[0])).toBe(
-      "https://models.example.test/api/v1/chat/completions",
+      "http://localhost:11434/api/chat",
     );
-    expect(headers.get("authorization")).toBe("Bearer token");
-    expect(headers.get("HTTP-Referer")).toBe("https://example.test");
-    expect(headers.get("X-Title")).toBe("Microsonya");
-  });
-
-  it("delegates model fallback and structured-output healing to OpenRouter", async () => {
-    const fetchMock = mockFetch({
-      choices: [
-        {
-          message: {
-            role: "assistant",
-            content: '{"title":"Chat"}',
-          },
-          finish_reason: "stop",
-        },
-      ],
-    });
-    const client = new AiSdkModelClient({
-      baseUrl: "https://openrouter.ai/api/v1/",
-      apiKey: "token",
-      models: ["first:free", "second:free", "third:free"],
-      maxRetries: 0,
-      fetch: fetchMock,
-    });
-
-    await expect(
-      client.generateObject("hello", z.object({ title: z.string() })),
-    ).resolves.toEqual({ title: "Chat" });
-
-    expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(
-      JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body)),
-    ).toMatchObject({
-      model: "first:free",
-      models: ["second:free", "third:free"],
-      plugins: [{ id: "response-healing" }],
-      provider: {
-        require_parameters: true,
-      },
-      response_format: {
-        type: "json_schema",
-      },
-      temperature: 1,
-      max_tokens: 2048,
-    });
-  });
-
-  it("uses a separate lightweight OpenRouter model for text merges", async () => {
-    const fetchMock = mockFetch();
-    const client = new AiSdkModelClient({
-      baseUrl: "https://openrouter.ai/api/v1",
-      apiKey: "token",
-      models: ["segment-primary", "segment-fallback"],
-      mergeModel: "openrouter/free",
-      fetch: fetchMock,
-    });
-
-    await expect(client.generateText("merge")).resolves.toBe("ok");
-
-    expect(fetchMock).toHaveBeenCalledTimes(1);
-    const body = JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body));
-
-    expect(body).toMatchObject({
-      model: "openrouter/free",
-      temperature: 1,
-      max_tokens: 2048,
-    });
-    expect(body).not.toHaveProperty("models");
-    expect(body).not.toHaveProperty("plugins");
   });
 });
 
-describe("ProductionModelRouterClient", () => {
-  it("selects tiers by estimated input size", async () => {
-    const clients = [
-      mockClient("cheap"),
-      mockClient("default"),
-      mockClient("quality"),
-    ];
-    const router = createRouter(clients);
-
-    await expect(router.generateText("short")).resolves.toBe("cheap");
-    await expect(router.generateText("x".repeat(15))).resolves.toBe("default");
-    await expect(router.generateText("x".repeat(25))).resolves.toBe("quality");
-  });
-
-  it("escalates to stronger tiers and then degrades when a route fails", async () => {
-    const cheap = mockClient("cheap", new Error("cheap unavailable"));
-    const standard = mockClient("default", new Error("default unavailable"));
-    const quality = mockClient("quality");
-    const router = createRouter([cheap, standard, quality]);
-
-    await expect(router.generateText("short")).resolves.toBe("quality");
-    expect(cheap.generateText).toHaveBeenCalledTimes(1);
-    expect(standard.generateText).toHaveBeenCalledTimes(1);
-    expect(quality.generateText).toHaveBeenCalledTimes(1);
-  });
-
-  it("opens a failing circuit and skips it until cooldown", async () => {
-    let now = 100;
-    const cheap = mockClient("cheap", new Error("down"));
-    const standard = mockClient("default");
-    const quality = mockClient("quality");
-    const router = createRouter([cheap, standard, quality], {
-      failureThreshold: 1,
-      circuitCooldownMs: 1_000,
-      now: () => now,
+describe("createSummarizationModelService", () => {
+  it("routes structured generation by the configured transport, not a base-url heuristic", async () => {
+    const requestedUrls: string[] = [];
+    const fetchMock = vi.fn(async (input: string | URL | Request) => {
+      requestedUrls.push(String(input));
+      if (String(input).endsWith("/api/chat")) {
+        return new Response(
+          JSON.stringify({ message: { role: "assistant", content: "{}" } }),
+          { status: 200, headers: { "content-type": "application/json" } },
+        );
+      }
+      return new Response(
+        JSON.stringify({
+          choices: [
+            { message: { role: "assistant", content: "{}" }, finish_reason: "stop" },
+          ],
+        }),
+        { status: 200, headers: { "content-type": "application/json" } },
+      );
     });
 
-    await router.generateText("short");
-    await router.generateText("short");
-    expect(cheap.generateText).toHaveBeenCalledTimes(1);
+    const ollamaConfig = loadModelConfig({
+      MODELS_MODE: "enabled",
+      LLM_BASE_URL: "http://localhost:11434",
+      LLM_MODEL: "gpt-oss:120b-cloud",
+    } as NodeJS.ProcessEnv);
+    const ollamaService = createSummarizationModelService(ollamaConfig, {
+      fetch: fetchMock,
+    })!;
+    await ollamaService.extractMemoryOps("prompt");
+    expect(requestedUrls.at(-1)).toBe("http://localhost:11434/api/chat");
 
-    now = 1_101;
-    await router.generateText("short");
-    expect(cheap.generateText).toHaveBeenCalledTimes(2);
+    requestedUrls.length = 0;
+    const compatibleConfig = loadModelConfig({
+      MODELS_MODE: "enabled",
+      LLM_BASE_URL: "https://models.example.test",
+      LLM_MODEL: "model",
+      LLM_API_KEY: "token",
+      LLM_STRUCTURED_TRANSPORT: "openai-compatible",
+    } as NodeJS.ProcessEnv);
+    const compatibleService = createSummarizationModelService(compatibleConfig, {
+      fetch: fetchMock,
+    })!;
+    await compatibleService.extractMemoryOps("prompt");
+    expect(requestedUrls.at(-1)).toBe(
+      "https://models.example.test/v1/chat/completions",
+    );
   });
 });
-
-function createRouter(
-  clients: ModelClient[],
-  options: Partial<
-    ConstructorParameters<typeof ProductionModelRouterClient>[0]
-  > = {},
-) {
-  return new ProductionModelRouterClient({
-    routes: (["cheap", "default", "quality"] as const).map((tier, index) => ({
-      tier,
-      model: tier,
-      client: clients[index]!,
-    })),
-    defaultMinInputTokens: 10,
-    qualityMinInputTokens: 20,
-    estimateInputTokens: (prompt) => prompt.length,
-    ...options,
-  });
-}
-
-function mockClient(value: string, error?: Error): ModelClient {
-  return {
-    generateText: vi.fn(async () => {
-      if (error) throw error;
-      return value;
-    }),
-    generateObject: vi.fn(async (_prompt, schema) => schema.parse({ value })),
-  };
-}
 
 function mockFetch(
   body: unknown = {

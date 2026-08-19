@@ -1,7 +1,9 @@
 import { z } from "zod";
 import {
-  discourseReconstructionSchema,
-  type DiscourseReconstruction,
+  claimsReconstructionSchema,
+  renderedSummarySchema,
+  type ClaimsReconstruction,
+  type RenderedSummary,
   type SegmentReconstruction,
 } from "@microsonya/discourse";
 import type { DiscussionSegment, MemoryOp } from "@microsonya/shared";
@@ -60,7 +62,13 @@ const memoryOpsResponseSchema = z.object({
   operations: z.array(memoryOpSchema).default([]),
 });
 
-export class ModelGateway {
+/**
+ * Domain operations over a ModelClient for the Microsonya summarization
+ * pipeline: segment reconstruction, memory-op extraction, summary rendering.
+ * Knows the domain schemas and fail-closed policy; knows nothing about
+ * providers or transports.
+ */
+export class SummarizationModelService {
   constructor(private readonly client: ModelClient) {}
 
   async reconstructSegment(
@@ -117,22 +125,52 @@ export class ModelGateway {
     }
   }
 
+  async renderSummary(
+    prompt: string,
+    context?: ModelCallContext,
+    signal?: AbortSignal,
+  ): Promise<RenderedSummary> {
+    let output: unknown;
+    try {
+      output = await this.client.generateObject(
+        prompt,
+        renderedSummarySchema,
+        context,
+        signal,
+      );
+      return renderedSummarySchema.parse(output);
+    } catch (error) {
+      if (
+        !(error instanceof InvalidModelOutputError) &&
+        !(error instanceof z.ZodError)
+      ) {
+        throw error;
+      }
+      throw error instanceof InvalidModelOutputError
+        ? error
+        : new InvalidModelOutputError({
+            cause: error,
+            rawText: safeStringify(output),
+          });
+    }
+  }
+
   private async generateSegmentReconstruction(
     prompt: string,
     segment: DiscussionSegment,
     context?: ModelCallContext,
     signal?: AbortSignal,
-  ): Promise<DiscourseReconstruction> {
+  ): Promise<ClaimsReconstruction> {
     let output: unknown;
 
     try {
       output = await this.client.generateObject(
         prompt,
-        discourseReconstructionSchema,
+        claimsReconstructionSchema,
         context,
         signal,
       );
-      return discourseReconstructionSchema.parse(output);
+      return claimsReconstructionSchema.parse(output);
     } catch (error) {
       if (
         !(error instanceof InvalidModelOutputError) &&
@@ -150,7 +188,7 @@ export class ModelGateway {
             });
 
       console.error(
-        "Model returned an invalid discourse reconstruction; segment was not cached",
+        "Model returned invalid v6 claims; segment was not cached",
         safeStringify({
           segmentId: segment.id,
           fromMessageId: segment.fromMessageId,

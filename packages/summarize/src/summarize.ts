@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import type { MessagesRepo, SummariesRepo } from "@microsonya/db";
-import type { ModelGateway } from "@microsonya/model-gateway";
+import type { SummarizationModelService } from "@microsonya/model-gateway";
 import type {
   MemoryState,
   MemoryUpdate,
@@ -11,7 +11,7 @@ import { hashMessages } from "./hashMessages.js";
 import { processChatDelta } from "./memoryRuntime.js";
 import { createMemoryState } from "./memoryState.js";
 import { buildSegmentPrompt } from "./prompts.js";
-import { renderSummary } from "./renderSummary.js";
+import { buildFinalRenderPrompt, buildSummaryEpisodes } from "./finalRender.js";
 import { segmentMessages } from "./segmentMessages.js";
 import { selectSummaryWindow } from "./selectWindow.js";
 import { SummaryWaterfall, type SummaryWaterfallSink } from "./waterfall.js";
@@ -27,12 +27,13 @@ export type SummaryRunsRepo = Pick<
 >;
 
 export type SummaryModels = {
-  reconstructSegment: ModelGateway["reconstructSegment"];
-  extractMemoryOps?: ModelGateway["extractMemoryOps"];
+  reconstructSegment: SummarizationModelService["reconstructSegment"];
+  renderSummary: SummarizationModelService["renderSummary"];
+  extractMemoryOps?: SummarizationModelService["extractMemoryOps"];
 };
 
 export type MemoryModels = {
-  extractMemoryOps: ModelGateway["extractMemoryOps"];
+  extractMemoryOps: SummarizationModelService["extractMemoryOps"];
 };
 
 export type MemoryStateRepo = {
@@ -57,7 +58,7 @@ const pendingMemoryUpdates = new Map<string, Promise<void>>();
 const MEMORY_DELTA_BATCH_SIZE = 100;
 const MAX_MEMORY_SAVE_CONFLICTS = 3;
 
-const RECONSTRUCTION_SCHEMA_VERSION = 5;
+const RECONSTRUCTION_SCHEMA_VERSION = 8;
 const MIN_RECONSTRUCTION_OUTPUT_TOKENS = 2_048;
 const MAX_RECONSTRUCTION_OUTPUT_TOKENS = 8_192;
 const RECONSTRUCTION_OUTPUT_TOKENS_PER_MESSAGE = 320;
@@ -150,11 +151,32 @@ async function summarizeCriticalPath(
     },
   );
 
-  const finalText = await trace.span(
-    "summary.render",
+  const episodes = await trace.span(
+    "summary.select",
     { segmentCount: reconstructions.length },
-    () => renderSummary(reconstructions),
+    () => buildSummaryEpisodes(reconstructions),
   );
+  const renderPrompt = await trace.span(
+    "summary.prompt",
+    { episodeCount: episodes.length },
+    () => buildFinalRenderPrompt(episodes),
+  );
+  const rendered = await trace.span(
+    "summary.model",
+    { episodeCount: episodes.length, promptChars: renderPrompt.length },
+    () =>
+      deps.models.renderSummary(
+        renderPrompt,
+        {
+          operation: "summary-render",
+          chatId: command.chatId,
+          commandMessageId: command.commandMessageId,
+          messageCount: messages.length,
+        },
+        deps.signal,
+      ),
+  );
+  const finalText = rendered.summary;
 
   const first = messages[0]!;
   const last = messages.at(-1)!;

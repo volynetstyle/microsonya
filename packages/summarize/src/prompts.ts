@@ -1,5 +1,5 @@
 import {
-  buildDiscoursePrompt,
+  buildClaimsPrompt,
   PIPE_V3_LANGUAGE_GUIDE,
   serializePipeV3,
   type DiscourseMessage,
@@ -17,11 +17,11 @@ export function buildSegmentPrompt(segment: DiscussionSegment): string {
   }));
 
   return [
-    buildDiscoursePrompt(
+    buildClaimsPrompt(
       serializePipeV3(messages),
       "pipe-v3",
       PIPE_V3_LANGUAGE_GUIDE,
     ),
-    "Output language requirement: write title, topicTitle, statement, and action values in Ukrainian. Preserve speaker identifiers. Keep JSON property names, event ids, and topicId values English-compatible.",
+    "Вимога до мови відповіді: пиши title, topic і text українською. Зберігай авторство тверджень у text. Назви JSON-полів залишай без змін.",
   ].join("\n\n");
 }

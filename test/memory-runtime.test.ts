@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import {
   InvalidModelOutputError,
-  ModelGateway,
+  SummarizationModelService,
   type ModelClient,
 } from "../packages/model-gateway/src/index.js";
 import {
@@ -11,9 +11,9 @@ import {
   materializeMemoryState,
   processChatDelta,
   retrieveRelevantMemory,
-  renderMemorySummary,
   type MemoryOpsModel,
 } from "../packages/summarize/src/index.js";
+import { renderMemorySummary } from "../experimental/tools/src/memoryView.js";
 import type { ChatMessage, MemoryOp } from "../packages/shared/src/index.js";
 
 describe("processChatDelta", () => {
@@ -308,7 +308,7 @@ describe("MemoryTable", () => {
   });
 });
 
-describe("ModelGateway.extractMemoryOps", () => {
+describe("SummarizationModelService.extractMemoryOps", () => {
   it("accepts typed operations and uses fail-closed [] for invalid output", async () => {
     const validClient: ModelClient = {
       generateText: vi.fn(async () => "unused"),
@@ -326,7 +326,7 @@ describe("ModelGateway.extractMemoryOps", () => {
       ),
     };
     await expect(
-      new ModelGateway(validClient).extractMemoryOps("prompt"),
+      new SummarizationModelService(validClient).extractMemoryOps("prompt"),
     ).resolves.toEqual([
       {
         type: "create",
@@ -343,7 +343,7 @@ describe("ModelGateway.extractMemoryOps", () => {
       }),
     };
     await expect(
-      new ModelGateway(invalidClient).extractMemoryOps("prompt"),
+      new SummarizationModelService(invalidClient).extractMemoryOps("prompt"),
     ).resolves.toEqual([]);
   });
 });
