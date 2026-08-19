@@ -21,11 +21,15 @@
     "eval:factuality": "pnpm --filter @microsonya/eval factuality",
     "start": "pnpm bot:start",
     "bot:start": "pnpm --filter @microsonya/telegram-bot start",
+    "dev:webapp": "cross-env STORAGE_MODE=memory MODELS_MODE=disabled WMA_URL=http://localhost:3000 pnpm --parallel --filter @microsonya/telegram-bot --filter @microsonya/telegram-wma dev",
+    "dev:webapp:tunnel": "node scripts/dev-webapp-tunnel.mjs",
+    "tunnel:wma": "cloudflared tunnel --url http://localhost:3000",
     "test": "vitest run"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.3",
     "@types/node": "^22.15.34",
+    "cross-env": "^7.0.3",
     "dotenv": "^16.5.0",
     "drizzle-orm": "^0.44.7",
     "pg": "^8.22.0",
