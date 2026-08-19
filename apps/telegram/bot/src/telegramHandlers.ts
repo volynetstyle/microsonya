@@ -1,7 +1,10 @@
 import { summarize } from "@microsonya/summarize";
 import type { Context } from "telegraf";
-import { parseSummaryCommand } from "./commands/summarize.js";
-import type { AppServices } from "./services.js";
+import { toCommandInvocation } from "./commands/telegram.js";
+import { parseSummarizeArgs, toSummaryCommand } from "./commands/summarize.js";
+import { buildWebAppMarkup } from "./commands/webapp.js";
+import type { SummarizationModelService } from "@microsonya/model-gateway";
+import type { Storage } from "./storage.js";
 import { ingestMessage } from "./telegram/ingest.js";
 import {
   isForwardedMessage,
@@ -24,7 +27,14 @@ const activeSummaries = new Map<
   { controller: AbortController; disclosure: LatencyAwareDisclosure }
 >();
 
-export function createMessageHandler(services: AppServices) {
+export type BotServices = {
+  storage: Storage;
+  models?: SummarizationModelService;
+  memoryModels?: SummarizationModelService;
+  wmaUrl?: string;
+};
+
+export function createMessageHandler(services: BotServices) {
   return async function handleMessage(ctx: Context): Promise<void> {
     const updateStartedAt = Date.now();
     let commandContext:
@@ -40,23 +50,36 @@ export function createMessageHandler(services: AppServices) {
       await ingestMessage(services.storage.messages, chatMessage);
       const ingestMs = Date.now() - ingestStartedAt;
 
-      const text = telegramMessage.text;
-
-      if (!text || isForwardedMessage(telegramMessage)) {
+      if (isForwardedMessage(telegramMessage)) {
         return;
       }
 
       const commandParseStartedAt = Date.now();
-      const command = parseSummaryCommand(
-        chatMessage.chatId,
-        chatMessage.id,
-        telegramMessage.date * 1000,
-        text,
-      );
+      const invocation = toCommandInvocation(telegramMessage, ctx.me);
+      if (!invocation) return;
 
-      if (!command) {
+      if (invocation.name === "app") {
+        if (!services.wmaUrl) {
+          await ctx.reply("Міні-застосунок вимкнено, бо WMA_URL не задано.");
+          return;
+        }
+        const reply_markup = buildWebAppMarkup(services.wmaUrl);
+        await ctx.reply(
+          reply_markup
+            ? "Тисни, щоб відкрити міні-застосунок:"
+            : `Відкрий міні-застосунок у браузері (не https, тому без кнопки): ${services.wmaUrl}`,
+          reply_markup ? { reply_markup } : undefined,
+        );
         return;
       }
+
+      if (invocation.name !== "summarize") {
+        return;
+      }
+      const args = parseSummarizeArgs(invocation.args);
+      if (!args) return;
+      const command = toSummaryCommand(invocation, args);
+
       commandContext = {
         chatId: command.chatId,
         commandMessageId: command.commandMessageId,
@@ -70,7 +93,7 @@ export function createMessageHandler(services: AppServices) {
 
       const controller = new AbortController();
       disclosure = new LatencyAwareDisclosure(
-        createDisclosureTransport(ctx, command.commandMessageId),
+        toDisclosureTransport(ctx, command.commandMessageId),
       );
       disclosure.start();
       activeSummaryKey = summaryKey(command.chatId, command.commandMessageId);
@@ -161,7 +184,7 @@ export function createCancelSummaryHandler() {
   };
 }
 
-function createDisclosureTransport(
+function toDisclosureTransport(
   ctx: Context,
   commandMessageId: number,
 ): DisclosureTransport {

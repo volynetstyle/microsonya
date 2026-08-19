@@ -9,6 +9,7 @@ import {
   InMemoryMessagesRepo,
   InMemoryMemoriesRepo,
   InMemorySummariesRepo,
+  LocalMemoryDatabase,
 } from "./runtime/inMemoryStorage.js";
 import { requiredConfigValue } from "./errors.js";
 
@@ -20,7 +21,7 @@ export type Storage = {
 
 export function createStorage(config: AppConfig): Storage {
   if (config.storageMode === "memory") {
-    return createInMemoryStorage();
+    return createInMemoryStorage(config.memoryFilePath);
   }
 
   return createPostgresStorage(
@@ -28,11 +29,12 @@ export function createStorage(config: AppConfig): Storage {
   );
 }
 
-function createInMemoryStorage(): Storage {
+function createInMemoryStorage(filePath: string): Storage {
+  const database = new LocalMemoryDatabase(filePath);
   return {
-    memory: new InMemoryMemoriesRepo(),
-    messages: new InMemoryMessagesRepo(),
-    summaries: new InMemorySummariesRepo(),
+    memory: new InMemoryMemoriesRepo(database),
+    messages: new InMemoryMessagesRepo(database),
+    summaries: new InMemorySummariesRepo(database),
   };
 }
 

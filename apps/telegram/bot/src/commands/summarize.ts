@@ -1,64 +1,57 @@
 import type { SummaryCommand } from "@microsonya/shared";
+import type { TelegramCommandInvocation } from "./telegram.js";
 
 const COMMAND_NAME = "summarize";
 const MAX_REQUESTED_COUNT = 1024;
 
-export function parseSummaryCommand(
-  chatId: string,
-  commandMessageId: number,
-  date: number,
-  text: string,
-): SummaryCommand | undefined {
-  const tokens = text.trim().split(/\s+/);
+export type SummarizeArgs =
+  | { mode: "recent" }
+  | { mode: "today" }
+  | { mode: "count"; count: number };
 
-  const rawCommand = tokens[0];
-  const argument = tokens[1];
-
-  if (!rawCommand || !isSummaryCommand(rawCommand)) {
+export function parseSummarizeArgs(
+  args: readonly string[],
+): SummarizeArgs | undefined {
+  if (args.length > 1) {
     return undefined;
   }
 
-  if (tokens.length > 2) {
-    return undefined;
-  }
+  const argument = args[0];
 
   if (argument === undefined) {
-    return {
-      chatId,
-      commandMessageId,
-      date,
-      mode: "recent",
-    };
+    return { mode: "recent" };
   }
 
   if (argument === "today") {
-    return {
-      chatId,
-      commandMessageId,
-      date,
-      mode: "today",
-    };
+    return { mode: "today" };
   }
 
   const count = parseCountArgument(argument);
 
   if (count !== undefined) {
-    return {
-      chatId,
-      commandMessageId,
-      date,
-      mode: "count",
-      count,
-    };
+    return { mode: "count", count };
   }
 
   return undefined;
 }
 
-function isSummaryCommand(command: string): boolean {
-  const [name] = command.split("@", 2);
+export const telegramCommands = [
+  {
+    command: COMMAND_NAME,
+    description: "Summarize recent messages",
+  },
+];
 
-  return name === `/${COMMAND_NAME}`;
+export function toSummaryCommand(
+  invocation: TelegramCommandInvocation,
+  args: SummarizeArgs,
+): SummaryCommand {
+  return {
+    chatId: invocation.chatId,
+    commandMessageId: invocation.messageId,
+    date: invocation.date,
+    ...args,
+  };
 }
 
 function parseCountArgument(argument: string): number | undefined {

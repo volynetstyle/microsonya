@@ -29,6 +29,18 @@ export async function launchWithRetry(
   }
 }
 
+export function isRetryableTelegramError(error: unknown): boolean {
+  if (typeof error !== "object" || error === null || !("response" in error)) {
+    return true;
+  }
+  const response = error.response;
+  if (typeof response !== "object" || response === null) return true;
+  if (!("error_code" in response) || typeof response.error_code !== "number") {
+    return true;
+  }
+  return response.error_code === 429 || response.error_code >= 500;
+}
+
 function abortableDelay(delayMs: number, signal: AbortSignal): Promise<void> {
   return new Promise((resolve) => {
     if (signal.aborted) {

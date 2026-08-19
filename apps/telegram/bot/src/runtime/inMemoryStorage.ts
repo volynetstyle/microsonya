@@ -6,6 +6,87 @@ import type {
 } from "@microsonya/shared";
 import type { SegmentReconstruction } from "@microsonya/discourse";
 import type { MessageSink } from "../telegram/ingest.js";
+import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
+import { dirname } from "node:path";
+
+type LocalMemorySnapshot = {
+  version: 1;
+  messages: Record<string, ChatMessage>;
+  runs: Record<string, SummaryRun>;
+  segments: Record<string, SegmentReconstruction>;
+  states: Record<string, MemoryState>;
+};
+
+const emptySnapshot = (): LocalMemorySnapshot => ({
+  version: 1,
+  messages: {},
+  runs: {},
+  segments: {},
+  states: {},
+});
+
+/** Shared process memory with an optional, atomically replaced JSON snapshot. */
+export class LocalMemoryDatabase {
+  private snapshot?: LocalMemorySnapshot;
+  private pending: Promise<void> = Promise.resolve();
+
+  constructor(private readonly filePath?: string) {}
+
+  async read<T>(reader: (snapshot: LocalMemorySnapshot) => T): Promise<T> {
+    await this.pending;
+    return reader(await this.load());
+  }
+
+  async update<T>(writer: (snapshot: LocalMemorySnapshot) => T): Promise<T> {
+    let result!: T;
+    const operation = this.pending.then(async () => {
+      const snapshot = await this.load();
+      result = writer(snapshot);
+      if (this.filePath) await this.persist(snapshot);
+    });
+    this.pending = operation.catch(() => undefined);
+    await operation;
+    return result;
+  }
+
+  private async load(): Promise<LocalMemorySnapshot> {
+    if (this.snapshot) return this.snapshot;
+    if (!this.filePath) return (this.snapshot = emptySnapshot());
+
+    try {
+      const parsed = JSON.parse(
+        await readFile(this.filePath, "utf8"),
+      ) as Partial<LocalMemorySnapshot>;
+      if (parsed.version !== 1) {
+        throw new Error(
+          `Unsupported local memory version: ${String(parsed.version)}`,
+        );
+      }
+      this.snapshot = {
+        version: 1,
+        messages: parsed.messages ?? {},
+        runs: parsed.runs ?? {},
+        segments: parsed.segments ?? {},
+        states: parsed.states ?? {},
+      };
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+      this.snapshot = emptySnapshot();
+    }
+    return this.snapshot;
+  }
+
+  private async persist(snapshot: LocalMemorySnapshot): Promise<void> {
+    const temporaryPath = `${this.filePath}.${process.pid}.tmp`;
+    await mkdir(dirname(this.filePath!), { recursive: true });
+    await writeFile(
+      temporaryPath,
+      `${JSON.stringify(snapshot, null, 2)}\n`,
+      "utf8",
+    );
+    await rename(temporaryPath, this.filePath!);
+  }
+}
 
 export type SummaryMessagesStore = {
   listByChat(chatId: string): Promise<ChatMessage[]>;
@@ -38,16 +119,22 @@ export type MemoryStateStore = {
 };
 
 export class InMemoryMessagesRepo implements MessageSink, SummaryMessagesStore {
-  private readonly messages = new Map<string, ChatMessage>();
+  constructor(private readonly database = new LocalMemoryDatabase()) {}
 
   async save(message: ChatMessage): Promise<void> {
-    this.messages.set(messageKey(message.chatId, message.id), message);
+    await this.database.update((snapshot) => {
+      snapshot.messages[messageKey(message.chatId, message.id)] =
+        structuredClone(message);
+    });
   }
 
   async listByChat(chatId: string): Promise<ChatMessage[]> {
-    return [...this.messages.values()]
-      .filter((message) => message.chatId === chatId)
-      .sort((left, right) => left.id - right.id);
+    return this.database.read((snapshot) =>
+      Object.values(snapshot.messages)
+        .filter((message) => message.chatId === chatId)
+        .sort((left, right) => left.id - right.id)
+        .map((message) => structuredClone(message)),
+    );
   }
 
   async listAfterByChat(
@@ -55,28 +142,39 @@ export class InMemoryMessagesRepo implements MessageSink, SummaryMessagesStore {
     afterMessageId: number,
     limit: number,
   ): Promise<ChatMessage[]> {
-    return [...this.messages.values()]
-      .filter(
-        (message) => message.chatId === chatId && message.id > afterMessageId,
-      )
-      .sort((left, right) => left.id - right.id)
-      .slice(0, limit);
+    return this.database.read((snapshot) =>
+      Object.values(snapshot.messages)
+        .filter(
+          (message) => message.chatId === chatId && message.id > afterMessageId,
+        )
+        .sort((left, right) => left.id - right.id)
+        .slice(0, limit)
+        .map((message) => structuredClone(message)),
+    );
   }
 }
 
 export class InMemorySummariesRepo implements SummaryRunsStore {
-  private readonly runs = new Map<string, SummaryRun>();
-  private readonly segments = new Map<string, SegmentReconstruction>();
+  constructor(private readonly database = new LocalMemoryDatabase()) {}
 
   async findLastRun(chatId: string): Promise<SummaryRun | undefined> {
-    return [...this.runs.values()]
-      .filter((run) => run.chatId === chatId && run.status === "ok")
-      .sort((left, right) => right.createdAt - left.createdAt)
-      .at(0);
+    return this.database.read((snapshot) => {
+      const run = Object.values(snapshot.runs)
+        .filter(
+          (candidate) =>
+            candidate.chatId === chatId && candidate.status === "ok",
+        )
+        .sort((left, right) => right.createdAt - left.createdAt)
+        .at(0);
+      return run ? structuredClone(run) : undefined;
+    });
   }
 
   async saveRun(run: SummaryRun): Promise<void> {
-    this.runs.set(`${run.chatId}:${run.commandMessageId}`, run);
+    await this.database.update((snapshot) => {
+      snapshot.runs[`${run.chatId}:${run.commandMessageId}`] =
+        structuredClone(run);
+    });
   }
 
   async findCachedReconstruction(
@@ -86,51 +184,59 @@ export class InMemorySummariesRepo implements SummaryRunsStore {
     hash: string,
     schemaVersion = 1,
   ): Promise<SegmentReconstruction | undefined> {
-    return this.segments.get(
-      segmentKey(chatId, fromMessageId, toMessageId, hash, schemaVersion),
-    );
+    return this.database.read((snapshot) => {
+      const segment =
+        snapshot.segments[
+          segmentKey(chatId, fromMessageId, toMessageId, hash, schemaVersion)
+        ];
+      return segment ? structuredClone(segment) : undefined;
+    });
   }
 
   async saveReconstruction(
     segment: SegmentReconstruction,
     schemaVersion = 1,
   ): Promise<void> {
-    this.segments.set(
-      segmentKey(
-        segment.chatId,
-        segment.fromMessageId,
-        segment.toMessageId,
-        segment.hash,
-        schemaVersion,
-      ),
-      segment,
-    );
+    await this.database.update((snapshot) => {
+      snapshot.segments[
+        segmentKey(
+          segment.chatId,
+          segment.fromMessageId,
+          segment.toMessageId,
+          segment.hash,
+          schemaVersion,
+        )
+      ] = structuredClone(segment);
+    });
   }
 }
 
 export class InMemoryMemoriesRepo implements MemoryStateStore {
-  private readonly states = new Map<string, MemoryState>();
+  constructor(private readonly database = new LocalMemoryDatabase()) {}
 
   async findState(chatId: string): Promise<MemoryState | undefined> {
-    const state = this.states.get(chatId);
-    return state ? structuredClone(state) : undefined;
+    return this.database.read((snapshot) => {
+      const state = snapshot.states[chatId];
+      return state ? structuredClone(state) : undefined;
+    });
   }
 
   async saveState(
     update: MemoryUpdate,
     expectedVersion: number,
   ): Promise<boolean> {
-    const { state } = update;
-    const currentVersion = this.states.get(state.chatId)?.version ?? 0;
-    if (
-      currentVersion !== expectedVersion ||
-      state.version !== expectedVersion + 1
-    ) {
-      return false;
-    }
-
-    this.states.set(state.chatId, structuredClone(state));
-    return true;
+    return this.database.update((snapshot) => {
+      const { state } = update;
+      const currentVersion = snapshot.states[state.chatId]?.version ?? 0;
+      if (
+        currentVersion !== expectedVersion ||
+        state.version !== expectedVersion + 1
+      ) {
+        return false;
+      }
+      snapshot.states[state.chatId] = structuredClone(state);
+      return true;
+    });
   }
 }
 

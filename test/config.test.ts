@@ -48,26 +48,43 @@ describe("readConfig", () => {
     ]);
   });
 
-  it("uses separate defaults for segment fallback and text merge", () => {
+  it("defaults to a local Ollama endpoint and model", () => {
     process.env.TELEGRAM_BOT_TOKEN = "telegram-token";
     process.env.DATABASE_URL = "postgresql://localhost/microsonya";
+    delete process.env.LLM_BASE_URL;
     delete process.env.LLM_MODEL;
     delete process.env.LLM_MODELS;
     delete process.env.LLM_MERGE_MODEL;
     delete process.env.LLM_MEMORY_MODEL;
     delete process.env.LLM_QUARANTINE_MODELS;
+    delete process.env.LLM_API_KEY;
+    delete process.env.OPENROUTER_TOKEN;
 
     const config = readConfig();
 
-    expect(config.llm.models).toEqual([
-      "nvidia/nemotron-3-super-120b-a12b:free",
-      "openai/gpt-oss-20b:free",
-      "google/gemma-4-26b-a4b-it:free",
-      "nvidia/nemotron-nano-9b-v2:free",
-      "openrouter/free",
-    ]);
-    expect(config.llm.mergeModel).toBe("openrouter/free");
+    expect(config.llm.baseUrl).toBe("http://localhost:11434");
+    expect(config.llm.structuredOutputTransport).toBe("ollama-native");
+    expect(config.llm.models).toEqual(["gpt-oss:120b-cloud"]);
+    expect(config.llm.mergeModel).toBeUndefined();
     expect(config.llm.memoryModel).toBe("gpt-oss:20b-cloud");
+  });
+
+  it("accepts an explicit structured-output transport instead of guessing from the base url", () => {
+    process.env.TELEGRAM_BOT_TOKEN = "telegram-token";
+    process.env.DATABASE_URL = "postgresql://localhost/microsonya";
+    process.env.LLM_STRUCTURED_TRANSPORT = "openai-compatible";
+
+    expect(readConfig().llm.structuredOutputTransport).toBe("openai-compatible");
+  });
+
+  it("rejects unknown structured-output transports", () => {
+    process.env.TELEGRAM_BOT_TOKEN = "telegram-token";
+    process.env.DATABASE_URL = "postgresql://localhost/microsonya";
+    process.env.LLM_STRUCTURED_TRANSPORT = "carrier-pigeon";
+
+    expect(() => readConfig()).toThrow(
+      /Unknown LLM_STRUCTURED_TRANSPORT "carrier-pigeon"/,
+    );
   });
 
   it("allows a dedicated smaller memory model", () => {
@@ -99,7 +116,7 @@ describe("readConfig", () => {
     const config = readConfig();
 
     expect(config.storageMode).toBe("memory");
-    expect(config.modelsMode).toBe("disabled");
+    expect(config.llm.mode).toBe("disabled");
   });
 
   it("rejects unknown service modes", () => {
@@ -120,33 +137,14 @@ describe("readConfig", () => {
     );
   });
 
-  it("configures the production Ollama router and permits local auth-free APIs", () => {
+  it("permits local auth-free APIs without an API key", () => {
     process.env.TELEGRAM_BOT_TOKEN = "telegram-token";
     process.env.STORAGE_MODE = "memory";
     process.env.LLM_BASE_URL = "http://localhost:11434/v1";
-    process.env.LLM_ROUTER_MODE = "production";
     delete process.env.DATABASE_URL;
     delete process.env.LLM_API_KEY;
     delete process.env.OPENROUTER_TOKEN;
 
-    expect(readConfig().llm.router).toEqual({
-      cheapModel: "gpt-oss:20b",
-      defaultModel: "qwen3.5:9b",
-      qualityModel: "deepseek-v4-pro:cloud",
-      defaultMinInputTokens: 2_000,
-      qualityMinInputTokens: 12_000,
-      failureThreshold: 3,
-      circuitCooldownMs: 30_000,
-    });
-  });
-
-  it("validates production router thresholds", () => {
-    process.env.TELEGRAM_BOT_TOKEN = "telegram-token";
-    process.env.DATABASE_URL = "postgresql://localhost/microsonya";
-    process.env.LLM_ROUTER_MODE = "production";
-    process.env.LLM_ROUTER_DEFAULT_MIN_INPUT_TOKENS = "100";
-    process.env.LLM_ROUTER_QUALITY_MIN_INPUT_TOKENS = "100";
-
-    expect(() => readConfig()).toThrow(/must be greater/);
+    expect(() => readConfig()).not.toThrow();
   });
 });

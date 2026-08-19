@@ -1,6 +1,6 @@
 import { Telegraf } from "telegraf";
 import type { AppConfig } from "./config.js";
-import type { AppServices } from "./services.js";
+import type { BotServices } from "./telegramHandlers.js";
 import {
   createCancelSummaryHandler,
   createMessageHandler,
@@ -8,7 +8,7 @@ import {
 
 export function createTelegramBot(
   config: AppConfig,
-  services: AppServices,
+  services: BotServices,
 ): Telegraf {
   const bot = new Telegraf(config.telegramToken);
 

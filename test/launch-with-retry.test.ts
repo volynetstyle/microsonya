@@ -1,6 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { isRetryableTelegramLaunchError } from "../apps/telegram/bot/src/app.js";
-import { launchWithRetry } from "../apps/telegram/bot/src/launchWithRetry.js";
+import {
+  isRetryableTelegramError,
+  launchWithRetry,
+} from "../apps/telegram/bot/src/launchWithRetry.js";
 
 describe("launchWithRetry", () => {
   afterEach(() => vi.useRealTimers());
@@ -66,23 +68,23 @@ describe("launchWithRetry", () => {
   });
 });
 
-describe("isRetryableTelegramLaunchError", () => {
+describe("isRetryableTelegramError", () => {
   it("retries transient network, rate-limit, and server failures", () => {
-    expect(isRetryableTelegramLaunchError(new Error("ETIMEDOUT"))).toBe(true);
-    expect(
-      isRetryableTelegramLaunchError({ response: { error_code: 429 } }),
-    ).toBe(true);
-    expect(
-      isRetryableTelegramLaunchError({ response: { error_code: 503 } }),
-    ).toBe(true);
+    expect(isRetryableTelegramError(new Error("ETIMEDOUT"))).toBe(true);
+    expect(isRetryableTelegramError({ response: { error_code: 429 } })).toBe(
+      true,
+    );
+    expect(isRetryableTelegramError({ response: { error_code: 503 } })).toBe(
+      true,
+    );
   });
 
   it("does not retry permanent Telegram client errors", () => {
-    expect(
-      isRetryableTelegramLaunchError({ response: { error_code: 409 } }),
-    ).toBe(false);
-    expect(
-      isRetryableTelegramLaunchError({ response: { error_code: 401 } }),
-    ).toBe(false);
+    expect(isRetryableTelegramError({ response: { error_code: 409 } })).toBe(
+      false,
+    );
+    expect(isRetryableTelegramError({ response: { error_code: 401 } })).toBe(
+      false,
+    );
   });
 });

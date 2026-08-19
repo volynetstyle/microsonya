@@ -25,6 +25,12 @@ type TelegramForwardOrigin = {
   message_id?: number;
 };
 
+type TelegramMessageEntity = {
+  type: string;
+  offset: number;
+  length: number;
+};
+
 export type TelegramMessageLike = {
   message_id: number;
   date: number;
@@ -41,10 +47,12 @@ export type TelegramMessageLike = {
   photo?: unknown;
   voice?: unknown;
   sticker?: unknown;
+  entities?: TelegramMessageEntity[];
+  message_thread_id?: number;
 };
 
 export function toChatMessage(message: TelegramMessageLike): ChatMessage {
-  const source = getMessageSource(message);
+  const source = toMessageSource(message);
   const text = message.text ?? message.caption ?? "";
 
   return {
@@ -56,7 +64,13 @@ export function toChatMessage(message: TelegramMessageLike): ChatMessage {
     text,
     replyToId: message.reply_to_message?.message_id,
     kind: getMessageKind(message),
-    isCommand: !isForwardedMessage(message) && text.startsWith("/"),
+    isCommand:
+      !isForwardedMessage(message) &&
+      Boolean(
+        message.entities?.some(
+          (entity) => entity.type === "bot_command" && entity.offset === 0,
+        ),
+      ),
   };
 }
 
@@ -70,7 +84,7 @@ export function isForwardedMessage(message: TelegramMessageLike): boolean {
   );
 }
 
-function getMessageSource(message: TelegramMessageLike): {
+function toMessageSource(message: TelegramMessageLike): {
   date: number;
   authorId: string;
   authorName: string;
@@ -80,7 +94,7 @@ function getMessageSource(message: TelegramMessageLike): {
   if (origin) {
     return {
       date: origin.date ?? message.date,
-      ...getForwardOriginAuthor(origin),
+      ...toForwardOriginAuthor(origin),
     };
   }
 
@@ -117,7 +131,7 @@ function getMessageSource(message: TelegramMessageLike): {
   };
 }
 
-function getForwardOriginAuthor(origin: TelegramForwardOrigin): {
+function toForwardOriginAuthor(origin: TelegramForwardOrigin): {
   authorId: string;
   authorName: string;
 } {
