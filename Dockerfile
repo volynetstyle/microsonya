@@ -32,7 +32,9 @@ FROM node:22-bookworm-slim AS runtime
 ENV NODE_ENV="production"
 WORKDIR /app
 
-RUN useradd --create-home --shell /usr/sbin/nologin microsonya
+RUN useradd --create-home --shell /usr/sbin/nologin microsonya \
+  && mkdir -p /app/data \
+  && chown microsonya:microsonya /app/data
 
 COPY --from=deploy --chown=microsonya:microsonya /prod ./
 

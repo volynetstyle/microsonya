@@ -5,8 +5,8 @@ Telegram groups.
 
 Microsonya stores Telegram group messages and answers `/summarize` commands
 through an OpenAI-compatible model provider such as OpenRouter. The model
-reconstructs typed discourse events; deterministic runtime code derives
-claims, decisions, question state, salience, and the final Telegram view.
+extracts evidence-grounded claims and produces a concise natural summary;
+runtime code validates, caches, persists, and renders the result.
 
 ## What Is Inside
 
@@ -15,11 +15,14 @@ apps/
   telegram/bot/        Telegram adapter and command handling
 packages/
   db/                  Drizzle schema, migrations, and repositories
-  discourse/           Reconstruction schema, invariants, projection, and salience
-  eval/                Offline datasets, model runners, scoring, and reports
+  discourse/           Production claims-v6 prompt, schema, and PIPECHAT/3
   model-gateway/       AI SDK provider boundary and structured generation
-  shared/              Shared types and errors
+  shared/              Shared production types
   summarize/           Window selection, segmentation, prompts, and summary runtime
+experimental/
+  discourse/           Legacy event reconstruction, projection, and salience
+  eval/                Offline datasets, model runners, scoring, and reports
+  tools/               Non-production memory views and legacy utilities
 ```
 
 ## Architecture
@@ -121,10 +124,25 @@ Projection, salience ranking, and rendering are separate modules.
 
 ### 3. Model Gateway: provider boundary
 
-The model gateway hides provider details from the runtime. It uses AI SDK Core for text and Zod-validated structured generation, the OpenRouter AI SDK provider for server-side model fallback, and the generic OpenAI-compatible provider for local services such as Ollama.
+`SummarizationModelService` (in `@microsonya/model-gateway`) knows the domain
+operations — reconstruct a segment, extract memory ops, render a summary —
+and nothing about providers. It talks only to the `ModelClient` port
+(`generateText`/`generateObject`). `DefaultModelClient` implements that port
+by delegating to a `TextGenerator` and a `StructuredGenerator`, chosen once
+at startup by `createSummarizationModelService`, never re-decided per call.
+
+Concretely: `AiSdkGenerator` implements both capabilities through one AI SDK
+OpenAI-compatible model — a single interface for every endpoint (Ollama,
+OpenRouter, or any other OpenAI-compatible API) rather than a client per
+provider. `OllamaStructuredGenerator` is the one addition: when
+`LLM_STRUCTURED_TRANSPORT=ollama-native` (the default), structured generation
+goes through Ollama's own `/api/chat` JSON mode instead of the
+OpenAI-compatible schema translation, which is more reliable for
+schema-constrained output. Which transport to use is explicit configuration,
+not inferred from the base URL.
 
 The runtime asks for a structured segment reconstruction. It does not care
-whether it came from OpenRouter, Ollama, a local model, or another compatible
+whether it came from Ollama, OpenRouter, a local model, or another compatible
 API.
 
 ### Storage Boundary
@@ -154,13 +172,14 @@ The semantic-memory database model is additive:
 
 - Node.js 22 or newer
 - pnpm 10.12.1 or newer
-- PostgreSQL 16 or newer, or Docker for the bundled Postgres service
+- PostgreSQL 16 or newer only when using the optional Postgres storage mode
 - Telegram bot token from `@BotFather`
 - OpenAI-compatible API key, for example an OpenRouter token
 
 ## Quick Start With Docker
 
-This is the easiest path for a fresh machine because Compose starts Postgres for you.
+This is the easiest path for a fresh machine. The default Compose stack starts
+only the bot and persists its in-memory database in the `memory-data` volume.
 
 ```bash
 cp .env.docker.example .env
@@ -171,27 +190,26 @@ Edit `.env` and set:
 - `TELEGRAM_BOT_TOKEN`
 - `OPENROUTER_TOKEN` or `LLM_API_KEY`
 
-Then start the database and bot:
+Then build and start the bot:
 
 ```bash
 pnpm install
 pnpm docker:build
 pnpm docker:up
-pnpm db:migrate
 pnpm docker:logs
 ```
 
-`pnpm db:migrate` runs against `DATABASE_URL`. For the bundled Docker database, use this local URL in `.env` while running migrations from the host:
+The Postgres implementation remains available as an optional migration path.
+Start its Compose profile and run migrations only when `STORAGE_MODE=postgres`:
 
-```env
-DATABASE_URL=postgresql://microsonya:microsonya@localhost:5432/microsonya
+```bash
+docker compose --profile postgres up -d
+pnpm db:migrate
 ```
-
-The bot container itself can keep `DATABASE_URL` empty in `.env.docker.example`; `compose.yaml` points it at the internal `postgres` service automatically.
 
 ## Local Start
 
-Use this when you already have Postgres running locally.
+The default local setup needs no database service.
 
 ```bash
 pnpm install
@@ -201,48 +219,56 @@ cp .env.example .env
 Edit `.env` and set:
 
 - `TELEGRAM_BOT_TOKEN`
-- `DATABASE_URL`
 - `OPENROUTER_TOKEN` or `LLM_API_KEY`
 
 Prepare and run:
 
 ```bash
 pnpm build
-pnpm db:migrate
 pnpm test
 pnpm start
 ```
 
 ## Environment Variables
 
-| Name                       | Required                    | Description                                                                  |
-| -------------------------- | --------------------------- | ---------------------------------------------------------------------------- |
-| `TELEGRAM_BOT_TOKEN`       | Yes                         | Token for the Telegram bot.                                                  |
-| `STORAGE_MODE`             | No                          | `postgres` (default) or `memory`.                                            |
-| `MODELS_MODE`              | No                          | `openai-compatible` (default) or `disabled`.                                 |
-| `DATABASE_URL`             | Yes unless `db` is disabled | Postgres connection string used by Drizzle and local bot runs.               |
-| `OPENROUTER_TOKEN`         | Usually                     | OpenRouter API token. Used when `LLM_API_KEY` is not set.                    |
-| `LLM_API_KEY`              | Usually                     | Generic OpenAI-compatible API key. Takes precedence over `OPENROUTER_TOKEN`. |
-| `LLM_BASE_URL`             | No                          | OpenAI-compatible base URL. Defaults to `https://openrouter.ai/api/v1/`.     |
-| `LLM_MODEL`                | No                          | Single segment-summary model. If empty, the fallback list is used.           |
-| `LLM_MODELS`               | No                          | Ordered OpenRouter fallback for structured segment summaries.                |
-| `LLM_MERGE_MODEL`          | No                          | Plain-text merge model. Defaults to `openrouter/free`.                       |
-| `LLM_MEMORY_MODEL`         | No                          | Dedicated memory extraction model. Defaults to `gpt-oss:120b-cloud`.         |
-| `LLM_QUARANTINE_MODELS`    | No                          | Comma-separated models to remove from the fallback list.                     |
-| `LLM_ROUTER_MODE`          | No                          | `production` enables local three-tier routing; default is `disabled`.        |
-| `LLM_ROUTER_CHEAP_MODEL`   | Router only                 | Cheap tier; defaults to `gpt-oss:20b`.                                       |
-| `LLM_ROUTER_DEFAULT_MODEL` | Router only                 | Default tier; defaults to `qwen3.5:9b`.                                      |
-| `LLM_ROUTER_QUALITY_MODEL` | Router only                 | Quality tier; defaults to `deepseek-v4-pro:cloud`.                           |
-| `POSTGRES_DB`              | Docker only                 | Database name for the Compose Postgres service.                              |
-| `POSTGRES_USER`            | Docker only                 | Database user for the Compose Postgres service.                              |
-| `POSTGRES_PASSWORD`        | Docker only                 | Database password for the Compose Postgres service.                          |
-| `POSTGRES_PORT`            | Docker only                 | Host port mapped to Postgres. Defaults to `5432`.                            |
+All model-related variables below are read in exactly one place —
+`packages/model-gateway/src/modelConfig.ts`'s `loadModelConfig` — so there
+is a single source of truth for defaults regardless of which app runs it.
 
-To use a local Ollama or another OpenAI-compatible endpoint, change `LLM_BASE_URL`, `LLM_MODEL`, `LLM_MERGE_MODEL`, and `LLM_API_KEY` according to that provider. Multiple `LLM_MODELS` are sent to OpenRouter as one server-side fallback route; generic compatible endpoints use the first configured model. Segment summaries default to temperature `1`, a 2048-token output limit, strict structured output, and providers that support every requested parameter. Plain-text merges use `openrouter/free` by default.
+| Name                        | Required      | Description                                                                  |
+| ---------------------------- | ------------- | ---------------------------------------------------------------------------- |
+| `TELEGRAM_BOT_TOKEN`        | Yes           | Token for the Telegram bot.                                                  |
+| `STORAGE_MODE`              | No            | `memory` (default) or `postgres`.                                            |
+| `MEMORY_FILE_PATH`          | Memory mode   | JSON snapshot path. Defaults to `.data/memory.json`.                         |
+| `MODELS_MODE`               | No            | `enabled` (default) or `disabled`.                                           |
+| `DATABASE_URL`              | Postgres mode | Postgres connection string used by Drizzle and local bot runs.               |
+| `WMA_URL`                   | No            | Public URL of the Web Mini App (`apps/telegram/wma`). Must be `https://` for Telegram to open it in-app; unset disables the `/app` command. |
+| `OPENROUTER_TOKEN`          | No            | OpenRouter API token. Used when `LLM_API_KEY` is not set.                    |
+| `LLM_API_KEY`               | No            | Generic OpenAI-compatible API key. Takes precedence over `OPENROUTER_TOKEN`. Only required when `LLM_BASE_URL` is not a local endpoint. |
+| `LLM_BASE_URL`              | No            | OpenAI-compatible base URL. Defaults to a local native Ollama server at `http://localhost:11434`. |
+| `LLM_STRUCTURED_TRANSPORT`  | No            | `ollama-native` (default) or `openai-compatible`. Explicit — not guessed from `LLM_BASE_URL`; switch it together when changing providers. |
+| `LLM_MODEL`                 | No            | Single segment-summary model. If empty, `LLM_MODELS` or the default is used. |
+| `LLM_MODELS`                | No            | Comma-separated models; only the first is used.                              |
+| `LLM_MERGE_MODEL`           | No            | Plain-text merge model. Defaults to reusing the primary model.               |
+| `LLM_MEMORY_MODEL`          | No            | Dedicated memory extraction model. Defaults to `gpt-oss:20b-cloud`.          |
+| `LLM_QUARANTINE_MODELS`     | No            | Comma-separated models to remove from the configured list.                   |
+| `POSTGRES_DB`               | Docker only   | Database name for the Compose Postgres service.                              |
+| `POSTGRES_USER`             | Docker only   | Database user for the Compose Postgres service.                              |
+| `POSTGRES_PASSWORD`         | Docker only   | Database password for the Compose Postgres service.                          |
+| `POSTGRES_PORT`             | Docker only   | Host port mapped to Postgres. Defaults to `5432`.                            |
 
-For production routing through Ollama, set `LLM_ROUTER_MODE=production`. Prompts below 2,000 estimated tokens use the cheap model, prompts from 2,000 to 11,999 use the default model, and larger prompts use the quality model. Failures escalate toward the quality tier and then degrade to any remaining tier. Three consecutive failures open that model's circuit for 30 seconds. Thresholds and circuit settings can be changed with `LLM_ROUTER_DEFAULT_MIN_INPUT_TOKENS`, `LLM_ROUTER_QUALITY_MIN_INPUT_TOKENS`, `LLM_ROUTER_FAILURE_THRESHOLD`, and `LLM_ROUTER_CIRCUIT_COOLDOWN_MS`.
+Ollama is the default transport: `LLM_BASE_URL` points at a local native
+Ollama server by default, and `LLM_STRUCTURED_TRANSPORT=ollama-native` picks
+its native JSON mode for structured generation. To use OpenRouter or another
+OpenAI-compatible endpoint instead, change `LLM_BASE_URL`, `LLM_MODEL`,
+`LLM_MERGE_MODEL`, `LLM_API_KEY`, and set `LLM_STRUCTURED_TRANSPORT=openai-compatible`.
+Segment summaries default to temperature `1`, a 2048-token output limit,
+strict structured output, and providers that support every requested
+parameter. There is one model per client — no tiered routing or per-model
+fallback list; that was an OpenRouter free-model-era feature that added
+complexity this single self-hosted Ollama endpoint doesn't need.
 
-Memory extraction uses `LLM_MEMORY_MODEL` independently of the summary router.
+Memory extraction uses `LLM_MEMORY_MODEL` independently of the summary path.
 It is scheduled after the user-facing summary path and does not delay the
 Telegram reply. Independent summary segments run with a bounded concurrency of
 three while result ordering stays deterministic.
@@ -261,13 +287,19 @@ it may name the current measured runtime stage and show known message/segment
 counts. After twenty seconds it adds a `Скасувати` button that aborts active
 model requests. The UI never invents LLM thoughts or unmeasured thread counts.
 
-For bot-only exploration without Postgres persistence, set:
+The default storage keeps its working set in process memory and writes every
+mutation to an atomically replaced local JSON snapshot:
 
 ```env
 STORAGE_MODE=memory
+MEMORY_FILE_PATH=.data/memory.json
 ```
 
-In this mode messages are kept in memory for the current process only. To inspect Telegram message parsing and bot behavior without calling an external model provider, use:
+The snapshot restores messages, summary runs, cached reconstructions, and
+semantic memory after a process restart. It is intended for a single bot
+process during the first production iteration; use Postgres before running
+multiple replicas. To inspect Telegram message parsing and bot behavior without
+calling an external model provider, use:
 
 ```env
 STORAGE_MODE=memory
@@ -279,6 +311,7 @@ MODELS_MODE=disabled
 - `/summarize` summarizes messages after the last successful summary, within the last 12 hours, up to 500 messages.
 - `/summarize today` summarizes text messages from the current local day.
 - `/summarize 100` summarizes the last 100 text messages, clamped to 500.
+- `/app` sends a button opening the Web Mini App (`apps/telegram/wma`) at `WMA_URL`. Replies with an explanatory message instead if `WMA_URL` is unset.
 
 ## Development
 
@@ -287,6 +320,38 @@ pnpm build
 pnpm typecheck
 pnpm test
 ```
+
+To test the bot and the Web Mini App together — the `/app` command and the
+page it opens — without configuring models or a database:
+
+```bash
+pnpm dev:webapp
+```
+
+This runs the bot (`STORAGE_MODE=memory`, `MODELS_MODE=disabled`) and the
+Vite dev server for `apps/telegram/wma` side by side, with `WMA_URL` pointed
+at `http://localhost:3000`. Telegram rejects non-`https://` URLs in inline
+buttons outright, so `/app` sends the link as plain text instead of a button
+for you to open manually — enough to check the page itself, just not the
+in-app Telegram UI. Requires `TELEGRAM_BOT_TOKEN` in `.env`, same as any
+other bot run; to see the real in-app mini-app experience — the native
+`web_app` button, opening inside Telegram instead of an external browser —
+tunnel the Vite server:
+
+```bash
+pnpm dev:webapp:tunnel
+```
+
+Requires [cloudflared](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/)
+(`winget install --id Cloudflare.cloudflared`, or `brew install cloudflared`).
+`scripts/dev-webapp-tunnel.mjs` starts the WMA dev server, opens a
+`cloudflared` tunnel to it, parses the resulting `https://*.trycloudflare.com`
+URL out of its output, and launches the bot with that URL as `WMA_URL`
+directly — no manual copying into `.env`, no restart. Ctrl-C stops all three
+processes together. The URL is random and changes on every run (it's never
+written to `.env`) unless you're on a paid Cloudflare plan with a named
+tunnel; `pnpm tunnel:wma` runs just the tunnel on its own, e.g. to reuse a
+fixed URL across bot restarts by pasting it into `WMA_URL` in `.env` instead.
 
 Database schema lives in `packages/db/src/schema.ts`. Generated migrations are stored in `packages/db/src/migrations`.
 
