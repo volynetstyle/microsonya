@@ -1,0 +1,177 @@
+{
+  "case": "real-fop-calculator",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v2",
+  "reasoning": "low",
+  "seed": 5,
+  "inputHash": "d3179cdb8e49a27f55b8dcbb42c5b7b95590527ad18ad16afb38bc499073e8af",
+  "promptHash": "eca85abfc56ad311138896d5cab4797d47473470e6cc3a6dfcb0d2cd6da519b2",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion on tax workaround, domain purchase, app profitability, and password source\",\n  \"topics\": [\n    {\n      \"id\": \"tax-workaround\",\n      \"title\": \"Tax declaration workaround\",\n      \"claims\": [\n        {\n          \"text\": \"Paying 500 UAH to aunt Sveta to fill missing columns in declarations can avoid larger penalties.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"The inspector previously approved declarations without review and was later reprimanded, leading to a re‑audit of all years.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"With Sveta's help the user repaid about 1000 UAH instead of paying all fines.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"The main difficulty is correctly matching each column and subtraction, not the tax calculation itself.\",\n          \"evidence\": [8]\n        },\n        {\n          \"text\": \"Quarterly reports and correct tax payments are required.\",\n          \"evidence\": [7]\n        }\n      ]\n    },\n    {\n      \"id\": \"domain-purchase\",\n      \"title\": \"Domain purchase discussion\",\n      \"claims\": [\n        {\n          \"text\": \"User P2 has not bought a domain yet.\",\n          \"evidence\": [2]\n        },\n        {\n          \"text\": \"Someone needs to buy a calculator so there will be money for the domain.\",\n          \"evidence\": [4]\n        },\n        {\n          \"text\": \"P4 doubts the domain will be purchased.\",\n          \"evidence\": [9,10]\n        }\n      ]\n    },\n    {\n      \"id\": \"app-profitability\",\n      \"title\": \"Profitability of a web/app project\",\n      \"claims\": [\n        {\n          \"text\": \"Web platforms are the simplest but less profitable than Android/iOS.\",\n          \"evidence\": [11]\n        },\n        {\n          \"text\": \"Web SEO is poor; even on the 10th Google page the site is not found.\",\n          \"evidence\": [11]\n        },\n        {\n          \"text\": \"No external traffic sources (Instagram, Threads, contextual ads) are available for the web project.\",\n          \"evidence\": [11]\n        },\n        {\n          \"text\": \"User retention is near zero due to early paywall and email verification.\",\n          \"evidence\": [11]\n        },\n        {\n          \"text\": \"Fast delivery (< 1 week) and cross‑platform stack (Flutter) are recommended for success.\",\n          \"evidence\": [12]\n        },\n        {\n          \"text\": \"The project being discussed is Igor's attempt to earn money.\",\n          \"evidence\": [13,14]\n        },\n        {\n          \"text\": \"The calculator works only with UAH‑based FOP; the author had to convert transactions using daily exchange rates.\",\n          \"evidence\": [19]\n        }\n      ]\n    },\n    {\n      \"id\": \"password-source\",\n      \"title\": \"Source code / password discussion\",\n      \"claims\": [\n        {\n          \"text\": \"The app's source code is not publicly available; the password is stored locally as a 100 % discount promo code.\",\n          \"evidence\": [20]\n        },\n        {\n          \"text\": \"P4 denies having paid 299 UAH for the app.\",\n          \"evidence\": [22]\n        },\n        {\n          \"text\": \"P5 calls the app a pirate version.\",\n          \"evidence\": [24]\n        },\n        {\n          \"text\": \"P1 believes most LinkedIn users could hack the app without issues.\",\n          \"evidence\": [28]\n        },\n        {\n          \"text\": \"The app is positioned as a local‑first app with USD/UAH rate updating every 5 minutes, calculations done instantly in the browser.\",\n          \"evidence\": [29]\n        },\n        {\n          \"text\": \"P4 describes the project as a “free vibe‑code” with no real value; people might look for the password or ignore it.\",\n          \"evidence\": [30,31,32]\n        },\n        {\n          \"text\": \"P5 labels the project as a “vibe‑code” and confirms it is exactly that.\",\n          \"evidence\": [33,34]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": [\n    {\n      \"text\": \"Is the source code or password searchable/obtainable?\",\n      \"evidence\": [21]\n    }\n  ]\n}",
+  "thinking": "We need to extract topics, claims, decisions, open questions.\n\nIdentify claims: e.g., #1 about paying 500 etc. It's a story claim but evidence.\n\nProbably main topics: tax declaration workaround, domain purchase, app profitability, password hack, etc.\n\nDecisions none? No explicit decision.\n\nOpen questions: maybe \"А який там сорс код? Можна сам пароль пошуком знайти?\" that's a question, unresolved. Also earlier maybe about domain purchase? but answered?\n\nLet's list.\n\nTopic ids:\n\ntax-works (tax workaround)\n\ndomain-purchase (domain)\n\napp-profitability (app profitability)\n\npassword-hack (password/source code)\n\nWe'll include claims per topic.\n\nConstruct JSON.\n\n",
+  "parsed": {
+    "title": "Discussion on tax workaround, domain purchase, app profitability, and password source",
+    "topics": [
+      {
+        "id": "tax-workaround",
+        "title": "Tax declaration workaround",
+        "claims": [
+          {
+            "text": "Paying 500 UAH to aunt Sveta to fill missing columns in declarations can avoid larger penalties.",
+            "evidence": [1]
+          },
+          {
+            "text": "The inspector previously approved declarations without review and was later reprimanded, leading to a re‑audit of all years.",
+            "evidence": [1]
+          },
+          {
+            "text": "With Sveta's help the user repaid about 1000 UAH instead of paying all fines.",
+            "evidence": [1]
+          },
+          {
+            "text": "The main difficulty is correctly matching each column and subtraction, not the tax calculation itself.",
+            "evidence": [8]
+          },
+          {
+            "text": "Quarterly reports and correct tax payments are required.",
+            "evidence": [7]
+          }
+        ]
+      },
+      {
+        "id": "domain-purchase",
+        "title": "Domain purchase discussion",
+        "claims": [
+          {
+            "text": "User P2 has not bought a domain yet.",
+            "evidence": [2]
+          },
+          {
+            "text": "Someone needs to buy a calculator so there will be money for the domain.",
+            "evidence": [4]
+          },
+          {
+            "text": "P4 doubts the domain will be purchased.",
+            "evidence": [9, 10]
+          }
+        ]
+      },
+      {
+        "id": "app-profitability",
+        "title": "Profitability of a web/app project",
+        "claims": [
+          {
+            "text": "Web platforms are the simplest but less profitable than Android/iOS.",
+            "evidence": [11]
+          },
+          {
+            "text": "Web SEO is poor; even on the 10th Google page the site is not found.",
+            "evidence": [11]
+          },
+          {
+            "text": "No external traffic sources (Instagram, Threads, contextual ads) are available for the web project.",
+            "evidence": [11]
+          },
+          {
+            "text": "User retention is near zero due to early paywall and email verification.",
+            "evidence": [11]
+          },
+          {
+            "text": "Fast delivery (< 1 week) and cross‑platform stack (Flutter) are recommended for success.",
+            "evidence": [12]
+          },
+          {
+            "text": "The project being discussed is Igor's attempt to earn money.",
+            "evidence": [13, 14]
+          },
+          {
+            "text": "The calculator works only with UAH‑based FOP; the author had to convert transactions using daily exchange rates.",
+            "evidence": [19]
+          }
+        ]
+      },
+      {
+        "id": "password-source",
+        "title": "Source code / password discussion",
+        "claims": [
+          {
+            "text": "The app's source code is not publicly available; the password is stored locally as a 100 % discount promo code.",
+            "evidence": [20]
+          },
+          {
+            "text": "P4 denies having paid 299 UAH for the app.",
+            "evidence": [22]
+          },
+          {
+            "text": "P5 calls the app a pirate version.",
+            "evidence": [24]
+          },
+          {
+            "text": "P1 believes most LinkedIn users could hack the app without issues.",
+            "evidence": [28]
+          },
+          {
+            "text": "The app is positioned as a local‑first app with USD/UAH rate updating every 5 minutes, calculations done instantly in the browser.",
+            "evidence": [29]
+          },
+          {
+            "text": "P4 describes the project as a “free vibe‑code” with no real value; people might look for the password or ignore it.",
+            "evidence": [30, 31, 32]
+          },
+          {
+            "text": "P5 labels the project as a “vibe‑code” and confirms it is exactly that.",
+            "evidence": [33, 34]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": [
+      {
+        "text": "Is the source code or password searchable/obtainable?",
+        "evidence": [21]
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 10261.517699999997,
+    "ollamaTotalMs": 10060.136209,
+    "promptEvalCount": 3046,
+    "evalCount": 1118,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 4,
+    "claimCount": 22,
+    "decisionCount": 0,
+    "openQuestionCount": 1,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 1,
+    "goldClaimPrecision": 0.36363636363636365,
+    "evidencePrecision": 0.32142857142857145,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 1,
+    "noiseRetention": 0.13636363636363635,
+    "matchedClaimIds": [
+      "product.creator-response",
+      "tax-reporting.paid-help",
+      "tax-reporting.form-risk",
+      "product.web-limitations",
+      "product.fast-delivery-strategy",
+      "product.uah-only",
+      "product.validate-demand-first",
+      "security.password-in-bundle"
+    ],
+    "retainedThreadIds": [
+      "calculator-product",
+      "tax-reporting",
+      "calculator-security"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

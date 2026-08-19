@@ -1,0 +1,69 @@
+{
+  "case": "mutation-question-base",
+  "model": "gpt-oss:120b",
+  "pipeline": "direct",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 1,
+  "transformation": "identity",
+  "inputHash": "6a360808f9f41ef21cd7e5b790a3c23313edde24c137222e2804680966a61a1f",
+  "promptHash": "9196f52818cac880b148b3c632c14ff84d5c3775b41e307142bb0bf9981f7a46",
+  "promptVersion": "v4",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Website availability\",\n  \"topics\": [\n    {\n      \"id\": \"website-availability\",\n      \"title\": \"Availability on website\",\n      \"claims\": []\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": [\n    {\n      \"text\": \"Is this unavailable on the website?\",\n      \"evidence\": [\n        1\n      ]\n    }\n  ]\n}",
+  "thinking": "We need to output summary. Only one message. No claims? It's a question. So it's an open question. Title maybe \"Website availability\". Provide JSON. Use message ID 1.",
+  "parsed": {
+    "title": "Website availability",
+    "topics": [
+      {
+        "id": "website-availability",
+        "title": "Availability on website",
+        "claims": []
+      }
+    ],
+    "decisions": [],
+    "openQuestions": [
+      {
+        "text": "Is this unavailable on the website?",
+        "evidence": [1]
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 2228.69020000007,
+    "ollamaTotalMs": 1891.641668,
+    "promptEvalCount": 276,
+    "evalCount": 134,
+    "doneReason": "stop",
+    "thinkingTextTokenCount": 38,
+    "finalTextTokenCount": 86
+  },
+  "operationalMetrics": {
+    "modelCalls": 1,
+    "sourceMessageWindows": 1,
+    "semanticInterpretations": 1,
+    "semanticAmplification": 1
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 1,
+    "claimCount": 0,
+    "decisionCount": 0,
+    "openQuestionCount": 1,
+    "majorThreadRecall": 0,
+    "weightedClaimRecall": null,
+    "goldClaimPrecision": null,
+    "evidencePrecision": 1,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0,
+    "matchedClaimIds": [],
+    "matchedDecisionIds": [],
+    "matchedOpenQuestionIds": ["website-availability.question"],
+    "retainedThreadIds": [],
+    "triggeredForbiddenIds": []
+  }
+}

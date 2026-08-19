@@ -1,0 +1,266 @@
+{
+  "case": "interleaved",
+  "model": "qwen3.5:397b",
+  "pipeline": "deterministic-shell",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 1,
+  "transformation": "identity",
+  "inputHash": "101aac579ee9cb035e03d018da1b428941a345f8f0148544fc3b5ce8ec246fef",
+  "promptHash": "2ef94cd84594429f1dbf2d492d095348136a6018f3e7b0cdfc49fb89a8f49b92",
+  "promptVersion": "v4",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Робочі оновлення: міграція та макет\",\n  \"events\": [\n    {\n      \"id\": \"m1\",\n      \"topicId\": \"database-migration\",\n      \"topicTitle\": \"Міграція бази даних\",\n      \"speaker\": \"A\",\n      \"statement\": \"Міграцію бази заплановано на п'ятницю.\",\n      \"speechAct\": \"assertion\",\n      \"literalness\": \"literal\",\n      \"commitment\": \"none\",\n      \"epistemicStatus\": \"claimed\",\n      \"settled\": false,\n      \"action\": null,\n      \"refersTo\": [],\n      \"stance\": \"neutral\",\n      \"semanticImportance\": 0.8,\n      \"confidence\": 0.9,\n      \"evidence\": [\n        1\n      ]\n    },\n    {\n      \"id\": \"m2\",\n      \"topicId\": \"homepage-mockup\",\n      \"topicTitle\": \"Макет головної сторінки\",\n      \"speaker\": \"B\",\n      \"statement\": \"Макет головної сторінки готовий до рев'ю.\",\n      \"speechAct\": \"assertion\",\n      \"literalness\": \"literal\",\n      \"commitment\": \"none\",\n      \"epistemicStatus\": \"claimed\",\n      \"settled\": false,\n      \"action\": null,\n      \"refersTo\": [],\n      \"stance\": \"neutral\",\n      \"semanticImportance\": 0.8,\n      \"confidence\": 0.9,\n      \"evidence\": [\n        2\n      ]\n    },\n    {\n      \"id\": \"m3\",\n      \"topicId\": \"database-migration\",\n      \"topicTitle\": \"Міграція бази даних\",\n      \"speaker\": \"C\",\n      \"statement\": \"Перед міграцією зробимо резервну копію.\",\n      \"speechAct\": \"assertion\",\n      \"literalness\": \"literal\",\n      \"commitment\": \"explicit\",\n      \"epistemicStatus\": \"claimed\",\n      \"settled\": false,\n      \"action\": \"зробити резервну копію\",\n      \"refersTo\": [\n        \"m1\"\n      ],\n      \"stance\": \"support\",\n      \"semanticImportance\": 0.9,\n      \"confidence\": 0.9,\n      \"evidence\": [\n        3\n      ]\n    },\n    {\n      \"id\": \"m4\",\n      \"topicId\": \"homepage-mockup\",\n      \"topicTitle\": \"Макет головної сторінки\",\n      \"speaker\": \"D\",\n      \"statement\": \"Я перегляну макет сьогодні.\",\n      \"speechAct\": \"assertion\",\n      \"literalness\": \"literal\",\n      \"commitment\": \"explicit\",\n      \"epistemicStatus\": \"claimed\",\n      \"settled\": false,\n      \"action\": \"переглянути макет\",\n      \"refersTo\": [\n        \"m2\"\n      ],\n      \"stance\": \"support\",\n      \"semanticImportance\": 0.9,\n      \"confidence\": 0.9,\n      \"evidence\": [\n        4\n      ]\n    }\n  ]\n}",
+  "thinking": "Thinking Process:\n\n1.  **Analyze the Request:**\n    *   **Task:** Reconstruct a Telegram conversation as normalized discourse events.\n    *   **Input Format:** `PIPECHAT/3` with specific grammar (`#ID|AUTHOR_JSON|TIME_JSON|^PARENT|KIND_JSON|TEXT_JSON_OR_NULL`).\n    *   **Output Format:** JSON only, specific schema (title, events array).\n    *   **Constraints:**\n        *   No summary, no decisions, no openQuestions.\n        *   Event IDs based on message IDs (e.g., `m1`, `m2`). Suffixes only for multiple propositions in one message.\n        *   Orthogonal properties (speechAct, literalness, commitment, epistemicStatus).\n        *   `commitment=explicit` only for clear actor commitment to action (no suggestions/preferences).\n        *   `settled=true` only when action is selected/approved/completed.\n        *   `action` only when actionable actor/action exists.\n        *   `refersTo` must contain target event ID for answers/corrections/support/opposition.\n        *   Honor explicit reply edges (`^PARENT`).\n        *   Preserve speaker attribution.\n        *   `semanticImportance` 0-1.\n        *   Omit greetings/noise.\n        *   Short kebab-case `topicId`.\n        *   Input language is Ukrainian. Output language should likely match the input content (Ukrainian) for statements, but the schema keys are English. The prompt instructions are in English, but the content is Ukrainian. I will keep the statement text in Ukrainian as per the input content to preserve meaning accurately, unless instructed otherwise (usually reconstruction keeps original language).\n        *   Input Messages:\n            *   #1|A|13:00|^0|text|\"Міграцію бази заплановано на п'ятницю.\" (Database migration scheduled for Friday.)\n            *   #2|B|13:01|^0|text|\"Макет головної сторінки готовий до рев'ю.\" (Homepage mockup ready for review.)\n            *   #3|C|13:02|^1|text|\"Перед міграцією зробимо резервну копію.\" (Before migration we will make a backup.)\n            *   #4|D|13:03|^2|text|\"Я перегляну макет сьогодні.\" (I will review the mockup today.)\n\n2.  **Analyze Messages & Relationships:**\n    *   **Message 1 (A):** States a fact/plan about database migration. Topic: Database Migration.\n    *   **Message 2 (B):** States a fact about homepage mockup. Topic: Homepage Mockup.\n    *   **Message 3 (C):** Replies to #1 (^1). States a plan/action regarding the migration (backup). This is a commitment/plan related to #1.\n    *   **Message 4 (D):** Replies to #2 (^2). States a personal commitment to review the mockup. This is an explicit commitment related to #2.\n\n3.  **Draft Events:**\n\n    *   **Event m1:**\n        *   Speaker: A\n        *   Statement: Міграцію бази заплановано на п'ятницю.\n        *   SpeechAct: assertion (stating a plan/status)\n        *   Topic: database-migration\n        *   Commitment: none (stating a plan exists, not personally committing here, though implies organizational plan)\n        *   EpistemicStatus: accepted (presented as fact)\n        *   Settled: true (says \"scheduled/planned\")\n        *   Action: null (statement of fact about schedule)\n        *   Evidence: [1]\n\n    *   **Event m2:**\n        *   Speaker: B\n        *   Statement: Макет головної сторінки готовий до рев'ю.\n        *   SpeechAct: assertion\n        *   Topic: homepage-mockup\n        *   Commitment: none\n        *   EpistemicStatus: accepted\n        *   Settled: true (ready)\n        *   Action: null\n        *   Evidence: [2]\n\n    *   **Event m3:**\n        *   Speaker: C\n        *   Statement: Перед міграцією зробимо резервну копію.\n        *   SpeechAct: proposal/assertion (plan)\n        *   Topic: database-migration\n        *   Commitment: explicit (\"зробимо\" - we will make, implies team commitment)\n        *   EpistemicStatus: accepted\n        *   Settled: false (plan stated, not completed yet)\n        *   Action: make backup\n        *   RefersTo: [\"m1\"] (Reply to #1)\n        *   Evidence: [3]\n\n    *   **Event m4:**\n        *   Speaker: D\n        *   Statement: Я перегляну макет сьогодні.\n        *   SpeechAct: proposal/commitment\n        *   Topic: homepage-mockup\n        *   Commitment: explicit (\"Я перегляну\" - I will review)\n        *   EpistemicStatus: accepted\n        *   Settled: false (future action)\n        *   Action: review mockup\n        *   RefersTo: [\"m2\"] (Reply to #2)\n        *   Evidence: [4]\n\n4.  **Refine Properties:**\n    *   **Commitment:**\n        *   m1: \"Заплановано\" (Scheduled). This is a state description. A is reporting. Commitment = none (A isn't saying *I* will do it, just that it is planned).\n        *   m3: \"Зробимо\" (We will make). This is a commitment by the team/C. Commitment = explicit.\n        *   m4: \"Я перегляну\" (I will review). This is a commitment by D. Commitment = explicit.\n    *   **Settled:**\n        *   m1: Migration is scheduled. The *schedule* is settled. The action itself is future. Usually `settled` refers to the decision/action being selected. \"Scheduled\" implies settled plan. Let's mark `settled: true` for the plan existence, but `action` is null because it's a status report.\n        *   m3: Backup plan stated. Is it settled? It's a statement of intent. `settled: false` until confirmed or done.\n        *   m4: Review plan stated. `settled: false`.\n    *   **SpeechAct:**\n        *   m1: assertion.\n        *   m2: assertion.\n        *   m3: assertion (of plan) or proposal. Given \"зробимо\" (we will do), it's an assertion of intent/plan. Let's use `assertion` or `proposal`. Since it's a reply confirming procedure, `assertion` of plan fits.\n        *   m4: `proposal` or `assertion` of intent. Given it's a commitment to act, `proposal` often fits future action, but `assertion` of intent works too. Let's stick to `assertion` for statements of fact/intent, `proposal` for suggestions. \"I will do X\" is a commitment. I'll use `assertion` for the intent.\n    *   **Topic:**\n        *   m1, m3 -> database-migration\n        *   m2, m4 -> homepage-mockup\n    *   **RefersTo:**\n        *   m3 replies to m1 (^1).\n        *   m4 replies to m2 (^2).\n    *   **Action:**\n        *   m3: \"make backup\" (зробити резервну копію).\n        *   m4: \"review mockup\" (переглянути макет).\n    *   **Semantic Importance:**\n        *   All seem equally important work updates. 0.8 or 0.9.\n\n5.  **JSON Construction:**\n    *   Ensure strict schema compliance.\n    *   Ensure Ukrainian text for statements.\n    *   Ensure IDs match message IDs (m1, m2, m3, m4).\n\n6.  **Review Constraints:**\n    *   \"Do not write a summary and do not output decisions or openQuestions.\" -> Only JSON.\n    *   \"Create event ids from the primary evidence message id: m17 for message 17.\" -> Here messages are 1, 2, 3, 4. So m1, m2, m3, m4.\n    *   \"commitment=explicit only when the evidence clearly commits an identifiable actor to an action.\" -> m3 (we), m4 (I).\n    *   \"settled=true only when the conversation presents the action as selected, approved, completed...\" -> m1 says \"scheduled\", implies selection. m3/m4 are future commitments.\n    *   \"Honor explicit reply edges\" -> m3 refersTo m1, m4 refersTo m2.\n\n7.  **Final Polish:**\n    *   Check `topicId` kebab-case.\n    *   Check `topicTitle`.\n    *   Check `evidence` array contains numbers (message IDs).\n    *   Check `refersTo` array contains strings (event IDs).\n\n    *   *Self-Correction on m1/m2 Settled:* m1 says \"Scheduled\". The *migration* isn't completed, but the *plan* is settled. However, the `action` field is null for m1 because it's a status report, not a directive. `settled` usually applies to the proposition's status regarding the action. If the proposition is \"Migration is scheduled\", that fact is asserted. If I set `action` to \"migrate database\", then `settled` would be true because it's scheduled. But A is just reporting. I will keep `action` null for m1/m2 as they are status updates, and `settled` false for the action itself (it hasn't happened), or true for the schedule. The prompt says \"settled=true only when the conversation presents the action as selected...\". The action \"migrate\" is selected/scheduled. But since `action` is null, `settled` is less relevant. I will set `settled: false` for m1/m2 as no specific *new* action is being decided here, just status. For m3/m4, actions are defined, but they are future commitments, so `settled: false` (not yet done/approved by others explicitly, just stated). Actually, m4 \"I will review\" is a personal commitment. Is it settled? The decision to review is made by D. But usually `settled` implies group agreement or completion. I'll keep `settled: false` for future commitments unless acknowledged.\n    *   *Refinement on Commitment:* m3 \"Зробимо\" (We will make). This is explicit commitment by the team/C. m4 \"Я перегляну\" (I will review). Explicit commitment by D.\n    *   *Refinement on SpeechAct:* m3 and m4 are assertions of future action (commitments).\n    *   *Refinement on RefersTo:* m3 replies to 1. m4 replies to 2.\n\n    Let's assemble the JSON.\n\n    *   m1: Topic database-migration.\n    *   m2: Topic homepage-mockup.\n    *   m3: Topic database-migration. RefersTo m1.\n    *   m4: Topic homepage-mockup. RefersTo m2.\n\n    Wait, check `topicTitle`. Should be consistent per topic.\n    Topic 1: database-migration -> \"Міграція бази даних\"\n    Topic 2: homepage-mockup -> \"Макет головної сторінки\"\n\n    Check `evidence`: Input says `#1`, `#2`... so evidence should be `[1]`, `[2]`...\n    Check `refersTo`: `[\"m1\"]`, `[\"m2\"]`.\n\n    One detail: \"Create event ids from the primary evidence message id: m17 for message 17.\"\n    Input messages are #1, #2, #3, #4.\n    So IDs are m1, m2, m3, m4.\n\n    Let's verify `commitment` for m1. \"Міграцію бази заплановано\" (Database migration is scheduled). Passive voice. No specific actor committed in this sentence. Commitment = none.\n    m3: \"зробимо\" (we will make). Actor = we (C + team). Commitment = explicit.\n    m4: \"Я перегляну\" (I will review). Actor = D. Commitment = explicit.\n\n    Let's verify `settled`.\n    m1: Schedule is set. But is the *action* settled? Yes, it's planned. But since `action` is null (status report), `settled` might be false or true. I'll lean false because it's just info.\n    m3: Action \"make backup\". Is it settled? It's a plan stated. Not yet done. `settled: false`.\n    m4: Action \"review mockup\". Plan stated. `settled: false`.\n\n    Let's verify `semanticImportance`. All are work updates. 0.8 seems appropriate.\n\n    Let's verify `literalness`. All seem literal.\n\n    Let's verify `epistemicStatus`. All are presented as facts/intentions. `accepted` (by speaker) or `claimed`. Since they are the speakers asserting their own plans/facts, `accepted` (by them) or `claimed` (to others). Usually `claimed` for assertions unless verified. I will use `claimed` for assertions of fact/plan.\n\n    Wait, `epistemicStatus` description: \"whether the proposition is merely claimed, accepted, rejected, or uncertain.\"\n    If I say \"I will do X\", is it claimed or accepted? It's a commitment. Usually `accepted` by the speaker. But in discourse analysis, assertions are `claimed` until validated. However, for commitments, the speaker accepts the obligation. I will use `claimed` for statements of fact/plan to be safe, as they are propositions introduced to the discourse.\n\n    Actually, looking at previous examples of this task style (if any): Usually assertions by speaker are `claimed`.\n    Let's stick to `claimed` for assertions.\n\n    One more check: `topicId` derived only from the topic.\n    m1/m3: database-migration\n    m2/m4: homepage-mockup\n\n    Ready to generate JSON.\n\n    Wait, one constraint: \"Use suffixes only when one message contains multiple independent propositions\". Each message here has one main proposition. So m1, m2, m3, m4.\n\n    Final check on `refersTo`: \"For an answer, correction, support, or opposition, refersTo must contain the target event id.\"\n    m3 supports/elaborates m1. m4 answers/responds to m2 (mockup ready -> I will review).\n    So m3 refersTo [\"m1\"], m4 refersTo [\"m2\"].\n\n    Final check on `action`: \"Set action to a concise action phrase only when an actionable actor/action exists\".\n    m3: \"зробити резервну копію\" (make backup).\n    m4: \"переглянути макет\" (review mockup).\n    m1/m2: null.\n\n    Final check on `confidence`: 0.9 is standard for clear text.\n\n    Let's write the JSON.\n\n    Wait, I need to make sure I don't output markdown code blocks if the instruction says \"Return JSON only\". Usually \"Return JSON only\" implies raw JSON, but often wrapped in ```json``` for clarity in chat interfaces. However, strict \"Return JSON only\" often means no markdown fences. I will output raw JSON text to be safe, but typically LLMs wrap in fences. The prompt says \"Return JSON only, with exactly this shape\". I will provide the JSON block.\n\n    Wait, looking at the instruction \"Return JSON only, with exactly this shape:\". I will output the JSON string without markdown fences to be strictly compliant, or with fences if standard practice. Usually, without fences is safer for \"JSON only\". But I'll add fences if it helps parsing. Actually, most system instructions prefer raw text. I'll output raw JSON.\n    Wait, I am an AI assistant. I should output valid JSON. I will wrap it in ```json``` to ensure it is highlighted as code, but the content must be exactly the shape.\n    Actually, re-reading: \"Return JSON only\". I will avoid markdown fences to be strictly compliant.\n\n    Wait, one more thing: `topicTitle`. Should be consistent.\n    m1/m3: \"Міграція бази даних\"\n    m2/m4: \"Макет головної сторінки\"\n\n    Let's finalize the values.\n    m1: A, assertion, literal, none, claimed, false, null, [], neutral, 0.8, 0.9, [1]\n    m2: B, assertion, literal, none, claimed, false, null, [], neutral, 0.8, 0.9, [2]\n    m3: C, assertion, literal, explicit, claimed, false, \"зробити резервну копію\", [\"m1\"], support, 0.9, 0.9, [3]\n    m4: D, assertion, literal, explicit, claimed, false, \"переглянути макет\", [\"m2\"], support, 0.9, 0.9, [4]\n\n    Wait, `speechAct` for m3/m4. They are commitments. Is there a `commitment` speechAct? No, list is \"assertion | question | proposal | answer | request | correction | opposition\".\n    m3 \"We will make backup\" -> assertion of plan.\n    m4 \"I will review\" -> assertion of plan.\n    Could be `proposal` if seeking approval, but here it sounds like confirmation. \"Before migration we will make backup\" (standard procedure). \"I will review today\" (confirmation). `assertion` fits best.\n    m4 could be `answer` to the implicit \"Who will review?\" or status \"Ready for review\". Since m2 says \"Ready for review\", m4 says \"I will review\". This is responsive. `answer` might fit if m2 is treated as a request隐含 (implicit request). But m2 is \"Mockup is ready\". m4 is \"I will review\". It's a response. `answer` requires a question usually. `assertion` is safer. Or `proposal` (offer). Let's use `assertion` of intent.\n\n    Wait, `refersTo` logic: \"Honor explicit reply edges: when a message directly replies to a question and supplies responsive information, emit speechAct=answer and refer to the question event.\"\n    m2 is not a question. So m4 cannot be `answer` based on that rule. It's an assertion responding to a status.\n    m3 replies to m1 (status). Assertion.\n\n    Okay, ready.\n\n    One detail: \"topicId values derived only from the topic.\"\n    m1/m3: database-migration\n    m2/m4: homepage-mockup\n\n    Let's construct the JSON.\n\n    Wait, I need to check if `topicTitle` should be English or Ukrainian. Input is Ukrainian. Output statements are Ukrainian. `topicTitle` should likely be Ukrainian to match content. `topicId` must be kebab-case (ASCII).\n\n    Final check on `settled`.\n    m1: \"Scheduled\". The plan is settled. But `action` is null.\n    m3: \"We will make\". Plan stated. `settled: false` (future).\n    m4: \"I will review\". Plan stated. `settled: false` (future).\n\n    Okay.\n\n    One more check: \"commitment=explicit only when the evidence clearly commits an identifiable actor to an action.\"\n    m3: \"зробимо\" (we will make). Actor: We (C + team). Action: backup. Explicit.\n    m4: \"Я перегляну\" (I will review). Actor: D. Action: review. Explicit.\n\n    Okay.\n\n    One more check: \"semanticImportance estimates explanatory importance from 0 to 1. Prefer developed conclusions over vivid wording, repetition, jokes, or banter.\"\n    These are all key work updates. 0.8-0.9.\n\n    Let's write.\n\n    Wait, I must ensure I don't add extra fields.\n    Schema:\n    title, events\n    event: id, topicId, topicTitle, speaker, statement, speechAct, literalness, commitment, epistemicStatus, settled, action, refersTo, stance, semanticImportance, confidence, evidence.\n\n    All good.\n\n    One detail on `stance`: \"support | oppose | neutral\".\n    m3 supports m1's plan (adds safety).\n    m4 supports m2's status (takes next step).\n    m1/m2 neutral (initial assertions).\n\n    Let's go.\n\n    Wait, I need to make sure I use the exact message IDs in evidence. Input: #1, #2, #3, #4. Evidence: [1], [2], [3], [4].\n\n    One detail: \"Use suffixes only when one message contains multiple independent propositions\".\n    All messages are single proposition.\n\n    Okay.\n\n    Wait, `topicTitle` consistency.\n    m1: \"Міграція бази даних\"\n    m3: \"Міграція бази даних\"\n    m2: \"Макет головної сторінки\"\n    m4: \"Макет головної сторінки\"\n\n    Okay.\n\n    One last check on `speechAct` for m4. m2 says \"Ready for review\". m4 says \"I will review\". This is effectively accepting the task. `proposal` (offer) or `assertion`. I'll stick with `assertion` of intent.\n\n    Wait, `refersTo` for m3 and m4.\n    m3 replies to 1 (^1). So refersTo [\"m1\"].\n    m4 replies to 2 (^2). So refersTo [\"m2\"].\n\n    Okay.\n\n    One detail: \"Do not promote participant claims to narrator facts.\"\n    Statements are what the speaker said.\n\n    Okay, generating JSON.\n",
+  "parsed": {
+    "title": "Робочі оновлення: міграція та макет",
+    "topics": [
+      {
+        "id": "homepage-mockup",
+        "title": "Макет головної сторінки",
+        "claims": [
+          {
+            "text": "B: Макет головної сторінки готовий до рев'ю.",
+            "evidence": [2]
+          },
+          {
+            "text": "D: Я перегляну макет сьогодні.",
+            "evidence": [4]
+          }
+        ]
+      },
+      {
+        "id": "database-migration",
+        "title": "Міграція бази даних",
+        "claims": [
+          {
+            "text": "A: Міграцію бази заплановано на п'ятницю.",
+            "evidence": [1]
+          },
+          {
+            "text": "C: Перед міграцією зробимо резервну копію.",
+            "evidence": [3]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": []
+  },
+  "reconstruction": {
+    "title": "Робочі оновлення: міграція та макет",
+    "events": [
+      {
+        "id": "m1",
+        "topicId": "database-migration",
+        "topicTitle": "Міграція бази даних",
+        "speaker": "A",
+        "statement": "Міграцію бази заплановано на п'ятницю.",
+        "speechAct": "assertion",
+        "literalness": "literal",
+        "commitment": "none",
+        "epistemicStatus": "claimed",
+        "settled": false,
+        "action": null,
+        "refersTo": [],
+        "stance": "neutral",
+        "semanticImportance": 0.8,
+        "confidence": 0.9,
+        "evidence": [1]
+      },
+      {
+        "id": "m2",
+        "topicId": "homepage-mockup",
+        "topicTitle": "Макет головної сторінки",
+        "speaker": "B",
+        "statement": "Макет головної сторінки готовий до рев'ю.",
+        "speechAct": "assertion",
+        "literalness": "literal",
+        "commitment": "none",
+        "epistemicStatus": "claimed",
+        "settled": false,
+        "action": null,
+        "refersTo": [],
+        "stance": "neutral",
+        "semanticImportance": 0.8,
+        "confidence": 0.9,
+        "evidence": [2]
+      },
+      {
+        "id": "m3",
+        "topicId": "database-migration",
+        "topicTitle": "Міграція бази даних",
+        "speaker": "C",
+        "statement": "Перед міграцією зробимо резервну копію.",
+        "speechAct": "assertion",
+        "literalness": "literal",
+        "commitment": "explicit",
+        "epistemicStatus": "claimed",
+        "settled": false,
+        "action": "зробити резервну копію",
+        "refersTo": ["m1"],
+        "stance": "support",
+        "semanticImportance": 0.9,
+        "confidence": 0.9,
+        "evidence": [3]
+      },
+      {
+        "id": "m4",
+        "topicId": "homepage-mockup",
+        "topicTitle": "Макет головної сторінки",
+        "speaker": "D",
+        "statement": "Я перегляну макет сьогодні.",
+        "speechAct": "assertion",
+        "literalness": "literal",
+        "commitment": "explicit",
+        "epistemicStatus": "claimed",
+        "settled": false,
+        "action": "переглянути макет",
+        "refersTo": ["m2"],
+        "stance": "support",
+        "semanticImportance": 0.9,
+        "confidence": 0.9,
+        "evidence": [4]
+      }
+    ]
+  },
+  "state": {
+    "title": "Робочі оновлення: міграція та макет",
+    "events": [
+      {
+        "id": "m1",
+        "topicId": "database-migration",
+        "topicTitle": "Міграція бази даних",
+        "speaker": "A",
+        "statement": "Міграцію бази заплановано на п'ятницю.",
+        "speechAct": "assertion",
+        "literalness": "literal",
+        "commitment": "none",
+        "epistemicStatus": "claimed",
+        "settled": false,
+        "action": null,
+        "refersTo": [],
+        "stance": "neutral",
+        "semanticImportance": 0.8,
+        "confidence": 0.9,
+        "evidence": [1]
+      },
+      {
+        "id": "m2",
+        "topicId": "homepage-mockup",
+        "topicTitle": "Макет головної сторінки",
+        "speaker": "B",
+        "statement": "Макет головної сторінки готовий до рев'ю.",
+        "speechAct": "assertion",
+        "literalness": "literal",
+        "commitment": "none",
+        "epistemicStatus": "claimed",
+        "settled": false,
+        "action": null,
+        "refersTo": [],
+        "stance": "neutral",
+        "semanticImportance": 0.8,
+        "confidence": 0.9,
+        "evidence": [2]
+      },
+      {
+        "id": "m3",
+        "topicId": "database-migration",
+        "topicTitle": "Міграція бази даних",
+        "speaker": "C",
+        "statement": "Перед міграцією зробимо резервну копію.",
+        "speechAct": "assertion",
+        "literalness": "literal",
+        "commitment": "explicit",
+        "epistemicStatus": "claimed",
+        "settled": false,
+        "action": "зробити резервну копію",
+        "refersTo": ["m1"],
+        "stance": "support",
+        "semanticImportance": 0.9,
+        "confidence": 0.9,
+        "evidence": [3]
+      },
+      {
+        "id": "m4",
+        "topicId": "homepage-mockup",
+        "topicTitle": "Макет головної сторінки",
+        "speaker": "D",
+        "statement": "Я перегляну макет сьогодні.",
+        "speechAct": "assertion",
+        "literalness": "literal",
+        "commitment": "explicit",
+        "epistemicStatus": "claimed",
+        "settled": false,
+        "action": "переглянути макет",
+        "refersTo": ["m2"],
+        "stance": "support",
+        "semanticImportance": 0.9,
+        "confidence": 0.9,
+        "evidence": [4]
+      }
+    ],
+    "resolvedQuestionIds": [],
+    "supersededEventIds": []
+  },
+  "extractorMetrics": {
+    "eventCount": 4,
+    "eventRecall": 0.75,
+    "eventPrecision": 0.75,
+    "attributionAccuracy": 1,
+    "evidenceCorrectness": 1,
+    "relationIntegrity": 1
+  },
+  "reducerMetrics": {
+    "deterministic": true,
+    "lifecycleInvariantViolations": 0,
+    "resolvedQuestions": 0,
+    "supersededEvents": 0
+  },
+  "operationalMetrics": {
+    "modelCalls": 1,
+    "sourceMessageWindows": 1,
+    "semanticInterpretations": 1,
+    "semanticAmplification": 1
+  },
+  "projectionDiagnostics": {
+    "decisionCandidates": 2,
+    "decisionsRejectedByInvariant": 2,
+    "questionsResolvedByAnswerEdge": 0
+  },
+  "usage": {
+    "durationMs": 53197.921700000006,
+    "ollamaTotalMs": 52946.57292,
+    "promptEvalCount": 815,
+    "evalCount": 5763,
+    "doneReason": "stop",
+    "thinkingTextTokenCount": 4745,
+    "finalTextTokenCount": 675
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 2,
+    "claimCount": 4,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 1,
+    "goldClaimPrecision": 0.75,
+    "evidencePrecision": 0.75,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0,
+    "matchedClaimIds": [
+      "database-migration.friday",
+      "database-migration.backup",
+      "homepage-design.review"
+    ],
+    "matchedDecisionIds": [],
+    "matchedOpenQuestionIds": [],
+    "retainedThreadIds": ["database-migration", "homepage-design"],
+    "triggeredForbiddenIds": []
+  }
+}

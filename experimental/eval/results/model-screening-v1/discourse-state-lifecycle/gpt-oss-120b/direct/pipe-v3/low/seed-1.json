@@ -1,0 +1,125 @@
+{
+  "case": "discourse-state-lifecycle",
+  "model": "gpt-oss:120b",
+  "pipeline": "direct",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 1,
+  "transformation": "identity",
+  "inputHash": "3e0fb3123264b2ed93d7e55c24f65afcaee37966422338b7ee2648925ba3e2da",
+  "promptHash": "7c93afc5c975e58439b7a7f7ee98702d8a6750cf5dfe4d67a7ea35db1eb7e106",
+  "promptVersion": "v4",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion on candidate selection, skill development, and historical view\",\n  \"topics\": [\n    {\n      \"id\": \"candidate-list\",\n      \"title\": \"How to get on the candidate list\",\n      \"claims\": [\n        {\n          \"text\": \"Need to be active in Guild and Metarchy communities so people know about you.\",\n          \"evidence\": [2]\n        },\n        {\n          \"text\": \"Taking 30 junior developers with one year of experience each.\",\n          \"evidence\": [3]\n        },\n        {\n          \"text\": \"Total experience does not add up like nine women giving birth in one month.\",\n          \"evidence\": [4]\n        },\n        {\n          \"text\": \"Formal experience is less important; cleverness and responsibility matter more in a short interview.\",\n          \"evidence\": [5]\n        }\n      ]\n    },\n    {\n      \"id\": \"skill-development\",\n      \"title\": \"Expanding stack vs deepening a direction\",\n      \"claims\": [\n        {\n          \"text\": \"Expanding the stack helps find a job faster and gain commercial experience.\",\n          \"evidence\": [7]\n        },\n        {\n          \"text\": \"Deepening knowledge in a chosen direction is better for professional growth.\",\n          \"evidence\": [8]\n        }\n      ]\n    },\n    {\n      \"id\": \"historical-comparison\",\n      \"title\": \"US vs Soviet bloc in tech leadership\",\n      \"claims\": [\n        {\n          \"text\": \"The US was not a leading country in these matters; the Soviet bloc was.\",\n          \"evidence\": [9]\n        },\n        {\n          \"text\": \"Disagreement: statement is too broad a generalization.\",\n          \"evidence\": [10]\n        },\n        {\n          \"text\": \"Gender is a bourgeois propaganda; only one gender exists – the Soviet person.\",\n          \"evidence\": [11]\n        },\n        {\n          \"text\": \"The previous comment was sarcasm.\",\n          \"evidence\": [12]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": []\n}",
+  "thinking": "We need summary JSON. Identify topics. Likely three topics: joining candidate list, stack vs depth, historical claim. Claims with evidence IDs.\n\nDecisions? none. Open questions maybe? There is question about global difference between stack expansion and deepening – answered by P2. So resolved? Might be decision? It's answered, so not open. No explicit decision. So decisions empty. OpenQuestions maybe none.\n\nConstruct.\n\n",
+  "parsed": {
+    "title": "Discussion on candidate selection, skill development, and historical view",
+    "topics": [
+      {
+        "id": "candidate-list",
+        "title": "How to get on the candidate list",
+        "claims": [
+          {
+            "text": "Need to be active in Guild and Metarchy communities so people know about you.",
+            "evidence": [2]
+          },
+          {
+            "text": "Taking 30 junior developers with one year of experience each.",
+            "evidence": [3]
+          },
+          {
+            "text": "Total experience does not add up like nine women giving birth in one month.",
+            "evidence": [4]
+          },
+          {
+            "text": "Formal experience is less important; cleverness and responsibility matter more in a short interview.",
+            "evidence": [5]
+          }
+        ]
+      },
+      {
+        "id": "skill-development",
+        "title": "Expanding stack vs deepening a direction",
+        "claims": [
+          {
+            "text": "Expanding the stack helps find a job faster and gain commercial experience.",
+            "evidence": [7]
+          },
+          {
+            "text": "Deepening knowledge in a chosen direction is better for professional growth.",
+            "evidence": [8]
+          }
+        ]
+      },
+      {
+        "id": "historical-comparison",
+        "title": "US vs Soviet bloc in tech leadership",
+        "claims": [
+          {
+            "text": "The US was not a leading country in these matters; the Soviet bloc was.",
+            "evidence": [9]
+          },
+          {
+            "text": "Disagreement: statement is too broad a generalization.",
+            "evidence": [10]
+          },
+          {
+            "text": "Gender is a bourgeois propaganda; only one gender exists – the Soviet person.",
+            "evidence": [11]
+          },
+          {
+            "text": "The previous comment was sarcasm.",
+            "evidence": [12]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": []
+  },
+  "usage": {
+    "durationMs": 7674.213899999999,
+    "ollamaTotalMs": 7210.053738,
+    "promptEvalCount": 746,
+    "evalCount": 538,
+    "doneReason": "stop",
+    "thinkingTextTokenCount": 85,
+    "finalTextTokenCount": 443
+  },
+  "operationalMetrics": {
+    "modelCalls": 1,
+    "sourceMessageWindows": 1,
+    "semanticInterpretations": 1,
+    "semanticAmplification": 1
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 3,
+    "claimCount": 10,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 1,
+    "goldClaimPrecision": 0.3,
+    "evidencePrecision": 0.3,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0.4,
+    "matchedClaimIds": [
+      "networking.answer",
+      "career.goal-dependent-strategy",
+      "history.contested-claim"
+    ],
+    "matchedDecisionIds": [],
+    "matchedOpenQuestionIds": [],
+    "retainedThreadIds": [
+      "candidate-networking",
+      "career-strategy",
+      "historical-dispute"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

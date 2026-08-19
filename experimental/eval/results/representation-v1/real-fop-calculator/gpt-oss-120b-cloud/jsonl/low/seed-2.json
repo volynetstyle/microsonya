@@ -1,0 +1,123 @@
+{
+  "case": "real-fop-calculator",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "jsonl",
+  "reasoning": "low",
+  "seed": 2,
+  "inputHash": "d3179cdb8e49a27f55b8dcbb42c5b7b95590527ad18ad16afb38bc499073e8af",
+  "promptHash": "114122d145c377590c11e05d8b156410db1a9d40bb770ac7d73e6ca9fe65c0ce",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion on taxes, domain purchase, and app viability\",\n  \"topics\": [\n    {\n      \"id\": \"tax-filing\",\n      \"title\": \"Complications in tax filing and declaration checks\",\n      \"claims\": [\n        {\n          \"text\": \"The main difficulty is ensuring correct column calculations in declarations, not just the tax amount.\",\n          \"evidence\": [1, 5, 8]\n        },\n        {\n          \"text\": \"The whole procedure can take about an hour with Excel, plus one day per month for reporting.\",\n          \"evidence\": [5, 6, 7]\n        },\n        {\n          \"text\": \"A calculator only works with a hryvnia‑based FOP, requiring manual conversion for foreign‑currency transactions.\",\n          \"evidence\": [19]\n        }\n      ]\n    },\n    {\n      \"id\": \"domain-purchase\",\n      \"title\": \"Domain acquisition status\",\n      \"claims\": [\n        {\n          \"text\": \"No domain has been bought yet.\",\n          \"evidence\": [2, 9]\n        },\n        {\n          \"text\": \"Someone suggests buying a calculator first before affording a domain.\",\n          \"evidence\": [4]\n        }\n      ]\n    },\n    {\n      \"id\": \"app-viability\",\n      \"title\": \"Prospects and challenges of the proposed app\",\n      \"claims\": [\n        {\n          \"text\": \"Web platforms are less profitable than Android/iOS and have poor SEO, making traffic acquisition difficult.\",\n          \"evidence\": [11]\n        },\n        {\n          \"text\": \"Successful projects use fast delivery (< 1 week) and a cross‑platform stack like Flutter.\",\n          \"evidence\": [12]\n        },\n        {\n          \"text\": \"Before analyzing further, it's necessary to verify that at least ten people would pay the 299 UAH price.\",\n          \"evidence\": [20]\n        },\n        {\n          \"text\": \"The app is positioned as a local‑first solution with currency rates updated every 5 minutes, but the paid bundle contains the core functionality.\",\n          \"evidence\": [29]\n        },\n        {\n          \"text\": \"The project is described as a low‑effort “free vibe‑code” demo, attracting only curious users; many may not buy.\",\n          \"evidence\": [30]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": [\n    {\n      \"text\": \"Are there at least ten potential customers willing to pay 299 UAH for the app?\",\n      \"evidence\": [20]\n    }\n  ]\n}",
+  "thinking": "Need construct JSON. Identify topics: tax filing process, domain purchase, app viability, source code password, etc. Claims list.\n\nLet's pick few topics.\n\nTopic id tax-filing: claim about needing to check columns etc evidence 1,5,8.\n\nTopic id domain-purchase: claim about no domain bought evidence 2,4,9.\n\nTopic id app-viability: claim about low profit, need users, etc evidence 11,12,20,30.\n\nDecisions none. Open questions maybe: \"Is there at least ten people willing to pay 299?\" evidence 20.\n\nAlso question about source code password? but that's joke.\n\nProvide JSON.",
+  "parsed": {
+    "title": "Discussion on taxes, domain purchase, and app viability",
+    "topics": [
+      {
+        "id": "tax-filing",
+        "title": "Complications in tax filing and declaration checks",
+        "claims": [
+          {
+            "text": "The main difficulty is ensuring correct column calculations in declarations, not just the tax amount.",
+            "evidence": [1, 5, 8]
+          },
+          {
+            "text": "The whole procedure can take about an hour with Excel, plus one day per month for reporting.",
+            "evidence": [5, 6, 7]
+          },
+          {
+            "text": "A calculator only works with a hryvnia‑based FOP, requiring manual conversion for foreign‑currency transactions.",
+            "evidence": [19]
+          }
+        ]
+      },
+      {
+        "id": "domain-purchase",
+        "title": "Domain acquisition status",
+        "claims": [
+          {
+            "text": "No domain has been bought yet.",
+            "evidence": [2, 9]
+          },
+          {
+            "text": "Someone suggests buying a calculator first before affording a domain.",
+            "evidence": [4]
+          }
+        ]
+      },
+      {
+        "id": "app-viability",
+        "title": "Prospects and challenges of the proposed app",
+        "claims": [
+          {
+            "text": "Web platforms are less profitable than Android/iOS and have poor SEO, making traffic acquisition difficult.",
+            "evidence": [11]
+          },
+          {
+            "text": "Successful projects use fast delivery (< 1 week) and a cross‑platform stack like Flutter.",
+            "evidence": [12]
+          },
+          {
+            "text": "Before analyzing further, it's necessary to verify that at least ten people would pay the 299 UAH price.",
+            "evidence": [20]
+          },
+          {
+            "text": "The app is positioned as a local‑first solution with currency rates updated every 5 minutes, but the paid bundle contains the core functionality.",
+            "evidence": [29]
+          },
+          {
+            "text": "The project is described as a low‑effort “free vibe‑code” demo, attracting only curious users; many may not buy.",
+            "evidence": [30]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": [
+      {
+        "text": "Are there at least ten potential customers willing to pay 299 UAH for the app?",
+        "evidence": [20]
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 6452.517000000051,
+    "ollamaTotalMs": 6144.004325,
+    "promptEvalCount": 2805,
+    "evalCount": 700,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 3,
+    "claimCount": 10,
+    "decisionCount": 0,
+    "openQuestionCount": 1,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 1,
+    "goldClaimPrecision": 0.8,
+    "evidencePrecision": 0.625,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 1,
+    "noiseRetention": 0,
+    "matchedClaimIds": [
+      "tax-reporting.form-risk",
+      "tax-reporting.paid-help",
+      "product.uah-only",
+      "product.web-limitations",
+      "product.fast-delivery-strategy",
+      "product.validate-demand-first",
+      "security.password-in-bundle",
+      "product.creator-response"
+    ],
+    "retainedThreadIds": [
+      "tax-reporting",
+      "calculator-product",
+      "calculator-security"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

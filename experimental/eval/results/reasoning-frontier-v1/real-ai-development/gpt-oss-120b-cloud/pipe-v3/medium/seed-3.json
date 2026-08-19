@@ -1,0 +1,165 @@
+{
+  "case": "real-ai-development",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v3",
+  "reasoning": "medium",
+  "seed": 3,
+  "transformation": "identity",
+  "inputHash": "c44e2d8f381898078b12b50a1dbf1501e5970203c0d4ef386b86fd514114c47c",
+  "promptHash": "3e0a05e203eb442eb676b68edb70e0aab57dbb0cc1feec2958e22a6ddaf40d3c",
+  "promptVersion": "v2",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"AI, Automation, and Development Practices Discussion\",\n  \"topics\": [\n    {\n      \"id\": \"job-search-automation\",\n      \"title\": \"Job Search Automation\",\n      \"claims\": [\n        {\n          \"text\": \"User plans to set up OpenClaw to automate job search, generating PDF resumes tailored to each vacancy.\",\n          \"evidence\": [1, 5]\n        },\n        {\n          \"text\": \"User believes adding AI‑related skills (Cursor, Claude Code, LLM, RAG, Embeddings) is necessary in 2026 to avoid being filtered out by recruiters.\",\n          \"evidence\": [6, 8]\n        },\n        {\n          \"text\": \"Significant acceleration of development started around 2025; tools are now good but increasingly expensive.\",\n          \"evidence\": [9]\n        }\n      ]\n    },\n    {\n      \"id\": \"ai-recruiting\",\n      \"title\": \"AI Impact on Recruiting\",\n      \"claims\": [\n        {\n          \"text\": \"Keyword‑based candidate search is becoming increasingly detached from reality.\",\n          \"evidence\": [13]\n        },\n        {\n          \"text\": \"User expects the recruiter profession to become extinct, with HR handling personnel management.\",\n          \"evidence\": [14]\n        },\n        {\n          \"text\": \"Interview experience showed HR did not read the resume, leading to a mismatch in expectations.\",\n          \"evidence\": [15]\n        }\n      ]\n    },\n    {\n      \"id\": \"llm-development-acceleration\",\n      \"title\": \"Development Acceleration with LLMs\",\n      \"claims\": [\n        {\n          \"text\": \"Using GPT to generate SQL joins and other code significantly speeds up development.\",\n          \"evidence\": [19]\n        },\n        {\n          \"text\": \"Incremental computations have been replaced by materialized views (or similar) in the current codebase.\",\n          \"evidence\": [34]\n        }\n      ]\n    },\n    {\n      \"id\": \"cloud-impact\",\n      \"title\": \"Cloud Impact on Code Quality\",\n      \"claims\": [\n        {\n          \"text\": \"Cloud platforms lower the entry barrier to programming, leading to poorly optimized and insecure code.\",\n          \"evidence\": [30]\n        },\n        {\n          \"text\": \"The team explicitly chooses not to use cloud services and states this will not change.\",\n          \"evidence\": [19]\n        },\n        {\n          \"text\": \"Database is configured to be recreated on each schema change, causing operational puzzles.\",\n          \"evidence\": [37]\n        }\n      ]\n    },\n    {\n      \"id\": \"architecture-comments\",\n      \"title\": \"Architecture Observations\",\n      \"claims\": [\n        {\n          \"text\": \"The described setup resembles REST, JSON, Microservices, Docker after React.\",\n          \"evidence\": [10]\n        }\n      ]\n    },\n    {\n      \"id\": \"ai-code-generation-risks\",\n      \"title\": \"Risks of AI‑Generated Code\",\n      \"claims\": [\n        {\n          \"text\": \"AI‑generated code can introduce breaking changes, leading teams to drop such code entirely.\",\n          \"evidence\": [35]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [\n    {\n      \"text\": \"Team decided to drop the AI‑generated feature entirely after it broke the project.\",\n      \"evidence\": [35]\n    },\n    {\n      \"text\": \"Organization decided to forego cloud adoption permanently.\",\n      \"evidence\": [19]\n    },\n    {\n      \"text\": \"Database was configured to be rebuilt on each schema change.\",\n      \"evidence\": [37]\n    }\n  ],\n  \"openQuestions\": []\n}",
+  "thinking": "We need to parse the conversation, extract topics, claims, decisions, open questions. Provide JSON with title and topics array. Need to generate short kebab-case topic id derived only from topic. Identify main themes.\n\nReview messages:\n\n1: P1 talks about preparing for job search, wants cloud setup (OpenClaw) for searching vacancies, generating PDFs resume tailored to vacancy. Also comment about background with books mistaken by AI.\n\n2: P2 reply \"Вааата...\" (sarcastic). Not a claim.\n\n3: P3 \"аішка керує людьми, а не люди аішкою\". Joke.\n\n4: P1 \"Реверс інженіринг аішок це штука прикольна...\". Not claim.\n\n5: P1 about waiting for startup to close to have free time to set up OpenClaw for job search automation. Also research job market with AI.\n\n6: P1 about needing to add many AI skills (Cursor, Claude Code, LLM, RAG, Embeddings) in 2026, because otherwise recruiters filter.\n\n7: P2 \"Саша в 2024: фу, аішка\\nСаша в 2026: мм, аішка\". Sarcastic.\n\n8: P1 continues about AI startups being market mainstream now, lack of knowledge makes job search hard for JS/Python.\n\n9: P1 about acceleration of development since 2022, but real start in 2025, tools are good but expensive.\n\n10: P4 \"Це виглядає як REST, JSON, Microservices, Docker після реакту😁\". Possibly comment about architecture?\n\n11: P4 \"часи йдуть, нічого не змінилось\" (no claim)\n\n12: P4 \"хахах\"\n\n13: P4 \"Мені здається, пошук кандидатів по таким ключовим словам ще відірваніший від реальності ніж було до цього\". Claim about candidate search using keywords being out of touch.\n\n14: P1 \"Я просто чекаю поки професія рекрутерів вимре назавжди. HR для менеджингу персоналу компанії хай буде\". Claim/opinion.\n\n15: P1 anecdote about interview process.\n\n16: P2 service message (null). Probably irrelevant.\n\n17: P1 reply to service message: \"Приколу вже десяток років а людям не доходить...\" comment.\n\n18: P4 service message.\n\n19: P2: asserts that development acceleration is true; he uses GPT to generate joins etc. notes that their projects have no cloud and never will.\n\n20: P2: suggests trying to \"запакувати логи в джеміні\" (maybe analyze logs)? Mentions bug fixes.\n\n21: P2 reply to 17: \"Та таким і не дійде...\". Opinion.\n\n22: P4 reply to 20: says higher quality env needed, mentions human brain context etc. Claim about AI model not seeing that.\n\n23: P2 reply to 22: says logs wouldn't help; describing confusion about tasks.\n\n24: P4: writes article thought: quality of answer proportional to quality of question and knowledge available.\n\n25: P2: \"Так і є\" (agree).\n\n26: P4: reply to 23: \"Якщо довго мучиться, все в тебе получиця))\" (sarcastic)\n\n27: P4: \"Полуниця\". nonsense.\n\n28: P4: \"як винагорода\". nonsense.\n\n29: P2 posts a poem about street and \"Ford Mustang\". It's off-topic.\n\n30: P1: Criticism of cloud lowering entry threshold; example of colleague generating large raw SQL queries causing performance issues (security/inefficient). That's a claim about cloud enabling poor practice? Also mentions index.py huge etc.\n\n31: P2: \"Смакота\" (appreciation).\n\n32: P1: \"Довго думав щоб обрати мустанг ціллю...\" (car interest). Not claim.\n\n33: P1: \"Поки ще не визначився з поколінням...\" (car). Not claim.\n\n34: P4: \"Інкрементальні обчислення похоронили десь тут і поставили пам'ятник view\". Claim about incremental computations replaced by view? It's cryptic.\n\n35: P1: Story about engineer community focusing on cache, normalization, etc. Person sleeping 4h and pushes SELECT * to prod without approval. The person used AI to generate code that broke project; team decided to drop it. That's a claim about AI code generation causing breaking code, and team decision to drop it.\n\n36: P4: \"Я просто не вірю, що таке існує\". maybe about previous claim.\n\n37: P1: \"Я ж забув що вони налаштували щоб при змінах в бд вона перестворювалась) ця загадка жака фреско мучає ...\" Possibly claim about DB being recreated on changes which cause issues.\n\nNow we need to identify topics. Likely topics: job-search-automation, AI-skill-requirements, AI-impact-on-recruiting, development-acceleration-with-LLM, cloud-impact-on-code-quality, AI-code-generation-risks, candidate-search-keywords, architecture (REST, Docker). We need short topic ids.\n\nAlso decisions: Are there any decisions made? Example: In message 35, team decided to drop the AI-generated code entirely because it was broken (\"вирішила дропнути взагалі\"). That's a decision.\n\nAlso maybe decision about not using cloud? In message 19, \"На наших проектах немає клауду і всілякого такого і ніколи тут і не буде\" is a decision (choice to not use cloud). It's an implemented choice after fact; qualifies as decision.\n\nAlso maybe decision that \"все в тебе получиця\" not decision.\n\nAlso maybe decision that \"they set up DB to recreate on schema changes\" (message 37), maybe describes a configuration decision.\n\nOpen questions: Any unanswered questions? I don't see explicit question marks; messages with ? maybe none. Check: There's no \"?\" char. So maybe none.\n\nBut we must include openQuestions array empty if none.\n\nNow produce JSON.\n\nStructure: title: maybe \"Discussion on AI in Job Search and Development\". topics: each with id, title, claims.\n\nWe need to include evidence IDs per claim.\n\nLet's outline topics:\n\nTopic 1: job-search-automation (id: job-search-automation). Claims: P1 messages 1,5,6,8,9 talk about automation, need AI skills, etc.\n\n- Claim: The user wants to set up OpenClaw for automated job search, generating PDF resumes tailored to vacancies. Evidence: #1 (initial mention), #5 (plan after startup closes). Possibly also #6 for skill addition.\n\n- Claim: Lack of AI skills (Cursor, Claude Code, LLM, RAG, Embeddings) makes job search hard for JS/Python roles. Evidence: #6, #8.\n\n- Claim: Acceleration of development due to AI tools started around 2025, tools are good but expensive. Evidence: #9.\n\nTopic 2: AI impact on recruiting (ai-recruiting). Claims: #13 (keyword search out of touch), #14 (recruiter profession may become extinct), #15 (HR interview anecdote). Also maybe #6 (need AI skills to avoid being filtered). Evidence accordingly.\n\nTopic 3: Development acceleration with LLMs (llm-development). Claims: #19 (using GPT to generate joins, accelerate dev), #34 (incremental computations replaced by view) maybe same? Also #35 (AI code generation leading to broken project). But #35 is about risk.\n\nTopic 4: Cloud vs No Cloud (cloud-decision). Claims: #30 (cloud lowers entry barrier but leads to sloppy code/performance issues), #19 (no cloud in their projects and never will). Also #37 (DB recreation on schema changes). Decision: #19 says they will never have cloud; #35 decision to drop AI-generated code.\n\nTopic 5: Architecture comments (architecture). Claim: #10 \"looks like REST, JSON, Microservices, Docker after React\". Might be categorized.\n\nTopic 6: AI code generation risks (ai-code-risk). Claim: #35 (AI-generated code broke project, team decided to drop). Decision: #35 team decision to drop. Also #30 example of poor queries generated by AI.\n\nMaybe share across topics.\n\nLet's craft JSON.\n\nWe need 'claims' list per topic: each claim an object with text and evidence (list of IDs). Provide multiple claims.\n\nDecisions: list decisions with text and evidence IDs.\n\nOpenQuestions: none.\n\nNow produce JSON.\n\nI'll define topics:\n\n- job-search-automation\n- ai-recruiting\n- llm-development-acceleration\n- cloud-impact\n- architecture-comments\n- ai-code-generation-risks\n\nNow fill claims.\n\nTopic job-search-automation:\n\nClaim1: \"User plans to set up OpenClaw to automate job search, generate PDF resumes tailored to each vacancy.\" Evidence: #1, #5.\n\nClaim2: \"User believes adding AI-related skills (Cursor, Claude Code, LLM, RAG, Embeddings) is necessary in 2026 to avoid being filtered out by recruiters.\" Evidence: #6, #8.\n\nClaim3: \"User notes that significant acceleration of development started around 2025, with tools becoming good but increasingly expensive.\" Evidence: #9.\n\nTopic ai-recruiting:\n\nClaim1: \"Current keyword-based candidate search is increasingly detached from reality.\" Evidence: #13.\n\nClaim2: \"User expects the recruiter profession to become extinct, with HR handling personnel management.\" Evidence: #14.\n\nClaim3: \"Interview experience showed HR did not read the resume, leading to a mismatch.\" Evidence: #15.\n\nTopic llm-development-acceleration:\n\nClaim1: \"Using GPT to generate SQL joins and other code significantly speeds up development.\" Evidence: #19.\n\nClaim2: \"Incremental computations have been replaced by materialized views (or similar), per comment.\" Evidence: #34.\n\nTopic cloud-impact:\n\nClaim1: \"Cloud platforms lower the entry barrier to programming, leading to poorly optimized code and security issues.\" Evidence: #30.\n\nClaim2: \"The team explicitly chooses not to use cloud services and states this will not change.\" Evidence: #19.\n\nClaim3: \"Database is configured to be recreated on schema changes, causing operational puzzles.\" Evidence: #37.\n\nTopic architecture-comments:\n\nClaim1: \"The described setup resembles REST, JSON, Microservices, Docker after React.\" Evidence: #10.\n\nTopic ai-code-generation-risks:\n\nClaim1: \"AI-generated code can introduce breaking changes, leading teams to drop such code entirely.\" Evidence: #35.\n\nDecision1: \"Team decided to drop the AI-generated feature entirely after it broke the project.\" Evidence: #35.\n\nDecision2: \"The organization decided to forego cloud adoption permanently.\" Evidence: #19.\n\nDecision3: \"Database was configured to be rebuilt on each change, a deliberate setup.\" Evidence: #37.\n\nNow, any more decisions? Possibly #19 also a decision but we already covered.\n\nOpen questions: I see none. So empty.\n\nNow construct JSON.\n\nMake sure evidence arrays contain numbers.\n\nCheck IDs:\n\n#1, #5, #6, #8, #9, #13, #14, #15, #19, #34, #30, #37, #10, #35.\n\nMake sure they are integer numbers.\n\nNow produce JSON.",
+  "parsed": {
+    "title": "AI, Automation, and Development Practices Discussion",
+    "topics": [
+      {
+        "id": "job-search-automation",
+        "title": "Job Search Automation",
+        "claims": [
+          {
+            "text": "User plans to set up OpenClaw to automate job search, generating PDF resumes tailored to each vacancy.",
+            "evidence": [1, 5]
+          },
+          {
+            "text": "User believes adding AI‑related skills (Cursor, Claude Code, LLM, RAG, Embeddings) is necessary in 2026 to avoid being filtered out by recruiters.",
+            "evidence": [6, 8]
+          },
+          {
+            "text": "Significant acceleration of development started around 2025; tools are now good but increasingly expensive.",
+            "evidence": [9]
+          }
+        ]
+      },
+      {
+        "id": "ai-recruiting",
+        "title": "AI Impact on Recruiting",
+        "claims": [
+          {
+            "text": "Keyword‑based candidate search is becoming increasingly detached from reality.",
+            "evidence": [13]
+          },
+          {
+            "text": "User expects the recruiter profession to become extinct, with HR handling personnel management.",
+            "evidence": [14]
+          },
+          {
+            "text": "Interview experience showed HR did not read the resume, leading to a mismatch in expectations.",
+            "evidence": [15]
+          }
+        ]
+      },
+      {
+        "id": "llm-development-acceleration",
+        "title": "Development Acceleration with LLMs",
+        "claims": [
+          {
+            "text": "Using GPT to generate SQL joins and other code significantly speeds up development.",
+            "evidence": [19]
+          },
+          {
+            "text": "Incremental computations have been replaced by materialized views (or similar) in the current codebase.",
+            "evidence": [34]
+          }
+        ]
+      },
+      {
+        "id": "cloud-impact",
+        "title": "Cloud Impact on Code Quality",
+        "claims": [
+          {
+            "text": "Cloud platforms lower the entry barrier to programming, leading to poorly optimized and insecure code.",
+            "evidence": [30]
+          },
+          {
+            "text": "The team explicitly chooses not to use cloud services and states this will not change.",
+            "evidence": [19]
+          },
+          {
+            "text": "Database is configured to be recreated on each schema change, causing operational puzzles.",
+            "evidence": [37]
+          }
+        ]
+      },
+      {
+        "id": "architecture-comments",
+        "title": "Architecture Observations",
+        "claims": [
+          {
+            "text": "The described setup resembles REST, JSON, Microservices, Docker after React.",
+            "evidence": [10]
+          }
+        ]
+      },
+      {
+        "id": "ai-code-generation-risks",
+        "title": "Risks of AI‑Generated Code",
+        "claims": [
+          {
+            "text": "AI‑generated code can introduce breaking changes, leading teams to drop such code entirely.",
+            "evidence": [35]
+          }
+        ]
+      }
+    ],
+    "decisions": [
+      {
+        "text": "Team decided to drop the AI‑generated feature entirely after it broke the project.",
+        "evidence": [35]
+      },
+      {
+        "text": "Organization decided to forego cloud adoption permanently.",
+        "evidence": [19]
+      },
+      {
+        "text": "Database was configured to be rebuilt on each schema change.",
+        "evidence": [37]
+      }
+    ],
+    "openQuestions": []
+  },
+  "usage": {
+    "durationMs": 33679.49669999999,
+    "ollamaTotalMs": 33237.513316,
+    "promptEvalCount": 3405,
+    "evalCount": 3211,
+    "doneReason": "stop",
+    "thinkingTextTokenCount": 2424,
+    "finalTextTokenCount": 776
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 6,
+    "claimCount": 13,
+    "decisionCount": 3,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.8095238095238095,
+    "goldClaimPrecision": 0.5384615384615384,
+    "evidencePrecision": 0.5,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0,
+    "matchedClaimIds": [
+      "job-search.automation-idea",
+      "job-search.ai-skills",
+      "development.routine-speedup",
+      "job-search.keyword-filtering",
+      "job-search.angular-anecdote",
+      "vibe-coding.review-failure",
+      "vibe-coding.bad-backend"
+    ],
+    "matchedDecisionIds": [],
+    "matchedOpenQuestionIds": [],
+    "retainedThreadIds": [
+      "ai-job-search",
+      "ai-assisted-development",
+      "vibe-coding-risks"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

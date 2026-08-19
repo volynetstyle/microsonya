@@ -1,0 +1,48 @@
+{
+  "case": "real-ai-development",
+  "model": "deepseek-v4-pro:preview",
+  "pipeline": "deterministic-shell",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 1,
+  "transformation": "identity",
+  "inputHash": "c44e2d8f381898078b12b50a1dbf1501e5970203c0d4ef386b86fd514114c47c",
+  "promptHash": "405c0491e95c7da43a15edcdec98c85e4befb8cc6d0f60435742b7376aff4548",
+  "promptVersion": "v4",
+  "status": "request_failure",
+  "raw": "",
+  "thinking": "",
+  "parsed": null,
+  "requestError": "OllamaRequestError: The operation was aborted due to timeout",
+  "usage": {
+    "durationMs": 180012.98620000016
+  },
+  "operationalMetrics": {
+    "modelCalls": 1,
+    "sourceMessageWindows": 1,
+    "semanticInterpretations": 1,
+    "semanticAmplification": 1
+  },
+  "metrics": {
+    "validJson": false,
+    "schemaValid": false,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 0,
+    "claimCount": 0,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": null,
+    "weightedClaimRecall": null,
+    "goldClaimPrecision": null,
+    "evidencePrecision": null,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": null,
+    "noiseRetention": null,
+    "matchedClaimIds": [],
+    "matchedDecisionIds": [],
+    "matchedOpenQuestionIds": [],
+    "retainedThreadIds": [],
+    "triggeredForbiddenIds": []
+  }
+}

@@ -1,0 +1,160 @@
+{
+  "case": "real-job-search-abroad",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 3,
+  "transformation": "identity",
+  "inputHash": "aac555f3427e2195f145b4a5e3a6d9644961170a8ccc181b8832ae83202b036f",
+  "promptHash": "f896acc87b54ce9e423829a612eb0b9ece1580d4ffe75c969295d6c8056fdff1",
+  "promptVersion": "v2",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion about living and working abroad in Slovakia, Austria and elsewhere\",\n  \"topics\": [\n    {\n      \"id\": \"migration-interest\",\n      \"title\": \"Interest in living abroad\",\n      \"claims\": [\n        {\n          \"text\": \"Several participants are living or have lived in Slovakia, Austria, Poland, and consider moving abroad.\",\n          \"evidence\": [1, 3, 4, 12, 13, 49, 54]\n        },\n        {\n          \"text\": \"The original poster has been living in Slovakia for almost a year without knowing the language.\",\n          \"evidence\": [43]\n        }\n      ]\n    },\n    {\n      \"id\": \"job-search-abroad\",\n      \"title\": \"Finding jobs abroad\",\n      \"claims\": [\n        {\n          \"text\": \"LinkedIn is recommended for job hunting in foreign markets.\",\n          \"evidence\": [18]\n        },\n        {\n          \"text\": \"Approximately 100 applications yielded only 3 interview invitations for the speaker.\",\n          \"evidence\": [21]\n        },\n        {\n          \"text\": \"In Austria, many job postings require local language proficiency (B2 or B1), though candidates often list B2 without a certificate.\",\n          \"evidence\": [46]\n        },\n        {\n          \"text\": \"English‑only positions exist, especially in international or tech environments.\",\n          \"evidence\": [20, 55]\n        },\n        {\n          \"text\": \"Higher education is rarely a decisive factor in hiring.\",\n          \"evidence\": [32]\n        },\n        {\n          \"text\": \"Salary expectations are higher in Europe than in Ukraine, but many accept lower offers to secure a job.\",\n          \"evidence\": [37, 35]\n        }\n      ]\n    },\n    {\n      \"id\": \"language-requirements\",\n      \"title\": \"Language requirements for work and daily life\",\n      \"claims\": [\n        {\n          \"text\": \"German is the primary language spoken in Austria, but English is commonly used in workplaces.\",\n          \"evidence\": [14, 15, 20, 46]\n        },\n        {\n          \"text\": \"Many candidates face a language barrier in daily life, feeling uncomfortable without local language skills.\",\n          \"evidence\": [47, 51, 52]\n        },\n        {\n          \"text\": \"Some employers accept B1 level language skills, but B2 is often requested.\",\n          \"evidence\": [46]\n        }\n      ]\n    },\n    {\n      \"id\": \"networking-and-events\",\n      \"title\": \"Networking and community events\",\n      \"claims\": [\n        {\n          \"text\": \"Attending international tech events (e.g., wawtech.io summer) is suggested for networking.\",\n          \"evidence\": [59]\n        },\n        {\n          \"text\": \"The original poster considers joining Discord channels to practice English conversation.\",\n          \"evidence\": [56, 57]\n        }\n      ]\n    },\n    {\n      \"id\": \"personal-opinions\",\n      \"title\": \"Personal views on staying in Austria\",\n      \"claims\": [\n        {\n          \"text\": \"One participant believes Austria is the best personal choice among European countries.\",\n          \"evidence\": [60]\n        },\n        {\n          \"text\": \"Another participant is skeptical about Austria's future due to political concerns.\",\n          \"evidence\": [60]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": [\n    {\n      \"text\": \"Should the original poster stay in Austria or consider moving to another country?\",\n      \"evidence\": [58]\n    }\n  ]\n}",
+  "thinking": "Need to produce JSON with topics, claims, decisions, openQuestions. Identify main topics: migration, job search, language requirements, salary, networking. Gather claims.\n\nOpen questions? There's maybe \"А ти як особисто відчуваєш, думаєш лишатись в Австрії?\" not answered? No answer given. So open.\n\nDecisions none.\n\nCreate topics IDs.\n\nLet's craft.",
+  "parsed": {
+    "title": "Discussion about living and working abroad in Slovakia, Austria and elsewhere",
+    "topics": [
+      {
+        "id": "migration-interest",
+        "title": "Interest in living abroad",
+        "claims": [
+          {
+            "text": "Several participants are living or have lived in Slovakia, Austria, Poland, and consider moving abroad.",
+            "evidence": [1, 3, 4, 12, 13, 49, 54]
+          },
+          {
+            "text": "The original poster has been living in Slovakia for almost a year without knowing the language.",
+            "evidence": [43]
+          }
+        ]
+      },
+      {
+        "id": "job-search-abroad",
+        "title": "Finding jobs abroad",
+        "claims": [
+          {
+            "text": "LinkedIn is recommended for job hunting in foreign markets.",
+            "evidence": [18]
+          },
+          {
+            "text": "Approximately 100 applications yielded only 3 interview invitations for the speaker.",
+            "evidence": [21]
+          },
+          {
+            "text": "In Austria, many job postings require local language proficiency (B2 or B1), though candidates often list B2 without a certificate.",
+            "evidence": [46]
+          },
+          {
+            "text": "English‑only positions exist, especially in international or tech environments.",
+            "evidence": [20, 55]
+          },
+          {
+            "text": "Higher education is rarely a decisive factor in hiring.",
+            "evidence": [32]
+          },
+          {
+            "text": "Salary expectations are higher in Europe than in Ukraine, but many accept lower offers to secure a job.",
+            "evidence": [37, 35]
+          }
+        ]
+      },
+      {
+        "id": "language-requirements",
+        "title": "Language requirements for work and daily life",
+        "claims": [
+          {
+            "text": "German is the primary language spoken in Austria, but English is commonly used in workplaces.",
+            "evidence": [14, 15, 20, 46]
+          },
+          {
+            "text": "Many candidates face a language barrier in daily life, feeling uncomfortable without local language skills.",
+            "evidence": [47, 51, 52]
+          },
+          {
+            "text": "Some employers accept B1 level language skills, but B2 is often requested.",
+            "evidence": [46]
+          }
+        ]
+      },
+      {
+        "id": "networking-and-events",
+        "title": "Networking and community events",
+        "claims": [
+          {
+            "text": "Attending international tech events (e.g., wawtech.io summer) is suggested for networking.",
+            "evidence": [59]
+          },
+          {
+            "text": "The original poster considers joining Discord channels to practice English conversation.",
+            "evidence": [56, 57]
+          }
+        ]
+      },
+      {
+        "id": "personal-opinions",
+        "title": "Personal views on staying in Austria",
+        "claims": [
+          {
+            "text": "One participant believes Austria is the best personal choice among European countries.",
+            "evidence": [60]
+          },
+          {
+            "text": "Another participant is skeptical about Austria's future due to political concerns.",
+            "evidence": [60]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": [
+      {
+        "text": "Should the original poster stay in Austria or consider moving to another country?",
+        "evidence": [58]
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 11092.6303,
+    "ollamaTotalMs": 10897.943751,
+    "promptEvalCount": 3676,
+    "evalCount": 857,
+    "doneReason": "stop",
+    "thinkingTextTokenCount": 83,
+    "finalTextTokenCount": 764
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 5,
+    "claimCount": 15,
+    "decisionCount": 0,
+    "openQuestionCount": 1,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.75,
+    "goldClaimPrecision": 0.4666666666666667,
+    "evidencePrecision": 0.4,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 1,
+    "noiseRetention": 0.13333333333333333,
+    "matchedClaimIds": [
+      "networking.participants-abroad",
+      "language.work-vs-daily-life",
+      "job-search.two-months",
+      "job-search.conversion",
+      "job-search.education-observation",
+      "job-search.salary-compromise",
+      "austria.outlook"
+    ],
+    "matchedDecisionIds": [],
+    "matchedOpenQuestionIds": [],
+    "retainedThreadIds": [
+      "networking-abroad",
+      "language-integration",
+      "job-search-abroad",
+      "life-in-austria"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

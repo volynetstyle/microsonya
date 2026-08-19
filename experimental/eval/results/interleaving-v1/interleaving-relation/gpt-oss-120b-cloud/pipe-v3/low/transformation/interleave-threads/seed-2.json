@@ -1,0 +1,82 @@
+{
+  "case": "interleaving-relation",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 2,
+  "transformation": "interleave-threads",
+  "inputHash": "97b092748fdceb6033b0c23ae3372b110fab4aabe5a6e09636c39295667ce73a",
+  "promptHash": "a79b0d70066dcaf68183563a221cc06e49db3d605c8e185eb8b0655f4a241958",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Project updates\",\n  \"topics\": [\n    {\n      \"id\": \"database-migration\",\n      \"title\": \"Database migration schedule\",\n      \"claims\": [\n        {\n          \"text\": \"The database migration is planned for Friday.\",\n          \"evidence\": [\n            1\n          ]\n        },\n        {\n          \"text\": \"A backup will be created before the migration.\",\n          \"evidence\": [\n            2\n          ]\n        }\n      ]\n    },\n    {\n      \"id\": \"homepage-design\",\n      \"title\": \"Homepage design review\",\n      \"claims\": [\n        {\n          \"text\": \"The homepage design is ready for review.\",\n          \"evidence\": [\n            3\n          ]\n        },\n        {\n          \"text\": \"User D will review the homepage design today.\",\n          \"evidence\": [\n            4\n          ]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": []\n}",
+  "thinking": "We need to produce JSON. Claims: message1 claim about migration planned Friday. Message2 backup plan claim. Message3 design ready claim. Message4 review claim.\n\nDecisions? None. Open questions? None.\n\nStructure topics maybe separate: migration, design-review.\n\nProvide IDs.\n\nLet's craft.",
+  "parsed": {
+    "title": "Project updates",
+    "topics": [
+      {
+        "id": "database-migration",
+        "title": "Database migration schedule",
+        "claims": [
+          {
+            "text": "The database migration is planned for Friday.",
+            "evidence": [1]
+          },
+          {
+            "text": "A backup will be created before the migration.",
+            "evidence": [2]
+          }
+        ]
+      },
+      {
+        "id": "homepage-design",
+        "title": "Homepage design review",
+        "claims": [
+          {
+            "text": "The homepage design is ready for review.",
+            "evidence": [3]
+          },
+          {
+            "text": "User D will review the homepage design today.",
+            "evidence": [4]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": []
+  },
+  "usage": {
+    "durationMs": 3780.0550999999978,
+    "ollamaTotalMs": 3556.887853,
+    "promptEvalCount": 551,
+    "evalCount": 273,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 2,
+    "claimCount": 4,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 1,
+    "goldClaimPrecision": 0.75,
+    "evidencePrecision": 0.75,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0,
+    "matchedClaimIds": [
+      "database-migration.schedule",
+      "database-migration.backup",
+      "homepage-design.review"
+    ],
+    "matchedDecisionIds": [],
+    "matchedOpenQuestionIds": [],
+    "retainedThreadIds": ["database-migration", "homepage-design"],
+    "triggeredForbiddenIds": []
+  }
+}

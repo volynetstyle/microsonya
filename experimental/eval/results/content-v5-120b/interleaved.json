@@ -1,0 +1,45 @@
+{
+  "case": "interleaved",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Планування міграції та рев'ю макету\",\n  \"summary\": \"Обговорюються два незалежні питання: підготовка до міграції бази даних і рев'ю готового макету головної сторінки.\",\n  \"topics\": [\n    {\n      \"topic\": \"Міграція бази даних\",\n      \"summary\": \"А оголосив дату міграції на п'ятницю, а С запропонував створити резервну копію перед цим кроком.\",\n      \"participants\": [\n        \"A\",\n        \"C\"\n      ],\n      \"evidence\": [\n        1,\n        3\n      ]\n    },\n    {\n      \"topic\": \"Рев'ю макету головної сторінки\",\n      \"summary\": \"B повідомив, що макет готовий до рев'ю, D відповів, що перегляне його сьогодні.\",\n      \"participants\": [\n        \"B\",\n        \"D\"\n      ],\n      \"evidence\": [\n        2,\n        4\n      ]\n    }\n  ]\n}",
+  "thinking": "Need produce JSON summary. Two topics: migration and mockup. Identify participants. Evidence IDs.",
+  "parsed": {
+    "title": "Планування міграції та рев'ю макету",
+    "summary": "Обговорюються два незалежні питання: підготовка до міграції бази даних і рев'ю готового макету головної сторінки.",
+    "topics": [
+      {
+        "topic": "Міграція бази даних",
+        "summary": "А оголосив дату міграції на п'ятницю, а С запропонував створити резервну копію перед цим кроком.",
+        "participants": ["A", "C"],
+        "evidence": [1, 3]
+      },
+      {
+        "topic": "Рев'ю макету головної сторінки",
+        "summary": "B повідомив, що макет готовий до рев'ю, D відповів, що перегляне його сьогодні.",
+        "participants": ["B", "D"],
+        "evidence": [2, 4]
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 3532.568000000001,
+    "ollamaTotalMs": 3249.860194,
+    "promptEvalCount": 626,
+    "evalCount": 266,
+    "doneReason": "stop",
+    "thinkingTextTokenCount": 19,
+    "finalTextTokenCount": 237
+  },
+  "metrics": {
+    "contentRecall": 1,
+    "claimRecall": 1,
+    "decisionRecall": 1,
+    "openQuestionRecall": null,
+    "evidenceSelectionPrecision": 1,
+    "noiseSelectionRate": 0,
+    "forbiddenRate": 0,
+    "unitCount": 2,
+    "selectedEvidenceCount": 4,
+    "unknownEvidenceCount": 0
+  }
+}

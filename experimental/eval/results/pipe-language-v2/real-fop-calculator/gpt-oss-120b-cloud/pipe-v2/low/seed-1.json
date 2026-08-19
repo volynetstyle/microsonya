@@ -1,0 +1,159 @@
+{
+  "case": "real-fop-calculator",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v2",
+  "reasoning": "low",
+  "seed": 1,
+  "inputHash": "d3179cdb8e49a27f55b8dcbb42c5b7b95590527ad18ad16afb38bc499073e8af",
+  "promptHash": "eca85abfc56ad311138896d5cab4797d47473470e6cc3a6dfcb0d2cd6da519b2",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion on taxes, domain purchase, app profitability and possible scam\",\n  \"topics\": [\n    {\n      \"id\": \"tax-filing\",\n      \"title\": \"Tax filing and penalties\",\n      \"claims\": [\n        {\n          \"text\": \"Paying 500 UAH to aunt Sveta helps avoid a huge main penalty when a column is incorrectly marked in the declaration\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"The inspector previously approved declarations without checking for a year and half, then was reprimanded\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"Correct re‑filing saved about 1000 UAH compared to paying all fines\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"The whole procedure takes about an hour with Excel, at most one day per month\",\n          \"evidence\": [5, 6]\n        },\n        {\n          \"text\": \"The difficulty lies in correctly matching columns and subtraction numbers, not in the tax calculation itself\",\n          \"evidence\": [8]\n        }\n      ]\n    },\n    {\n      \"id\": \"domain-purchase\",\n      \"title\": \"Domain buying plans\",\n      \"claims\": [\n        {\n          \"text\": \"No one has bought the domain yet\",\n          \"evidence\": [2, 9]\n        },\n        {\n          \"text\": \"Someone suggests buying a calculator first, then the domain with the money\",\n          \"evidence\": [4]\n        },\n        {\n          \"text\": \"Domain is considered a useless or “raw” thing that won’t sell\",\n          \"evidence\": [10]\n        }\n      ]\n    },\n    {\n      \"id\": \"app-profitability\",\n      \"title\": \"Profitability of a web app vs mobile\",\n      \"claims\": [\n        {\n          \"text\": \"Web platform is the simplest but far less profitable than Android/iOS\",\n          \"evidence\": [11]\n        },\n        {\n          \"text\": \"SEO is poor; even on the 10th Google page the site isn’t found\",\n          \"evidence\": [11]\n        },\n        {\n          \"text\": \"There is no external traffic from Instagram/Threads and no contextual ads\",\n          \"evidence\": [11]\n        },\n        {\n          \"text\": \"No passive income from site advertising\",\n          \"evidence\": [11]\n        },\n        {\n          \"text\": \"User retention is near zero because a paywall appears within the first 10 seconds\",\n          \"evidence\": [11]\n        },\n        {\n          \"text\": \"Successful projects use very fast delivery (< 1 week) and a cross‑platform stack like Flutter\",\n          \"evidence\": [12]\n        }\n      ]\n    },\n    {\n      \"id\": \"scam-talk\",\n      \"title\": \"Potential scam around source code and password\",\n      \"claims\": [\n        {\n          \"text\": \"Someone asks if the source code or password can be found by searching\",\n          \"evidence\": [21]\n        },\n        {\n          \"text\": \"Others mock the idea of paying 299 UAH for it and call it a scam\",\n          \"evidence\": [22, 23, 24, 26, 28]\n        },\n        {\n          \"text\": \"The project is described as a “free vibe code” with dubious value\",\n          \"evidence\": [30, 32, 33, 34]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": [\n    {\n      \"text\": \"Where exactly is the source code or password stored, and can it be found by searching?\",\n      \"evidence\": [21]\n    },\n    {\n      \"text\": \"Is there an audience of at least ten people ready to pay 299 UAH for the product?\",\n      \"evidence\": [20]\n    }\n  ]\n}",
+  "thinking": "Need produce JSON summary. Identify topics: tax filing, domain purchase, app profitability, scam discussion. Claims etc.\n\nDecisions none. Open questions: maybe about source code? but unresolved.\n\nLet's gather claims.\n\nTopic tax-filing (id tax-filing)\nClaims:\n- Paying 500 UAH to aunt Sveta helps avoid large main penalty (evidence #1)\n- Inspector approved without checking then reprimanded (evidence #1)\n- Proper re-filing saved about 1000 UAH (evidence #1)\n- Procedure takes about an hour with Excel (evidence #5)\n- Need to ensure correct column subtraction (evidence #8)\n\nTopic domain (id domain-purchase)\nClaims:\n- No one bought domain yet (evidence #2, #9)\n- Someone plans to buy calculator then have money for domain (evidence #4)\n- Domain considered worthless/silly (evidence #10)\n\nTopic app-profitability (id app-profitability)\nClaims:\n- Web platform less profitable than Android/iOS (evidence #11)\n- SEO poor, no traffic sources (evidence #11)\n- No passive ad revenue (evidence #11)\n- User retention near zero due to paywall (evidence #11)\n- Fast delivery (< week) and cross‑platform stack (Flutter) suggested (evidence #12)\n\nTopic scam-discussion (id scam-talk)\nClaims:\n- Person claims source code/password could be found (evidence #21)\n- Others mock paying 299 UAH for it (evidence #22, #23, #24, #26, #28)\n- Project described as \"free vibe code\" with questionable value (evidence #30, #32, #33, #34)\n\nOpen questions:\n- What is the source code/password location? (evidence #21)\n- Is there any audience of at least ten people willing to pay 299 UAH? (evidence #20)\n\nNo decisions.\n\nNow construct JSON.",
+  "parsed": {
+    "title": "Discussion on taxes, domain purchase, app profitability and possible scam",
+    "topics": [
+      {
+        "id": "tax-filing",
+        "title": "Tax filing and penalties",
+        "claims": [
+          {
+            "text": "Paying 500 UAH to aunt Sveta helps avoid a huge main penalty when a column is incorrectly marked in the declaration",
+            "evidence": [1]
+          },
+          {
+            "text": "The inspector previously approved declarations without checking for a year and half, then was reprimanded",
+            "evidence": [1]
+          },
+          {
+            "text": "Correct re‑filing saved about 1000 UAH compared to paying all fines",
+            "evidence": [1]
+          },
+          {
+            "text": "The whole procedure takes about an hour with Excel, at most one day per month",
+            "evidence": [5, 6]
+          },
+          {
+            "text": "The difficulty lies in correctly matching columns and subtraction numbers, not in the tax calculation itself",
+            "evidence": [8]
+          }
+        ]
+      },
+      {
+        "id": "domain-purchase",
+        "title": "Domain buying plans",
+        "claims": [
+          {
+            "text": "No one has bought the domain yet",
+            "evidence": [2, 9]
+          },
+          {
+            "text": "Someone suggests buying a calculator first, then the domain with the money",
+            "evidence": [4]
+          },
+          {
+            "text": "Domain is considered a useless or “raw” thing that won’t sell",
+            "evidence": [10]
+          }
+        ]
+      },
+      {
+        "id": "app-profitability",
+        "title": "Profitability of a web app vs mobile",
+        "claims": [
+          {
+            "text": "Web platform is the simplest but far less profitable than Android/iOS",
+            "evidence": [11]
+          },
+          {
+            "text": "SEO is poor; even on the 10th Google page the site isn’t found",
+            "evidence": [11]
+          },
+          {
+            "text": "There is no external traffic from Instagram/Threads and no contextual ads",
+            "evidence": [11]
+          },
+          {
+            "text": "No passive income from site advertising",
+            "evidence": [11]
+          },
+          {
+            "text": "User retention is near zero because a paywall appears within the first 10 seconds",
+            "evidence": [11]
+          },
+          {
+            "text": "Successful projects use very fast delivery (< 1 week) and a cross‑platform stack like Flutter",
+            "evidence": [12]
+          }
+        ]
+      },
+      {
+        "id": "scam-talk",
+        "title": "Potential scam around source code and password",
+        "claims": [
+          {
+            "text": "Someone asks if the source code or password can be found by searching",
+            "evidence": [21]
+          },
+          {
+            "text": "Others mock the idea of paying 299 UAH for it and call it a scam",
+            "evidence": [22, 23, 24, 26, 28]
+          },
+          {
+            "text": "The project is described as a “free vibe code” with dubious value",
+            "evidence": [30, 32, 33, 34]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": [
+      {
+        "text": "Where exactly is the source code or password stored, and can it be found by searching?",
+        "evidence": [21]
+      },
+      {
+        "text": "Is there an audience of at least ten people ready to pay 299 UAH for the product?",
+        "evidence": [20]
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 14953.438900000008,
+    "ollamaTotalMs": 14707.546094,
+    "promptEvalCount": 3046,
+    "evalCount": 1246,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 4,
+    "claimCount": 17,
+    "decisionCount": 0,
+    "openQuestionCount": 2,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.7222222222222222,
+    "goldClaimPrecision": 0.35294117647058826,
+    "evidencePrecision": 0.32142857142857145,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 1,
+    "noiseRetention": 0.11764705882352941,
+    "matchedClaimIds": [
+      "security.password-in-bundle",
+      "tax-reporting.form-risk",
+      "tax-reporting.paid-help",
+      "product.web-limitations",
+      "product.fast-delivery-strategy",
+      "product.creator-response"
+    ],
+    "retainedThreadIds": [
+      "calculator-security",
+      "tax-reporting",
+      "calculator-product"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

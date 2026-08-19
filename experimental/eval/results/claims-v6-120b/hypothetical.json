@@ -1,0 +1,39 @@
+{
+  "case": "hypothetical",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Оптимізація процесу\",\n  \"claims\": [\n    {\n      \"topic\": \"Підхід до оптимізації\",\n      \"text\": \"Якби мене попросили оптимізувати, я спочатку спитав би, навіщо це потрібно.\",\n      \"evidence\": [1]\n    }\n  ]\n}",
+  "thinking": "We need output JSON with claims from the single message. Extract atomic claim: \"Якби мене попросили оптимізувати, спочатку спитав би навіщо.\" That's a statement. Topic maybe \"Оптимізація\". Title maybe from conversation? Use short title. We'll set title \"Оптимізація процесу\". Provide claim. evidence [1].",
+  "parsed": {
+    "title": "Оптимізація процесу",
+    "claims": [
+      {
+        "topic": "Підхід до оптимізації",
+        "text": "Якби мене попросили оптимізувати, я спочатку спитав би, навіщо це потрібно.",
+        "evidence": [1]
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 2033.1299999999992,
+    "ollamaTotalMs": 1633.503034,
+    "promptEvalCount": 748,
+    "evalCount": 159,
+    "doneReason": "stop",
+    "thinkingTextTokenCount": 75,
+    "finalTextTokenCount": 74
+  },
+  "metrics": {
+    "contentRecall": null,
+    "claimRecall": null,
+    "decisionRecall": null,
+    "openQuestionRecall": null,
+    "evidenceSelectionPrecision": 0,
+    "noiseSelectionRate": 0,
+    "forbiddenRate": 0,
+    "atomicityViolationRate": 0,
+    "evidenceIdsPerUnit": 1,
+    "unitCount": 1,
+    "selectedEvidenceCount": 1,
+    "unknownEvidenceCount": 0
+  }
+}

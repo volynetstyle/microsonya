@@ -1,0 +1,165 @@
+{
+  "case": "real-fop-calculator",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 2,
+  "inputHash": "d3179cdb8e49a27f55b8dcbb42c5b7b95590527ad18ad16afb38bc499073e8af",
+  "promptHash": "150d78ee667732e96b9a2fcd5fe5354e59b5fd2af6c1920571e8c0ae3bfc95d6",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion on tax filing, domain purchase, and app monetization\",\n  \"topics\": [\n    {\n      \"id\": \"tax-filing\",\n      \"title\": \"Tax filing complications and shortcuts\",\n      \"claims\": [\n        {\n          \"text\": \"Author P1 paid 500 UAH to a relative (Sveta) to handle tax declarations and avoid larger penalties.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"P1 claims the inspector previously approved filings without review and was later reprimanded, forcing P1 to re‑check all years.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"P1 states the recalculation process takes about an hour with Excel, not more.\",\n          \"evidence\": [5,6,7,8]\n        },\n        {\n          \"text\": \"P1 notes that the tax calculator only works with a hryvnia‑based FOP, requiring daily exchange‑rate conversion for foreign transactions.\",\n          \"evidence\": [19]\n        }\n      ]\n    },\n    {\n      \"id\": \"domain-purchase\",\n      \"title\": \"Domain acquisition considerations\",\n      \"claims\": [\n        {\n          \"text\": \"P2 mentions not having bought a domain yet.\",\n          \"evidence\": [2]\n        },\n        {\n          \"text\": \"P4 expresses reluctance to buy a domain, describing it as a worthless item.\",\n          \"evidence\": [9,10]\n        },\n        {\n          \"text\": \"P1 sarcastically replies that buying the calculator would free money for a domain.\",\n          \"evidence\": [4]\n        }\n      ]\n    },\n    {\n      \"id\": \"app-monetization\",\n      \"title\": \"Viability of a low‑cost app product\",\n      \"claims\": [\n        {\n          \"text\": \"P1 outlines many drawbacks of a web‑only product: low profit, poor SEO, no external traffic, high paywall friction, near‑zero conversion.\",\n          \"evidence\": [11]\n        },\n        {\n          \"text\": \"P1 shares a podcast summary recommending fast delivery (< 1 week), cross‑platform stack (Flutter), and copying popular ideas with minor tweaks.\",\n          \"evidence\": [12]\n        },\n        {\n          \"text\": \"P4 asks for clarification about the podcast topic, indicating confusion.\",\n          \"evidence\": [13,14]\n        },\n        {\n          \"text\": \"P1 doubts the market, betting that no one will buy the product in months.\",\n          \"evidence\": [17]\n        },\n        {\n          \"text\": \"P4 questions whether there are at least ten people willing to pay 299 UAH for the app.\",\n          \"evidence\": [20]\n        }\n      ]\n    },\n    {\n      \"id\": \"security-and-scam\",\n      \"title\": \"Password security and potential scam concerns\",\n      \"claims\": [\n        {\n          \"text\": \"P1 asks if the source code can be used to locate the password.\",\n          \"evidence\": [21]\n        },\n        {\n          \"text\": \"P4 jokes about having paid 299 UAH for the product.\",\n          \"evidence\": [22]\n        },\n        {\n          \"text\": \"P4 describes the product as a “local‑first” app with limited USD/UAH updates, implying the paid bundle contains the only valuable part.\",\n          \"evidence\": [29]\n        },\n        {\n          \"text\": \"P4 later labels the project a “free vibe‑code” experiment with a password that anyone can find or buy.\",\n          \"evidence\": [30,31,32]\n        },\n        {\n          \"text\": \"P5 and others confirm the perception of the project as a scam or pirated software.\",\n          \"evidence\": [24,33,34]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": [\n    {\n      \"text\": \"Is there a sufficient market (at least ten users) willing to pay 299 UAH for the app?\",\n      \"evidence\": [20]\n    },\n    {\n      \"text\": \"Can the password be discovered by searching the source code?\",\n      \"evidence\": [21]\n    },\n    {\n      \"text\": \"What exactly was P1 referring to in the podcast summary (the “Igor” project)?\",\n      \"evidence\": [13]\n    }\n  ]\n}",
+  "thinking": "We need summarize. Identify topics: tax filing process, domain purchase, app monetization viability, password security/scam concerns.\n\nCreate claims with evidence IDs.\n\nDecisions? none explicit.\n\nOpen questions: maybe \"чи є хоча б десяток людей, готових віддати 299 грн?\" unresolved. Also \"А який там сорс код? Можна сам пароль пошуком знайти?\" unresolved. Also \"Це ти про що?\" resolved? Not really.\n\nWe'll output.\n\n",
+  "parsed": {
+    "title": "Discussion on tax filing, domain purchase, and app monetization",
+    "topics": [
+      {
+        "id": "tax-filing",
+        "title": "Tax filing complications and shortcuts",
+        "claims": [
+          {
+            "text": "Author P1 paid 500 UAH to a relative (Sveta) to handle tax declarations and avoid larger penalties.",
+            "evidence": [1]
+          },
+          {
+            "text": "P1 claims the inspector previously approved filings without review and was later reprimanded, forcing P1 to re‑check all years.",
+            "evidence": [1]
+          },
+          {
+            "text": "P1 states the recalculation process takes about an hour with Excel, not more.",
+            "evidence": [5, 6, 7, 8]
+          },
+          {
+            "text": "P1 notes that the tax calculator only works with a hryvnia‑based FOP, requiring daily exchange‑rate conversion for foreign transactions.",
+            "evidence": [19]
+          }
+        ]
+      },
+      {
+        "id": "domain-purchase",
+        "title": "Domain acquisition considerations",
+        "claims": [
+          {
+            "text": "P2 mentions not having bought a domain yet.",
+            "evidence": [2]
+          },
+          {
+            "text": "P4 expresses reluctance to buy a domain, describing it as a worthless item.",
+            "evidence": [9, 10]
+          },
+          {
+            "text": "P1 sarcastically replies that buying the calculator would free money for a domain.",
+            "evidence": [4]
+          }
+        ]
+      },
+      {
+        "id": "app-monetization",
+        "title": "Viability of a low‑cost app product",
+        "claims": [
+          {
+            "text": "P1 outlines many drawbacks of a web‑only product: low profit, poor SEO, no external traffic, high paywall friction, near‑zero conversion.",
+            "evidence": [11]
+          },
+          {
+            "text": "P1 shares a podcast summary recommending fast delivery (< 1 week), cross‑platform stack (Flutter), and copying popular ideas with minor tweaks.",
+            "evidence": [12]
+          },
+          {
+            "text": "P4 asks for clarification about the podcast topic, indicating confusion.",
+            "evidence": [13, 14]
+          },
+          {
+            "text": "P1 doubts the market, betting that no one will buy the product in months.",
+            "evidence": [17]
+          },
+          {
+            "text": "P4 questions whether there are at least ten people willing to pay 299 UAH for the app.",
+            "evidence": [20]
+          }
+        ]
+      },
+      {
+        "id": "security-and-scam",
+        "title": "Password security and potential scam concerns",
+        "claims": [
+          {
+            "text": "P1 asks if the source code can be used to locate the password.",
+            "evidence": [21]
+          },
+          {
+            "text": "P4 jokes about having paid 299 UAH for the product.",
+            "evidence": [22]
+          },
+          {
+            "text": "P4 describes the product as a “local‑first” app with limited USD/UAH updates, implying the paid bundle contains the only valuable part.",
+            "evidence": [29]
+          },
+          {
+            "text": "P4 later labels the project a “free vibe‑code” experiment with a password that anyone can find or buy.",
+            "evidence": [30, 31, 32]
+          },
+          {
+            "text": "P5 and others confirm the perception of the project as a scam or pirated software.",
+            "evidence": [24, 33, 34]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": [
+      {
+        "text": "Is there a sufficient market (at least ten users) willing to pay 299 UAH for the app?",
+        "evidence": [20]
+      },
+      {
+        "text": "Can the password be discovered by searching the source code?",
+        "evidence": [21]
+      },
+      {
+        "text": "What exactly was P1 referring to in the podcast summary (the “Igor” project)?",
+        "evidence": [13]
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 16643.83660000001,
+    "ollamaTotalMs": 16160.396393,
+    "promptEvalCount": 2799,
+    "evalCount": 1047,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 4,
+    "claimCount": 17,
+    "decisionCount": 0,
+    "openQuestionCount": 3,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 1,
+    "goldClaimPrecision": 0.47058823529411764,
+    "evidencePrecision": 0.41379310344827586,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 1,
+    "noiseRetention": 0.11764705882352941,
+    "matchedClaimIds": [
+      "tax-reporting.form-risk",
+      "product.creator-response",
+      "tax-reporting.paid-help",
+      "product.uah-only",
+      "product.web-limitations",
+      "product.fast-delivery-strategy",
+      "product.validate-demand-first",
+      "security.password-in-bundle"
+    ],
+    "retainedThreadIds": [
+      "tax-reporting",
+      "calculator-product",
+      "calculator-security"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

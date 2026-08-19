@@ -1,0 +1,133 @@
+{
+  "case": "real-ai-development",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "jsonl",
+  "reasoning": "low",
+  "seed": 2,
+  "inputHash": "c44e2d8f381898078b12b50a1dbf1501e5970203c0d4ef386b86fd514114c47c",
+  "promptHash": "281eab4cb9e60e73560b247e4ca48181f5b52dc9969b7dc8d1b92236e4721471",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion on AI in Job Search and Development\",\n  \"topics\": [\n    {\n      \"id\": \"ai-job-search\",\n      \"title\": \"AI tools for job searching and résumé generation\",\n      \"claims\": [\n        {\n          \"text\": \"The author plans to set up an automated system (OpenClaw) to find job vacancies, generate PDFs of tailored résumés, and write cover letters.\",\n          \"evidence\": [5]\n        },\n        {\n          \"text\": \"Knowledge of AI technologies (Cursor, Claude Code, LLM, RAG, embeddings) is increasingly required by recruiters in 2026.\",\n          \"evidence\": [6, 8]\n        },\n        {\n          \"text\": \"The author expects the recruiter profession to disappear, favoring HR for personnel management.\",\n          \"evidence\": [14]\n        }\n      ]\n    },\n    {\n      \"id\": \"ai-development-acceleration\",\n      \"title\": \"AI accelerating software development\",\n      \"claims\": [\n        {\n          \"text\": \"Since 2025, AI tools have significantly accelerated development speed, allowing developers to generate complex queries and code quickly.\",\n          \"evidence\": [9, 19]\n        },\n        {\n          \"text\": \"AI can replace routine tasks such as writing JOIN queries, leading to faster iteration and earlier detection of missing details.\",\n          \"evidence\": [19]\n        }\n      ]\n    },\n    {\n      \"id\": \"ai-generated-code-risks\",\n      \"title\": \"Risks of AI‑generated code and queries\",\n      \"claims\": [\n        {\n          \"text\": \"A colleague generated a 450‑line raw SQL query that fetched almost all data, causing potential security and performance issues (10‑20 min production queries).\",\n          \"evidence\": [30]\n        },\n        {\n          \"text\": \"The same AI‑generated code was later deemed unusable and was dropped after code review.\",\n          \"evidence\": [35]\n        }\n      ]\n    },\n    {\n      \"id\": \"ai-tools-limitations\",\n      \"title\": \"Limitations of current AI tools\",\n      \"claims\": [\n        {\n          \"text\": \"AI struggles with deep contextual understanding and cannot replace an experienced engineer's knowledge of optimizations, caching, and normalization.\",\n          \"evidence\": [22, 36]\n        },\n        {\n          \"text\": \"Log analysis via AI was attempted but deemed unnecessary for the immediate bug‑fix task.\",\n          \"evidence\": [20, 23]\n        }\n      ]\n    },\n    {\n      \"id\": \"cultural-perception\",\n      \"title\": \"Cultural perception of AI over time\",\n      \"claims\": [\n        {\n          \"text\": \"In 2024 AI was viewed dismissively, whereas by 2026 it is accepted as mainstream.\",\n          \"evidence\": [7, 8]\n        },\n        {\n          \"text\": \"Comments suggest that the pace of technological change feels similar to past eras (REST, JSON, Docker).\",\n          \"evidence\": [10, 11]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": []\n}",
+  "thinking": "Need produce JSON. Identify topics: AI tools for job search, AI impact on dev speed, issues with AI-generated SQL, etc.\n\nMake claims with evidence IDs.\n\nDecisions none.\n\nOpen questions maybe none.\n\nConstruct.\n\n",
+  "parsed": {
+    "title": "Discussion on AI in Job Search and Development",
+    "topics": [
+      {
+        "id": "ai-job-search",
+        "title": "AI tools for job searching and résumé generation",
+        "claims": [
+          {
+            "text": "The author plans to set up an automated system (OpenClaw) to find job vacancies, generate PDFs of tailored résumés, and write cover letters.",
+            "evidence": [5]
+          },
+          {
+            "text": "Knowledge of AI technologies (Cursor, Claude Code, LLM, RAG, embeddings) is increasingly required by recruiters in 2026.",
+            "evidence": [6, 8]
+          },
+          {
+            "text": "The author expects the recruiter profession to disappear, favoring HR for personnel management.",
+            "evidence": [14]
+          }
+        ]
+      },
+      {
+        "id": "ai-development-acceleration",
+        "title": "AI accelerating software development",
+        "claims": [
+          {
+            "text": "Since 2025, AI tools have significantly accelerated development speed, allowing developers to generate complex queries and code quickly.",
+            "evidence": [9, 19]
+          },
+          {
+            "text": "AI can replace routine tasks such as writing JOIN queries, leading to faster iteration and earlier detection of missing details.",
+            "evidence": [19]
+          }
+        ]
+      },
+      {
+        "id": "ai-generated-code-risks",
+        "title": "Risks of AI‑generated code and queries",
+        "claims": [
+          {
+            "text": "A colleague generated a 450‑line raw SQL query that fetched almost all data, causing potential security and performance issues (10‑20 min production queries).",
+            "evidence": [30]
+          },
+          {
+            "text": "The same AI‑generated code was later deemed unusable and was dropped after code review.",
+            "evidence": [35]
+          }
+        ]
+      },
+      {
+        "id": "ai-tools-limitations",
+        "title": "Limitations of current AI tools",
+        "claims": [
+          {
+            "text": "AI struggles with deep contextual understanding and cannot replace an experienced engineer's knowledge of optimizations, caching, and normalization.",
+            "evidence": [22, 36]
+          },
+          {
+            "text": "Log analysis via AI was attempted but deemed unnecessary for the immediate bug‑fix task.",
+            "evidence": [20, 23]
+          }
+        ]
+      },
+      {
+        "id": "cultural-perception",
+        "title": "Cultural perception of AI over time",
+        "claims": [
+          {
+            "text": "In 2024 AI was viewed dismissively, whereas by 2026 it is accepted as mainstream.",
+            "evidence": [7, 8]
+          },
+          {
+            "text": "Comments suggest that the pace of technological change feels similar to past eras (REST, JSON, Docker).",
+            "evidence": [10, 11]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": []
+  },
+  "usage": {
+    "durationMs": 5831.475399999996,
+    "ollamaTotalMs": 5608.321416,
+    "promptEvalCount": 3302,
+    "evalCount": 719,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 5,
+    "claimCount": 11,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.9047619047619048,
+    "goldClaimPrecision": 0.6363636363636364,
+    "evidencePrecision": 0.5882352941176471,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0.2727272727272727,
+    "matchedClaimIds": [
+      "job-search.ai-skills",
+      "development.routine-speedup",
+      "development.context-quality",
+      "job-search.automation-idea",
+      "job-search.keyword-filtering",
+      "vibe-coding.bad-backend",
+      "vibe-coding.review-failure"
+    ],
+    "retainedThreadIds": [
+      "ai-job-search",
+      "ai-assisted-development",
+      "vibe-coding-risks"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

@@ -1,0 +1,177 @@
+{
+  "case": "real-fop-calculator",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 3,
+  "transformation": "identity-replay",
+  "inputHash": "d3179cdb8e49a27f55b8dcbb42c5b7b95590527ad18ad16afb38bc499073e8af",
+  "promptHash": "150d78ee667732e96b9a2fcd5fe5354e59b5fd2af6c1920571e8c0ae3bfc95d6",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion on Tax Filing, Domain Purchase, and App Viability\",\n  \"topics\": [\n    {\n      \"id\": \"tax-filing\",\n      \"title\": \"Tax filing difficulties and shortcuts\",\n      \"claims\": [\n        {\n          \"text\": \"Paying 500 UAH to an acquaintance helped avoid larger penalties from mis‑marked columns in tax declarations\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"The inspector approved declarations without review for 1.5 years and later demanded re‑verification of all years\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"Using the acquaintance’s help allowed correct re‑filing with a payment of about 1000 UAH instead of all fines\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"The tax‑calculation procedure takes about an hour with Excel, possibly a day per month\",\n          \"evidence\": [5, 6]\n        },\n        {\n          \"text\": \"Quarterly reports must be filed and taxes paid correctly\",\n          \"evidence\": [7]\n        },\n        {\n          \"text\": \"Mistakes often arise from not matching the right column and subtraction values in the declaration\",\n          \"evidence\": [8]\n        },\n        {\n          \"text\": \"A calculator works only for Ukrainian‑currency sole proprietorships; other currencies require conversion at the day’s rate\",\n          \"evidence\": [19]\n        }\n      ]\n    },\n    {\n      \"id\": \"domain-purchase\",\n      \"title\": \"Domain purchase hesitations\",\n      \"claims\": [\n        {\n          \"text\": \"No domain has been bought yet\",\n          \"evidence\": [2]\n        },\n        {\n          \"text\": \"Someone suggested buying a calculator first so there would be money for a domain\",\n          \"evidence\": [4]\n        },\n        {\n          \"text\": \"One participant is reluctant to buy a domain, calling it a “silly thing”\",\n          \"evidence\": [9, 10]\n        }\n      ]\n    },\n    {\n      \"id\": \"app-profitability\",\n      \"title\": \"Viability of a cross‑platform app\",\n      \"claims\": [\n        {\n          \"text\": \"Web platforms are the simplest but less profitable than Android/iOS\",\n          \"evidence\": [11]\n        },\n        {\n          \"text\": \"Web SEO is poor; even on the 10th Google page the site is not found\",\n          \"evidence\": [11]\n        },\n        {\n          \"text\": \"No traffic from social platforms or contextual ads; app stores promote new apps more effectively\",\n          \"evidence\": [11]\n        },\n        {\n          \"text\": \"No passive ad revenue from a website and user retention is near zero due to early paywall\",\n          \"evidence\": [11]\n        },\n        {\n          \"text\": \"A successful approach mentioned a fast delivery (under a week) using a cross‑platform stack like Flutter and copying popular ideas\",\n          \"evidence\": [12]\n        },\n        {\n          \"text\": \"Skepticism about selling the app: doubt that anyone would buy it within months\",\n          \"evidence\": [17]\n        },\n        {\n          \"text\": \"LinkedIn audience may be smaller than 50% for technical/managerial posts\",\n          \"evidence\": [18]\n        }\n      ]\n    },\n    {\n      \"id\": \"password-security\",\n      \"title\": \"Concerns about bundled app password\",\n      \"claims\": [\n        {\n          \"text\": \"The app’s source code contains a single hardcoded promo‑code password stored locally\",\n          \"evidence\": [20]\n        },\n        {\n          \"text\": \"User wonders if the password can be found by searching the source\",\n          \"evidence\": [21]\n        },\n        {\n          \"text\": \"Another participant jokes they did not pay 299 UAH for it\",\n          \"evidence\": [22]\n        },\n        {\n          \"text\": \"The password is claimed to be in the bundle\",\n          \"evidence\": [23]\n        },\n        {\n          \"text\": \"Others mock the situation, calling it piracy or a scam\",\n          \"evidence\": [24, 26, 32, 33, 34]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": [\n    {\n      \"text\": \"Can the hardcoded promo‑code password be located in the source code?\",\n      \"evidence\": [21]\n    }\n  ]\n}",
+  "thinking": "Need to produce JSON summarizing. Identify topics: tax filing process, domain purchase, app profitability, password security. Claims with evidence IDs.\n\nDecisions none. Open questions? maybe about source code/password search (#21 question not answered). No answer later. So open question.\n\nMake topics list.\n\nTopic ids kebab-case.\n\nLet's craft.\n\n",
+  "parsed": {
+    "title": "Discussion on Tax Filing, Domain Purchase, and App Viability",
+    "topics": [
+      {
+        "id": "tax-filing",
+        "title": "Tax filing difficulties and shortcuts",
+        "claims": [
+          {
+            "text": "Paying 500 UAH to an acquaintance helped avoid larger penalties from mis‑marked columns in tax declarations",
+            "evidence": [1]
+          },
+          {
+            "text": "The inspector approved declarations without review for 1.5 years and later demanded re‑verification of all years",
+            "evidence": [1]
+          },
+          {
+            "text": "Using the acquaintance’s help allowed correct re‑filing with a payment of about 1000 UAH instead of all fines",
+            "evidence": [1]
+          },
+          {
+            "text": "The tax‑calculation procedure takes about an hour with Excel, possibly a day per month",
+            "evidence": [5, 6]
+          },
+          {
+            "text": "Quarterly reports must be filed and taxes paid correctly",
+            "evidence": [7]
+          },
+          {
+            "text": "Mistakes often arise from not matching the right column and subtraction values in the declaration",
+            "evidence": [8]
+          },
+          {
+            "text": "A calculator works only for Ukrainian‑currency sole proprietorships; other currencies require conversion at the day’s rate",
+            "evidence": [19]
+          }
+        ]
+      },
+      {
+        "id": "domain-purchase",
+        "title": "Domain purchase hesitations",
+        "claims": [
+          {
+            "text": "No domain has been bought yet",
+            "evidence": [2]
+          },
+          {
+            "text": "Someone suggested buying a calculator first so there would be money for a domain",
+            "evidence": [4]
+          },
+          {
+            "text": "One participant is reluctant to buy a domain, calling it a “silly thing”",
+            "evidence": [9, 10]
+          }
+        ]
+      },
+      {
+        "id": "app-profitability",
+        "title": "Viability of a cross‑platform app",
+        "claims": [
+          {
+            "text": "Web platforms are the simplest but less profitable than Android/iOS",
+            "evidence": [11]
+          },
+          {
+            "text": "Web SEO is poor; even on the 10th Google page the site is not found",
+            "evidence": [11]
+          },
+          {
+            "text": "No traffic from social platforms or contextual ads; app stores promote new apps more effectively",
+            "evidence": [11]
+          },
+          {
+            "text": "No passive ad revenue from a website and user retention is near zero due to early paywall",
+            "evidence": [11]
+          },
+          {
+            "text": "A successful approach mentioned a fast delivery (under a week) using a cross‑platform stack like Flutter and copying popular ideas",
+            "evidence": [12]
+          },
+          {
+            "text": "Skepticism about selling the app: doubt that anyone would buy it within months",
+            "evidence": [17]
+          },
+          {
+            "text": "LinkedIn audience may be smaller than 50% for technical/managerial posts",
+            "evidence": [18]
+          }
+        ]
+      },
+      {
+        "id": "password-security",
+        "title": "Concerns about bundled app password",
+        "claims": [
+          {
+            "text": "The app’s source code contains a single hardcoded promo‑code password stored locally",
+            "evidence": [20]
+          },
+          {
+            "text": "User wonders if the password can be found by searching the source",
+            "evidence": [21]
+          },
+          {
+            "text": "Another participant jokes they did not pay 299 UAH for it",
+            "evidence": [22]
+          },
+          {
+            "text": "The password is claimed to be in the bundle",
+            "evidence": [23]
+          },
+          {
+            "text": "Others mock the situation, calling it piracy or a scam",
+            "evidence": [24, 26, 32, 33, 34]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": [
+      {
+        "text": "Can the hardcoded promo‑code password be located in the source code?",
+        "evidence": [21]
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 15754.06819999998,
+    "ollamaTotalMs": 15471.515434,
+    "promptEvalCount": 2799,
+    "evalCount": 1047,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 4,
+    "claimCount": 22,
+    "decisionCount": 0,
+    "openQuestionCount": 1,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.8888888888888888,
+    "goldClaimPrecision": 0.3181818181818182,
+    "evidencePrecision": 0.27586206896551724,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 1,
+    "noiseRetention": 0.045454545454545456,
+    "matchedClaimIds": [
+      "tax-reporting.form-risk",
+      "tax-reporting.paid-help",
+      "product.uah-only",
+      "product.web-limitations",
+      "product.fast-delivery-strategy",
+      "product.validate-demand-first",
+      "security.password-in-bundle"
+    ],
+    "retainedThreadIds": [
+      "tax-reporting",
+      "calculator-product",
+      "calculator-security"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

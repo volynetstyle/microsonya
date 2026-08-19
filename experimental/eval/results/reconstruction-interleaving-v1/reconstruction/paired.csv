@@ -1,0 +1,9 @@
+target,metric,nPairs,meanDelta
+identity-replay,pairwiseThreadPrecision,5,0
+identity-replay,pairwiseThreadRecall,5,0
+identity-replay,majorThreadRecall,5,0
+identity-replay,bestThreadJaccardMean,5,0
+interleave-threads,pairwiseThreadPrecision,5,0
+interleave-threads,pairwiseThreadRecall,5,0
+interleave-threads,majorThreadRecall,5,0
+interleave-threads,bestThreadJaccardMean,5,0

@@ -1,0 +1,266 @@
+{
+  "case": "interleaving-relation",
+  "model": "deepseek-v4-pro:preview",
+  "pipeline": "deterministic-shell",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 1,
+  "transformation": "identity",
+  "inputHash": "1d573b0ea83be7587a0ba6c83003a6357d94aa60582bfc570ecb19a2e32e09f5",
+  "promptHash": "3e27211fba2b4611e28208bdc2a1f7760ba1f848c0370360ee1115784d5d1a56",
+  "promptVersion": "v4",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Database migration and homepage design review planning\",\n  \"events\": [\n    {\n      \"id\": \"m1\",\n      \"topicId\": \"database-migration\",\n      \"topicTitle\": \"Database migration\",\n      \"speaker\": \"A\",\n      \"statement\": \"The database migration is planned for Friday.\",\n      \"speechAct\": \"assertion\",\n      \"literalness\": \"literal\",\n      \"commitment\": \"none\",\n      \"epistemicStatus\": \"claimed\",\n      \"settled\": false,\n      \"action\": \"Database migration on Friday\",\n      \"refersTo\": [],\n      \"stance\": \"neutral\",\n      \"semanticImportance\": 0.7,\n      \"confidence\": 0.9,\n      \"evidence\": [1]\n    },\n    {\n      \"id\": \"m2\",\n      \"topicId\": \"database-migration\",\n      \"topicTitle\": \"Database migration\",\n      \"speaker\": \"B\",\n      \"statement\": \"We will create a backup before the migration.\",\n      \"speechAct\": \"assertion\",\n      \"literalness\": \"literal\",\n      \"commitment\": \"explicit\",\n      \"epistemicStatus\": \"claimed\",\n      \"settled\": false,\n      \"action\": \"Create backup before migration\",\n      \"refersTo\": [\"m1\"],\n      \"stance\": \"support\",\n      \"semanticImportance\": 0.7,\n      \"confidence\": 0.9,\n      \"evidence\": [2]\n    },\n    {\n      \"id\": \"m3\",\n      \"topicId\": \"homepage-design\",\n      \"topicTitle\": \"Homepage design review\",\n      \"speaker\": \"C\",\n      \"statement\": \"The homepage design is ready for review.\",\n      \"speechAct\": \"assertion\",\n      \"literalness\": \"literal\",\n      \"commitment\": \"none\",\n      \"epistemicStatus\": \"claimed\",\n      \"settled\": false,\n      \"action\": \"Review homepage design\",\n      \"refersTo\": [],\n      \"stance\": \"neutral\",\n      \"semanticImportance\": 0.7,\n      \"confidence\": 0.9,\n      \"evidence\": [3]\n    },\n    {\n      \"id\": \"m4\",\n      \"topicId\": \"homepage-design\",\n      \"topicTitle\": \"Homepage design review\",\n      \"speaker\": \"D\",\n      \"statement\": \"I will review it today.\",\n      \"speechAct\": \"assertion\",\n      \"literalness\": \"literal\",\n      \"commitment\": \"explicit\",\n      \"epistemicStatus\": \"claimed\",\n      \"settled\": false,\n      \"action\": \"Review homepage design today\",\n      \"refersTo\": [\"m3\"],\n      \"stance\": \"support\",\n      \"semanticImportance\": 0.7,\n      \"confidence\": 0.9,\n      \"evidence\": [4]\n    }\n  ]\n}",
+  "thinking": "We are asked to reconstruct a Telegram conversation as normalized discourse events, given a pipe-v3 input. We must output JSON with events. We have messages:\n\n#1|\"A\"|\"10:00\"|^0|\"text\"|\"The database migration is planned for Friday.\"\n#2|\"B\"|\"10:01\"|^1|\"text\"|\"We will create a backup before the migration.\"\n#3|\"C\"|\"10:02\"|^0|\"text\"|\"The homepage design is ready for review.\"\n#4|\"D\"|\"10:03\"|^3|\"text\"|\"I will review it today.\"\n\nWe need to create events for each message, possibly decomposing if a message contains multiple independent propositions, but these are simple. Event ids from primary evidence message id: m1, m2, m3, m4.\n\nInterpret each:\n\n#1: Speaker A asserts that the database migration is planned for Friday. This is a statement of a plan. It's an assertion. Literal. Commitment: is it explicit? The speaker says \"is planned\", that is a claim, not necessarily a direct commitment to action by the speaker. It might be a plan that involves the team, but not a personal commitment. The input says \"commitment=explicit only when the evidence clearly commits an identifiable actor to an action. A suggestion, preference, prediction, joke, analogy, or isolated first-person opinion is never explicit commitment.\" Here it's a statement about a plan, possibly a fact about the schedule. Not an explicit commitment by A to do something, unless A says \"I will do it\". So commitment=none. Epistemic status: claimed, because it's a claim that migration is planned. Settled? It says \"is planned\", which might indicate a settled decision, but the conversation doesn't show approval from others. \"settled=true only when the conversation presents the action as selected, approved, completed, or otherwise settled.\" It's just one person stating it's planned, so not settled. Action: there is an actionable actor/action: database migration on Friday. So action could be \"database migration on Friday\". The actor? Who is doing the migration? Not specified. Could be the team. But we can set action as \"database migration on Friday\" with no specific actor. However, an action phrase should be concise. So I'll use action: \"Database migration on Friday\". Or maybe just \"database migration\". But the guidelines: \"Set action to a concise action phrase only when an actionable actor/action exists; otherwise null. Never infer an action from a punchline or analogy.\" Here the action is the migration itself, and it's planned. So action could be \"Schedule database migration for Friday\" or just \"Database migration\". I'll make it \"Database migration on Friday\". It's a planned action, but actor not clear. So action phrase. Stance: neutral. No support/opposition. Semantic importance: this is a significant announcement, so maybe 0.7 or 0.8. I'll say 0.7. Confidence: high, 0.9. Evidence: [1].\n\n#2: B replies to #1, \"We will create a backup before the migration.\" This is an assertion of a planned action: B states that \"we\" (presumably B and maybe A) will create a backup. It's an assertion, possibly a proposal or a statement of commitment. speechAct: could be assertion. It's literal. Commitment: B says \"We will create...\", which is an explicit commitment by B (and possibly others) to an action. \"Commitment=explicit only when the evidence clearly commits an identifiable actor to an action.\" Here B says \"We will create\", so B is committing themselves (as part of \"we\") to create a backup. So commitment=explicit. Epistemic status: claimed (they are claiming they will do it). Settled? Not yet settled until others agree. So settled=false. Action: \"Create a backup before the migration\" or \"Create backup prior to Friday migration\". Actionable actor: B (and maybe A). So action phrase: \"Create backup before migration\". RefersTo: it's a reply to #1, so refersTo should point to the event that it responds to. It doesn't ask a question, so it's not an answer. It's an assertion that supports or adds to the plan. The guidelines: \"Honor explicit reply edges: when a message directly replies to a question and supplies responsive information, emit speechAct=answer and refer to the question event.\" Here, #1 is not a question; it's a statement. So speechAct isn't answer, it's just assertion. But it's a direct reply, so refersTo:[\"m1\"] to indicate it's in response to the migration plan. Stance: support? It's adding a positive step, probably supporting the plan. So stance: support. Semantic importance: about equal to m1, 0.7. Confidence: 0.9. Evidence: [2].\n\n#3: C, ^0, \"The homepage design is ready for review.\" This is an assertion, new topic. Speaker C claims that the homepage design is ready for review. Literal. Commitment: none, just stating a fact. Epistemic status: claimed. Settled: no. Action: \"Review homepage design\". The action is the review. Actor? It's implied that someone should review it. Not explicitly committed, so action phrase can still be \"Review homepage design\". No actor identified, but action exists. So action: \"Review homepage design\". Stance: neutral. Semantic importance: 0.7. Confidence: 0.9. Evidence: [3].\n\n#4: D replies to #3, \"I will review it today.\" This is an assertion/commitment. D commits themselves to reviewing the homepage design today. speechAct: assertion, but could be proposal? It's an offer. But the guidelines say proposal is for suggesting a course of action. Here it's more like a commitment. I'll use assertion. Literal. Commitment: explicit because D commits to an action: \"I will review it today.\" So commitment=explicit. Epistemic status: claimed. Settled? Not yet, but D has committed. The action is now assigned to D. So settled? No, it's not yet settled that the review is done, but it's a plan. \"Settled=true only when the conversation presents the action as selected, approved, completed, or otherwise settled.\" This is a commitment, but not yet settled that it's approved by others. So settled=false. Action: \"D reviews homepage design today\". Action phrase concise: \"Review homepage design today\". Actor: D. So action: \"Review homepage design today\". RefersTo: it's a reply to m3's statement about readiness for review, so refersTo:[\"m3\"]. Stance: support, because D is offering to review it, supporting C's readiness. Semantic importance: 0.7. Confidence: 0.9. Evidence: [4].\n\nNow, we need to generate events with topicId and topicTitle. I'll assign: m1 topicId \"database-migration\", m2 also \"database-migration\". m3 topicId \"homepage-design\", m4 \"homepage-design\". So topicTitle for m1,m2: \"Database migration\", for m3,m4: \"Homepage design review\". Or more precise: m1: \"Database migration\", m2: \"Database migration backup\", but same topic. So I'll use \"Database migration\" for both.\n\nNow construct JSON.\n\nEnsure proper fields. No openQuestions, no decisions, no summary. Just events array.\n\nsemanticImportance: I'll set all at 0.7, maybe m2 slightly less? But backup is important, so same. m4 is a commitment, slightly important. So keep 0.7.\n\nconfidence: all 0.9.\n\nCheck: For m2, commitment explicit, so correct. m4 explicit. For m1 and m3, commitment none.\n\nNow, event ids: \"m1\", \"m2\", \"m3\", \"m4\". Evidence array: just the message number.\n\nStance for m2: support; m4: support. Others neutral.\n\nNow output final JSON.",
+  "parsed": {
+    "title": "Database migration and homepage design review planning",
+    "topics": [
+      {
+        "id": "homepage-design",
+        "title": "Homepage design review",
+        "claims": [
+          {
+            "text": "C: The homepage design is ready for review.",
+            "evidence": [3]
+          },
+          {
+            "text": "D: I will review it today.",
+            "evidence": [4]
+          }
+        ]
+      },
+      {
+        "id": "database-migration",
+        "title": "Database migration",
+        "claims": [
+          {
+            "text": "A: The database migration is planned for Friday.",
+            "evidence": [1]
+          },
+          {
+            "text": "B: We will create a backup before the migration.",
+            "evidence": [2]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": []
+  },
+  "reconstruction": {
+    "title": "Database migration and homepage design review planning",
+    "events": [
+      {
+        "id": "m1",
+        "topicId": "database-migration",
+        "topicTitle": "Database migration",
+        "speaker": "A",
+        "statement": "The database migration is planned for Friday.",
+        "speechAct": "assertion",
+        "literalness": "literal",
+        "commitment": "none",
+        "epistemicStatus": "claimed",
+        "settled": false,
+        "action": "Database migration on Friday",
+        "refersTo": [],
+        "stance": "neutral",
+        "semanticImportance": 0.7,
+        "confidence": 0.9,
+        "evidence": [1]
+      },
+      {
+        "id": "m2",
+        "topicId": "database-migration",
+        "topicTitle": "Database migration",
+        "speaker": "B",
+        "statement": "We will create a backup before the migration.",
+        "speechAct": "assertion",
+        "literalness": "literal",
+        "commitment": "explicit",
+        "epistemicStatus": "claimed",
+        "settled": false,
+        "action": "Create backup before migration",
+        "refersTo": ["m1"],
+        "stance": "support",
+        "semanticImportance": 0.7,
+        "confidence": 0.9,
+        "evidence": [2]
+      },
+      {
+        "id": "m3",
+        "topicId": "homepage-design",
+        "topicTitle": "Homepage design review",
+        "speaker": "C",
+        "statement": "The homepage design is ready for review.",
+        "speechAct": "assertion",
+        "literalness": "literal",
+        "commitment": "none",
+        "epistemicStatus": "claimed",
+        "settled": false,
+        "action": "Review homepage design",
+        "refersTo": [],
+        "stance": "neutral",
+        "semanticImportance": 0.7,
+        "confidence": 0.9,
+        "evidence": [3]
+      },
+      {
+        "id": "m4",
+        "topicId": "homepage-design",
+        "topicTitle": "Homepage design review",
+        "speaker": "D",
+        "statement": "I will review it today.",
+        "speechAct": "assertion",
+        "literalness": "literal",
+        "commitment": "explicit",
+        "epistemicStatus": "claimed",
+        "settled": false,
+        "action": "Review homepage design today",
+        "refersTo": ["m3"],
+        "stance": "support",
+        "semanticImportance": 0.7,
+        "confidence": 0.9,
+        "evidence": [4]
+      }
+    ]
+  },
+  "state": {
+    "title": "Database migration and homepage design review planning",
+    "events": [
+      {
+        "id": "m1",
+        "topicId": "database-migration",
+        "topicTitle": "Database migration",
+        "speaker": "A",
+        "statement": "The database migration is planned for Friday.",
+        "speechAct": "assertion",
+        "literalness": "literal",
+        "commitment": "none",
+        "epistemicStatus": "claimed",
+        "settled": false,
+        "action": "Database migration on Friday",
+        "refersTo": [],
+        "stance": "neutral",
+        "semanticImportance": 0.7,
+        "confidence": 0.9,
+        "evidence": [1]
+      },
+      {
+        "id": "m2",
+        "topicId": "database-migration",
+        "topicTitle": "Database migration",
+        "speaker": "B",
+        "statement": "We will create a backup before the migration.",
+        "speechAct": "assertion",
+        "literalness": "literal",
+        "commitment": "explicit",
+        "epistemicStatus": "claimed",
+        "settled": false,
+        "action": "Create backup before migration",
+        "refersTo": ["m1"],
+        "stance": "support",
+        "semanticImportance": 0.7,
+        "confidence": 0.9,
+        "evidence": [2]
+      },
+      {
+        "id": "m3",
+        "topicId": "homepage-design",
+        "topicTitle": "Homepage design review",
+        "speaker": "C",
+        "statement": "The homepage design is ready for review.",
+        "speechAct": "assertion",
+        "literalness": "literal",
+        "commitment": "none",
+        "epistemicStatus": "claimed",
+        "settled": false,
+        "action": "Review homepage design",
+        "refersTo": [],
+        "stance": "neutral",
+        "semanticImportance": 0.7,
+        "confidence": 0.9,
+        "evidence": [3]
+      },
+      {
+        "id": "m4",
+        "topicId": "homepage-design",
+        "topicTitle": "Homepage design review",
+        "speaker": "D",
+        "statement": "I will review it today.",
+        "speechAct": "assertion",
+        "literalness": "literal",
+        "commitment": "explicit",
+        "epistemicStatus": "claimed",
+        "settled": false,
+        "action": "Review homepage design today",
+        "refersTo": ["m3"],
+        "stance": "support",
+        "semanticImportance": 0.7,
+        "confidence": 0.9,
+        "evidence": [4]
+      }
+    ],
+    "resolvedQuestionIds": [],
+    "supersededEventIds": []
+  },
+  "extractorMetrics": {
+    "eventCount": 4,
+    "eventRecall": 0.75,
+    "eventPrecision": 0.75,
+    "attributionAccuracy": 1,
+    "evidenceCorrectness": 1,
+    "relationIntegrity": 1
+  },
+  "reducerMetrics": {
+    "deterministic": true,
+    "lifecycleInvariantViolations": 0,
+    "resolvedQuestions": 0,
+    "supersededEvents": 0
+  },
+  "operationalMetrics": {
+    "modelCalls": 1,
+    "sourceMessageWindows": 1,
+    "semanticInterpretations": 1,
+    "semanticAmplification": 1
+  },
+  "projectionDiagnostics": {
+    "decisionCandidates": 4,
+    "decisionsRejectedByInvariant": 4,
+    "questionsResolvedByAnswerEdge": 0
+  },
+  "usage": {
+    "durationMs": 35818.77130000002,
+    "ollamaTotalMs": 35554.783585,
+    "promptEvalCount": 758,
+    "evalCount": 2377,
+    "doneReason": "stop",
+    "thinkingTextTokenCount": 1681,
+    "finalTextTokenCount": 602
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 2,
+    "claimCount": 4,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 1,
+    "goldClaimPrecision": 0.75,
+    "evidencePrecision": 0.75,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0,
+    "matchedClaimIds": [
+      "homepage-design.review",
+      "database-migration.schedule",
+      "database-migration.backup"
+    ],
+    "matchedDecisionIds": [],
+    "matchedOpenQuestionIds": [],
+    "retainedThreadIds": ["homepage-design", "database-migration"],
+    "triggeredForbiddenIds": []
+  }
+}

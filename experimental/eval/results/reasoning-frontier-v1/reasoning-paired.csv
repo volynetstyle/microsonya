@@ -1,0 +1,3 @@
+baseline,target,nCases,nPairs,qualityDelta,qualityCiLow,qualityCiHigh,thinkingTokensDelta,finalTokensDelta,latencyMsDelta
+low,medium,4,12,-0.078203,-0.189698,0.004881,1501.500000,134.416667,15766.230592
+low,high,4,12,0.008917,-0.009065,0.026900,8101.500000,341.500000,80403.703542

@@ -1,0 +1,129 @@
+{
+  "case": "real-fop-calculator",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 2,
+  "transformation": "rename-users",
+  "inputHash": "6c36faa5f852486a060747c860a4d99ec3b2e02263aa75953582eba7889cc060",
+  "promptHash": "03764dbcd9414a0769ae98d353fa72a1d80eb4ae7464e8b98ffdad77543649a5",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion on tax filing, domain purchase, app profitability, and potential scam\",\n  \"topics\": [\n    {\n      \"id\": \"tax-filing\",\n      \"title\": \"Tax filing complications\",\n      \"claims\": [\n        {\n          \"text\": \"Incorrect column markings in declarations can cause large penalties, requiring thorough checks of each column and numbers.\",\n          \"evidence\": [1, 8]\n        },\n        {\n          \"text\": \"The tax calculator only works with a hryvnia‑based ФОП, forcing daily currency conversion for transactions.\",\n          \"evidence\": [19]\n        },\n        {\n          \"text\": \"The author had to resubmit declarations for all years, paying about 1000 ₴ instead of larger fines, due to a corrupt inspector.\",\n          \"evidence\": [1]\n        }\n      ]\n    },\n    {\n      \"id\": \"domain-purchase\",\n      \"title\": \"Domain purchase skepticism\",\n      \"claims\": [\n        {\n          \"text\": \"No one is expected to buy the domain, and the domain has not been purchased yet.\",\n          \"evidence\": [2, 4, 9]\n        }\n      ]\n    },\n    {\n      \"id\": \"app-profitability\",\n      \"title\": \"Profitability of a web/Flutter app\",\n      \"claims\": [\n        {\n          \"text\": \"Web platforms are less profitable than Android/iOS; SEO is poor, traffic sources are missing, and conversion is assumed near zero.\",\n          \"evidence\": [11]\n        },\n        {\n          \"text\": \"Successful rapid delivery (< 1 week) with a cross‑platform stack (Flutter) and copying popular ideas is suggested as a viable approach.\",\n          \"evidence\": [12]\n        },\n        {\n          \"text\": \"LinkedIn audience size for technical/managerial posts has dropped below 50%, affecting potential reach.\",\n          \"evidence\": [18]\n        }\n      ]\n    },\n    {\n      \"id\": \"scam-concerns\",\n      \"title\": \"Potential scam and security issues\",\n      \"claims\": [\n        {\n          \"text\": \"The project is described as a “free vibe‑code” with a single password stored locally as a 100 % discount promo code, suggesting no real value.\",\n          \"evidence\": [20]\n        },\n        {\n          \"text\": \"The app claims to fetch USD/UAH rates every 5 minutes and perform calculations locally, but the paid bundle allegedly contains nothing useful.\",\n          \"evidence\": [29]\n        },\n        {\n          \"text\": \"Participants label the author as a scammer and question the legitimacy of the product.\",\n          \"evidence\": [30, 32, 33, 34]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": [\n    {\n      \"text\": \"Is the source code accessible; can the password be found by searching?\",\n      \"evidence\": [21]\n    }\n  ]\n}",
+  "thinking": "We need JSON summary. Identify topics: tax filing issues, domain purchase, app profitability, scam concerns. Extract claims with evidence IDs.\n\nDecisions none. Open questions? maybe \"А який там сорс код? Можна сам пароль пошуком знайти?\" not answered. So open.\n\nCreate topics.\n\nTopic ids: tax-filing, domain-purchase, app-profitability, scam-concerns.\n\nCollect claims.\n\ntax-filing: claim about needing to check columns to avoid penalties (IDs 1,8). Also about calculator only works with UAH FOP (19). Also about time to redo declarations (1). Provide.\n\ndomain-purchase: claim that no one will buy domain, domain not bought (2,4,9). \n\napp-profitability: claim web less profitable than mobile, SEO poor, no traffic, low conversion (11). Also fast delivery and flutter stack suggestion (12). Also audience on LinkedIn reduced (18). \n\nscam-concerns: claim app is scam, password in local storage, bundle payment etc (20,23,29,30,32,33). Open question about source code/password (21). \n\nNow build JSON.\n\n",
+  "parsed": {
+    "title": "Discussion on tax filing, domain purchase, app profitability, and potential scam",
+    "topics": [
+      {
+        "id": "tax-filing",
+        "title": "Tax filing complications",
+        "claims": [
+          {
+            "text": "Incorrect column markings in declarations can cause large penalties, requiring thorough checks of each column and numbers.",
+            "evidence": [1, 8]
+          },
+          {
+            "text": "The tax calculator only works with a hryvnia‑based ФОП, forcing daily currency conversion for transactions.",
+            "evidence": [19]
+          },
+          {
+            "text": "The author had to resubmit declarations for all years, paying about 1000 ₴ instead of larger fines, due to a corrupt inspector.",
+            "evidence": [1]
+          }
+        ]
+      },
+      {
+        "id": "domain-purchase",
+        "title": "Domain purchase skepticism",
+        "claims": [
+          {
+            "text": "No one is expected to buy the domain, and the domain has not been purchased yet.",
+            "evidence": [2, 4, 9]
+          }
+        ]
+      },
+      {
+        "id": "app-profitability",
+        "title": "Profitability of a web/Flutter app",
+        "claims": [
+          {
+            "text": "Web platforms are less profitable than Android/iOS; SEO is poor, traffic sources are missing, and conversion is assumed near zero.",
+            "evidence": [11]
+          },
+          {
+            "text": "Successful rapid delivery (< 1 week) with a cross‑platform stack (Flutter) and copying popular ideas is suggested as a viable approach.",
+            "evidence": [12]
+          },
+          {
+            "text": "LinkedIn audience size for technical/managerial posts has dropped below 50%, affecting potential reach.",
+            "evidence": [18]
+          }
+        ]
+      },
+      {
+        "id": "scam-concerns",
+        "title": "Potential scam and security issues",
+        "claims": [
+          {
+            "text": "The project is described as a “free vibe‑code” with a single password stored locally as a 100 % discount promo code, suggesting no real value.",
+            "evidence": [20]
+          },
+          {
+            "text": "The app claims to fetch USD/UAH rates every 5 minutes and perform calculations locally, but the paid bundle allegedly contains nothing useful.",
+            "evidence": [29]
+          },
+          {
+            "text": "Participants label the author as a scammer and question the legitimacy of the product.",
+            "evidence": [30, 32, 33, 34]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": [
+      {
+        "text": "Is the source code accessible; can the password be found by searching?",
+        "evidence": [21]
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 10504.895300000004,
+    "ollamaTotalMs": 10342.624661,
+    "promptEvalCount": 2799,
+    "evalCount": 880,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 4,
+    "claimCount": 10,
+    "decisionCount": 0,
+    "openQuestionCount": 1,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.8888888888888888,
+    "goldClaimPrecision": 0.7,
+    "evidencePrecision": 0.4117647058823529,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 1,
+    "noiseRetention": 0.1,
+    "matchedClaimIds": [
+      "tax-reporting.paid-help",
+      "product.uah-only",
+      "product.web-limitations",
+      "product.fast-delivery-strategy",
+      "product.validate-demand-first",
+      "security.password-in-bundle",
+      "product.creator-response"
+    ],
+    "retainedThreadIds": [
+      "tax-reporting",
+      "calculator-product",
+      "calculator-security"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

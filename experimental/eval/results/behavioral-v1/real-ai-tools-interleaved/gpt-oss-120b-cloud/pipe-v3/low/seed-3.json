@@ -1,0 +1,118 @@
+{
+  "case": "real-ai-tools-interleaved",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 3,
+  "inputHash": "3e5fb5efeccd172ee2f1e8a3ef61dfdf2ed0fd33f2162906991e5f91c1a0d9ba",
+  "promptHash": "37cf3f4e79d184fd2b0f7efef7545a92b54b985f38a2a5b261ece3d444236cdf",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Chat excerpts on AI tools and diploma cover pricing\",\n  \"topics\": [\n    {\n      \"id\": \"ai-discussion\",\n      \"title\": \"Discussion about AI capabilities and toolkits\",\n      \"claims\": [\n        {\n          \"text\": \"AI models are not inherently intelligent; their complex abilities come from toolkits and ready-made solutions.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"Nobody needs AI to be truly intelligent because humans don’t understand it themselves.\",\n          \"evidence\": [2]\n        },\n        {\n          \"text\": \"The author wants to test an AI from 2022‑2023 with a modern toolkit like opencode, suspecting older models will struggle due to small context windows.\",\n          \"evidence\": [3]\n        },\n        {\n          \"text\": \"InstinctGPT comparisons show that adding a toolkit can give a large boost but does not compensate for a model’s lacking core abilities.\",\n          \"evidence\": [8]\n        },\n        {\n          \"text\": \"There is a metric about active parameters that is considered better than raw parameter count; modern models aim to extract more from fewer parameters and are sometimes fine‑tuned for specific tasks.\",\n          \"evidence\": [14]\n        }\n      ]\n    },\n    {\n      \"id\": \"diploma-cover-pricing\",\n      \"title\": \"Prices for diploma cover fees\",\n      \"claims\": [\n        {\n          \"text\": \"Someone asked how much money is taken for diploma covers.\",\n          \"evidence\": [22]\n        },\n        {\n          \"text\": \"One respondent said 650 UAH is demanded.\",\n          \"evidence\": [23]\n        },\n        {\n          \"text\": \"Another user reported paying 47 UAH.\",\n          \"evidence\": [24]\n        },\n        {\n          \"text\": \"A later comment mentioned a price of 30 UAH.\",\n          \"evidence\": [25]\n        },\n        {\n          \"text\": \"One participant suggested giving the diploma without a cover because it is essentially waste paper.\",\n          \"evidence\": [26]\n        },\n        {\n          \"text\": \"Someone noted that the cover includes the university emblem, which is unique.\",\n          \"evidence\": [27]\n        },\n        {\n          \"text\": \"Another comment claimed no one will actually take the cover.\",\n          \"evidence\": [28]\n        },\n        {\n          \"text\": \"A final remark described the cover as something you’ll look at only three times in life (receiving the diploma, photographing it, and later translating documents).\",\n          \"evidence\": [29]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": []\n}",
+  "thinking": "We need extract claims, decisions, open questions. Mainly AI discussion and diploma cover price. Open question? maybe none resolved. There's a question about price? No answer? They gave prices. No decision. So topics: ai-tools, diploma-cover-price, weather? maybe.\n\nWe'll list claims: #1 claim AI not smart apriori. #2 claim no one needs AI smart. #3 desire to test AI 2022-23 with modern tool. #8 mentions InstinctGPT comparison, tool gives boost but not compensate. #14 about active parameters metric etc. #22 question about how many paid for diploma covers. That's a question. It gets answers #23 650, #24 47, #25 30, #26 says give without cover, #27 mentions emblem, #28 says nobody will take cover, #29 commentary. So open question maybe unresolved cost? It's answered with amounts, but question was \"А скільки з нас брали грошей за обкладинки диплому?\" answered with amounts, so resolved. No open.\n\nDecisions none.\n\nCreate topics: ai-discussion, diploma-cover-pricing, random bus anecdote? maybe skip.\n\nWe'll include claims with evidence ids.\n\nReturn JSON.",
+  "parsed": {
+    "title": "Chat excerpts on AI tools and diploma cover pricing",
+    "topics": [
+      {
+        "id": "ai-discussion",
+        "title": "Discussion about AI capabilities and toolkits",
+        "claims": [
+          {
+            "text": "AI models are not inherently intelligent; their complex abilities come from toolkits and ready-made solutions.",
+            "evidence": [1]
+          },
+          {
+            "text": "Nobody needs AI to be truly intelligent because humans don’t understand it themselves.",
+            "evidence": [2]
+          },
+          {
+            "text": "The author wants to test an AI from 2022‑2023 with a modern toolkit like opencode, suspecting older models will struggle due to small context windows.",
+            "evidence": [3]
+          },
+          {
+            "text": "InstinctGPT comparisons show that adding a toolkit can give a large boost but does not compensate for a model’s lacking core abilities.",
+            "evidence": [8]
+          },
+          {
+            "text": "There is a metric about active parameters that is considered better than raw parameter count; modern models aim to extract more from fewer parameters and are sometimes fine‑tuned for specific tasks.",
+            "evidence": [14]
+          }
+        ]
+      },
+      {
+        "id": "diploma-cover-pricing",
+        "title": "Prices for diploma cover fees",
+        "claims": [
+          {
+            "text": "Someone asked how much money is taken for diploma covers.",
+            "evidence": [22]
+          },
+          {
+            "text": "One respondent said 650 UAH is demanded.",
+            "evidence": [23]
+          },
+          {
+            "text": "Another user reported paying 47 UAH.",
+            "evidence": [24]
+          },
+          {
+            "text": "A later comment mentioned a price of 30 UAH.",
+            "evidence": [25]
+          },
+          {
+            "text": "One participant suggested giving the diploma without a cover because it is essentially waste paper.",
+            "evidence": [26]
+          },
+          {
+            "text": "Someone noted that the cover includes the university emblem, which is unique.",
+            "evidence": [27]
+          },
+          {
+            "text": "Another comment claimed no one will actually take the cover.",
+            "evidence": [28]
+          },
+          {
+            "text": "A final remark described the cover as something you’ll look at only three times in life (receiving the diploma, photographing it, and later translating documents).",
+            "evidence": [29]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": []
+  },
+  "usage": {
+    "durationMs": 11053.759300000005,
+    "ollamaTotalMs": 10620.672301,
+    "promptEvalCount": 2165,
+    "evalCount": 833,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 2,
+    "claimCount": 13,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.8235294117647058,
+    "goldClaimPrecision": 0.46153846153846156,
+    "evidencePrecision": 0.46153846153846156,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0,
+    "matchedClaimIds": [
+      "ai-tooling.capability-view",
+      "ai-tooling.old-model-experiment",
+      "ai-tooling.instinctgpt-result",
+      "ai-tooling.model-comparison",
+      "diploma-cover.prices",
+      "diploma-cover.low-value"
+    ],
+    "retainedThreadIds": ["ai-tooling", "diploma-cover"],
+    "triggeredForbiddenIds": []
+  }
+}

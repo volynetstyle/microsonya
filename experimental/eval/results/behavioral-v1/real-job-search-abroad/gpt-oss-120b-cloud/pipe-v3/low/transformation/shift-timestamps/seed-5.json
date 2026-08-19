@@ -1,0 +1,137 @@
+{
+  "case": "real-job-search-abroad",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 5,
+  "transformation": "shift-timestamps",
+  "inputHash": "9c081a3f77f71f9a86ecaf947444a54c9426def1245bba61e3d26b4f2813cda2",
+  "promptHash": "c3e43cafa2c115fb8acd4f704bf7c053eda213b92cb4ea9607dd1933b43232ff",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion about working abroad in Slovakia and Austria\",\n  \"topics\": [\n    {\n      \"id\": \"people-abroad\",\n      \"title\": \"People living abroad\",\n      \"claims\": [\n        {\n          \"text\": \"There are members who have connections in Austria and Poland.\",\n          \"evidence\": [3]\n        },\n        {\n          \"text\": \"Someone mentions returning to their native land.\",\n          \"evidence\": [4]\n        }\n      ]\n    },\n    {\n      \"id\": \"language-requirements\",\n      \"title\": \"Language requirements for jobs\",\n      \"claims\": [\n        {\n          \"text\": \"German is the typical spoken language in Austria.\",\n          \"evidence\": [14]\n        },\n        {\n          \"text\": \"English is also used, especially in international contexts.\",\n          \"evidence\": [15, 46, 55]\n        },\n        {\n          \"text\": \"Most job postings (≈95%) require a local language proficiency.\",\n          \"evidence\": [26]\n        },\n        {\n          \"text\": \"B2 level is frequently requested, B1 may be acceptable, certificates not always needed.\",\n          \"evidence\": [46]\n        }\n      ]\n    },\n    {\n      \"id\": \"job-search-advice\",\n      \"title\": \"Job search strategies and outcomes\",\n      \"claims\": [\n        {\n          \"text\": \"LinkedIn is recommended for finding jobs abroad.\",\n          \"evidence\": [18]\n        },\n        {\n          \"text\": \"Approximately 100 applications yielded only 3 interview invitations.\",\n          \"evidence\": [21]\n        },\n        {\n          \"text\": \"Applying broadly, even to positions without language requirements, can produce results.\",\n          \"evidence\": [36]\n        }\n      ]\n    },\n    {\n      \"id\": \"salary-expectations\",\n      \"title\": \"Salary expectations in Europe\",\n      \"claims\": [\n        {\n          \"text\": \"Salaries in Europe are generally higher than in Ukraine, but many receive only minimal offers.\",\n          \"evidence\": [35, 37]\n        },\n        {\n          \"text\": \"Higher education rarely influences hiring decisions.\",\n          \"evidence\": [32]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": [\n    {\n      \"text\": \"Who lives in Bratislava or Slovakia, and who has already moved abroad?\",\n      \"evidence\": [1]\n    },\n    {\n      \"text\": \"Will you stay in Austria long‑term?\",\n      \"evidence\": [58]\n    }\n  ]\n}",
+  "thinking": "We need produce JSON. Identify topics: e.g., abroad experience, language requirements, salary expectations, job search advice.\n\nExtract claims with evidence IDs.\n\nDecisions none. Open questions? There is question at #1 about who lives in Bratislava, but later no answer? No answer given. So open question.\n\nAlso question #58 about staying in Austria, not answered. So open.\n\nNow build JSON.\n\nTitle maybe \"Discussion about working abroad in Slovakia and Austria\".\n\nTopics list.\n\nTopic 1: people living abroad. Claim: P1 asks who lives in Bratislava or Slovakia and who moved abroad. Evidence #1. No answers? #3 mentions individuals in Austria and Poland. That's a partial answer. So claim that there are people in Austria and Poland. Evidence #3.\n\nTopic 2: language requirements. Claims: German is spoken, also English used. Evidence #14, #15, #46, #47.\n\nTopic 3: job search advice. Claim: Use LinkedIn. Evidence #18. Claim: sent ~100 applications, got 3 interviews. Evidence #21. Claim: 95% jobs require local language. Evidence #26.\n\nTopic 4: salary expectations. Claim: Salary higher than Ukraine but often low. Evidence #37, #35.\n\nOpen questions: #1 who lives in Bratislava? still open. #58 staying in Austria? open.\n\nNow construct JSON.\n\n",
+  "parsed": {
+    "title": "Discussion about working abroad in Slovakia and Austria",
+    "topics": [
+      {
+        "id": "people-abroad",
+        "title": "People living abroad",
+        "claims": [
+          {
+            "text": "There are members who have connections in Austria and Poland.",
+            "evidence": [3]
+          },
+          {
+            "text": "Someone mentions returning to their native land.",
+            "evidence": [4]
+          }
+        ]
+      },
+      {
+        "id": "language-requirements",
+        "title": "Language requirements for jobs",
+        "claims": [
+          {
+            "text": "German is the typical spoken language in Austria.",
+            "evidence": [14]
+          },
+          {
+            "text": "English is also used, especially in international contexts.",
+            "evidence": [15, 46, 55]
+          },
+          {
+            "text": "Most job postings (≈95%) require a local language proficiency.",
+            "evidence": [26]
+          },
+          {
+            "text": "B2 level is frequently requested, B1 may be acceptable, certificates not always needed.",
+            "evidence": [46]
+          }
+        ]
+      },
+      {
+        "id": "job-search-advice",
+        "title": "Job search strategies and outcomes",
+        "claims": [
+          {
+            "text": "LinkedIn is recommended for finding jobs abroad.",
+            "evidence": [18]
+          },
+          {
+            "text": "Approximately 100 applications yielded only 3 interview invitations.",
+            "evidence": [21]
+          },
+          {
+            "text": "Applying broadly, even to positions without language requirements, can produce results.",
+            "evidence": [36]
+          }
+        ]
+      },
+      {
+        "id": "salary-expectations",
+        "title": "Salary expectations in Europe",
+        "claims": [
+          {
+            "text": "Salaries in Europe are generally higher than in Ukraine, but many receive only minimal offers.",
+            "evidence": [35, 37]
+          },
+          {
+            "text": "Higher education rarely influences hiring decisions.",
+            "evidence": [32]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": [
+      {
+        "text": "Who lives in Bratislava or Slovakia, and who has already moved abroad?",
+        "evidence": [1]
+      },
+      {
+        "text": "Will you stay in Austria long‑term?",
+        "evidence": [58]
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 9685.573199999999,
+    "ollamaTotalMs": 9520.798486,
+    "promptEvalCount": 3531,
+    "evalCount": 839,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 4,
+    "claimCount": 11,
+    "decisionCount": 0,
+    "openQuestionCount": 2,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.8,
+    "goldClaimPrecision": 0.6363636363636364,
+    "evidencePrecision": 0.5,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 1,
+    "noiseRetention": 0.09090909090909091,
+    "matchedClaimIds": [
+      "language.work-vs-daily-life",
+      "networking.participants-abroad",
+      "job-search.local-language-filter",
+      "job-search.two-months",
+      "job-search.conversion",
+      "job-search.salary-compromise",
+      "job-search.education-observation"
+    ],
+    "retainedThreadIds": [
+      "language-integration",
+      "networking-abroad",
+      "job-search-abroad"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

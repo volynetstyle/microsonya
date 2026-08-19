@@ -1,0 +1,84 @@
+{
+  "case": "real-ai-tools-interleaved",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Обговорення AI та інші теми\",\n  \"claims\": [\n    {\n      \"topic\": \"AI як інструмент\",\n      \"text\": \"AI за своєю суттю не може бути розумною апріорі, а лише набором інструментів і готових прикладів вирішення задач.\",\n      \"evidence\": [1]\n    },\n    {\n      \"topic\": \"Потреба в розумному AI\",\n      \"text\": \"Нікому не потрібно, щоб AI був розумним, бо люди самі не знають, як це робити.\",\n      \"evidence\": [2]\n    },\n    {\n      \"topic\": \"Тестування старих моделей AI\",\n      \"text\": \"Автор хоче протестувати AI 2022‑2023 років сучасним інструментарієм типу opencode, передбачаючи, що старі моделі не впораються через маленьке контекстне вікно.\",\n      \"evidence\": [3]\n    },\n    {\n      \"topic\": \"Вплив інструментів на продуктивність моделей\",\n      \"text\": \"InstinctGPT порівнював 3 B і GPT‑3 175 B з зовнішнім runtime і інструментами; інструментарій дає великий приріст, але не компенсує нестачу базових здібностей моделі.\",\n      \"evidence\": [8]\n    },\n    {\n      \"topic\": \"Метрики та тренування сучасних моделей\",\n      \"text\": \"У ChatGPT 3 реальна метрика – активні параметри, а не лише 175 B; старі моделі навчалися без розуміння цілі, тоді як сучасні намагаються отримати максимум з меншою кількістю параметрів і інколи тренуються під конкретні завдання.\",\n      \"evidence\": [14]\n    },\n    {\n      \"topic\": \"Джерело зовнішньої інформації\",\n      \"text\": \"Посилання, подане користувачем P4, має джерело, зазначене як @fionalt.\",\n      \"evidence\": [16, 17]\n    },\n    {\n      \"topic\": \"Відчуття погоди\",\n      \"text\": \"Автор відчуває в повітрі атмосферу, схожу на дощ, хоча температура нагадує лаву.\",\n      \"evidence\": [20]\n    },\n    {\n      \"topic\": \"Температурна аномалія\",\n      \"text\": \"Сьогодні було особливо жарко.\",\n      \"evidence\": [21]\n    },\n    {\n      \"topic\": \"Оплата за обкладинки дипломів\",\n      \"text\": \"Дехто стягує гроші за обкладинки дипломів: 650 грн у Богдана, 47 грн у іншого, 30 грн у ще одного.\",\n      \"evidence\": [23, 24, 25]\n    },\n    {\n      \"topic\": \"Корисність обкладинки диплома\",\n      \"text\": \"Обкладинка диплома вважається марною: її будуть переглядати лише тричі в житті (при отриманні, фотографуванні та перекладі документів).\",\n      \"evidence\": [29]\n    }\n  ]\n}",
+  "thinking": "Need extract claims. Identify relevant factual statements.\n\nClaims:\n1 AI can't be intelligent apriori, only toolkits. (ID1)\n2 No one needs AI to be intelligent, people don't know how. (ID2)\n3 Wants to test AI from 2022-23 with modern toolkit, expects old models limited by context window. (ID3)\n4 InstinctGPT compared 3B vs GPT-3 175B with external runtime/tools; toolkit gives big boost but doesn't compensate model base ability shortage. (ID8)\n5 ChatGPT 3 has 175B params but better metric active params; old models trained on everything without understanding; modern models try to squeeze more from fewer params, sometimes trained for specific tasks. (ID14)\n6 Tweet link posted. (ID16) maybe not claim.\n7 Source credited to @fionalt. (ID17)\n8 Weather feeling like rain but temperature like lava. (ID20)\n9 It was especially hot today. (ID21)\n10 Some people charge money for diploma covers, amounts: 650 from Bohdan, 47, 30. (IDs23,24,25)\n11 Someone says diploma cover is useless, will be looked at 3 times. (ID29)\n\nNow produce JSON.\n\nTitle maybe \"Обговорення AI та інші теми\". Provide topics.\n\nList each claim with topic.\n\n",
+  "parsed": {
+    "title": "Обговорення AI та інші теми",
+    "claims": [
+      {
+        "topic": "AI як інструмент",
+        "text": "AI за своєю суттю не може бути розумною апріорі, а лише набором інструментів і готових прикладів вирішення задач.",
+        "evidence": [1]
+      },
+      {
+        "topic": "Потреба в розумному AI",
+        "text": "Нікому не потрібно, щоб AI був розумним, бо люди самі не знають, як це робити.",
+        "evidence": [2]
+      },
+      {
+        "topic": "Тестування старих моделей AI",
+        "text": "Автор хоче протестувати AI 2022‑2023 років сучасним інструментарієм типу opencode, передбачаючи, що старі моделі не впораються через маленьке контекстне вікно.",
+        "evidence": [3]
+      },
+      {
+        "topic": "Вплив інструментів на продуктивність моделей",
+        "text": "InstinctGPT порівнював 3 B і GPT‑3 175 B з зовнішнім runtime і інструментами; інструментарій дає великий приріст, але не компенсує нестачу базових здібностей моделі.",
+        "evidence": [8]
+      },
+      {
+        "topic": "Метрики та тренування сучасних моделей",
+        "text": "У ChatGPT 3 реальна метрика – активні параметри, а не лише 175 B; старі моделі навчалися без розуміння цілі, тоді як сучасні намагаються отримати максимум з меншою кількістю параметрів і інколи тренуються під конкретні завдання.",
+        "evidence": [14]
+      },
+      {
+        "topic": "Джерело зовнішньої інформації",
+        "text": "Посилання, подане користувачем P4, має джерело, зазначене як @fionalt.",
+        "evidence": [16, 17]
+      },
+      {
+        "topic": "Відчуття погоди",
+        "text": "Автор відчуває в повітрі атмосферу, схожу на дощ, хоча температура нагадує лаву.",
+        "evidence": [20]
+      },
+      {
+        "topic": "Температурна аномалія",
+        "text": "Сьогодні було особливо жарко.",
+        "evidence": [21]
+      },
+      {
+        "topic": "Оплата за обкладинки дипломів",
+        "text": "Дехто стягує гроші за обкладинки дипломів: 650 грн у Богдана, 47 грн у іншого, 30 грн у ще одного.",
+        "evidence": [23, 24, 25]
+      },
+      {
+        "topic": "Корисність обкладинки диплома",
+        "text": "Обкладинка диплома вважається марною: її будуть переглядати лише тричі в житті (при отриманні, фотографуванні та перекладі документів).",
+        "evidence": [29]
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 11914.813599999994,
+    "ollamaTotalMs": 11689.494366,
+    "promptEvalCount": 2421,
+    "evalCount": 1017,
+    "doneReason": "stop",
+    "thinkingTextTokenCount": 280,
+    "finalTextTokenCount": 727
+  },
+  "metrics": {
+    "contentRecall": 0.8333333333333334,
+    "claimRecall": 0.8235294117647058,
+    "decisionRecall": null,
+    "openQuestionRecall": 1,
+    "evidenceSelectionPrecision": 0.6923076923076923,
+    "noiseSelectionRate": 0.3076923076923077,
+    "forbiddenRate": 0,
+    "atomicityViolationRate": 0.3,
+    "evidenceIdsPerUnit": 1.3,
+    "unitCount": 10,
+    "selectedEvidenceCount": 13,
+    "unknownEvidenceCount": 0
+  }
+}

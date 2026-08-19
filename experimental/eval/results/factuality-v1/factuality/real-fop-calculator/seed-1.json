@@ -1,0 +1,198 @@
+{
+  "case": "real-fop-calculator",
+  "sourceExperiment": "pipe-language-v3",
+  "sourceModel": "gpt-oss:120b-cloud",
+  "sourceRepresentation": "pipe-v3",
+  "sourceReasoning": "low",
+  "sourceSeed": 1,
+  "judgeModel": "gpt-oss:120b-cloud",
+  "judgeReasoning": "low",
+  "promptVersion": "qa-factuality-v1",
+  "sourceRunHash": "b9abd5608087c8744ddb9457f64541e2a21e25702941e1da293ac3b4f3c5b133",
+  "promptHash": "712516f1da8d352be1937774c8b6613b43f4275a806ce4b1aa85eb56b4bc984f",
+  "status": "ok",
+  "raw": "{\n  \"checks\": [\n    {\n      \"itemIndex\": 0,\n      \"question\": \"Does giving aunt Sveta 500 UAH prevent a large main penalty caused by a mis‑marked column in the declaration?\",\n      \"candidateAnswer\": \"Yes, the author claims that paying aunt Sveta 500 UAH helps avoid a huge main penalty caused by a mis‑marked column.\",\n      \"sourceAnswer\": \"The source says it is simpler to give 500 грн to aunt Sveta so she can handle the pain caused by a mis‑marked column in the declaration.\",\n      \"answerRelation\": \"equivalent\",\n      \"verdict\": \"supported\",\n      \"explanation\": \"Both the claim and the source state that giving 500 UAH to Sveta avoids the penalty from a mis‑marked column.\"\n    },\n    {\n      \"itemIndex\": 1,\n      \"question\": \"Was the inspector corrupt, approving declarations without review for 1.5 years and later reprimanded?\",\n      \"candidateAnswer\": \"Yes, the author says the inspector did not review declarations for a year and a half, approved them, and then was reprimanded.\",\n      \"sourceAnswer\": \"The source describes the inspector as a 'rare scumbag' who for 1.5 years did not look at declarations, just approved them, and later received a reprimand from Kyiv.\",\n      \"answerRelation\": \"equivalent\",\n      \"verdict\": \"supported\",\n      \"explanation\": \"The source explicitly matches the claim about the inspector’s misconduct and later reprimand.\"\n    },\n    {\n      \"itemIndex\": 2,\n      \"question\": \"Did Sveta’s help enable the author to re‑file correctly and pay about 1000 UAH instead of all fines?\",\n      \"candidateAnswer\": \"Yes, the claim is that with Sveta’s help the author re‑filed correctly and paid roughly 1000 UAH rather than the full fines.\",\n      \"sourceAnswer\": \"The source states that with aunt Sveta’s help the author re‑filed correctly and paid about 1000 грн instead of paying all the larger fines.\",\n      \"answerRelation\": \"equivalent\",\n      \"verdict\": \"supported\",\n      \"explanation\": \"The source confirms the amount paid and the role of Sveta in correctly re‑filing.\"\n    },\n    {\n      \"itemIndex\": 3,\n      \"question\": \"Has the author bought a domain yet?\",\n      \"candidateAnswer\": \"The claim says the author has not bought a domain.\",\n      \"sourceAnswer\": \"The source says \\\"навіть домен не купив\\\" (did not even buy a domain).\",\n      \"answerRelation\": \"equivalent\",\n      \"verdict\": \"supported\",\n      \"explanation\": \"Both the claim and the source state the domain has not been purchased.\"\n    },\n    {\n      \"itemIndex\": 4,\n      \"question\": \"Is a FOP calculator needed and will buying it provide money for the domain?\",\n      \"candidateAnswer\": \"The claim is that a FOP calculator is needed and once someone buys it there will be money for the domain.\",\n      \"sourceAnswer\": \"Source 3 mentions a FOP calculator; source 4 says \\\"once someone buys that calculator there will be money for the domain\\\".\",\n      \"answerRelation\": \"equivalent\",\n      \"verdict\": \"supported\",\n      \"explanation\": \"Both sources together convey the need for a calculator and the expectation of domain‑funding after purchase.\"\n    },\n    {\n      \"itemIndex\": 5,\n      \"question\": \"Does the tax calculation procedure take about an hour with Excel, at most a day?\",\n      \"candidateAnswer\": \"The claim says the procedure takes roughly an hour with Excel, but no more than a day.\",\n      \"sourceAnswer\": \"Source 5 states the procedure takes an hour with Excel, at most a day; source 6 adds \\\"and a day per month\\\" which does not contradict the timeframe.\",\n      \"answerRelation\": \"equivalent\",\n      \"verdict\": \"supported\",\n      \"explanation\": \"The source confirms the hour‑to‑day range described in the claim.\"\n    },\n    {\n      \"itemIndex\": 6,\n      \"question\": \"Must quarterly reports be filed and taxes paid correctly?\",\n      \"candidateAnswer\": \"The claim asserts that quarterly reports must be filed and taxes paid correctly.\",\n      \"sourceAnswer\": \"Source 7 says \\\"quarterly reports, and correctly pay everything and ok\\\".\",\n      \"answerRelation\": \"equivalent\",\n      \"verdict\": \"supported\",\n      \"explanation\": \"The source directly matches the claim.\"\n    },\n    {\n      \"itemIndex\": 7,\n      \"question\": \"Is the main difficulty matching columns and subtractions rather than the tax calculation itself?\",\n      \"candidateAnswer\": \"The claim states the difficulty lies in correctly matching columns and subtraction, not the calculation itself.\",\n      \"sourceAnswer\": \"Source 8 says the trick is not how you calculate tax but whether you match the right column and subtraction.\",\n      \"answerRelation\": \"equivalent\",\n      \"verdict\": \"supported\",\n      \"explanation\": \"Both express the same idea about the primary difficulty.\"\n    },\n    {\n      \"itemIndex\": 8,\n      \"question\": \"Are web platforms the simplest but considerably less profitable than Android/iOS apps?\",\n      \"candidateAnswer\": \"The claim says web platforms are simplest but far less profitable than Android/iOS.\",\n      \"sourceAnswer\": \"Source 11 lists web as the simplest platform and notes it is much less profitable than Android/IOS.\",\n      \"answerRelation\": \"equivalent\",\n      \"verdict\": \"supported\",\n      \"explanation\": \"The source directly supports the claim.\"\n    },\n    {\n      \"itemIndex\": 9,\n      \"question\": \"Is SEO poor, there is no external traffic, no ad revenue, and user retention is almost zero due to paywalls?\",\n      \"candidateAnswer\": \"The claim lists these problems for the web approach.\",\n      \"sourceAnswer\": \"Source 11 mentions low SEO, no external traffic, no ad revenue, and near‑zero user retention because of paywalls.\",\n      \"answerRelation\": \"equivalent\",\n      \"verdict\": \"supported\",\n      \"explanation\": \"The source enumerates exactly the issues claimed.\"\n    },\n    {\n      \"itemIndex\": 10,\n      \"question\": \"Do successful projects use delivery under one week, a fast cross‑platform stack like Flutter, and copy popular ideas with minor tweaks?\",\n      \"candidateAnswer\": \"The claim outlines these three success factors.\",\n      \"sourceAnswer\": \"Source 12 lists fast delivery (< 1 week), fast cross‑platform stack (Flutter), and copying popular ideas with minor additions.\",\n      \"answerRelation\": \"equivalent\",\n      \"verdict\": \"supported\",\n      \"explanation\": \"The source matches each element of the claim.\"\n    },\n    {\n      \"itemIndex\": 11,\n      \"question\": \"Does the author doubt anyone will buy the product, betting on zero sales?\",\n      \"candidateAnswer\": \"The claim says the author doubts any sales and bets no one will buy.\",\n      \"sourceAnswer\": \"Source 17 says the author would bet that nobody will buy it within months.\",\n      \"answerRelation\": \"equivalent\",\n      \"verdict\": \"supported\",\n      \"explanation\": \"Both express the same skepticism about sales.\"\n    },\n    {\n      \"itemIndex\": 12,\n      \"question\": \"Has the share of technical/managerial posts on LinkedIn dropped below 50%?\",\n      \"candidateAnswer\": \"The claim states the audience for such posts is now under 50%.\",\n      \"sourceAnswer\": \"Source 18 says the number of technical/managerial/sales posts seems to be less than 50%.\",\n      \"answerRelation\": \"equivalent\",\n      \"verdict\": \"supported\",\n      \"explanation\": \"The source confirms the claim.\"\n    },\n    {\n      \"itemIndex\": 13,\n      \"question\": \"Does the calculator work only with a UAH‑based FOP, requiring conversion using the day‑rate for each transaction?\",\n      \"candidateAnswer\": \"The claim says the calculator only works with a UAH FOP and needs daily‑rate conversion.\",\n      \"sourceAnswer\": \"Source 19 states the calculator works only with a UAH‑based FOP and the author had to calculate all transactions relative to the day's exchange rate.\",\n      \"answerRelation\": \"equivalent\",\n      \"verdict\": \"supported\",\n      \"explanation\": \"The source directly supports the claim.\"\n    },\n    {\n      \"itemIndex\": 14,\n      \"question\": \"Is it necessary to have at least ten people willing to pay 299 UAH before proceeding, otherwise the analysis is pointless?\",\n      \"candidateAnswer\": \"The claim sets this prerequisite for moving forward.\",\n      \"sourceAnswer\": \"Source 20 says first you need to know if at least ten people are ready to pay 299 грн, otherwise analysis is pointless.\",\n      \"answerRelation\": \"equivalent\",\n      \"verdict\": \"supported\",\n      \"explanation\": \"The source mirrors the claim exactly.\"\n    },\n    {\n      \"itemIndex\": 15,\n      \"question\": \"Might the source code contain a hard‑coded password stored in local storage?\",\n      \"candidateAnswer\": \"The claim suggests the source code could have a hard‑coded password in local storage.\",\n      \"sourceAnswer\": \"Source 21 asks \\\"What about the source code? Can the password be found by searching?\\\" implying the possibility.\",\n      \"answerRelation\": \"equivalent\",\n      \"verdict\": \"supported\",\n      \"explanation\": \"The source raises the same concern about a password in the code.\"\n    },\n    {\n      \"itemIndex\": 16,\n      \"question\": \"Does the author joke that most LinkedIn users could hack the thing?\",\n      \"candidateAnswer\": \"The claim says the author jokes about many LinkedIn users being able to hack it.\",\n      \"sourceAnswer\": \"Source 28 says \\\"I think most people from LinkedIn will hack this thing without problems\\\".\",\n      \"answerRelation\": \"equivalent\",\n      \"verdict\": \"supported\",\n      \"explanation\": \"The source expresses the same joking statement.\"\n    },\n    {\n      \"itemIndex\": 17,\n      \"question\": \"Is the app described as a local‑first bundle whose paid features are unlocked by a password?\",\n      \"candidateAnswer\": \"The claim describes the app as a local‑first bundle with a password unlocking full features.\",\n      \"sourceAnswer\": \"Source 29 describes it as a local‑first app with calculations done instantly in the browser; source 30 says the paid part (the bundle) is what people pay for and mentions a password.\",\n      \"answerRelation\": \"equivalent\",\n      \"verdict\": \"supported\",\n      \"explanation\": \"Both sources together convey that the app is local‑first and that a password protects the paid bundle.\"\n    }\n  ]\n}",
+  "thinking": "We need produce checks array for each item 0-17. Determine answerRelation and verdict. Likely many supported. Use sourceAnswer from citedSource. Provide question.\n\nProceed quickly.",
+  "parsed": {
+    "checks": [
+      {
+        "itemIndex": 0,
+        "question": "Does giving aunt Sveta 500 UAH prevent a large main penalty caused by a mis‑marked column in the declaration?",
+        "candidateAnswer": "Yes, the author claims that paying aunt Sveta 500 UAH helps avoid a huge main penalty caused by a mis‑marked column.",
+        "sourceAnswer": "The source says it is simpler to give 500 грн to aunt Sveta so she can handle the pain caused by a mis‑marked column in the declaration.",
+        "answerRelation": "equivalent",
+        "verdict": "supported",
+        "explanation": "Both the claim and the source state that giving 500 UAH to Sveta avoids the penalty from a mis‑marked column."
+      },
+      {
+        "itemIndex": 1,
+        "question": "Was the inspector corrupt, approving declarations without review for 1.5 years and later reprimanded?",
+        "candidateAnswer": "Yes, the author says the inspector did not review declarations for a year and a half, approved them, and then was reprimanded.",
+        "sourceAnswer": "The source describes the inspector as a 'rare scumbag' who for 1.5 years did not look at declarations, just approved them, and later received a reprimand from Kyiv.",
+        "answerRelation": "equivalent",
+        "verdict": "supported",
+        "explanation": "The source explicitly matches the claim about the inspector’s misconduct and later reprimand."
+      },
+      {
+        "itemIndex": 2,
+        "question": "Did Sveta’s help enable the author to re‑file correctly and pay about 1000 UAH instead of all fines?",
+        "candidateAnswer": "Yes, the claim is that with Sveta’s help the author re‑filed correctly and paid roughly 1000 UAH rather than the full fines.",
+        "sourceAnswer": "The source states that with aunt Sveta’s help the author re‑filed correctly and paid about 1000 грн instead of paying all the larger fines.",
+        "answerRelation": "equivalent",
+        "verdict": "supported",
+        "explanation": "The source confirms the amount paid and the role of Sveta in correctly re‑filing."
+      },
+      {
+        "itemIndex": 3,
+        "question": "Has the author bought a domain yet?",
+        "candidateAnswer": "The claim says the author has not bought a domain.",
+        "sourceAnswer": "The source says \"навіть домен не купив\" (did not even buy a domain).",
+        "answerRelation": "equivalent",
+        "verdict": "supported",
+        "explanation": "Both the claim and the source state the domain has not been purchased."
+      },
+      {
+        "itemIndex": 4,
+        "question": "Is a FOP calculator needed and will buying it provide money for the domain?",
+        "candidateAnswer": "The claim is that a FOP calculator is needed and once someone buys it there will be money for the domain.",
+        "sourceAnswer": "Source 3 mentions a FOP calculator; source 4 says \"once someone buys that calculator there will be money for the domain\".",
+        "answerRelation": "equivalent",
+        "verdict": "supported",
+        "explanation": "Both sources together convey the need for a calculator and the expectation of domain‑funding after purchase."
+      },
+      {
+        "itemIndex": 5,
+        "question": "Does the tax calculation procedure take about an hour with Excel, at most a day?",
+        "candidateAnswer": "The claim says the procedure takes roughly an hour with Excel, but no more than a day.",
+        "sourceAnswer": "Source 5 states the procedure takes an hour with Excel, at most a day; source 6 adds \"and a day per month\" which does not contradict the timeframe.",
+        "answerRelation": "equivalent",
+        "verdict": "supported",
+        "explanation": "The source confirms the hour‑to‑day range described in the claim."
+      },
+      {
+        "itemIndex": 6,
+        "question": "Must quarterly reports be filed and taxes paid correctly?",
+        "candidateAnswer": "The claim asserts that quarterly reports must be filed and taxes paid correctly.",
+        "sourceAnswer": "Source 7 says \"quarterly reports, and correctly pay everything and ok\".",
+        "answerRelation": "equivalent",
+        "verdict": "supported",
+        "explanation": "The source directly matches the claim."
+      },
+      {
+        "itemIndex": 7,
+        "question": "Is the main difficulty matching columns and subtractions rather than the tax calculation itself?",
+        "candidateAnswer": "The claim states the difficulty lies in correctly matching columns and subtraction, not the calculation itself.",
+        "sourceAnswer": "Source 8 says the trick is not how you calculate tax but whether you match the right column and subtraction.",
+        "answerRelation": "equivalent",
+        "verdict": "supported",
+        "explanation": "Both express the same idea about the primary difficulty."
+      },
+      {
+        "itemIndex": 8,
+        "question": "Are web platforms the simplest but considerably less profitable than Android/iOS apps?",
+        "candidateAnswer": "The claim says web platforms are simplest but far less profitable than Android/iOS.",
+        "sourceAnswer": "Source 11 lists web as the simplest platform and notes it is much less profitable than Android/IOS.",
+        "answerRelation": "equivalent",
+        "verdict": "supported",
+        "explanation": "The source directly supports the claim."
+      },
+      {
+        "itemIndex": 9,
+        "question": "Is SEO poor, there is no external traffic, no ad revenue, and user retention is almost zero due to paywalls?",
+        "candidateAnswer": "The claim lists these problems for the web approach.",
+        "sourceAnswer": "Source 11 mentions low SEO, no external traffic, no ad revenue, and near‑zero user retention because of paywalls.",
+        "answerRelation": "equivalent",
+        "verdict": "supported",
+        "explanation": "The source enumerates exactly the issues claimed."
+      },
+      {
+        "itemIndex": 10,
+        "question": "Do successful projects use delivery under one week, a fast cross‑platform stack like Flutter, and copy popular ideas with minor tweaks?",
+        "candidateAnswer": "The claim outlines these three success factors.",
+        "sourceAnswer": "Source 12 lists fast delivery (< 1 week), fast cross‑platform stack (Flutter), and copying popular ideas with minor additions.",
+        "answerRelation": "equivalent",
+        "verdict": "supported",
+        "explanation": "The source matches each element of the claim."
+      },
+      {
+        "itemIndex": 11,
+        "question": "Does the author doubt anyone will buy the product, betting on zero sales?",
+        "candidateAnswer": "The claim says the author doubts any sales and bets no one will buy.",
+        "sourceAnswer": "Source 17 says the author would bet that nobody will buy it within months.",
+        "answerRelation": "equivalent",
+        "verdict": "supported",
+        "explanation": "Both express the same skepticism about sales."
+      },
+      {
+        "itemIndex": 12,
+        "question": "Has the share of technical/managerial posts on LinkedIn dropped below 50%?",
+        "candidateAnswer": "The claim states the audience for such posts is now under 50%.",
+        "sourceAnswer": "Source 18 says the number of technical/managerial/sales posts seems to be less than 50%.",
+        "answerRelation": "equivalent",
+        "verdict": "supported",
+        "explanation": "The source confirms the claim."
+      },
+      {
+        "itemIndex": 13,
+        "question": "Does the calculator work only with a UAH‑based FOP, requiring conversion using the day‑rate for each transaction?",
+        "candidateAnswer": "The claim says the calculator only works with a UAH FOP and needs daily‑rate conversion.",
+        "sourceAnswer": "Source 19 states the calculator works only with a UAH‑based FOP and the author had to calculate all transactions relative to the day's exchange rate.",
+        "answerRelation": "equivalent",
+        "verdict": "supported",
+        "explanation": "The source directly supports the claim."
+      },
+      {
+        "itemIndex": 14,
+        "question": "Is it necessary to have at least ten people willing to pay 299 UAH before proceeding, otherwise the analysis is pointless?",
+        "candidateAnswer": "The claim sets this prerequisite for moving forward.",
+        "sourceAnswer": "Source 20 says first you need to know if at least ten people are ready to pay 299 грн, otherwise analysis is pointless.",
+        "answerRelation": "equivalent",
+        "verdict": "supported",
+        "explanation": "The source mirrors the claim exactly."
+      },
+      {
+        "itemIndex": 15,
+        "question": "Might the source code contain a hard‑coded password stored in local storage?",
+        "candidateAnswer": "The claim suggests the source code could have a hard‑coded password in local storage.",
+        "sourceAnswer": "Source 21 asks \"What about the source code? Can the password be found by searching?\" implying the possibility.",
+        "answerRelation": "equivalent",
+        "verdict": "supported",
+        "explanation": "The source raises the same concern about a password in the code."
+      },
+      {
+        "itemIndex": 16,
+        "question": "Does the author joke that most LinkedIn users could hack the thing?",
+        "candidateAnswer": "The claim says the author jokes about many LinkedIn users being able to hack it.",
+        "sourceAnswer": "Source 28 says \"I think most people from LinkedIn will hack this thing without problems\".",
+        "answerRelation": "equivalent",
+        "verdict": "supported",
+        "explanation": "The source expresses the same joking statement."
+      },
+      {
+        "itemIndex": 17,
+        "question": "Is the app described as a local‑first bundle whose paid features are unlocked by a password?",
+        "candidateAnswer": "The claim describes the app as a local‑first bundle with a password unlocking full features.",
+        "sourceAnswer": "Source 29 describes it as a local‑first app with calculations done instantly in the browser; source 30 says the paid part (the bundle) is what people pay for and mentions a password.",
+        "answerRelation": "equivalent",
+        "verdict": "supported",
+        "explanation": "Both sources together convey that the app is local‑first and that a password protects the paid bundle."
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 31574.201800000003,
+    "ollamaTotalMs": 31373.426825,
+    "promptEvalCount": 3878,
+    "evalCount": 2363,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "nItems": 18,
+    "supportedRate": 1,
+    "qaAgreementRate": 1,
+    "contradictedRate": 0,
+    "insufficientRate": 0,
+    "labelValidRate": 1
+  },
+  "variant": "original"
+}

@@ -1,0 +1,167 @@
+{
+  "case": "real-fop-calculator",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v2",
+  "reasoning": "low",
+  "seed": 4,
+  "inputHash": "d3179cdb8e49a27f55b8dcbb42c5b7b95590527ad18ad16afb38bc499073e8af",
+  "promptHash": "eca85abfc56ad311138896d5cab4797d47473470e6cc3a6dfcb0d2cd6da519b2",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion on tax filing, domain purchase, and a low‑profit app idea\",\n  \"topics\": [\n    {\n      \"id\": \"tax-filing\",\n      \"title\": \"Tax filing workaround and related workload\",\n      \"claims\": [\n        {\n          \"text\": \"P1 claims that paying 500 UAH to aunt Sveta allowed the tax inspector to re‑verify declarations and avoid larger fines, ultimately paying about 1000 UAH total.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"P3 says the whole tax correction procedure takes about an hour of Excel work per day at most.\",\n          \"evidence\": [5]\n        },\n        {\n          \"text\": \"P3 adds that the work is done roughly one day per month.\",\n          \"evidence\": [6]\n        },\n        {\n          \"text\": \"P3 notes that quarterly reports must be filed correctly and payments made on time.\",\n          \"evidence\": [7]\n        },\n        {\n          \"text\": \"P1 emphasizes that the difficulty lies not in calculating the tax but in ensuring each column and subtraction is correct.\",\n          \"evidence\": [8]\n        },\n        {\n          \"text\": \"P1 later mentions that his calculator only works with a UAH‑based FOP, forcing him to convert all transactions at the daily exchange rate.\",\n          \"evidence\": [19]\n        }\n      ]\n    },\n    {\n      \"id\": \"domain-purchase\",\n      \"title\": \"Discussion about buying a domain\",\n      \"claims\": [\n        {\n          \"text\": \"P2 states they have not even bought a domain yet.\",\n          \"evidence\": [2]\n        },\n        {\n          \"text\": \"P1 replies that someone needs to buy the calculator first, then there will be money for the domain.\",\n          \"evidence\": [4]\n        },\n        {\n          \"text\": \"P4 jokes that they wouldn't bet on the domain being bought.\",\n          \"evidence\": [9]\n        },\n        {\n          \"text\": \"P4 adds that the domain is considered a “raw thing” that won’t generate revenue even in hot weather.\",\n          \"evidence\": [10]\n        }\n      ]\n    },\n    {\n      \"id\": \"app-idea\",\n      \"title\": \"Skepticism around a low‑profit app concept\",\n      \"claims\": [\n        {\n          \"text\": \"P1 lists many drawbacks of earning from a simple web app, including low profitability, poor SEO, lack of traffic, no ads revenue, and low conversion.\",\n          \"evidence\": [11]\n        },\n        {\n          \"text\": \"P1 shares a podcast summary suggesting fast delivery (< 1 week) and a cross‑platform stack (Flutter) for successful low‑cost products.\",\n          \"evidence\": [12]\n        },\n        {\n          \"text\": \"P4 asks what P1 is referring to, and P1 clarifies it’s about Igor’s attempt to make money.\",\n          \"evidence\": [13,14]\n        },\n        {\n          \"text\": \"P4 mocks the idea, calling it a “spa in two prompts”.\",\n          \"evidence\": [16]\n        },\n        {\n          \"text\": \"P1 argues that trying to earn from this is odd and bets that nobody will buy it.\",\n          \"evidence\": [17]\n        },\n        {\n          \"text\": \"P4 argues the product’s viability depends on having at least ten paying users, and criticises premature analysis.\",\n          \"evidence\": [20]\n        },\n        {\n          \"text\": \"P4 questions the source code and password availability, implying they didn’t pay for it.\",\n          \"evidence\": [21,22]\n        },\n        {\n          \"text\": \"P5 labels the source as “pirate” and suggests contacting the author.\",\n          \"evidence\": [24,25]\n        },\n        {\n          \"text\": \"P4 describes the app as a “local‑first” app with cheap USD/UAH updates, but says the paid bundle contains nothing valuable.\",\n          \"evidence\": [29]\n        },\n        {\n          \"text\": \"P4 later calls the project “free vibe‑code” with no real value, implying it’s a scam.\",\n          \"evidence\": [30,32]\n        },\n        {\n          \"text\": \"P5 confirms it’s essentially a “vibe‑code” with no substance.\",\n          \"evidence\": [33,34]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": [\n    {\n      \"text\": \"What is the actual source code or password for the app mentioned by P4 and P1?\",\n      \"evidence\": [21]\n    }\n  ]\n}",
+  "thinking": "We need extract topics. Main themes: tax filing issues, domain purchase, app idea skepticism. Claims: e.g., P1 says paying 500grn to aunt solves tax. etc. Decisions none. Open questions: maybe about source code/password? There's question #21 asking source code. Not answered. So open.\n\nConstruct JSON.\n\nIdentify topics:\n\ntax-filing (messages 1,5,6,7,8,19). domain-purchase (2,4,9,10). app-idea (11-18,20-34). We'll include claims.\n\nNow produce JSON.",
+  "parsed": {
+    "title": "Discussion on tax filing, domain purchase, and a low‑profit app idea",
+    "topics": [
+      {
+        "id": "tax-filing",
+        "title": "Tax filing workaround and related workload",
+        "claims": [
+          {
+            "text": "P1 claims that paying 500 UAH to aunt Sveta allowed the tax inspector to re‑verify declarations and avoid larger fines, ultimately paying about 1000 UAH total.",
+            "evidence": [1]
+          },
+          {
+            "text": "P3 says the whole tax correction procedure takes about an hour of Excel work per day at most.",
+            "evidence": [5]
+          },
+          {
+            "text": "P3 adds that the work is done roughly one day per month.",
+            "evidence": [6]
+          },
+          {
+            "text": "P3 notes that quarterly reports must be filed correctly and payments made on time.",
+            "evidence": [7]
+          },
+          {
+            "text": "P1 emphasizes that the difficulty lies not in calculating the tax but in ensuring each column and subtraction is correct.",
+            "evidence": [8]
+          },
+          {
+            "text": "P1 later mentions that his calculator only works with a UAH‑based FOP, forcing him to convert all transactions at the daily exchange rate.",
+            "evidence": [19]
+          }
+        ]
+      },
+      {
+        "id": "domain-purchase",
+        "title": "Discussion about buying a domain",
+        "claims": [
+          {
+            "text": "P2 states they have not even bought a domain yet.",
+            "evidence": [2]
+          },
+          {
+            "text": "P1 replies that someone needs to buy the calculator first, then there will be money for the domain.",
+            "evidence": [4]
+          },
+          {
+            "text": "P4 jokes that they wouldn't bet on the domain being bought.",
+            "evidence": [9]
+          },
+          {
+            "text": "P4 adds that the domain is considered a “raw thing” that won’t generate revenue even in hot weather.",
+            "evidence": [10]
+          }
+        ]
+      },
+      {
+        "id": "app-idea",
+        "title": "Skepticism around a low‑profit app concept",
+        "claims": [
+          {
+            "text": "P1 lists many drawbacks of earning from a simple web app, including low profitability, poor SEO, lack of traffic, no ads revenue, and low conversion.",
+            "evidence": [11]
+          },
+          {
+            "text": "P1 shares a podcast summary suggesting fast delivery (< 1 week) and a cross‑platform stack (Flutter) for successful low‑cost products.",
+            "evidence": [12]
+          },
+          {
+            "text": "P4 asks what P1 is referring to, and P1 clarifies it’s about Igor’s attempt to make money.",
+            "evidence": [13, 14]
+          },
+          {
+            "text": "P4 mocks the idea, calling it a “spa in two prompts”.",
+            "evidence": [16]
+          },
+          {
+            "text": "P1 argues that trying to earn from this is odd and bets that nobody will buy it.",
+            "evidence": [17]
+          },
+          {
+            "text": "P4 argues the product’s viability depends on having at least ten paying users, and criticises premature analysis.",
+            "evidence": [20]
+          },
+          {
+            "text": "P4 questions the source code and password availability, implying they didn’t pay for it.",
+            "evidence": [21, 22]
+          },
+          {
+            "text": "P5 labels the source as “pirate” and suggests contacting the author.",
+            "evidence": [24, 25]
+          },
+          {
+            "text": "P4 describes the app as a “local‑first” app with cheap USD/UAH updates, but says the paid bundle contains nothing valuable.",
+            "evidence": [29]
+          },
+          {
+            "text": "P4 later calls the project “free vibe‑code” with no real value, implying it’s a scam.",
+            "evidence": [30, 32]
+          },
+          {
+            "text": "P5 confirms it’s essentially a “vibe‑code” with no substance.",
+            "evidence": [33, 34]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": [
+      {
+        "text": "What is the actual source code or password for the app mentioned by P4 and P1?",
+        "evidence": [21]
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 16362.573600000003,
+    "ollamaTotalMs": 16198.006952,
+    "promptEvalCount": 3046,
+    "evalCount": 1137,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 3,
+    "claimCount": 21,
+    "decisionCount": 0,
+    "openQuestionCount": 1,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 1,
+    "goldClaimPrecision": 0.38095238095238093,
+    "evidencePrecision": 0.3333333333333333,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 1,
+    "noiseRetention": 0.14285714285714285,
+    "matchedClaimIds": [
+      "security.password-in-bundle",
+      "tax-reporting.paid-help",
+      "tax-reporting.form-risk",
+      "product.uah-only",
+      "product.web-limitations",
+      "product.fast-delivery-strategy",
+      "product.validate-demand-first",
+      "product.creator-response"
+    ],
+    "retainedThreadIds": [
+      "calculator-security",
+      "tax-reporting",
+      "calculator-product"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

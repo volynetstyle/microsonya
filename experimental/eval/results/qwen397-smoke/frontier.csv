@@ -1,0 +1,2 @@
+model,pipeline,representation,transformation,reasoning,n,okRuns,okRate,recallMean,goldClaimPrecisionMean,evidencePrecisionMean,falseOpenQuestionRateMean,noiseRetentionMean,promptTokensMean,thinkingTokensMean,finalTokensMean,generatedTokensMean,reasoningShareMean,latencyMsMean
+qwen3.5:397b,deterministic-shell,pipe-v3,identity,low,1,0,0,,,,,,,,,,,549.366000

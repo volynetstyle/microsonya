@@ -1,0 +1,177 @@
+{
+  "case": "real-ai-tools-interleaved",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v2",
+  "reasoning": "low",
+  "seed": 1,
+  "inputHash": "3e5fb5efeccd172ee2f1e8a3ef61dfdf2ed0fd33f2162906991e5f91c1a0d9ba",
+  "promptHash": "03599931bf8492e2d3bf5a38e44c9d6fce70634b423c54274ff1e94d55f6c160",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Chat summary\",\n  \"topics\": [\n    {\n      \"id\": \"ai-toolkit-performance\",\n      \"title\": \"AI toolkits and model capabilities\",\n      \"claims\": [\n        {\n          \"text\": \"AI systems are not inherently intelligent; their complex abilities come from toolkits and ready-made solutions.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"No one needs AI to be truly smart because people themselves don't understand it.\",\n          \"evidence\": [2]\n        },\n        {\n          \"text\": \"Testing AI with modern toolkits like Opencode around 2022‑2023 may fail for older models due to small context windows.\",\n          \"evidence\": [3]\n        },\n        {\n          \"text\": \"InstinctGPT comparison showed a 3B model vs GPT‑3 175B with external runtime and tools, revealing toolkits add large gains but cannot compensate for lacking core model abilities.\",\n          \"evidence\": [8]\n        },\n        {\n          \"text\": \"Modern models aim to extract more from fewer parameters and are sometimes fine‑tuned for specific tasks.\",\n          \"evidence\": [14]\n        }\n      ]\n    },\n    {\n      \"id\": \"bus-anecdote\",\n      \"title\": \"Odd bus experiences\",\n      \"claims\": [\n        {\n          \"text\": \"User observed strange people in public transport and stayed seated without interacting.\",\n          \"evidence\": [4,5]\n        },\n        {\n          \"text\": \"A second encounter involved someone repeatedly blowing gas in the bus.\",\n          \"evidence\": [7]\n        }\n      ]\n    },\n    {\n      \"id\": \"shared-pin-link\",\n      \"title\": \"Shared Pin link\",\n      \"claims\": [\n        {\n          \"text\": \"User P4 posted a Pin link.\",\n          \"evidence\": [16]\n        },\n        {\n          \"text\": \"User P5 cited the source as @fionalt.\",\n          \"evidence\": [17]\n        },\n        {\n          \"text\": \"User P4 expressed hope that the content is still relevant.\",\n          \"evidence\": [18]\n        }\n      ]\n    },\n    {\n      \"id\": \"weather-feeling\",\n      \"title\": \"Weather impressions\",\n      \"claims\": [\n        {\n          \"text\": \"User P7 noted it was unusually hot that day.\",\n          \"evidence\": [21]\n        },\n        {\n          \"text\": \"User P6 described a feeling of impending rain, possibly lava rain based on temperature.\",\n          \"evidence\": [20]\n        }\n      ]\n    },\n    {\n      \"id\": \"diploma-cover-pricing\",\n      \"title\": \"Diploma cover pricing discussion\",\n      \"claims\": [\n        {\n          \"text\": \"User P8 asked how much was paid for diploma covers, mentioning 650 UAH from Bogdan.\",\n          \"evidence\": [22,23]\n        },\n        {\n          \"text\": \"User P9 said they paid 47 UAH.\",\n          \"evidence\": [24]\n        },\n        {\n          \"text\": \"User P4 replied that 30 UAH is typical.\",\n          \"evidence\": [25]\n        },\n        {\n          \"text\": \"User P1 argued the cover is essentially waste paper.\",\n          \"evidence\": [26]\n        },\n        {\n          \"text\": \"User P8 noted the unique university emblem on the cover.\",\n          \"evidence\": [27]\n        },\n        {\n          \"text\": \"User P8 claimed nobody uses the cover, calling it pointless.\",\n          \"evidence\": [28]\n        },\n        {\n          \"text\": \"User P8 explained the cover is seen only three times: receiving the diploma, photographing it, and later translating documents.\",\n          \"evidence\": [29]\n        }\n      ]\n    },\n    {\n      \"id\": \"pc-case-modification\",\n      \"title\": \"Fitting multiple GPUs into a small PC case\",\n      \"claims\": [\n        {\n          \"text\": \"In a small PC case that normally holds one GPU, three GPUs were fitted using straps and force.\",\n          \"evidence\": [30]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": []\n}",
+  "thinking": "We need summarize. Identify topics: AI toolkits, bus anecdote, pin link, weather, diploma cover pricing, PC case hack. Claims accordingly.\n\nDecisions none. Open questions maybe none.\n\nConstruct JSON.\n\n",
+  "parsed": {
+    "title": "Chat summary",
+    "topics": [
+      {
+        "id": "ai-toolkit-performance",
+        "title": "AI toolkits and model capabilities",
+        "claims": [
+          {
+            "text": "AI systems are not inherently intelligent; their complex abilities come from toolkits and ready-made solutions.",
+            "evidence": [1]
+          },
+          {
+            "text": "No one needs AI to be truly smart because people themselves don't understand it.",
+            "evidence": [2]
+          },
+          {
+            "text": "Testing AI with modern toolkits like Opencode around 2022‑2023 may fail for older models due to small context windows.",
+            "evidence": [3]
+          },
+          {
+            "text": "InstinctGPT comparison showed a 3B model vs GPT‑3 175B with external runtime and tools, revealing toolkits add large gains but cannot compensate for lacking core model abilities.",
+            "evidence": [8]
+          },
+          {
+            "text": "Modern models aim to extract more from fewer parameters and are sometimes fine‑tuned for specific tasks.",
+            "evidence": [14]
+          }
+        ]
+      },
+      {
+        "id": "bus-anecdote",
+        "title": "Odd bus experiences",
+        "claims": [
+          {
+            "text": "User observed strange people in public transport and stayed seated without interacting.",
+            "evidence": [4, 5]
+          },
+          {
+            "text": "A second encounter involved someone repeatedly blowing gas in the bus.",
+            "evidence": [7]
+          }
+        ]
+      },
+      {
+        "id": "shared-pin-link",
+        "title": "Shared Pin link",
+        "claims": [
+          {
+            "text": "User P4 posted a Pin link.",
+            "evidence": [16]
+          },
+          {
+            "text": "User P5 cited the source as @fionalt.",
+            "evidence": [17]
+          },
+          {
+            "text": "User P4 expressed hope that the content is still relevant.",
+            "evidence": [18]
+          }
+        ]
+      },
+      {
+        "id": "weather-feeling",
+        "title": "Weather impressions",
+        "claims": [
+          {
+            "text": "User P7 noted it was unusually hot that day.",
+            "evidence": [21]
+          },
+          {
+            "text": "User P6 described a feeling of impending rain, possibly lava rain based on temperature.",
+            "evidence": [20]
+          }
+        ]
+      },
+      {
+        "id": "diploma-cover-pricing",
+        "title": "Diploma cover pricing discussion",
+        "claims": [
+          {
+            "text": "User P8 asked how much was paid for diploma covers, mentioning 650 UAH from Bogdan.",
+            "evidence": [22, 23]
+          },
+          {
+            "text": "User P9 said they paid 47 UAH.",
+            "evidence": [24]
+          },
+          {
+            "text": "User P4 replied that 30 UAH is typical.",
+            "evidence": [25]
+          },
+          {
+            "text": "User P1 argued the cover is essentially waste paper.",
+            "evidence": [26]
+          },
+          {
+            "text": "User P8 noted the unique university emblem on the cover.",
+            "evidence": [27]
+          },
+          {
+            "text": "User P8 claimed nobody uses the cover, calling it pointless.",
+            "evidence": [28]
+          },
+          {
+            "text": "User P8 explained the cover is seen only three times: receiving the diploma, photographing it, and later translating documents.",
+            "evidence": [29]
+          }
+        ]
+      },
+      {
+        "id": "pc-case-modification",
+        "title": "Fitting multiple GPUs into a small PC case",
+        "claims": [
+          {
+            "text": "In a small PC case that normally holds one GPU, three GPUs were fitted using straps and force.",
+            "evidence": [30]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": []
+  },
+  "usage": {
+    "durationMs": 11769.669600000023,
+    "ollamaTotalMs": 11566.875992,
+    "promptEvalCount": 2388,
+    "evalCount": 944,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 6,
+    "claimCount": 20,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 1,
+    "goldClaimPrecision": 0.4,
+    "evidencePrecision": 0.45454545454545453,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0.25,
+    "matchedClaimIds": [
+      "bus-passenger.repeated-encounter",
+      "diploma-cover.prices",
+      "ai-tooling.capability-view",
+      "ai-tooling.old-model-experiment",
+      "ai-tooling.instinctgpt-result",
+      "ai-tooling.model-comparison",
+      "diploma-cover.low-value",
+      "pc-case.three-gpus"
+    ],
+    "retainedThreadIds": [
+      "bus-passenger",
+      "diploma-cover",
+      "ai-tooling",
+      "pc-case"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

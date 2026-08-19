@@ -1,0 +1,153 @@
+{
+  "case": "real-fop-calculator",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 5,
+  "inputHash": "d3179cdb8e49a27f55b8dcbb42c5b7b95590527ad18ad16afb38bc499073e8af",
+  "promptHash": "150d78ee667732e96b9a2fcd5fe5354e59b5fd2af6c1920571e8c0ae3bfc95d6",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion on taxes, domain purchase, app profitability, and potential scam\",\n  \"topics\": [\n    {\n      \"id\": \"tax-filing\",\n      \"title\": \"Tax filing complications and assistance\",\n      \"claims\": [\n        {\n          \"text\": \"User P1 claims that bribing aunt Sveta helped correctly re‑file taxes for about 1000 UAH instead of paying larger penalties.\",\n          \"evidence\": [1, 8]\n        },\n        {\n          \"text\": \"User P3 states that the whole tax declaration procedure takes about an hour with Excel, at most a day per month.\",\n          \"evidence\": [5, 6, 7]\n        },\n        {\n          \"text\": \"User P1 notes that the difficulty lies not in calculating taxes but in correctly matching declaration columns and amounts.\",\n          \"evidence\": [8]\n        },\n        {\n          \"text\": \"User P1 reports that the calculator works only for UAH‑based FOP, requiring daily exchange‑rate conversion for transactions.\",\n          \"evidence\": [19]\n        }\n      ]\n    },\n    {\n      \"id\": \"domain-purchase\",\n      \"title\": \"Domain purchase discussion\",\n      \"claims\": [\n        {\n          \"text\": \"User P2 says they haven't even bought a domain yet.\",\n          \"evidence\": [2]\n        },\n        {\n          \"text\": \"User P1 replies that once someone buys the calculator, there will be money for the domain.\",\n          \"evidence\": [4]\n        },\n        {\n          \"text\": \"User P4 doubts the domain will be bought, describing it as a useless thing that won’t generate revenue.\",\n          \"evidence\": [9, 10]\n        }\n      ]\n    },\n    {\n      \"id\": \"app-profitability\",\n      \"title\": \"Profitability of a web/Flutter app\",\n      \"claims\": [\n        {\n          \"text\": \"User P1 argues that web platforms are less profitable than Android/iOS, have poor SEO, no external traffic, low conversion, and heavy paywall friction.\",\n          \"evidence\": [11]\n        },\n        {\n          \"text\": \"User P1 shares a podcast summary recommending fast delivery (< 1 week) and a cross‑platform stack (Flutter) by copying popular ideas.\",\n          \"evidence\": [12]\n        },\n        {\n          \"text\": \"User P1 observes that LinkedIn audience for technical/managerial posts has dropped below 50%.\",\n          \"evidence\": [18]\n        },\n        {\n          \"text\": \"User P4 says the project isn’t worth analyzing until at least ten people are willing to pay 299 UAH.\",\n          \"evidence\": [20]\n        },\n        {\n          \"text\": \"User P1 asks about the source code and whether the password can be found via search.\",\n          \"evidence\": [21]\n        }\n      ]\n    },\n    {\n      \"id\": \"scam-concerns\",\n      \"title\": \"Potential scam and password leakage\",\n      \"claims\": [\n        {\n          \"text\": \"User P4 describes the app as a “local‑first” bundle with a single static password stored locally.\",\n          \"evidence\": [29]\n        },\n        {\n          \"text\": \"User P4 calls the project a “free vibecode” with no real value, suggesting people will either hack it or ignore it.\",\n          \"evidence\": [30, 31]\n        },\n        {\n          \"text\": \"User P4 accuses the developer of being a scammer.\",\n          \"evidence\": [32]\n        },\n        {\n          \"text\": \"User P5 confirms the scam perception.\",\n          \"evidence\": [33]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": [\n    {\n      \"text\": \"Can the source code be found and the password retrieved by searching?\",\n      \"evidence\": [21]\n    }\n  ]\n}",
+  "thinking": "We need extract topics. Main themes: tax filing woes, domain purchase, app profitability, calculator, scam concerns.\n\nCreate topics.\n\nTopic1 tax-filing assistance claim: messages 1,5,8 etc.\n\nTopic2 domain purchase discussion: 2,4,9,10.\n\nTopic3 app profitability analysis: 11,12,18,20,21 etc.\n\nTopic4 scam concerns about app/password: 30-34.\n\nDecisions none. Open questions? maybe \"А який там сорс код? Можна сам пароль пошуком знайти?\" not answered. So open question ID21.\n\nAlso question about source code unresolved.\n\nAlso maybe \"Це ти про що?\" answered with 14. resolved.\n\nSo one open question.\n\nNow produce JSON.\n\n",
+  "parsed": {
+    "title": "Discussion on taxes, domain purchase, app profitability, and potential scam",
+    "topics": [
+      {
+        "id": "tax-filing",
+        "title": "Tax filing complications and assistance",
+        "claims": [
+          {
+            "text": "User P1 claims that bribing aunt Sveta helped correctly re‑file taxes for about 1000 UAH instead of paying larger penalties.",
+            "evidence": [1, 8]
+          },
+          {
+            "text": "User P3 states that the whole tax declaration procedure takes about an hour with Excel, at most a day per month.",
+            "evidence": [5, 6, 7]
+          },
+          {
+            "text": "User P1 notes that the difficulty lies not in calculating taxes but in correctly matching declaration columns and amounts.",
+            "evidence": [8]
+          },
+          {
+            "text": "User P1 reports that the calculator works only for UAH‑based FOP, requiring daily exchange‑rate conversion for transactions.",
+            "evidence": [19]
+          }
+        ]
+      },
+      {
+        "id": "domain-purchase",
+        "title": "Domain purchase discussion",
+        "claims": [
+          {
+            "text": "User P2 says they haven't even bought a domain yet.",
+            "evidence": [2]
+          },
+          {
+            "text": "User P1 replies that once someone buys the calculator, there will be money for the domain.",
+            "evidence": [4]
+          },
+          {
+            "text": "User P4 doubts the domain will be bought, describing it as a useless thing that won’t generate revenue.",
+            "evidence": [9, 10]
+          }
+        ]
+      },
+      {
+        "id": "app-profitability",
+        "title": "Profitability of a web/Flutter app",
+        "claims": [
+          {
+            "text": "User P1 argues that web platforms are less profitable than Android/iOS, have poor SEO, no external traffic, low conversion, and heavy paywall friction.",
+            "evidence": [11]
+          },
+          {
+            "text": "User P1 shares a podcast summary recommending fast delivery (< 1 week) and a cross‑platform stack (Flutter) by copying popular ideas.",
+            "evidence": [12]
+          },
+          {
+            "text": "User P1 observes that LinkedIn audience for technical/managerial posts has dropped below 50%.",
+            "evidence": [18]
+          },
+          {
+            "text": "User P4 says the project isn’t worth analyzing until at least ten people are willing to pay 299 UAH.",
+            "evidence": [20]
+          },
+          {
+            "text": "User P1 asks about the source code and whether the password can be found via search.",
+            "evidence": [21]
+          }
+        ]
+      },
+      {
+        "id": "scam-concerns",
+        "title": "Potential scam and password leakage",
+        "claims": [
+          {
+            "text": "User P4 describes the app as a “local‑first” bundle with a single static password stored locally.",
+            "evidence": [29]
+          },
+          {
+            "text": "User P4 calls the project a “free vibecode” with no real value, suggesting people will either hack it or ignore it.",
+            "evidence": [30, 31]
+          },
+          {
+            "text": "User P4 accuses the developer of being a scammer.",
+            "evidence": [32]
+          },
+          {
+            "text": "User P5 confirms the scam perception.",
+            "evidence": [33]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": [
+      {
+        "text": "Can the source code be found and the password retrieved by searching?",
+        "evidence": [21]
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 16280.6097,
+    "ollamaTotalMs": 16049.283502,
+    "promptEvalCount": 2799,
+    "evalCount": 1003,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 4,
+    "claimCount": 16,
+    "decisionCount": 0,
+    "openQuestionCount": 1,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 1,
+    "goldClaimPrecision": 0.5,
+    "evidencePrecision": 0.5,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 1,
+    "noiseRetention": 0.125,
+    "matchedClaimIds": [
+      "tax-reporting.form-risk",
+      "product.creator-response",
+      "tax-reporting.paid-help",
+      "product.uah-only",
+      "product.web-limitations",
+      "product.fast-delivery-strategy",
+      "product.validate-demand-first",
+      "security.password-in-bundle"
+    ],
+    "retainedThreadIds": [
+      "tax-reporting",
+      "calculator-product",
+      "calculator-security"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

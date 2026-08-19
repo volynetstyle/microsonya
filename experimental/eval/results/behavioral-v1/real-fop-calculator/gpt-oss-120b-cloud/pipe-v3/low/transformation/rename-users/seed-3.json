@@ -1,0 +1,188 @@
+{
+  "case": "real-fop-calculator",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 3,
+  "transformation": "rename-users",
+  "inputHash": "6c36faa5f852486a060747c860a4d99ec3b2e02263aa75953582eba7889cc060",
+  "promptHash": "03764dbcd9414a0769ae98d353fa72a1d80eb4ae7464e8b98ffdad77543649a5",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion on Tax Filing, Domain Purchase, and App Idea Viability\",\n  \"topics\": [\n    {\n      \"id\": \"tax-filing\",\n      \"title\": \"Tax filing complications and workaround\",\n      \"claims\": [\n        {\n          \"text\": \"The user paid 500 UAH to aunt Sveta to correct a large amount of main tax liability caused by a column mislabel in the declaration.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"The inspector ignored the user's declarations for 1.5 years, then was reprimanded and started demanding the user re‑verify all past declarations.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"With Sveta's help the user managed to correctly re‑file and paid about 1000 UAH instead of all fines.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"The whole procedure takes about an hour with Excel, up to one day maximum.\",\n          \"evidence\": [5,6]\n        },\n        {\n          \"text\": \"The critical issue is not the tax calculation itself but correctly matching each column and subtraction.\",\n          \"evidence\": [8]\n        }\n      ]\n    },\n    {\n      \"id\": \"domain-purchase\",\n      \"title\": \"Domain purchase discussion\",\n      \"claims\": [\n        {\n          \"text\": \"User has not bought a domain yet.\",\n          \"evidence\": [2]\n        },\n        {\n          \"text\": \"Someone needs to buy a calculator first, then there will be money for a domain.\",\n          \"evidence\": [4]\n        },\n        {\n          \"text\": \"One participant doubts anyone will buy the domain.\",\n          \"evidence\": [9]\n        },\n        {\n          \"text\": \"Another participant describes the domain as a “sick thing” that won’t evaporate even in heat.\",\n          \"evidence\": [10]\n        }\n      ]\n    },\n    {\n      \"id\": \"app-viability\",\n      \"title\": \"Viability of a quick‑delivery cross‑platform app\",\n      \"claims\": [\n        {\n          \"text\": \"Web platform is the simplest but far less profitable than Android/iOS.\",\n          \"evidence\": [11]\n        },\n        {\n          \"text\": \"Web SEO is poor; even on the 10th Google page the site is not found.\",\n          \"evidence\": [11]\n        },\n        {\n          \"text\": \"No external traffic from Instagram/Threads, no contextual ads; app stores promote new apps more effectively.\",\n          \"evidence\": [11]\n        },\n        {\n          \"text\": \"No passive ad revenue on a website; user retention is near zero because of immediate paywall.\",\n          \"evidence\": [11]\n        },\n        {\n          \"text\": \"Conversion is presumed zero; product does not simplify much nor integrate with banks or tax cabinets.\",\n          \"evidence\": [11]\n        },\n        {\n          \"text\": \"Successful approach described: rapid delivery (< 1 week), cross‑platform stack (Flutter), copying popular ideas with minor tweaks.\",\n          \"evidence\": [12]\n        },\n        {\n          \"text\": \"The idea discussed is about Ihar trying to make money.\",\n          \"evidence\": [13,14]\n        },\n        {\n          \"text\": \"Skepticism that anyone will buy the product; wager that nobody will purchase within months.\",\n          \"evidence\": [17]\n        },\n        {\n          \"text\": \"LinkedIn audience for technical/managerial/sales posts has dropped below 50%.\",\n          \"evidence\": [18]\n        },\n        {\n          \"text\": \"The calculator only works with UAH‑based FOP; foreign‑currency FOP requires daily exchange‑rate calculations.\",\n          \"evidence\": [19]\n        },\n        {\n          \"text\": \"Before building, need to verify at least ten people are willing to pay 299 UAH.\",\n          \"evidence\": [20]\n        },\n        {\n          \"text\": \"Password for the app is stored plainly in local storage as a 100 % discount promo code.\",\n          \"evidence\": [20]\n        },\n        {\n          \"text\": \"User asks if the source code can be found by searching for the password.\",\n          \"evidence\": [21]\n        },\n        {\n          \"text\": \"Another participant mocks the idea of paying 299 UAH for it.\",\n          \"evidence\": [22]\n        },\n        {\n          \"text\": \"The app is positioned as a local‑first app with USD/UAH rate fetched every 5 minutes; calculations happen instantly in the browser.\",\n          \"evidence\": [29]\n        },\n        {\n          \"text\": \"A participant describes the project as a “free vibe‑code” made out of boredom, suggesting only insiders will look for the password.\",\n          \"evidence\": [30,31]\n        },\n        {\n          \"text\": \"Someone calls the creator a scammer.\",\n          \"evidence\": [32]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": [\n    {\n      \"text\": \"Is the source code searchable to find the password?\",\n      \"evidence\": [21]\n    }\n  ]\n}",
+  "thinking": "We need produce JSON summary. Identify topics: maybe tax filing, domain purchase, app idea viability, password hack. Create claims.\n\nDecisions none. Open questions? maybe \"А який там сорс код? Можна сам пароль пошуком знайти?\" not answered. So that's open.\n\nConstruct topics:\n\ntax-filing (messages 1,4,5,8) claim about needing aunt etc.\n\ndomain-purchase (2,4,9,10)\n\napp-viability (11,12,13,14,16,17,18,20,21,22,29,30,32) claims like web less profitable, need 10 users paying 299, etc.\n\nCreate JSON.\n\n",
+  "parsed": {
+    "title": "Discussion on Tax Filing, Domain Purchase, and App Idea Viability",
+    "topics": [
+      {
+        "id": "tax-filing",
+        "title": "Tax filing complications and workaround",
+        "claims": [
+          {
+            "text": "The user paid 500 UAH to aunt Sveta to correct a large amount of main tax liability caused by a column mislabel in the declaration.",
+            "evidence": [1]
+          },
+          {
+            "text": "The inspector ignored the user's declarations for 1.5 years, then was reprimanded and started demanding the user re‑verify all past declarations.",
+            "evidence": [1]
+          },
+          {
+            "text": "With Sveta's help the user managed to correctly re‑file and paid about 1000 UAH instead of all fines.",
+            "evidence": [1]
+          },
+          {
+            "text": "The whole procedure takes about an hour with Excel, up to one day maximum.",
+            "evidence": [5, 6]
+          },
+          {
+            "text": "The critical issue is not the tax calculation itself but correctly matching each column and subtraction.",
+            "evidence": [8]
+          }
+        ]
+      },
+      {
+        "id": "domain-purchase",
+        "title": "Domain purchase discussion",
+        "claims": [
+          {
+            "text": "User has not bought a domain yet.",
+            "evidence": [2]
+          },
+          {
+            "text": "Someone needs to buy a calculator first, then there will be money for a domain.",
+            "evidence": [4]
+          },
+          {
+            "text": "One participant doubts anyone will buy the domain.",
+            "evidence": [9]
+          },
+          {
+            "text": "Another participant describes the domain as a “sick thing” that won’t evaporate even in heat.",
+            "evidence": [10]
+          }
+        ]
+      },
+      {
+        "id": "app-viability",
+        "title": "Viability of a quick‑delivery cross‑platform app",
+        "claims": [
+          {
+            "text": "Web platform is the simplest but far less profitable than Android/iOS.",
+            "evidence": [11]
+          },
+          {
+            "text": "Web SEO is poor; even on the 10th Google page the site is not found.",
+            "evidence": [11]
+          },
+          {
+            "text": "No external traffic from Instagram/Threads, no contextual ads; app stores promote new apps more effectively.",
+            "evidence": [11]
+          },
+          {
+            "text": "No passive ad revenue on a website; user retention is near zero because of immediate paywall.",
+            "evidence": [11]
+          },
+          {
+            "text": "Conversion is presumed zero; product does not simplify much nor integrate with banks or tax cabinets.",
+            "evidence": [11]
+          },
+          {
+            "text": "Successful approach described: rapid delivery (< 1 week), cross‑platform stack (Flutter), copying popular ideas with minor tweaks.",
+            "evidence": [12]
+          },
+          {
+            "text": "The idea discussed is about Ihar trying to make money.",
+            "evidence": [13, 14]
+          },
+          {
+            "text": "Skepticism that anyone will buy the product; wager that nobody will purchase within months.",
+            "evidence": [17]
+          },
+          {
+            "text": "LinkedIn audience for technical/managerial/sales posts has dropped below 50%.",
+            "evidence": [18]
+          },
+          {
+            "text": "The calculator only works with UAH‑based FOP; foreign‑currency FOP requires daily exchange‑rate calculations.",
+            "evidence": [19]
+          },
+          {
+            "text": "Before building, need to verify at least ten people are willing to pay 299 UAH.",
+            "evidence": [20]
+          },
+          {
+            "text": "Password for the app is stored plainly in local storage as a 100 % discount promo code.",
+            "evidence": [20]
+          },
+          {
+            "text": "User asks if the source code can be found by searching for the password.",
+            "evidence": [21]
+          },
+          {
+            "text": "Another participant mocks the idea of paying 299 UAH for it.",
+            "evidence": [22]
+          },
+          {
+            "text": "The app is positioned as a local‑first app with USD/UAH rate fetched every 5 minutes; calculations happen instantly in the browser.",
+            "evidence": [29]
+          },
+          {
+            "text": "A participant describes the project as a “free vibe‑code” made out of boredom, suggesting only insiders will look for the password.",
+            "evidence": [30, 31]
+          },
+          {
+            "text": "Someone calls the creator a scammer.",
+            "evidence": [32]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": [
+      {
+        "text": "Is the source code searchable to find the password?",
+        "evidence": [21]
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 17686.009900000005,
+    "ollamaTotalMs": 17523.204153,
+    "promptEvalCount": 2799,
+    "evalCount": 1270,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 3,
+    "claimCount": 26,
+    "decisionCount": 0,
+    "openQuestionCount": 1,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 1,
+    "goldClaimPrecision": 0.3076923076923077,
+    "evidencePrecision": 0.3333333333333333,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 1,
+    "noiseRetention": 0.038461538461538464,
+    "matchedClaimIds": [
+      "tax-reporting.form-risk",
+      "product.creator-response",
+      "tax-reporting.paid-help",
+      "product.web-limitations",
+      "product.fast-delivery-strategy",
+      "product.uah-only",
+      "product.validate-demand-first",
+      "security.password-in-bundle"
+    ],
+    "retainedThreadIds": [
+      "tax-reporting",
+      "calculator-product",
+      "calculator-security"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

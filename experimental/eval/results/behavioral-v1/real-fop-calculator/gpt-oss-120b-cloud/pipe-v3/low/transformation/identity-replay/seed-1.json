@@ -1,0 +1,156 @@
+{
+  "case": "real-fop-calculator",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 1,
+  "transformation": "identity-replay",
+  "inputHash": "d3179cdb8e49a27f55b8dcbb42c5b7b95590527ad18ad16afb38bc499073e8af",
+  "promptHash": "150d78ee667732e96b9a2fcd5fe5354e59b5fd2af6c1920571e8c0ae3bfc95d6",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion on tax filing, domain purchase, app profitability and source code security\",\n  \"topics\": [\n    {\n      \"id\": \"tax-filing\",\n      \"title\": \"Tax filing shortcuts and risks\",\n      \"claims\": [\n        {\n          \"text\": \"Using a relative (aunt) to correct tax declarations can avoid larger penalties.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"The main difficulty is correctly matching columns in the declaration, not the calculation itself.\",\n          \"evidence\": [5, 8]\n        },\n        {\n          \"text\": \"The whole procedure can take about an hour with Excel.\",\n          \"evidence\": [5]\n        }\n      ]\n    },\n    {\n      \"id\": \"domain-purchase\",\n      \"title\": \"Domain purchase skepticism\",\n      \"claims\": [\n        {\n          \"text\": \"Someone mentions they haven't even bought a domain yet.\",\n          \"evidence\": [2]\n        },\n        {\n          \"text\": \"Buying a calculator (presumably tax calculator) is seen as a prerequisite for having money to buy a domain.\",\n          \"evidence\": [4]\n        },\n        {\n          \"text\": \"A participant doubts anyone will actually purchase the domain.\",\n          \"evidence\": [9]\n        }\n      ]\n    },\n    {\n      \"id\": \"app-profitability\",\n      \"title\": \"Profitability of a simple web/app product\",\n      \"claims\": [\n        {\n          \"text\": \"Web platforms are less profitable than Android/iOS, with low SEO and no external traffic sources.\",\n          \"evidence\": [11]\n        },\n        {\n          \"text\": \"Successful rapid delivery (under a week) with a cross‑platform stack (Flutter) is suggested as a way to earn.\",\n          \"evidence\": [12]\n        },\n        {\n          \"text\": \"The speaker doubts the product will sell, betting it won't get buyers within a month.\",\n          \"evidence\": [17]\n        },\n        {\n          \"text\": \"LinkedIn audience composition has shifted, with fewer technical/managerial posts.\",\n          \"evidence\": [18]\n        }\n      ]\n    },\n    {\n      \"id\": \"source-code-password\",\n      \"title\": \"Security of source code and passwords in the project\",\n      \"claims\": [\n        {\n          \"text\": \"The project stores a single password in local storage as a 100% discount promo code.\",\n          \"evidence\": [20]\n        },\n        {\n          \"text\": \"A question is raised about finding the password via source code search.\",\n          \"evidence\": [21]\n        },\n        {\n          \"text\": \"Another participant mocks the idea of paying 299 UAH for such a setup.\",\n          \"evidence\": [22]\n        },\n        {\n          \"text\": \"The code is described as being in a bundle, implying limited visibility.\",\n          \"evidence\": [23]\n        },\n        {\n          \"text\": \"One user claims most LinkedIn users could hack the thing without problems.\",\n          \"evidence\": [28]\n        },\n        {\n          \"text\": \"The app is positioned as a local‑first app with USD/UAH rates refreshed every 5 minutes and calculations done in the browser.\",\n          \"evidence\": [29]\n        },\n        {\n          \"text\": \"The project is portrayed as a free “vibe‑code” experiment with no serious intent.\",\n          \"evidence\": [30]\n        },\n        {\n          \"text\": \"A participant calls the author a scammer.\",\n          \"evidence\": [32]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": []\n}",
+  "thinking": "We need produce JSON summarizing. Identify topics: tax filing process, domain purchase, app profitability, source code password, etc.\n\nCreate claims with evidence IDs.\n\nDecisions none? No clear decision.\n\nOpen questions: maybe about source code location? but answered sarcastically. No clear unresolved question.\n\nLet's pick topics:\n\n1. tax-filing shortcuts (messages 1,5,8)\n2. domain purchase comment (2,4,9)\n3. app profitability discussion (11,12,17,18)\n4. source code/password security (20,21,22,23,28,29,30,32)\n\nMake claims.\n\nDecisions empty.\n\nOpen questions maybe: None unresolved.\n\nReturn JSON.",
+  "parsed": {
+    "title": "Discussion on tax filing, domain purchase, app profitability and source code security",
+    "topics": [
+      {
+        "id": "tax-filing",
+        "title": "Tax filing shortcuts and risks",
+        "claims": [
+          {
+            "text": "Using a relative (aunt) to correct tax declarations can avoid larger penalties.",
+            "evidence": [1]
+          },
+          {
+            "text": "The main difficulty is correctly matching columns in the declaration, not the calculation itself.",
+            "evidence": [5, 8]
+          },
+          {
+            "text": "The whole procedure can take about an hour with Excel.",
+            "evidence": [5]
+          }
+        ]
+      },
+      {
+        "id": "domain-purchase",
+        "title": "Domain purchase skepticism",
+        "claims": [
+          {
+            "text": "Someone mentions they haven't even bought a domain yet.",
+            "evidence": [2]
+          },
+          {
+            "text": "Buying a calculator (presumably tax calculator) is seen as a prerequisite for having money to buy a domain.",
+            "evidence": [4]
+          },
+          {
+            "text": "A participant doubts anyone will actually purchase the domain.",
+            "evidence": [9]
+          }
+        ]
+      },
+      {
+        "id": "app-profitability",
+        "title": "Profitability of a simple web/app product",
+        "claims": [
+          {
+            "text": "Web platforms are less profitable than Android/iOS, with low SEO and no external traffic sources.",
+            "evidence": [11]
+          },
+          {
+            "text": "Successful rapid delivery (under a week) with a cross‑platform stack (Flutter) is suggested as a way to earn.",
+            "evidence": [12]
+          },
+          {
+            "text": "The speaker doubts the product will sell, betting it won't get buyers within a month.",
+            "evidence": [17]
+          },
+          {
+            "text": "LinkedIn audience composition has shifted, with fewer technical/managerial posts.",
+            "evidence": [18]
+          }
+        ]
+      },
+      {
+        "id": "source-code-password",
+        "title": "Security of source code and passwords in the project",
+        "claims": [
+          {
+            "text": "The project stores a single password in local storage as a 100% discount promo code.",
+            "evidence": [20]
+          },
+          {
+            "text": "A question is raised about finding the password via source code search.",
+            "evidence": [21]
+          },
+          {
+            "text": "Another participant mocks the idea of paying 299 UAH for such a setup.",
+            "evidence": [22]
+          },
+          {
+            "text": "The code is described as being in a bundle, implying limited visibility.",
+            "evidence": [23]
+          },
+          {
+            "text": "One user claims most LinkedIn users could hack the thing without problems.",
+            "evidence": [28]
+          },
+          {
+            "text": "The app is positioned as a local‑first app with USD/UAH rates refreshed every 5 minutes and calculations done in the browser.",
+            "evidence": [29]
+          },
+          {
+            "text": "The project is portrayed as a free “vibe‑code” experiment with no serious intent.",
+            "evidence": [30]
+          },
+          {
+            "text": "A participant calls the author a scammer.",
+            "evidence": [32]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": []
+  },
+  "usage": {
+    "durationMs": 14361.584799999982,
+    "ollamaTotalMs": 14045.940884,
+    "promptEvalCount": 2799,
+    "evalCount": 926,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 4,
+    "claimCount": 18,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.8888888888888888,
+    "goldClaimPrecision": 0.3888888888888889,
+    "evidencePrecision": 0.42105263157894735,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0.05555555555555555,
+    "matchedClaimIds": [
+      "tax-reporting.form-risk",
+      "tax-reporting.paid-help",
+      "product.web-limitations",
+      "product.fast-delivery-strategy",
+      "product.validate-demand-first",
+      "security.password-in-bundle",
+      "product.creator-response"
+    ],
+    "retainedThreadIds": [
+      "tax-reporting",
+      "calculator-product",
+      "calculator-security"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

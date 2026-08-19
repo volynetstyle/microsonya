@@ -1,0 +1,137 @@
+{
+  "case": "real-job-search-abroad",
+  "model": "gpt-oss:120b",
+  "pipeline": "direct",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 1,
+  "transformation": "identity",
+  "inputHash": "aac555f3427e2195f145b4a5e3a6d9644961170a8ccc181b8832ae83202b036f",
+  "promptHash": "e41e6b70be063f10789ceefe0df8ed603e3db3c6ee9855e9237972d7c698d5cc",
+  "promptVersion": "v4",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Job hunting and language issues in Austria and Slovakia\",\n  \"topics\": [\n    {\n      \"id\": \"job-hunting-abroad\",\n      \"title\": \"Finding work abroad\",\n      \"claims\": [\n        {\n          \"text\": \"LinkedIn is recommended for job search.\",\n          \"evidence\": [18]\n        },\n        {\n          \"text\": \"Around 100 applications yielded only 3 interviews.\",\n          \"evidence\": [21]\n        },\n        {\n          \"text\": \"Most vacancies (95%) require local language proficiency.\",\n          \"evidence\": [26]\n        },\n        {\n          \"text\": \"Some hires occur despite poor language skills.\",\n          \"evidence\": [29]\n        },\n        {\n          \"text\": \"Higher education rarely influences hiring decisions.\",\n          \"evidence\": [32]\n        },\n        {\n          \"text\": \"Salary in Europe is generally higher than in Ukraine, but many overlook it.\",\n          \"evidence\": [35]\n        },\n        {\n          \"text\": \"Employer often asks for B2 language level, sometimes B1, and rarely demands a certificate.\",\n          \"evidence\": [46]\n        }\n      ]\n    },\n    {\n      \"id\": \"language-barriers\",\n      \"title\": \"Language requirements and daily life\",\n      \"claims\": [\n        {\n          \"text\": \"German is the primary language spoken in Austria, but English is used in many workplaces.\",\n          \"evidence\": [14, 15]\n        },\n        {\n          \"text\": \"The speaker feels insecure using English outside work.\",\n          \"evidence\": [55]\n        },\n        {\n          \"text\": \"Learning the local language improves confidence in everyday situations.\",\n          \"evidence\": [47]\n        }\n      ]\n    },\n    {\n      \"id\": \"experience-and-interviews\",\n      \"title\": \"Experience and interview chances\",\n      \"claims\": [\n        {\n          \"text\": \"Even candidates with 3 years of experience face low conversion rates (100 applications → 3 interviews).\",\n          \"evidence\": [21]\n        },\n        {\n          \"text\": \"A friend was invited to a Mid-level interview despite having no commercial experience, likely due to a master's degree.\",\n          \"evidence\": [28]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": [\n    {\n      \"text\": \"Should the speaker stay in Austria or consider moving elsewhere?\",\n      \"evidence\": [58]\n    }\n  ]\n}",
+  "thinking": "Need produce JSON summarizing. Identify topics: job search abroad, language requirements, salary, experience. Claims with evidence IDs. No open questions? There is question about staying in Austria. That is unresolved. Decisions? None. So decisions empty. OpenQuestions include \"А ти як особисто відчуваєш, думаєш лишатись в Австрії?\" evidence 58. Also maybe earlier question about salary? They asked but got answer. So okay.\n\nCreate topics: \"Finding work abroad\" with claims like need LinkedIn, applications 100, 3 interviews, language B2, etc. Provide IDs.\n\nLet's craft.",
+  "parsed": {
+    "title": "Job hunting and language issues in Austria and Slovakia",
+    "topics": [
+      {
+        "id": "job-hunting-abroad",
+        "title": "Finding work abroad",
+        "claims": [
+          {
+            "text": "LinkedIn is recommended for job search.",
+            "evidence": [18]
+          },
+          {
+            "text": "Around 100 applications yielded only 3 interviews.",
+            "evidence": [21]
+          },
+          {
+            "text": "Most vacancies (95%) require local language proficiency.",
+            "evidence": [26]
+          },
+          {
+            "text": "Some hires occur despite poor language skills.",
+            "evidence": [29]
+          },
+          {
+            "text": "Higher education rarely influences hiring decisions.",
+            "evidence": [32]
+          },
+          {
+            "text": "Salary in Europe is generally higher than in Ukraine, but many overlook it.",
+            "evidence": [35]
+          },
+          {
+            "text": "Employer often asks for B2 language level, sometimes B1, and rarely demands a certificate.",
+            "evidence": [46]
+          }
+        ]
+      },
+      {
+        "id": "language-barriers",
+        "title": "Language requirements and daily life",
+        "claims": [
+          {
+            "text": "German is the primary language spoken in Austria, but English is used in many workplaces.",
+            "evidence": [14, 15]
+          },
+          {
+            "text": "The speaker feels insecure using English outside work.",
+            "evidence": [55]
+          },
+          {
+            "text": "Learning the local language improves confidence in everyday situations.",
+            "evidence": [47]
+          }
+        ]
+      },
+      {
+        "id": "experience-and-interviews",
+        "title": "Experience and interview chances",
+        "claims": [
+          {
+            "text": "Even candidates with 3 years of experience face low conversion rates (100 applications → 3 interviews).",
+            "evidence": [21]
+          },
+          {
+            "text": "A friend was invited to a Mid-level interview despite having no commercial experience, likely due to a master's degree.",
+            "evidence": [28]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": [
+      {
+        "text": "Should the speaker stay in Austria or consider moving elsewhere?",
+        "evidence": [58]
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 7773.581700000446,
+    "ollamaTotalMs": 7432.356304,
+    "promptEvalCount": 3328,
+    "evalCount": 663,
+    "doneReason": "stop",
+    "thinkingTextTokenCount": 131,
+    "finalTextTokenCount": 522
+  },
+  "operationalMetrics": {
+    "modelCalls": 1,
+    "sourceMessageWindows": 1,
+    "semanticInterpretations": 1,
+    "semanticAmplification": 1
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 3,
+    "claimCount": 12,
+    "decisionCount": 0,
+    "openQuestionCount": 1,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.75,
+    "goldClaimPrecision": 0.5,
+    "evidencePrecision": 0.42857142857142855,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 1,
+    "noiseRetention": 0,
+    "matchedClaimIds": [
+      "job-search.two-months",
+      "job-search.conversion",
+      "job-search.local-language-filter",
+      "job-search.education-observation",
+      "language.work-vs-daily-life",
+      "language.learning-motivation"
+    ],
+    "matchedDecisionIds": [],
+    "matchedOpenQuestionIds": [],
+    "retainedThreadIds": ["job-search-abroad", "language-integration"],
+    "triggeredForbiddenIds": []
+  }
+}

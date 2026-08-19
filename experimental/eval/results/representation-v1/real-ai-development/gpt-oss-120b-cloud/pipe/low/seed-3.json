@@ -1,0 +1,147 @@
+{
+  "case": "real-ai-development",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe",
+  "reasoning": "low",
+  "seed": 3,
+  "inputHash": "c44e2d8f381898078b12b50a1dbf1501e5970203c0d4ef386b86fd514114c47c",
+  "promptHash": "ca466985a1b24e688c02f542402eed97a24851c840c6eaa17fc4ea625c145538",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"AI, job search, and code generation discussion\",\n  \"topics\": [\n    {\n      \"id\": \"ai-job-search\",\n      \"title\": \"AI tools for job search and resume generation\",\n      \"claims\": [\n        {\n          \"text\": \"The author plans to set up OpenClaw to automate vacancy search, PDF resume generation, and cover letter writing.\",\n          \"evidence\": [5]\n        },\n        {\n          \"text\": \"Full automation of resume generation is seen as beneficial because humans can still analyze the output during technical interviews.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"There is a concern that AI (referred to as \\\"клод\\\") lowers the entry barrier to programming, leading to poorly optimized code.\",\n          \"evidence\": [30]\n        },\n        {\n          \"text\": \"Lack of AI knowledge makes JavaScript/Python job search much harder in 2026.\",\n          \"evidence\": [8]\n        }\n      ]\n    },\n    {\n      \"id\": \"ai-skills-market\",\n      \"title\": \"Need for AI‑related skills in the job market\",\n      \"claims\": [\n        {\n          \"text\": \"In 2026 employers expect many AI‑related skills (Cursor, Claude Code, LLM, RAG, embeddings, etc.).\",\n          \"evidence\": [6]\n        },\n        {\n          \"text\": \"The market treats AI tools similarly to past tech stacks like REST, JSON, Microservices, Docker.\",\n          \"evidence\": [10]\n        }\n      ]\n    },\n    {\n      \"id\": \"code-generation-productivity\",\n      \"title\": \"LLM code generation accelerates development\",\n      \"claims\": [\n        {\n          \"text\": \"Using GPT to generate joins and SQL queries speeds up development, handling routine tasks.\",\n          \"evidence\": [19]\n        },\n        {\n          \"text\": \"Generated code can be sub‑optimal or even break projects, requiring human review.\",\n          \"evidence\": [35]\n        }\n      ]\n    },\n    {\n      \"id\": \"debugging-and-context\",\n      \"title\": \"Limitations of simple LLM models for debugging\",\n      \"claims\": [\n        {\n          \"text\": \"Simple models cannot see accumulated context, personal solutions, or workarounds that exist in a developer's mind.\",\n          \"evidence\": [22]\n        },\n        {\n          \"text\": \"Quality of LLM answers depends on quality of questions and available knowledge.\",\n          \"evidence\": [24, 25]\n        }\n      ]\n    },\n    {\n      \"id\": \"recruiter-role\",\n      \"title\": \"Future of recruiters and HR\",\n      \"claims\": [\n        {\n          \"text\": \"One participant expects the recruiter profession to become obsolete.\",\n          \"evidence\": [14]\n        }\n      ]\n    },\n    {\n      \"id\": \"misc‑humor\",\n      \"title\": \"Humorous and off‑topic remarks\",\n      \"claims\": [\n        {\n          \"text\": \"Various jokes and memes were shared, including references to “аішка”, “мусатан”, and random media messages.\",\n          \"evidence\": [2, 3, 4, 7, 11, 12, 13, 16, 17, 18, 29, 32, 33, 34, 36, 37]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": []\n}",
+  "thinking": "We need JSON summary. Identify topics: AI for job search, AI impact on hiring, LLM usage in dev, code generation issues, cloud tools, etc. Create claims with evidence ids.\n\nDecisions none. Open questions maybe none.\n\nProvide.\n\n",
+  "parsed": {
+    "title": "AI, job search, and code generation discussion",
+    "topics": [
+      {
+        "id": "ai-job-search",
+        "title": "AI tools for job search and resume generation",
+        "claims": [
+          {
+            "text": "The author plans to set up OpenClaw to automate vacancy search, PDF resume generation, and cover letter writing.",
+            "evidence": [5]
+          },
+          {
+            "text": "Full automation of resume generation is seen as beneficial because humans can still analyze the output during technical interviews.",
+            "evidence": [1]
+          },
+          {
+            "text": "There is a concern that AI (referred to as \"клод\") lowers the entry barrier to programming, leading to poorly optimized code.",
+            "evidence": [30]
+          },
+          {
+            "text": "Lack of AI knowledge makes JavaScript/Python job search much harder in 2026.",
+            "evidence": [8]
+          }
+        ]
+      },
+      {
+        "id": "ai-skills-market",
+        "title": "Need for AI‑related skills in the job market",
+        "claims": [
+          {
+            "text": "In 2026 employers expect many AI‑related skills (Cursor, Claude Code, LLM, RAG, embeddings, etc.).",
+            "evidence": [6]
+          },
+          {
+            "text": "The market treats AI tools similarly to past tech stacks like REST, JSON, Microservices, Docker.",
+            "evidence": [10]
+          }
+        ]
+      },
+      {
+        "id": "code-generation-productivity",
+        "title": "LLM code generation accelerates development",
+        "claims": [
+          {
+            "text": "Using GPT to generate joins and SQL queries speeds up development, handling routine tasks.",
+            "evidence": [19]
+          },
+          {
+            "text": "Generated code can be sub‑optimal or even break projects, requiring human review.",
+            "evidence": [35]
+          }
+        ]
+      },
+      {
+        "id": "debugging-and-context",
+        "title": "Limitations of simple LLM models for debugging",
+        "claims": [
+          {
+            "text": "Simple models cannot see accumulated context, personal solutions, or workarounds that exist in a developer's mind.",
+            "evidence": [22]
+          },
+          {
+            "text": "Quality of LLM answers depends on quality of questions and available knowledge.",
+            "evidence": [24, 25]
+          }
+        ]
+      },
+      {
+        "id": "recruiter-role",
+        "title": "Future of recruiters and HR",
+        "claims": [
+          {
+            "text": "One participant expects the recruiter profession to become obsolete.",
+            "evidence": [14]
+          }
+        ]
+      },
+      {
+        "id": "misc‑humor",
+        "title": "Humorous and off‑topic remarks",
+        "claims": [
+          {
+            "text": "Various jokes and memes were shared, including references to “аішка”, “мусатан”, and random media messages.",
+            "evidence": [
+              2, 3, 4, 7, 11, 12, 13, 16, 17, 18, 29, 32, 33, 34, 36, 37
+            ]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": []
+  },
+  "usage": {
+    "durationMs": 9525.360199999996,
+    "ollamaTotalMs": 9240.255618,
+    "promptEvalCount": 2911,
+    "evalCount": 796,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 6,
+    "claimCount": 12,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.9523809523809523,
+    "goldClaimPrecision": 0.6666666666666666,
+    "evidencePrecision": 0.39285714285714285,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0.08333333333333333,
+    "matchedClaimIds": [
+      "cars.miata-preference",
+      "development.context-quality",
+      "job-search.automation-idea",
+      "job-search.ai-skills",
+      "vibe-coding.bad-backend",
+      "job-search.keyword-filtering",
+      "development.routine-speedup",
+      "vibe-coding.review-failure"
+    ],
+    "retainedThreadIds": [
+      "cars",
+      "ai-assisted-development",
+      "ai-job-search",
+      "vibe-coding-risks"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

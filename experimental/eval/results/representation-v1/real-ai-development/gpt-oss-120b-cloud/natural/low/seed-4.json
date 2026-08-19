@@ -1,0 +1,133 @@
+{
+  "case": "real-ai-development",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "natural",
+  "reasoning": "low",
+  "seed": 4,
+  "inputHash": "c44e2d8f381898078b12b50a1dbf1501e5970203c0d4ef386b86fd514114c47c",
+  "promptHash": "6f6a93a1a7c17bdd442d22544b6808e07d5479865ebaeb3a171a61b9e72ad468",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion on AI-driven job search, tooling, and development experiences\",\n  \"topics\": [\n    {\n      \"id\": \"job-search-automation\",\n      \"title\": \"AI automation for job hunting\",\n      \"claims\": [\n        {\n          \"text\": \"The speaker plans to set up a cloud system to find vacancies, generate PDFs of resumes tailored to each job, and write cover letters.\",\n          \"evidence\": [1, 5]\n        },\n        {\n          \"text\": \"Full automation with AI-generated resumes is seen as advantageous because interviewers can read the attached resume during technical interviews.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"There is a concern that reliance on AI tools lowers the entry barrier to programming.\",\n          \"evidence\": [30]\n        }\n      ]\n    },\n    {\n      \"id\": \"ai-skill-requirements\",\n      \"title\": \"Need for AI-related skills in 2026 job market\",\n      \"claims\": [\n        {\n          \"text\": \"In 2026, job seekers need to add many AI-related skills (e.g., Cursor, Claude Code, LLM, RAG, embeddings) to avoid being filtered out by recruiters.\",\n          \"evidence\": [6]\n        },\n        {\n          \"text\": \"Lack of AI knowledge makes job searching for JS/Python positions much harder.\",\n          \"evidence\": [8]\n        }\n      ]\n    },\n    {\n      \"id\": \"development-acceleration\",\n      \"title\": \"AI accelerating software development\",\n      \"claims\": [\n        {\n          \"text\": \"AI tools significantly speed up development by generating code (e.g., SQL joins) that developers only need to tweak.\",\n          \"evidence\": [19, 9]\n        },\n        {\n          \"text\": \"The acceleration trend started around 2025, with tools becoming both better and more expensive.\",\n          \"evidence\": [9]\n        }\n      ]\n    },\n    {\n      \"id\": \"code-generation-risks\",\n      \"title\": \"Risks of AI-generated code\",\n      \"claims\": [\n        {\n          \"text\": \"AI-generated SQL can produce overly large queries that pull excessive data, leading to performance issues (10‑20 min production queries).\",\n          \"evidence\": [30]\n        },\n        {\n          \"text\": \"Generated code may break projects and be rejected by teams after review.\",\n          \"evidence\": [35]\n        }\n      ]\n    },\n    {\n      \"id\": \"car-choice-mustang\",\n      \"title\": \"Choosing a Mustang for weekend driving\",\n      \"claims\": [\n        {\n          \"text\": \"The speaker considered a Mustang for weekend use but ultimately wants a Miata.\",\n          \"evidence\": [32]\n        },\n        {\n          \"text\": \"There is indecision about which generation of the car to choose, but the speaker feels something about the car.\",\n          \"evidence\": [33]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": []\n}",
+  "thinking": "Need to produce JSON summarizing. Identify topics: job search automation, AI skill importance, AI tool drawbacks, developer productivity, code generation issues, car choice. Claims list with evidences. No decisions maybe none. Open questions none.\n\nCreate topics ids.\n\nLet's craft.\n\n",
+  "parsed": {
+    "title": "Discussion on AI-driven job search, tooling, and development experiences",
+    "topics": [
+      {
+        "id": "job-search-automation",
+        "title": "AI automation for job hunting",
+        "claims": [
+          {
+            "text": "The speaker plans to set up a cloud system to find vacancies, generate PDFs of resumes tailored to each job, and write cover letters.",
+            "evidence": [1, 5]
+          },
+          {
+            "text": "Full automation with AI-generated resumes is seen as advantageous because interviewers can read the attached resume during technical interviews.",
+            "evidence": [1]
+          },
+          {
+            "text": "There is a concern that reliance on AI tools lowers the entry barrier to programming.",
+            "evidence": [30]
+          }
+        ]
+      },
+      {
+        "id": "ai-skill-requirements",
+        "title": "Need for AI-related skills in 2026 job market",
+        "claims": [
+          {
+            "text": "In 2026, job seekers need to add many AI-related skills (e.g., Cursor, Claude Code, LLM, RAG, embeddings) to avoid being filtered out by recruiters.",
+            "evidence": [6]
+          },
+          {
+            "text": "Lack of AI knowledge makes job searching for JS/Python positions much harder.",
+            "evidence": [8]
+          }
+        ]
+      },
+      {
+        "id": "development-acceleration",
+        "title": "AI accelerating software development",
+        "claims": [
+          {
+            "text": "AI tools significantly speed up development by generating code (e.g., SQL joins) that developers only need to tweak.",
+            "evidence": [19, 9]
+          },
+          {
+            "text": "The acceleration trend started around 2025, with tools becoming both better and more expensive.",
+            "evidence": [9]
+          }
+        ]
+      },
+      {
+        "id": "code-generation-risks",
+        "title": "Risks of AI-generated code",
+        "claims": [
+          {
+            "text": "AI-generated SQL can produce overly large queries that pull excessive data, leading to performance issues (10‑20 min production queries).",
+            "evidence": [30]
+          },
+          {
+            "text": "Generated code may break projects and be rejected by teams after review.",
+            "evidence": [35]
+          }
+        ]
+      },
+      {
+        "id": "car-choice-mustang",
+        "title": "Choosing a Mustang for weekend driving",
+        "claims": [
+          {
+            "text": "The speaker considered a Mustang for weekend use but ultimately wants a Miata.",
+            "evidence": [32]
+          },
+          {
+            "text": "There is indecision about which generation of the car to choose, but the speaker feels something about the car.",
+            "evidence": [33]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": []
+  },
+  "usage": {
+    "durationMs": 7737.884300000034,
+    "ollamaTotalMs": 7496.670482,
+    "promptEvalCount": 2990,
+    "evalCount": 705,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 5,
+    "claimCount": 11,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.7142857142857143,
+    "goldClaimPrecision": 0.5454545454545454,
+    "evidencePrecision": 0.6153846153846154,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0.18181818181818182,
+    "matchedClaimIds": [
+      "job-search.automation-idea",
+      "development.routine-speedup",
+      "vibe-coding.bad-backend",
+      "job-search.ai-skills",
+      "vibe-coding.review-failure",
+      "cars.miata-preference"
+    ],
+    "retainedThreadIds": [
+      "ai-job-search",
+      "ai-assisted-development",
+      "vibe-coding-risks",
+      "cars"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

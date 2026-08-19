@@ -1,0 +1,152 @@
+{
+  "case": "real-ai-tools-interleaved",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 2,
+  "transformation": "rename-users",
+  "inputHash": "433caaaa641962fb3b39914e268460e3d2d405764e9742c259bceb9b158d6180",
+  "promptHash": "91df243abbde66e217b0e5a111db744c14d023f86e5fee123762b3a9ababe5f8",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Chat Summary July 2 2026\",\n  \"topics\": [\n    {\n      \"id\": \"ai-capabilities\",\n      \"title\": \"AI capabilities and toolkits\",\n      \"claims\": [\n        {\n          \"text\": \"AI systems are not inherently intelligent; their complex abilities come from toolkits and ready-made solutions.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"Testing AI with modern toolkits like opencode may reveal limitations of older models due to small context windows.\",\n          \"evidence\": [3]\n        },\n        {\n          \"text\": \"InstinctGPT comparisons showed that even with 3B vs 175B models, toolkits boost performance but cannot fully compensate for lacking base model abilities.\",\n          \"evidence\": [8]\n        },\n        {\n          \"text\": \"Older models were trained on everything without understanding purpose, while modern models aim to extract maximal ability from fewer parameters and may be specialized.\",\n          \"evidence\": [14]\n        }\n      ]\n    },\n    {\n      \"id\": \"diploma-cover-fee\",\n      \"title\": \"Fees for diploma covers\",\n      \"claims\": [\n        {\n          \"text\": \"Some people are asked to pay around 650 units for diploma covers.\",\n          \"evidence\": [23]\n        },\n        {\n          \"text\": \"Others reported paying 47 units.\",\n          \"evidence\": [24]\n        },\n        {\n          \"text\": \"A claim of 30 units was mentioned in response to the 650 figure.\",\n          \"evidence\": [25]\n        },\n        {\n          \"text\": \"One user suggested foregoing the cover since it becomes paper waste.\",\n          \"evidence\": [26]\n        },\n        {\n          \"text\": \"Another user noted that the cover includes a unique university emblem.\",\n          \"evidence\": [27]\n        },\n        {\n          \"text\": \"It was argued that nobody will actually take the cover.\",\n          \"evidence\": [28]\n        },\n        {\n          \"text\": \"The cover will likely be viewed only three times: receiving the diploma, photographing it, and later when translating documents.\",\n          \"evidence\": [29]\n        }\n      ]\n    },\n    {\n      \"id\": \"pc-case-mod\",\n      \"title\": \"Fitting multiple GPUs in a small PC case\",\n      \"claims\": [\n        {\n          \"text\": \"In a small PC case that officially fits one small GPU, it is possible to insert three GPUs using straps and force.\",\n          \"evidence\": [30]\n        }\n      ]\n    },\n    {\n      \"id\": \"bus-anecdote\",\n      \"title\": \"Strange behavior in public transport\",\n      \"claims\": [\n        {\n          \"text\": \"The author observed odd people in a bus, describing one who repeatedly emits gas.\",\n          \"evidence\": [4,5,7]\n        },\n        {\n          \"text\": \"The described person played piano at full volume, listened to metro announcements, and then made micro sounds towards the author’s mother.\",\n          \"evidence\": [9]\n        }\n      ]\n    },\n    {\n      \"id\": \"weather-feel\",\n      \"title\": \"Atmospheric sensations\",\n      \"claims\": [\n        {\n          \"text\": \"There is a feeling that it might rain, but the temperature suggests it could be lava-like rain.\",\n          \"evidence\": [20]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": []\n}",
+  "thinking": "We need to produce JSON with title, topics, decisions, openQuestions. Identify main topics: AI model capabilities, bus anecdote, weather, diploma cover fees, PC case mod, maybe pin link. Claims etc.\n\nLet's pick topics:\n\nai-capabilities: claims about AI not being inherently intelligent, toolkits, old models context window, InstinctGPT comparison, active parameters metric.\n\ndiploma-cover-fee: discussion about paying for diploma covers, amounts.\n\npc-case-mod: claim about fitting 3 GPUs.\n\nbus-anecdote: weird people in public transport, incident.\n\nweather-feel: feeling of rain lava.\n\nWe'll list claims with evidence IDs.\n\nDecisions none.\n\nOpen questions? none apparent.\n\nProvide title e.g., \"Chat Summary July 2 2026\".\n\nProceed.",
+  "parsed": {
+    "title": "Chat Summary July 2 2026",
+    "topics": [
+      {
+        "id": "ai-capabilities",
+        "title": "AI capabilities and toolkits",
+        "claims": [
+          {
+            "text": "AI systems are not inherently intelligent; their complex abilities come from toolkits and ready-made solutions.",
+            "evidence": [1]
+          },
+          {
+            "text": "Testing AI with modern toolkits like opencode may reveal limitations of older models due to small context windows.",
+            "evidence": [3]
+          },
+          {
+            "text": "InstinctGPT comparisons showed that even with 3B vs 175B models, toolkits boost performance but cannot fully compensate for lacking base model abilities.",
+            "evidence": [8]
+          },
+          {
+            "text": "Older models were trained on everything without understanding purpose, while modern models aim to extract maximal ability from fewer parameters and may be specialized.",
+            "evidence": [14]
+          }
+        ]
+      },
+      {
+        "id": "diploma-cover-fee",
+        "title": "Fees for diploma covers",
+        "claims": [
+          {
+            "text": "Some people are asked to pay around 650 units for diploma covers.",
+            "evidence": [23]
+          },
+          {
+            "text": "Others reported paying 47 units.",
+            "evidence": [24]
+          },
+          {
+            "text": "A claim of 30 units was mentioned in response to the 650 figure.",
+            "evidence": [25]
+          },
+          {
+            "text": "One user suggested foregoing the cover since it becomes paper waste.",
+            "evidence": [26]
+          },
+          {
+            "text": "Another user noted that the cover includes a unique university emblem.",
+            "evidence": [27]
+          },
+          {
+            "text": "It was argued that nobody will actually take the cover.",
+            "evidence": [28]
+          },
+          {
+            "text": "The cover will likely be viewed only three times: receiving the diploma, photographing it, and later when translating documents.",
+            "evidence": [29]
+          }
+        ]
+      },
+      {
+        "id": "pc-case-mod",
+        "title": "Fitting multiple GPUs in a small PC case",
+        "claims": [
+          {
+            "text": "In a small PC case that officially fits one small GPU, it is possible to insert three GPUs using straps and force.",
+            "evidence": [30]
+          }
+        ]
+      },
+      {
+        "id": "bus-anecdote",
+        "title": "Strange behavior in public transport",
+        "claims": [
+          {
+            "text": "The author observed odd people in a bus, describing one who repeatedly emits gas.",
+            "evidence": [4, 5, 7]
+          },
+          {
+            "text": "The described person played piano at full volume, listened to metro announcements, and then made micro sounds towards the author’s mother.",
+            "evidence": [9]
+          }
+        ]
+      },
+      {
+        "id": "weather-feel",
+        "title": "Atmospheric sensations",
+        "claims": [
+          {
+            "text": "There is a feeling that it might rain, but the temperature suggests it could be lava-like rain.",
+            "evidence": [20]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": []
+  },
+  "usage": {
+    "durationMs": 11922.692900000024,
+    "ollamaTotalMs": 11564.699922,
+    "promptEvalCount": 2165,
+    "evalCount": 902,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 5,
+    "claimCount": 15,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 1,
+    "goldClaimPrecision": 0.5333333333333333,
+    "evidencePrecision": 0.5882352941176471,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0.06666666666666667,
+    "matchedClaimIds": [
+      "bus-passenger.repeated-encounter",
+      "ai-tooling.capability-view",
+      "ai-tooling.old-model-experiment",
+      "ai-tooling.instinctgpt-result",
+      "ai-tooling.model-comparison",
+      "diploma-cover.prices",
+      "diploma-cover.low-value",
+      "pc-case.three-gpus"
+    ],
+    "retainedThreadIds": [
+      "bus-passenger",
+      "ai-tooling",
+      "diploma-cover",
+      "pc-case"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

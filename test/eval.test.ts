@@ -2,43 +2,43 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { createServer } from "node:http";
-import { runOllama } from "../packages/eval/src/ollama.js";
+import { runOllama } from "../experimental/eval/src/ollama.js";
 import {
   parseDiscourseReconstruction,
   parseProjectedSummary,
-} from "../packages/eval/src/parse.js";
-import { aggregateRuns } from "../packages/eval/src/report.js";
+} from "../experimental/eval/src/parse.js";
+import { aggregateRuns } from "../experimental/eval/src/report.js";
 import {
   frontierRows,
   reasoningPairedToCsv,
-} from "../packages/eval/src/frontier.js";
-import { pairedComparisons } from "../packages/eval/src/paired.js";
-import { scoreSummary } from "../packages/eval/src/score.js";
+} from "../experimental/eval/src/frontier.js";
+import { pairedComparisons } from "../experimental/eval/src/paired.js";
+import { scoreSummary } from "../experimental/eval/src/score.js";
 import {
   serializeJsonl,
   serializeNatural,
   serializePipe,
   serializePipeV2,
   serializePipeV3,
-} from "../packages/eval/src/serializers/index.js";
+} from "../experimental/eval/src/serializers/index.js";
 import {
   experimentSchema,
   goldSchema,
   messageSchema,
   type ProjectedSummary,
   type StoredRun,
-} from "../packages/eval/src/types.js";
-import { transformMessages } from "../packages/eval/src/transform.js";
-import { selectSummaryClaims } from "../packages/eval/src/selective.js";
+} from "../experimental/eval/src/types.js";
+import { transformMessages } from "../experimental/eval/src/transform.js";
+import { selectSummaryClaims } from "../experimental/eval/src/selective.js";
 import {
   parseReconstruction,
   scoreReconstruction,
-} from "../packages/eval/src/reconstruction.js";
+} from "../experimental/eval/src/reconstruction.js";
 import {
   buildFactualityPrompt,
   parseFactuality,
   scoreFactuality,
-} from "../packages/eval/src/factuality.js";
+} from "../experimental/eval/src/factuality.js";
 import { z } from "zod";
 
 describe("eval serializers", () => {
@@ -494,7 +494,13 @@ describe("eval fixtures", () => {
       "discourse-state-lifecycle",
     ];
     for (const name of names) {
-      const root = path.join(process.cwd(), "packages", "eval", "cases", name);
+      const root = path.join(
+        process.cwd(),
+        "experimental",
+        "eval",
+        "cases",
+        name,
+      );
       const messages = z
         .array(messageSchema)
         .parse(

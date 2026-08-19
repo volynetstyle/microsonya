@@ -1,0 +1,180 @@
+{
+  "case": "real-ai-tools-interleaved",
+  "sourceExperiment": "pipe-language-v3",
+  "sourceModel": "gpt-oss:120b-cloud",
+  "sourceRepresentation": "pipe-v3",
+  "sourceReasoning": "low",
+  "sourceSeed": 1,
+  "judgeModel": "gpt-oss:120b-cloud",
+  "judgeReasoning": "low",
+  "promptVersion": "qa-factuality-v1",
+  "sourceRunHash": "e5471d06aa014a38a039f8514e2a2cbf50a77029b196d2328464a193e5fcc31d",
+  "promptHash": "35a64258205f45ac2e48f395cacebb9f7b2ae6820c2dfaed6ccea01dd85701c6",
+  "status": "ok",
+  "raw": "{\n  \"checks\": [\n    {\n      \"itemIndex\": 0,\n      \"question\": \"Do AI models themselves possess inherent intelligence, or are complex abilities derived from toolkits and ready‑made solutions?\",\n      \"candidateAnswer\": \"AI models themselves are not inherently intelligent; complex abilities come from toolkits and ready‑made solutions.\",\n      \"sourceAnswer\": \"AI models cannot be inherently intelligent a priori; all complex things they can do are due to toolkits, ready examples, mcp, etc.\",\n      \"answerRelation\": \"equivalent\",\n      \"verdict\": \"supported\",\n      \"explanation\": \"Both state that AI models lack intrinsic intelligence and rely on external toolkits.\"\n    },\n    {\n      \"itemIndex\": 1,\n      \"question\": \"Was testing AI with modern toolkits like opencode in 2022‑2023 potentially limited by the small context windows of older models?\",\n      \"candidateAnswer\": \"Testing AI with modern toolkits like opencode in 2022‑2023 may be limited by small context windows of older models.\",\n      \"sourceAnswer\": \"Wanted to test AI in 2022‑2023 with a modern toolkit like opencode, assuming old models wouldn't handle it because of a small context window.\",\n      \"answerRelation\": \"equivalent\",\n      \"verdict\": \"supported\",\n      \"explanation\": \"Both claim older models likely fail due to limited context size.\"\n    },\n    {\n      \"itemIndex\": 2,\n      \"question\": \"Does the InstinctGPT comparison indicate that toolkits give a large boost but cannot fully compensate for missing base model abilities?\",\n      \"candidateAnswer\": \"InstinctGPT comparison shows that toolkits can boost performance but cannot fully compensate for lacking base model abilities.\",\n      \"sourceAnswer\": \"InstinctGPT compared ~3B and GPT‑3 175B with external runtime and tools; the toolkit gave a big boost but does not compensate for the lack of base model abilities.\",\n      \"answerRelation\": \"equivalent\",\n      \"verdict\": \"supported\",\n      \"explanation\": \"Both describe the same finding from the InstinctGPT comparison.\"\n    },\n    {\n      \"itemIndex\": 3,\n      \"question\": \"According to the source, did older models train on all data without understanding while modern models try to extract more from fewer parameters and may be fine‑tuned for specific tasks?\",\n      \"candidateAnswer\": \"Older models were trained on large data without understanding, whereas modern models try to extract maximal ability from fewer parameters and may be fine‑tuned for specific tasks.\",\n      \"sourceAnswer\": \"Seen that ChatGPT‑3 has 175B parameters but there is a better metric; old models trained on everything without understanding; modern models try to squeeze everything from fewer parameters and sometimes are trained for specific jobs.\",\n      \"answerRelation\": \"equivalent\",\n      \"verdict\": \"supported\",\n      \"explanation\": \"Both convey that old models lacked purposeful understanding and modern ones aim for efficiency and specialization.\"\n    },\n    {\n      \"itemIndex\": 4,\n      \"question\": \"Does the author describe a person on a bus playing piano at full volume, then listening to a metro announcement on repeat, and later making micro‑sounds that upset his mother?\",\n      \"candidateAnswer\": \"The author observes odd behavior from a person on a bus, including playing piano loudly and later making micro‑sounds that disturb his mother.\",\n      \"sourceAnswer\": \"First time he played piano at full volume, then on repeat listened to metro announcements, then his mother called him and he started making micro‑sounds before choking.\",\n      \"answerRelation\": \"equivalent\",\n      \"verdict\": \"supported\",\n      \"explanation\": \"Both recount the same sequence of unusual actions on the bus.\"\n    },\n    {\n      \"itemIndex\": 5,\n      \"question\": \"Is it claimed that the same person emitted gas during a second encounter in the bus?\",\n      \"candidateAnswer\": \"The same person allegedly emitted gas on a second encounter.\",\n      \"sourceAnswer\": \"Second time I was with this guy on the bus, he emitted gas.\",\n      \"answerRelation\": \"equivalent\",\n      \"verdict\": \"supported\",\n      \"explanation\": \"Both state that the individual produced gas on a second bus encounter.\"\n    },\n    {\n      \"itemIndex\": 6,\n      \"question\": \"Does the source say that strange people sometimes appear in public transport and that the author sits in a bus without bothering anyone?\",\n      \"candidateAnswer\": \"The author notes generally strange people on public transport.\",\n      \"sourceAnswer\": \"Strange people sometimes appear in public transport. I sit on the bus, I don't bother anyone.\",\n      \"answerRelation\": \"equivalent\",\n      \"verdict\": \"supported\",\n      \"explanation\": \"Both combine observations of odd people on transport and the author's passive presence.\"\n    },\n    {\n      \"itemIndex\": 7,\n      \"question\": \"Is it reported that someone asked how much is charged for diploma covers and a reply said 650 UAH from Bogdan?\",\n      \"candidateAnswer\": \"Someone is asking how much is paid for diploma covers; one response mentions 650 UAH from Bogdan.\",\n      \"sourceAnswer\": \"How much did we take for diploma covers? – 650 want from Bogdan.\",\n      \"answerRelation\": \"equivalent\",\n      \"verdict\": \"supported\",\n      \"explanation\": \"Both capture the question about price and the answer citing 650 UAH from Bogdan.\"\n    },\n    {\n      \"itemIndex\": 8,\n      \"question\": \"Does another user claim they paid 47 UAH for a diploma cover?\",\n      \"candidateAnswer\": \"Another user states they paid 47 UAH.\",\n      \"sourceAnswer\": \"I recently paid 47.\",\n      \"answerRelation\": \"equivalent\",\n      \"verdict\": \"supported\",\n      \"explanation\": \"Both express the same payment amount.\"\n    },\n    {\n      \"itemIndex\": 9,\n      \"question\": \"Is there a later comment stating the price was 30 UAH?\",\n      \"candidateAnswer\": \"A later comment says 30 UAH.\",\n      \"sourceAnswer\": \"30 hryvnias.\",\n      \"answerRelation\": \"equivalent\",\n      \"verdict\": \"supported\",\n      \"explanation\": \"Both give the same price figure.\"\n    },\n    {\n      \"itemIndex\": 10,\n      \"question\": \"Does a participant suggest they don’t care about the diploma cover because it is just paper?\",\n      \"candidateAnswer\": \"One participant suggests they don’t care about the cover because it’s just paper.\",\n      \"sourceAnswer\": \"Let them give it without a cover, it’s still just wastepaper.\",\n      \"answerRelation\": \"equivalent\",\n      \"verdict\": \"supported\",\n      \"explanation\": \"Both convey indifference to the cover, viewing it as mere wastepaper.\"\n    },\n    {\n      \"itemIndex\": 11,\n      \"question\": \"Is it claimed that the diploma cover has the university emblem, making it unique?\",\n      \"candidateAnswer\": \"Another notes the cover bears the university emblem, making it unique.\",\n      \"sourceAnswer\": \"But it has the KPI emblem (its unique).\",\n      \"answerRelation\": \"equivalent\",\n      \"verdict\": \"supported\",\n      \"explanation\": \"Both highlight the presence of a distinctive university emblem on the cover.\"\n    },\n    {\n      \"itemIndex\": 12,\n      \"question\": \"Does a comment argue that nobody will keep the diploma cover because it is useless?\",\n      \"candidateAnswer\": \"A comment argues nobody will keep the cover; it's useless.\",\n      \"sourceAnswer\": \"It’s nonsense, nobody will take that cover.\",\n      \"answerRelation\": \"equivalent\",\n      \"verdict\": \"supported\",\n      \"explanation\": \"Both state that the cover will not be retained by anyone.\"\n    },\n    {\n      \"itemIndex\": 13,\n      \"question\": \"Is it said that the cover will be looked at only three times in life: when receiving the diploma, photographing it, and later when translating documents?\",\n      \"candidateAnswer\": \"Someone remarks the cover will be looked at only three times in life: receiving the diploma, photographing it, and later translating documents.\",\n      \"sourceAnswer\": \"You’ll look at it three times in life – when you get the diploma, when you photograph it, and later when you translate documents and say “oh, my diploma”.\",\n      \"answerRelation\": \"equivalent\",\n      \"verdict\": \"supported\",\n      \"explanation\": \"Both enumerate the same three occasions.\"\n    },\n    {\n      \"itemIndex\": 14,\n      \"question\": \"Does the author feel the air suggests imminent rain, but the temperature suggests a lava‑like rain?\",\n      \"candidateAnswer\": \"A participant feels the air suggests imminent rain, though temperature hints at a lava‑like rain.\",\n      \"sourceAnswer\": \"In the air there’s a feeling that rain should come, but by temperature you could say maybe lava rain.\",\n      \"answerRelation\": \"equivalent\",\n      \"verdict\": \"supported\",\n      \"explanation\": \"Both describe the contradictory sensations about rain.\"\n    },\n    {\n      \"itemIndex\": 15,\n      \"question\": \"Is it claimed that in a small PC case officially designed for one small GPU, the author managed to fit three GPUs using straps and force?\",\n      \"candidateAnswer\": \"In a small PC case that officially fits only one small GPU, the author managed to fit three GPUs using straps and force.\",\n      \"sourceAnswer\": \"In a small PC case that officially holds only one small video card, it turned out that with straps and rough force you can squeeze in three.\",\n      \"answerRelation\": \"equivalent\",\n      \"verdict\": \"supported\",\n      \"explanation\": \"Both report the same unconventional fitting of three GPUs.\"\n    }\n  ]\n}",
+  "thinking": "We need produce checks for each item 0-15. Create diagnostic question, candidate answer = from item text, source answer from cited source. Compare.\n\nAll are straightforward matching Ukrainian statements. So answerRelation likely equivalent and verdict supported for each.\n\nProceed.",
+  "parsed": {
+    "checks": [
+      {
+        "itemIndex": 0,
+        "question": "Do AI models themselves possess inherent intelligence, or are complex abilities derived from toolkits and ready‑made solutions?",
+        "candidateAnswer": "AI models themselves are not inherently intelligent; complex abilities come from toolkits and ready‑made solutions.",
+        "sourceAnswer": "AI models cannot be inherently intelligent a priori; all complex things they can do are due to toolkits, ready examples, mcp, etc.",
+        "answerRelation": "equivalent",
+        "verdict": "supported",
+        "explanation": "Both state that AI models lack intrinsic intelligence and rely on external toolkits."
+      },
+      {
+        "itemIndex": 1,
+        "question": "Was testing AI with modern toolkits like opencode in 2022‑2023 potentially limited by the small context windows of older models?",
+        "candidateAnswer": "Testing AI with modern toolkits like opencode in 2022‑2023 may be limited by small context windows of older models.",
+        "sourceAnswer": "Wanted to test AI in 2022‑2023 with a modern toolkit like opencode, assuming old models wouldn't handle it because of a small context window.",
+        "answerRelation": "equivalent",
+        "verdict": "supported",
+        "explanation": "Both claim older models likely fail due to limited context size."
+      },
+      {
+        "itemIndex": 2,
+        "question": "Does the InstinctGPT comparison indicate that toolkits give a large boost but cannot fully compensate for missing base model abilities?",
+        "candidateAnswer": "InstinctGPT comparison shows that toolkits can boost performance but cannot fully compensate for lacking base model abilities.",
+        "sourceAnswer": "InstinctGPT compared ~3B and GPT‑3 175B with external runtime and tools; the toolkit gave a big boost but does not compensate for the lack of base model abilities.",
+        "answerRelation": "equivalent",
+        "verdict": "supported",
+        "explanation": "Both describe the same finding from the InstinctGPT comparison."
+      },
+      {
+        "itemIndex": 3,
+        "question": "According to the source, did older models train on all data without understanding while modern models try to extract more from fewer parameters and may be fine‑tuned for specific tasks?",
+        "candidateAnswer": "Older models were trained on large data without understanding, whereas modern models try to extract maximal ability from fewer parameters and may be fine‑tuned for specific tasks.",
+        "sourceAnswer": "Seen that ChatGPT‑3 has 175B parameters but there is a better metric; old models trained on everything without understanding; modern models try to squeeze everything from fewer parameters and sometimes are trained for specific jobs.",
+        "answerRelation": "equivalent",
+        "verdict": "supported",
+        "explanation": "Both convey that old models lacked purposeful understanding and modern ones aim for efficiency and specialization."
+      },
+      {
+        "itemIndex": 4,
+        "question": "Does the author describe a person on a bus playing piano at full volume, then listening to a metro announcement on repeat, and later making micro‑sounds that upset his mother?",
+        "candidateAnswer": "The author observes odd behavior from a person on a bus, including playing piano loudly and later making micro‑sounds that disturb his mother.",
+        "sourceAnswer": "First time he played piano at full volume, then on repeat listened to metro announcements, then his mother called him and he started making micro‑sounds before choking.",
+        "answerRelation": "equivalent",
+        "verdict": "supported",
+        "explanation": "Both recount the same sequence of unusual actions on the bus."
+      },
+      {
+        "itemIndex": 5,
+        "question": "Is it claimed that the same person emitted gas during a second encounter in the bus?",
+        "candidateAnswer": "The same person allegedly emitted gas on a second encounter.",
+        "sourceAnswer": "Second time I was with this guy on the bus, he emitted gas.",
+        "answerRelation": "equivalent",
+        "verdict": "supported",
+        "explanation": "Both state that the individual produced gas on a second bus encounter."
+      },
+      {
+        "itemIndex": 6,
+        "question": "Does the source say that strange people sometimes appear in public transport and that the author sits in a bus without bothering anyone?",
+        "candidateAnswer": "The author notes generally strange people on public transport.",
+        "sourceAnswer": "Strange people sometimes appear in public transport. I sit on the bus, I don't bother anyone.",
+        "answerRelation": "equivalent",
+        "verdict": "supported",
+        "explanation": "Both combine observations of odd people on transport and the author's passive presence."
+      },
+      {
+        "itemIndex": 7,
+        "question": "Is it reported that someone asked how much is charged for diploma covers and a reply said 650 UAH from Bogdan?",
+        "candidateAnswer": "Someone is asking how much is paid for diploma covers; one response mentions 650 UAH from Bogdan.",
+        "sourceAnswer": "How much did we take for diploma covers? – 650 want from Bogdan.",
+        "answerRelation": "equivalent",
+        "verdict": "supported",
+        "explanation": "Both capture the question about price and the answer citing 650 UAH from Bogdan."
+      },
+      {
+        "itemIndex": 8,
+        "question": "Does another user claim they paid 47 UAH for a diploma cover?",
+        "candidateAnswer": "Another user states they paid 47 UAH.",
+        "sourceAnswer": "I recently paid 47.",
+        "answerRelation": "equivalent",
+        "verdict": "supported",
+        "explanation": "Both express the same payment amount."
+      },
+      {
+        "itemIndex": 9,
+        "question": "Is there a later comment stating the price was 30 UAH?",
+        "candidateAnswer": "A later comment says 30 UAH.",
+        "sourceAnswer": "30 hryvnias.",
+        "answerRelation": "equivalent",
+        "verdict": "supported",
+        "explanation": "Both give the same price figure."
+      },
+      {
+        "itemIndex": 10,
+        "question": "Does a participant suggest they don’t care about the diploma cover because it is just paper?",
+        "candidateAnswer": "One participant suggests they don’t care about the cover because it’s just paper.",
+        "sourceAnswer": "Let them give it without a cover, it’s still just wastepaper.",
+        "answerRelation": "equivalent",
+        "verdict": "supported",
+        "explanation": "Both convey indifference to the cover, viewing it as mere wastepaper."
+      },
+      {
+        "itemIndex": 11,
+        "question": "Is it claimed that the diploma cover has the university emblem, making it unique?",
+        "candidateAnswer": "Another notes the cover bears the university emblem, making it unique.",
+        "sourceAnswer": "But it has the KPI emblem (its unique).",
+        "answerRelation": "equivalent",
+        "verdict": "supported",
+        "explanation": "Both highlight the presence of a distinctive university emblem on the cover."
+      },
+      {
+        "itemIndex": 12,
+        "question": "Does a comment argue that nobody will keep the diploma cover because it is useless?",
+        "candidateAnswer": "A comment argues nobody will keep the cover; it's useless.",
+        "sourceAnswer": "It’s nonsense, nobody will take that cover.",
+        "answerRelation": "equivalent",
+        "verdict": "supported",
+        "explanation": "Both state that the cover will not be retained by anyone."
+      },
+      {
+        "itemIndex": 13,
+        "question": "Is it said that the cover will be looked at only three times in life: when receiving the diploma, photographing it, and later when translating documents?",
+        "candidateAnswer": "Someone remarks the cover will be looked at only three times in life: receiving the diploma, photographing it, and later translating documents.",
+        "sourceAnswer": "You’ll look at it three times in life – when you get the diploma, when you photograph it, and later when you translate documents and say “oh, my diploma”.",
+        "answerRelation": "equivalent",
+        "verdict": "supported",
+        "explanation": "Both enumerate the same three occasions."
+      },
+      {
+        "itemIndex": 14,
+        "question": "Does the author feel the air suggests imminent rain, but the temperature suggests a lava‑like rain?",
+        "candidateAnswer": "A participant feels the air suggests imminent rain, though temperature hints at a lava‑like rain.",
+        "sourceAnswer": "In the air there’s a feeling that rain should come, but by temperature you could say maybe lava rain.",
+        "answerRelation": "equivalent",
+        "verdict": "supported",
+        "explanation": "Both describe the contradictory sensations about rain."
+      },
+      {
+        "itemIndex": 15,
+        "question": "Is it claimed that in a small PC case officially designed for one small GPU, the author managed to fit three GPUs using straps and force?",
+        "candidateAnswer": "In a small PC case that officially fits only one small GPU, the author managed to fit three GPUs using straps and force.",
+        "sourceAnswer": "In a small PC case that officially holds only one small video card, it turned out that with straps and rough force you can squeeze in three.",
+        "answerRelation": "equivalent",
+        "verdict": "supported",
+        "explanation": "Both report the same unconventional fitting of three GPUs."
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 27862.541800000006,
+    "ollamaTotalMs": 27634.162479,
+    "promptEvalCount": 2443,
+    "evalCount": 2128,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "nItems": 16,
+    "supportedRate": 1,
+    "qaAgreementRate": 1,
+    "contradictedRate": 0,
+    "insufficientRate": 0,
+    "labelValidRate": 1
+  },
+  "variant": "original"
+}

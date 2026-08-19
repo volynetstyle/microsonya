@@ -1,0 +1,60 @@
+{
+  "case": "mutation-question-assertion",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 4,
+  "transformation": "identity",
+  "inputHash": "0dbe9198a71f89ced4983a27d503574f78ee09505578d229b071d00127fff702",
+  "promptHash": "519ca6b196039fd83e09fdb4e56b693e5980c823dee43f3ac950d59fc60ffcf4",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion on website availability\",\n  \"topics\": [\n    {\n      \"id\": \"availability\",\n      \"title\": \"Website content availability\",\n      \"claims\": [\n        {\n          \"text\": \"This is unavailable on the website.\",\n          \"evidence\": [\n            1\n          ]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": []\n}",
+  "thinking": "We need produce JSON. Identify claims: message 1 says \"This is unavailable on the website.\" That's a claim. No decisions or questions. So one topic maybe \"availability\". Title short. Use topic id \"availability\". Provide claim text and evidence [1]. No decisions, no open questions. Return JSON.",
+  "parsed": {
+    "title": "Discussion on website availability",
+    "topics": [
+      {
+        "id": "availability",
+        "title": "Website content availability",
+        "claims": [
+          {
+            "text": "This is unavailable on the website.",
+            "evidence": [1]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": []
+  },
+  "usage": {
+    "durationMs": 1534.8001000000004,
+    "ollamaTotalMs": 1203.746642,
+    "promptEvalCount": 479,
+    "evalCount": 159,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 1,
+    "claimCount": 1,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 1,
+    "goldClaimPrecision": 1,
+    "evidencePrecision": 1,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0,
+    "matchedClaimIds": ["website-unavailable.assertion"],
+    "matchedDecisionIds": [],
+    "matchedOpenQuestionIds": [],
+    "retainedThreadIds": ["website-availability"],
+    "triggeredForbiddenIds": []
+  }
+}

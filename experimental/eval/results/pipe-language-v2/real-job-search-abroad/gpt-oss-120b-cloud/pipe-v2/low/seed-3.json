@@ -1,0 +1,160 @@
+{
+  "case": "real-job-search-abroad",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v2",
+  "reasoning": "low",
+  "seed": 3,
+  "inputHash": "aac555f3427e2195f145b4a5e3a6d9644961170a8ccc181b8832ae83202b036f",
+  "promptHash": "077209e19c59522d8124ddfc6e7878e5359b2dbb72e76ca456348054aaea5989",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion about living and working abroad in Slovakia and Austria\",\n  \"topics\": [\n    {\n      \"id\": \"contacts-abroad\",\n      \"title\": \"People known in Slovakia and Austria\",\n      \"claims\": [\n        {\n          \"text\": \"Someone lives in Bratislava or elsewhere in Slovakia and asks for others who live abroad\",\n          \"evidence\": [\n            1\n          ]\n        },\n        {\n          \"text\": \"Known contacts abroad include @AndriiRaccoon in Austria and walternet134 in Poland\",\n          \"evidence\": [\n            3\n          ]\n        },\n        {\n          \"text\": \"P3 has at least two acquaintances in Austria; one arrived recently, another has been there for several years\",\n          \"evidence\": [\n            12,\n            13\n          ]\n        }\n      ]\n    },\n    {\n      \"id\": \"language-requirements\",\n      \"title\": \"Language requirements for jobs in Austria and Slovakia\",\n      \"claims\": [\n        {\n          \"text\": \"German is the primary language spoken in Austria, but English is commonly used in many workplaces\",\n          \"evidence\": [\n            14,\n            15,\n            46\n          ]\n        },\n        {\n          \"text\": \"Job postings often require local language proficiency, typically B2 level, sometimes B1, and certificates are rarely demanded\",\n          \"evidence\": [\n            46\n          ]\n        },\n        {\n          \"text\": \"P1 feels insecure speaking English outside of work and experiences language barrier at social events\",\n          \"evidence\": [\n            51,\n            52\n          ]\n        },\n        {\n          \"text\": \"P3 started learning Slovak recently because of discomfort navigating the city without it\",\n          \"evidence\": [\n            47\n          ]\n        }\n      ]\n    },\n    {\n      \"id\": \"job-search-experience\",\n      \"title\": \"Experiences finding jobs abroad\",\n      \"claims\": [\n        {\n          \"text\": \"P3 applied to about 100 jobs, got only 3 interviews, and secured a position after two months\",\n          \"evidence\": [\n            21,\n            17,\n            37\n          ]\n        },\n        {\n          \"text\": \"Higher education rarely plays a decisive role in hiring decisions\",\n          \"evidence\": [\n            32\n          ]\n        },\n        {\n          \"text\": \"Many vacancies state a local language requirement, causing many candidates to be filtered out\",\n          \"evidence\": [\n            26,\n            27\n          ]\n        },\n        {\n          \"text\": \"Some companies hire candidates with limited language skills if other criteria match\",\n          \"evidence\": [\n            29\n          ]\n        }\n      ]\n    },\n    {\n      \"id\": \"salary-and-compensation\",\n      \"title\": \"Salary expectations and offers\",\n      \"claims\": [\n        {\n          \"text\": \"Salaries in Europe are generally higher than in Ukraine, but many employers still offer only minimal wages\",\n          \"evidence\": [\n            35,\n            37\n          ]\n        },\n        {\n          \"text\": \"P3 accepted a minimum salary that was still higher than a fast‑food job\",\n          \"evidence\": [\n            37\n          ]\n        }\n      ]\n    },\n    {\n      \"id\": \"relocation-decisions\",\n      \"title\": \"Considerations about staying or moving\",\n      \"claims\": [\n        {\n          \"text\": \"P3 considers Austria the best choice among European countries, despite some negative views from a partner living there\",\n          \"evidence\": [\n            60\n          ]\n        },\n        {\n          \"text\": \"P3 is also thinking about attending a tech event in Warsaw\",\n          \"evidence\": [\n            59\n          ]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": [\n    {\n      \"text\": \"Should P3 move to Warsaw for the event or stay in Austria?\",\n      \"evidence\": [\n        59\n      ]\n    },\n    {\n      \"text\": \"What specific language level is required for the job P3 is targeting?\",\n      \"evidence\": [\n        46\n      ]\n    }\n  ]\n}",
+  "thinking": "Need to produce JSON summary. Identify topics: e.g., contacts in Slovakia, language requirements, job search experiences, salary, relocation decisions.\n\nCreate claims with evidence IDs.\n\nDecisions maybe none. Open questions: e.g., \"А ти на якусь австрійську компанію воркаєш?\" answered? Not resolved. Also \"А ти як особисто відчуваєш, думаєш лишатись в Австрії?\" answered with personal view but not decision. Maybe unresolved: \"maybe go to Warsaw event?\" not decided.\n\nWe'll output.\n\n",
+  "parsed": {
+    "title": "Discussion about living and working abroad in Slovakia and Austria",
+    "topics": [
+      {
+        "id": "contacts-abroad",
+        "title": "People known in Slovakia and Austria",
+        "claims": [
+          {
+            "text": "Someone lives in Bratislava or elsewhere in Slovakia and asks for others who live abroad",
+            "evidence": [1]
+          },
+          {
+            "text": "Known contacts abroad include @AndriiRaccoon in Austria and walternet134 in Poland",
+            "evidence": [3]
+          },
+          {
+            "text": "P3 has at least two acquaintances in Austria; one arrived recently, another has been there for several years",
+            "evidence": [12, 13]
+          }
+        ]
+      },
+      {
+        "id": "language-requirements",
+        "title": "Language requirements for jobs in Austria and Slovakia",
+        "claims": [
+          {
+            "text": "German is the primary language spoken in Austria, but English is commonly used in many workplaces",
+            "evidence": [14, 15, 46]
+          },
+          {
+            "text": "Job postings often require local language proficiency, typically B2 level, sometimes B1, and certificates are rarely demanded",
+            "evidence": [46]
+          },
+          {
+            "text": "P1 feels insecure speaking English outside of work and experiences language barrier at social events",
+            "evidence": [51, 52]
+          },
+          {
+            "text": "P3 started learning Slovak recently because of discomfort navigating the city without it",
+            "evidence": [47]
+          }
+        ]
+      },
+      {
+        "id": "job-search-experience",
+        "title": "Experiences finding jobs abroad",
+        "claims": [
+          {
+            "text": "P3 applied to about 100 jobs, got only 3 interviews, and secured a position after two months",
+            "evidence": [21, 17, 37]
+          },
+          {
+            "text": "Higher education rarely plays a decisive role in hiring decisions",
+            "evidence": [32]
+          },
+          {
+            "text": "Many vacancies state a local language requirement, causing many candidates to be filtered out",
+            "evidence": [26, 27]
+          },
+          {
+            "text": "Some companies hire candidates with limited language skills if other criteria match",
+            "evidence": [29]
+          }
+        ]
+      },
+      {
+        "id": "salary-and-compensation",
+        "title": "Salary expectations and offers",
+        "claims": [
+          {
+            "text": "Salaries in Europe are generally higher than in Ukraine, but many employers still offer only minimal wages",
+            "evidence": [35, 37]
+          },
+          {
+            "text": "P3 accepted a minimum salary that was still higher than a fast‑food job",
+            "evidence": [37]
+          }
+        ]
+      },
+      {
+        "id": "relocation-decisions",
+        "title": "Considerations about staying or moving",
+        "claims": [
+          {
+            "text": "P3 considers Austria the best choice among European countries, despite some negative views from a partner living there",
+            "evidence": [60]
+          },
+          {
+            "text": "P3 is also thinking about attending a tech event in Warsaw",
+            "evidence": [59]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": [
+      {
+        "text": "Should P3 move to Warsaw for the event or stay in Austria?",
+        "evidence": [59]
+      },
+      {
+        "text": "What specific language level is required for the job P3 is targeting?",
+        "evidence": [46]
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 13511.092399999998,
+    "ollamaTotalMs": 13225.720658,
+    "promptEvalCount": 3915,
+    "evalCount": 1013,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 5,
+    "claimCount": 15,
+    "decisionCount": 0,
+    "openQuestionCount": 2,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.85,
+    "goldClaimPrecision": 0.5333333333333333,
+    "evidencePrecision": 0.44,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 1,
+    "noiseRetention": 0,
+    "matchedClaimIds": [
+      "networking.participants-abroad",
+      "language.work-vs-daily-life",
+      "job-search.local-language-filter",
+      "language.learning-motivation",
+      "job-search.two-months",
+      "job-search.education-observation",
+      "job-search.salary-compromise",
+      "austria.outlook"
+    ],
+    "retainedThreadIds": [
+      "networking-abroad",
+      "language-integration",
+      "job-search-abroad",
+      "life-in-austria"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

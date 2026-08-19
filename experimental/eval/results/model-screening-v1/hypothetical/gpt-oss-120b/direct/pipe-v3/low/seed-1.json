@@ -1,0 +1,69 @@
+{
+  "case": "hypothetical",
+  "model": "gpt-oss:120b",
+  "pipeline": "direct",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 1,
+  "transformation": "identity",
+  "inputHash": "635920fe92b99a3e5bac93743f863f3d410b1d634799df05e6f4098a35057e48",
+  "promptHash": "e3b3141144814536257d0c141733bb24230cb1b951395588835c419b925d7768",
+  "promptVersion": "v4",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Optimization approach\",\n  \"topics\": [\n    {\n      \"id\": \"optimization-approach\",\n      \"title\": \"Approach to optimization\",\n      \"claims\": [\n        {\n          \"text\": \"If asked to optimize, the speaker would first ask why.\",\n          \"evidence\": [1]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": []\n}",
+  "thinking": "We need to produce JSON but we have only one message. No claims, decisions, questions? That message is a statement. It's a claim? It's an opinion \"If asked to optimize, I'd first ask why.\" So it's a claim. No decisions or open questions. So produce one topic maybe \"Optimization approach\". Include claim with evidence [1]. Title maybe \"Optimization approach\". Title short. Provide.\n\n",
+  "parsed": {
+    "title": "Optimization approach",
+    "topics": [
+      {
+        "id": "optimization-approach",
+        "title": "Approach to optimization",
+        "claims": [
+          {
+            "text": "If asked to optimize, the speaker would first ask why.",
+            "evidence": [1]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": []
+  },
+  "usage": {
+    "durationMs": 2555.806199999992,
+    "ollamaTotalMs": 2329.27198,
+    "promptEvalCount": 289,
+    "evalCount": 180,
+    "doneReason": "stop",
+    "thinkingTextTokenCount": 81,
+    "finalTextTokenCount": 89
+  },
+  "operationalMetrics": {
+    "modelCalls": 1,
+    "sourceMessageWindows": 1,
+    "semanticInterpretations": 1,
+    "semanticAmplification": 1
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 1,
+    "claimCount": 1,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 0,
+    "weightedClaimRecall": null,
+    "goldClaimPrecision": 0,
+    "evidencePrecision": 0,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0,
+    "matchedClaimIds": [],
+    "matchedDecisionIds": [],
+    "matchedOpenQuestionIds": [],
+    "retainedThreadIds": [],
+    "triggeredForbiddenIds": []
+  }
+}

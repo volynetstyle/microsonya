@@ -1,0 +1,115 @@
+{
+  "case": "real-ai-development",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 1,
+  "transformation": "rename-users",
+  "inputHash": "4dd58602882282739faa5356f91372432810f3ed50978ee7285c40fdb16e3f37",
+  "promptHash": "0c45b657a36f50d977da1c5f62dcc9d149d452f6a46ff61fc9da22dbe95ada52",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Обговорення AI‑інструментів у пошуку роботи та впливу на розробку\",\n  \"topics\": [\n    {\n      \"id\": \"ai-job-search\",\n      \"title\": \"Використання AI для автоматизації пошуку роботи\",\n      \"claims\": [\n        {\n          \"text\": \"Автор планує налаштувати OpenClaw для автоматичного пошуку вакансій, генерації резюме і cover letter.\",\n          \"evidence\": [5]\n        },\n        {\n          \"text\": \"Вважає, що знання AI‑технологій (Cursor, Claude Code, LLM, RAG, Embeddings) стають необхідними для уникнення відсіву recruiter‑ами.\",\n          \"evidence\": [6, 8]\n        },\n        {\n          \"text\": \"AI‑генерація коду може призводити до неефективних SQL‑запитів та безпеки проблем, як описано в прикладі з 450 рядками raw SQL.\",\n          \"evidence\": [30]\n        }\n      ]\n    },\n    {\n      \"id\": \"ai-development-acceleration\",\n      \"title\": \"Прискорення розробки за рахунок LLM\",\n      \"claims\": [\n        {\n          \"text\": \"LLM допомагає швидко генерувати код, скорочуючи рутину, наприклад створення JOIN‑ів, що прискорює розробку.\",\n          \"evidence\": [19]\n        },\n        {\n          \"text\": \"Автор вважає, що інструменти з 2025 року стали достатньо добрими, хоча й дорогими.\",\n          \"evidence\": [9]\n        }\n      ]\n    },\n    {\n      \"id\": \"ai-recruiter-market\",\n      \"title\": \"Перспективи професії рекрутера\",\n      \"claims\": [\n        {\n          \"text\": \"Автор вважає, що професія рекрутера може зникнути, залишивши HR лише для управління персоналом.\",\n          \"evidence\": [14]\n        }\n      ]\n    },\n    {\n      \"id\": \"developer-tools-opinion\",\n      \"title\": \"Ставлення до нових технологічних стеків\",\n      \"claims\": [\n        {\n          \"text\": \"Коментар про схожість нових підходів до REST, JSON, Microservices, Docker після React.\",\n          \"evidence\": [10]\n        },\n        {\n          \"text\": \"Теза про те, що якість відповіді моделі пропорційна якості питання та доступним знанням.\",\n          \"evidence\": [24]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": []\n}",
+  "thinking": "We need extract topics. Likely about AI tools for job search, impact of AI on dev, cloud etc. Provide claims with evidence IDs.\n\nDecisions none. Open questions maybe none.\n\nConstruct JSON.",
+  "parsed": {
+    "title": "Обговорення AI‑інструментів у пошуку роботи та впливу на розробку",
+    "topics": [
+      {
+        "id": "ai-job-search",
+        "title": "Використання AI для автоматизації пошуку роботи",
+        "claims": [
+          {
+            "text": "Автор планує налаштувати OpenClaw для автоматичного пошуку вакансій, генерації резюме і cover letter.",
+            "evidence": [5]
+          },
+          {
+            "text": "Вважає, що знання AI‑технологій (Cursor, Claude Code, LLM, RAG, Embeddings) стають необхідними для уникнення відсіву recruiter‑ами.",
+            "evidence": [6, 8]
+          },
+          {
+            "text": "AI‑генерація коду може призводити до неефективних SQL‑запитів та безпеки проблем, як описано в прикладі з 450 рядками raw SQL.",
+            "evidence": [30]
+          }
+        ]
+      },
+      {
+        "id": "ai-development-acceleration",
+        "title": "Прискорення розробки за рахунок LLM",
+        "claims": [
+          {
+            "text": "LLM допомагає швидко генерувати код, скорочуючи рутину, наприклад створення JOIN‑ів, що прискорює розробку.",
+            "evidence": [19]
+          },
+          {
+            "text": "Автор вважає, що інструменти з 2025 року стали достатньо добрими, хоча й дорогими.",
+            "evidence": [9]
+          }
+        ]
+      },
+      {
+        "id": "ai-recruiter-market",
+        "title": "Перспективи професії рекрутера",
+        "claims": [
+          {
+            "text": "Автор вважає, що професія рекрутера може зникнути, залишивши HR лише для управління персоналом.",
+            "evidence": [14]
+          }
+        ]
+      },
+      {
+        "id": "developer-tools-opinion",
+        "title": "Ставлення до нових технологічних стеків",
+        "claims": [
+          {
+            "text": "Коментар про схожість нових підходів до REST, JSON, Microservices, Docker після React.",
+            "evidence": [10]
+          },
+          {
+            "text": "Теза про те, що якість відповіді моделі пропорційна якості питання та доступним знанням.",
+            "evidence": [24]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": []
+  },
+  "usage": {
+    "durationMs": 7773.788600000014,
+    "ollamaTotalMs": 7511.851212,
+    "promptEvalCount": 3260,
+    "evalCount": 646,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 4,
+    "claimCount": 8,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.7619047619047619,
+    "goldClaimPrecision": 0.75,
+    "evidencePrecision": 0.7777777777777778,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0,
+    "matchedClaimIds": [
+      "job-search.ai-skills",
+      "job-search.automation-idea",
+      "vibe-coding.bad-backend",
+      "development.routine-speedup",
+      "job-search.keyword-filtering",
+      "development.context-quality"
+    ],
+    "retainedThreadIds": [
+      "ai-job-search",
+      "vibe-coding-risks",
+      "ai-assisted-development"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

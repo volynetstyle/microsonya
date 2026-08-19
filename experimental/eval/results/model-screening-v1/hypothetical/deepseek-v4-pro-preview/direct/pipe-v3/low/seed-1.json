@@ -1,0 +1,69 @@
+{
+  "case": "hypothetical",
+  "model": "deepseek-v4-pro:preview",
+  "pipeline": "direct",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 1,
+  "transformation": "identity",
+  "inputHash": "635920fe92b99a3e5bac93743f863f3d410b1d634799df05e6f4098a35057e48",
+  "promptHash": "e3b3141144814536257d0c141733bb24230cb1b951395588835c419b925d7768",
+  "promptVersion": "v4",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Optimization approach\",\n  \"topics\": [\n    {\n      \"id\": \"optimization-approach\",\n      \"title\": \"Optimization approach\",\n      \"claims\": [\n        {\n          \"text\": \"Якби мене попросили оптимізувати, спочатку спитав би навіщо.\",\n          \"evidence\": [\n            1\n          ]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": []\n}",
+  "thinking": "We are asked to summarize the Telegram conversation in a specific JSON format. The input is a single message in a \"pipe-v3\" format. Let's parse it.\n\nThe input is: \nPIPECHAT/3\n#1|\"A\"|\"12:00\"|^0|\"text\"|\"Якби мене попросили оптимізувати, спочатку спитав би навіщо.\"\n\nThis appears to be a single message from author \"A\" at time \"12:00\", with some flag ^0, type \"text\", and content: \"Якби мене попросили оптимізувати, спочатку спитав би навіщо.\" which is Ukrainian, translating to \"If I were asked to optimize, I would first ask why.\"\n\nWe need to summarize the conversation directly, preserving attribution and citing source message IDs. There's only one message, ID 1. So we need to produce a JSON summarizing that. However, the shape expects topics, claims, decisions, openQuestions. The single message is a statement, not a question, not a decision, not a claim necessarily. It's a hypothetical statement. We need to interpret what kind of summary we can extract. The instruction: \"Summarize the Telegram conversation directly. Preserve attribution and cite only source message IDs. Do not invent decisions or leave answered questions open.\" So we must summarize what was said. This is likely a test with a trivial conversation.\n\nWe need to create topics with claims. The statement could be a claim: \"If asked to optimize, I would first ask why.\" We can attribute it to A. Evidence: 1. No decisions or open questions, because nothing was settled or asked. So decisions and openQuestions can be empty arrays.\n\nThus:\n{\n  \"title\": \"Short title\", maybe \"Optimization approach\"\n  \"topics\": [\n    {\n      \"id\": \"optimization-approach\",\n      \"title\": \"Optimization approach\",\n      \"claims\": [\n        {\n          \"text\": \"Якби мене попросили оптимізувати, спочатку спитав би навіщо.\",\n          \"evidence\": [1]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": []\n}\n\nBut the instruction says preserve attribution. The claim text should be the message content, which is the original Ukrainian. We can write it as is. The title can be in English or the same language? Possibly we can use a short English title. The JSON keys are English. The claim text should be the exact message content? I'd say yes, preserve the text.\n\nNow, I need to output JSON only. So final answer.",
+  "parsed": {
+    "title": "Optimization approach",
+    "topics": [
+      {
+        "id": "optimization-approach",
+        "title": "Optimization approach",
+        "claims": [
+          {
+            "text": "Якби мене попросили оптимізувати, спочатку спитав би навіщо.",
+            "evidence": [1]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": []
+  },
+  "usage": {
+    "durationMs": 10277.509699999995,
+    "ollamaTotalMs": 10027.795924,
+    "promptEvalCount": 237,
+    "evalCount": 676,
+    "doneReason": "stop",
+    "thinkingTextTokenCount": 538,
+    "finalTextTokenCount": 99
+  },
+  "operationalMetrics": {
+    "modelCalls": 1,
+    "sourceMessageWindows": 1,
+    "semanticInterpretations": 1,
+    "semanticAmplification": 1
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 1,
+    "claimCount": 1,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 0,
+    "weightedClaimRecall": null,
+    "goldClaimPrecision": 0,
+    "evidencePrecision": 0,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0,
+    "matchedClaimIds": [],
+    "matchedDecisionIds": [],
+    "matchedOpenQuestionIds": [],
+    "retainedThreadIds": [],
+    "triggeredForbiddenIds": []
+  }
+}

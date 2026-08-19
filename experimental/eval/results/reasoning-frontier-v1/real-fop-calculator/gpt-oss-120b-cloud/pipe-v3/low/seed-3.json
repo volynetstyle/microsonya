@@ -1,0 +1,146 @@
+{
+  "case": "real-fop-calculator",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 3,
+  "transformation": "identity",
+  "inputHash": "d3179cdb8e49a27f55b8dcbb42c5b7b95590527ad18ad16afb38bc499073e8af",
+  "promptHash": "5060e45df53bd39d6e132ad1a9e4bbcf2ae1de44805740c2d1c480e9b25e240f",
+  "promptVersion": "v2",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion on tax filing, domain purchase, app feasibility and security concerns\",\n  \"topics\": [\n    {\n      \"id\": \"tax-filing\",\n      \"title\": \"Tax filing and calculator usage\",\n      \"claims\": [\n        {\n          \"text\": \"The user paid about 1000 UAH after re-filing with the help of aunt Sveta to avoid larger fines.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"The tax calculator works only with a Ukrainian‑currency FOP and requires conversion based on the daily exchange rate.\",\n          \"evidence\": [19]\n        },\n        {\n          \"text\": \"The filing process takes about an hour with Excel, or roughly one day per month.\",\n          \"evidence\": [5,6]\n        },\n        {\n          \"text\": \"Quarterly reports must be submitted correctly to avoid penalties.\",\n          \"evidence\": [7]\n        }\n      ]\n    },\n    {\n      \"id\": \"domain-purchase\",\n      \"title\": \"Domain acquisition discussion\",\n      \"claims\": [\n        {\n          \"text\": \"No domain has been purchased yet.\",\n          \"evidence\": [2]\n        },\n        {\n          \"text\": \"Someone suggests buying a calculator first to have money for a domain.\",\n          \"evidence\": [4]\n        }\n      ]\n    },\n    {\n      \"id\": \"app-profitability\",\n      \"title\": \"Viability of a cross‑platform app\",\n      \"claims\": [\n        {\n          \"text\": \"Web is the easiest platform but less profitable than Android/iOS.\",\n          \"evidence\": [11]\n        },\n        {\n          \"text\": \"Fast delivery (under a week) and a cross‑platform stack (Flutter) are considered essential for success.\",\n          \"evidence\": [12]\n        },\n        {\n          \"text\": \"The envisioned app would be a local‑first bundle with USD/UAH rates refreshed every 5 minutes and calculations performed in the browser.\",\n          \"evidence\": [29]\n        },\n        {\n          \"text\": \"There is skepticism about finding at least ten users willing to pay 299 UAH.\",\n          \"evidence\": [20]\n        }\n      ]\n    },\n    {\n      \"id\": \"security-concerns\",\n      \"title\": \"Potential security and piracy issues\",\n      \"claims\": [\n        {\n          \"text\": \"The app’s password is stored in local storage as a 100 % discount promo code.\",\n          \"evidence\": [20]\n        },\n        {\n          \"text\": \"Participants suspect the app is a scam and the bundle may contain pirated content.\",\n          \"evidence\": [23,24,26,32,33,34]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [\n    {\n      \"text\": \"Decision not to purchase a domain at this stage.\",\n      \"evidence\": [9]\n    }\n  ],\n  \"openQuestions\": [\n    {\n      \"text\": \"Is it possible to locate the source code or password by searching the bundle?\",\n      \"evidence\": [21]\n    }\n  ]\n}",
+  "thinking": "We need produce JSON with title, topics, decisions, openQuestions. Identify main topics: tax filing hack, domain purchase, app profitability, security of app, etc. Probably create topics: tax-filing, domain-purchase, app-profitability, security-concerns. Claims and decisions.\n\nDecisions? maybe decision to not buy domain (message9). That's a decision.\n\nOpen questions none resolved? maybe \"А який там сорс код? Можна сам пароль пошуком знайти?\" unresolved. Also \"Це ти про що?\" resolved? Not really. So open question.\n\nProduce accordingly.\n\n",
+  "parsed": {
+    "title": "Discussion on tax filing, domain purchase, app feasibility and security concerns",
+    "topics": [
+      {
+        "id": "tax-filing",
+        "title": "Tax filing and calculator usage",
+        "claims": [
+          {
+            "text": "The user paid about 1000 UAH after re-filing with the help of aunt Sveta to avoid larger fines.",
+            "evidence": [1]
+          },
+          {
+            "text": "The tax calculator works only with a Ukrainian‑currency FOP and requires conversion based on the daily exchange rate.",
+            "evidence": [19]
+          },
+          {
+            "text": "The filing process takes about an hour with Excel, or roughly one day per month.",
+            "evidence": [5, 6]
+          },
+          {
+            "text": "Quarterly reports must be submitted correctly to avoid penalties.",
+            "evidence": [7]
+          }
+        ]
+      },
+      {
+        "id": "domain-purchase",
+        "title": "Domain acquisition discussion",
+        "claims": [
+          {
+            "text": "No domain has been purchased yet.",
+            "evidence": [2]
+          },
+          {
+            "text": "Someone suggests buying a calculator first to have money for a domain.",
+            "evidence": [4]
+          }
+        ]
+      },
+      {
+        "id": "app-profitability",
+        "title": "Viability of a cross‑platform app",
+        "claims": [
+          {
+            "text": "Web is the easiest platform but less profitable than Android/iOS.",
+            "evidence": [11]
+          },
+          {
+            "text": "Fast delivery (under a week) and a cross‑platform stack (Flutter) are considered essential for success.",
+            "evidence": [12]
+          },
+          {
+            "text": "The envisioned app would be a local‑first bundle with USD/UAH rates refreshed every 5 minutes and calculations performed in the browser.",
+            "evidence": [29]
+          },
+          {
+            "text": "There is skepticism about finding at least ten users willing to pay 299 UAH.",
+            "evidence": [20]
+          }
+        ]
+      },
+      {
+        "id": "security-concerns",
+        "title": "Potential security and piracy issues",
+        "claims": [
+          {
+            "text": "The app’s password is stored in local storage as a 100 % discount promo code.",
+            "evidence": [20]
+          },
+          {
+            "text": "Participants suspect the app is a scam and the bundle may contain pirated content.",
+            "evidence": [23, 24, 26, 32, 33, 34]
+          }
+        ]
+      }
+    ],
+    "decisions": [
+      {
+        "text": "Decision not to purchase a domain at this stage.",
+        "evidence": [9]
+      }
+    ],
+    "openQuestions": [
+      {
+        "text": "Is it possible to locate the source code or password by searching the bundle?",
+        "evidence": [21]
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 9353.704500000109,
+    "ollamaTotalMs": 9132.470896,
+    "promptEvalCount": 2944,
+    "evalCount": 790,
+    "doneReason": "stop",
+    "thinkingTextTokenCount": 123,
+    "finalTextTokenCount": 657
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 4,
+    "claimCount": 12,
+    "decisionCount": 1,
+    "openQuestionCount": 1,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.8888888888888888,
+    "goldClaimPrecision": 0.5833333333333334,
+    "evidencePrecision": 0.4,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 1,
+    "noiseRetention": 0.08333333333333333,
+    "matchedClaimIds": [
+      "tax-reporting.form-risk",
+      "tax-reporting.paid-help",
+      "product.uah-only",
+      "product.web-limitations",
+      "product.fast-delivery-strategy",
+      "security.password-in-bundle",
+      "product.validate-demand-first"
+    ],
+    "matchedDecisionIds": [],
+    "matchedOpenQuestionIds": [],
+    "retainedThreadIds": [
+      "tax-reporting",
+      "calculator-product",
+      "calculator-security"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

@@ -1,0 +1,148 @@
+{
+  "case": "real-job-search-abroad",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 2,
+  "transformation": "identity",
+  "inputHash": "aac555f3427e2195f145b4a5e3a6d9644961170a8ccc181b8832ae83202b036f",
+  "promptHash": "f896acc87b54ce9e423829a612eb0b9ece1580d4ffe75c969295d6c8056fdff1",
+  "promptVersion": "v2",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion on relocation, job search and language requirements in Slovakia and Austria\",\n  \"topics\": [\n    {\n      \"id\": \"expats-in-austria-poland\",\n      \"title\": \"People known to be living abroad\",\n      \"claims\": [\n        {\n          \"text\": \"AndriiRaccoon lives in Austria and walternet134 lives in Poland\",\n          \"evidence\": [3]\n        },\n        {\n          \"text\": \"The speaker has been living in Slovakia for almost a year\",\n          \"evidence\": [43]\n        },\n        {\n          \"text\": \"One participant has been in Austria since November 2025\",\n          \"evidence\": [49]\n        }\n      ]\n    },\n    {\n      \"id\": \"language-requirements-slovakia\",\n      \"title\": \"Language requirements for jobs in Slovakia\",\n      \"claims\": [\n        {\n          \"text\": \"About 95% of job postings require a local language proficiency\",\n          \"evidence\": [26]\n        },\n        {\n          \"text\": \"Employers usually ask for B2 level, sometimes B1, and rarely require a certificate\",\n          \"evidence\": [46]\n        },\n        {\n          \"text\": \"Many candidates are filtered out because they do not meet language requirements\",\n          \"evidence\": [27]\n        }\n      ]\n    },\n    {\n      \"id\": \"job-search-difficulty\",\n      \"title\": \"Difficulty of finding a job abroad\",\n      \"claims\": [\n        {\n          \"text\": \"Finding a job in Austria took about two months for one participant\",\n          \"evidence\": [17]\n        },\n        {\n          \"text\": \"Approximately 100 applications were sent, resulting in only three interviews\",\n          \"evidence\": [21]\n        },\n        {\n          \"text\": \"The interview conversion rate is low despite having three years of experience\",\n          \"evidence\": [23]\n        }\n      ]\n    },\n    {\n      \"id\": \"salary-comparison\",\n      \"title\": \"Salary expectations compared to Ukraine\",\n      \"claims\": [\n        {\n          \"text\": \"Salaries in Europe are generally higher than in Ukraine, but many accept the minimum offered\",\n          \"evidence\": [35]\n        },\n        {\n          \"text\": \"The participant received a higher salary than his previous job but still considered it low\",\n          \"evidence\": [37]\n        }\n      ]\n    },\n    {\n      \"id\": \"language-practice\",\n      \"title\": \"Ways to improve English speaking skills\",\n      \"claims\": [\n        {\n          \"text\": \"The participant suggests joining Discord channels to practice spoken English\",\n          \"evidence\": [56, 57]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": [\n    {\n      \"text\": \"Should the participant stay in Austria long‑term?\",\n      \"evidence\": [58, 60]\n    }\n  ]\n}",
+  "thinking": "We need construct JSON. Identify topics: maybe \"relocation experiences\", \"language requirements\", \"job search\". Create claims.\n\nLet's pick topics:\n\n1. known expats in Austria/Poland - claim who lives where.\n\n2. language requirement for jobs in Slovakia - claim majority require local language B2/B1.\n\n3. job search difficulty - claim took 2 months, many applications.\n\n4. salary expectations - claim higher than Ukraine but low.\n\nOpen questions: maybe \"Should stay in Austria?\" not answered.\n\nDecisions none.\n\nCreate IDs.\n\nLet's craft.",
+  "parsed": {
+    "title": "Discussion on relocation, job search and language requirements in Slovakia and Austria",
+    "topics": [
+      {
+        "id": "expats-in-austria-poland",
+        "title": "People known to be living abroad",
+        "claims": [
+          {
+            "text": "AndriiRaccoon lives in Austria and walternet134 lives in Poland",
+            "evidence": [3]
+          },
+          {
+            "text": "The speaker has been living in Slovakia for almost a year",
+            "evidence": [43]
+          },
+          {
+            "text": "One participant has been in Austria since November 2025",
+            "evidence": [49]
+          }
+        ]
+      },
+      {
+        "id": "language-requirements-slovakia",
+        "title": "Language requirements for jobs in Slovakia",
+        "claims": [
+          {
+            "text": "About 95% of job postings require a local language proficiency",
+            "evidence": [26]
+          },
+          {
+            "text": "Employers usually ask for B2 level, sometimes B1, and rarely require a certificate",
+            "evidence": [46]
+          },
+          {
+            "text": "Many candidates are filtered out because they do not meet language requirements",
+            "evidence": [27]
+          }
+        ]
+      },
+      {
+        "id": "job-search-difficulty",
+        "title": "Difficulty of finding a job abroad",
+        "claims": [
+          {
+            "text": "Finding a job in Austria took about two months for one participant",
+            "evidence": [17]
+          },
+          {
+            "text": "Approximately 100 applications were sent, resulting in only three interviews",
+            "evidence": [21]
+          },
+          {
+            "text": "The interview conversion rate is low despite having three years of experience",
+            "evidence": [23]
+          }
+        ]
+      },
+      {
+        "id": "salary-comparison",
+        "title": "Salary expectations compared to Ukraine",
+        "claims": [
+          {
+            "text": "Salaries in Europe are generally higher than in Ukraine, but many accept the minimum offered",
+            "evidence": [35]
+          },
+          {
+            "text": "The participant received a higher salary than his previous job but still considered it low",
+            "evidence": [37]
+          }
+        ]
+      },
+      {
+        "id": "language-practice",
+        "title": "Ways to improve English speaking skills",
+        "claims": [
+          {
+            "text": "The participant suggests joining Discord channels to practice spoken English",
+            "evidence": [56, 57]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": [
+      {
+        "text": "Should the participant stay in Austria long‑term?",
+        "evidence": [58, 60]
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 7048.183499999999,
+    "ollamaTotalMs": 6743.206704,
+    "promptEvalCount": 3676,
+    "evalCount": 742,
+    "doneReason": "stop",
+    "thinkingTextTokenCount": 114,
+    "finalTextTokenCount": 618
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 5,
+    "claimCount": 12,
+    "decisionCount": 0,
+    "openQuestionCount": 1,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.9,
+    "goldClaimPrecision": 0.6666666666666666,
+    "evidencePrecision": 0.5333333333333333,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 1,
+    "noiseRetention": 0.08333333333333333,
+    "matchedClaimIds": [
+      "networking.participants-abroad",
+      "language.work-vs-daily-life",
+      "language.learning-motivation",
+      "job-search.local-language-filter",
+      "job-search.two-months",
+      "job-search.conversion",
+      "job-search.education-observation",
+      "job-search.salary-compromise"
+    ],
+    "matchedDecisionIds": [],
+    "matchedOpenQuestionIds": [],
+    "retainedThreadIds": [
+      "networking-abroad",
+      "language-integration",
+      "job-search-abroad"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

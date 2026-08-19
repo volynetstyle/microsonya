@@ -1,0 +1,131 @@
+{
+  "case": "real-ai-tools-interleaved",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "jsonl",
+  "reasoning": "low",
+  "seed": 3,
+  "inputHash": "3e5fb5efeccd172ee2f1e8a3ef61dfdf2ed0fd33f2162906991e5f91c1a0d9ba",
+  "promptHash": "fd2f5f3cb9ea89d88080a5bc3208c4cd11f653489ff26dc3ae28bacb13e5d025",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"AI toolkits, bus anecdotes, shared link, diploma cover costs, and PC case GPU hack\",\n  \"topics\": [\n    {\n      \"id\": \"ai-toolkit-capabilities\",\n      \"title\": \"AI capabilities depend on toolkits, not inherent intelligence\",\n      \"claims\": [\n        {\n          \"text\": \"AI systems are not inherently intelligent; their complex abilities come from toolkits, ready examples, and external modules.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"Toolkits can provide a large performance boost but cannot fully compensate for a model's missing basic abilities.\",\n          \"evidence\": [8]\n        },\n        {\n          \"text\": \"Older models were trained on everything without clear purpose, while modern models aim to achieve more with fewer parameters and sometimes are fine‑tuned for specific tasks.\",\n          \"evidence\": [14]\n        }\n      ]\n    },\n    {\n      \"id\": \"bus-anecdote\",\n      \"title\": \"Weird encounters on public transport\",\n      \"claims\": [\n        {\n          \"text\": \"P1 observed strange people on a bus, staying idle and later encountering the same person who emitted gas.\",\n          \"evidence\": [4, 5, 7]\n        }\n      ]\n    },\n    {\n      \"id\": \"shared-link\",\n      \"title\": \"Pinned external link\",\n      \"claims\": [\n        {\n          \"text\": \"P4 shared a link with a pin, and later expressed hope that it is still relevant.\",\n          \"evidence\": [16, 18]\n        }\n      ]\n    },\n    {\n      \"id\": \"diploma-cover-pricing\",\n      \"title\": \"Discussion of diploma cover fees\",\n      \"claims\": [\n        {\n          \"text\": \"Participants debated the price of diploma covers, mentioning 650 UAH from Bogdan, 30 UAH from others, and personal payments of 47 UAH.\",\n          \"evidence\": [22, 23, 24, 25]\n        },\n        {\n          \"text\": \"P1 suggested getting the diploma without a cover since it is essentially waste paper.\",\n          \"evidence\": [26]\n        },\n        {\n          \"text\": \"P8 argued the cover bears the university emblem, making it unique, but later claimed nobody will keep it and it will be seen only three times in a lifetime.\",\n          \"evidence\": [27, 28, 29]\n        }\n      ]\n    },\n    {\n      \"id\": \"pc-case-gpu-hack\",\n      \"title\": \"Fitting multiple GPUs into a small PC case\",\n      \"claims\": [\n        {\n          \"text\": \"A small PC case that normally holds one small GPU can be modified with straps and force to accommodate three GPUs.\",\n          \"evidence\": [30]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": [\n    {\n      \"text\": \"What specific issues exist with the current approach to training coder models?\",\n      \"evidence\": [14]\n    }\n  ]\n}",
+  "thinking": "We need JSON summary. Identify topics: AI toolkits, bus anecdote, pinned link, diploma cover price, hardware hack. Create claims.\n\nClaims:\n- AI models aren't inherently intelligent; capabilities come from toolkits and examples. (ids 1)\n- Toolkits can give large gain but don't compensate lack of base model abilities. (id 8 replying to 3)\n- Older models trained on broad data without clear purpose; modern aim to do more with fewer parameters. (id 14)\n- Bus incident: weird people in transport, second time same person blares gas. (ids 4,5,7)\n- Pinned link shared by P4 considered possibly outdated. (ids 16,18)\n- Diploma cover costs discussed: 650 from Bogdan, 30 from others, 47 paid, etc. (ids 22,23,24,25,26,27,28,29)\n- Hardware hack: small PC case can fit 3 small GPUs using straps. (id 30)\n\nDecisions none. Open questions? maybe none. But maybe \"what's wrong with coder models?\" that's question in 14 but not answered. Could be open question. So open question: what is wrong with the approach of training coder models? evidence 14.\n\nReturn JSON.\n\n",
+  "parsed": {
+    "title": "AI toolkits, bus anecdotes, shared link, diploma cover costs, and PC case GPU hack",
+    "topics": [
+      {
+        "id": "ai-toolkit-capabilities",
+        "title": "AI capabilities depend on toolkits, not inherent intelligence",
+        "claims": [
+          {
+            "text": "AI systems are not inherently intelligent; their complex abilities come from toolkits, ready examples, and external modules.",
+            "evidence": [1]
+          },
+          {
+            "text": "Toolkits can provide a large performance boost but cannot fully compensate for a model's missing basic abilities.",
+            "evidence": [8]
+          },
+          {
+            "text": "Older models were trained on everything without clear purpose, while modern models aim to achieve more with fewer parameters and sometimes are fine‑tuned for specific tasks.",
+            "evidence": [14]
+          }
+        ]
+      },
+      {
+        "id": "bus-anecdote",
+        "title": "Weird encounters on public transport",
+        "claims": [
+          {
+            "text": "P1 observed strange people on a bus, staying idle and later encountering the same person who emitted gas.",
+            "evidence": [4, 5, 7]
+          }
+        ]
+      },
+      {
+        "id": "shared-link",
+        "title": "Pinned external link",
+        "claims": [
+          {
+            "text": "P4 shared a link with a pin, and later expressed hope that it is still relevant.",
+            "evidence": [16, 18]
+          }
+        ]
+      },
+      {
+        "id": "diploma-cover-pricing",
+        "title": "Discussion of diploma cover fees",
+        "claims": [
+          {
+            "text": "Participants debated the price of diploma covers, mentioning 650 UAH from Bogdan, 30 UAH from others, and personal payments of 47 UAH.",
+            "evidence": [22, 23, 24, 25]
+          },
+          {
+            "text": "P1 suggested getting the diploma without a cover since it is essentially waste paper.",
+            "evidence": [26]
+          },
+          {
+            "text": "P8 argued the cover bears the university emblem, making it unique, but later claimed nobody will keep it and it will be seen only three times in a lifetime.",
+            "evidence": [27, 28, 29]
+          }
+        ]
+      },
+      {
+        "id": "pc-case-gpu-hack",
+        "title": "Fitting multiple GPUs into a small PC case",
+        "claims": [
+          {
+            "text": "A small PC case that normally holds one small GPU can be modified with straps and force to accommodate three GPUs.",
+            "evidence": [30]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": [
+      {
+        "text": "What specific issues exist with the current approach to training coder models?",
+        "evidence": [14]
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 8899.111199999985,
+    "ollamaTotalMs": 8672.683435,
+    "promptEvalCount": 2136,
+    "evalCount": 918,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 5,
+    "claimCount": 9,
+    "decisionCount": 0,
+    "openQuestionCount": 1,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.8235294117647058,
+    "goldClaimPrecision": 0.7777777777777778,
+    "evidencePrecision": 0.8333333333333334,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0.1111111111111111,
+    "matchedClaimIds": [
+      "diploma-cover.prices",
+      "bus-passenger.repeated-encounter",
+      "diploma-cover.low-value",
+      "ai-tooling.capability-view",
+      "ai-tooling.instinctgpt-result",
+      "ai-tooling.model-comparison",
+      "pc-case.three-gpus"
+    ],
+    "retainedThreadIds": [
+      "diploma-cover",
+      "bus-passenger",
+      "ai-tooling",
+      "pc-case"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

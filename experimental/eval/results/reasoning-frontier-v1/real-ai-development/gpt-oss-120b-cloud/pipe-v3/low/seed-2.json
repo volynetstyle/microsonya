@@ -1,0 +1,119 @@
+{
+  "case": "real-ai-development",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 2,
+  "transformation": "identity",
+  "inputHash": "c44e2d8f381898078b12b50a1dbf1501e5970203c0d4ef386b86fd514114c47c",
+  "promptHash": "3e0a05e203eb442eb676b68edb70e0aab57dbb0cc1feec2958e22a6ddaf40d3c",
+  "promptVersion": "v2",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion on AI-powered job search, tooling, and code generation risks\",\n  \"topics\": [\n    {\n      \"id\": \"job-search-automation\",\n      \"title\": \"Automation of job search and resume generation\",\n      \"claims\": [\n        {\n          \"text\": \"The author plans to set up a cloud system that fully automates searching for job vacancies, generating PDF resumes tailored to each vacancy, and writing cover letters.\",\n          \"evidence\": [1, 5]\n        },\n        {\n          \"text\": \"Modern job seekers need to add many AI-related skills (e.g., Cursor, Claude Code, LLM, RAG, embeddings) to avoid being filtered out by recruiters.\",\n          \"evidence\": [6, 8]\n        },\n        {\n          \"text\": \"The acceleration of development tools started around 2025, making them sufficiently good but also increasingly expensive.\",\n          \"evidence\": [9]\n        }\n      ]\n    },\n    {\n      \"id\": \"ai-impact\",\n      \"title\": \"Perceived shift in AI relevance for developers\",\n      \"claims\": [\n        {\n          \"text\": \"AI tools have moved from being a niche curiosity in 2024 to a mainstream market in 2026, making lack of AI knowledge a barrier for JS/Python job seekers.\",\n          \"evidence\": [7, 8]\n        },\n        {\n          \"text\": \"Using LLMs (e.g., GPT) to generate SQL joins and other code can drastically speed up development, but may introduce security and performance issues.\",\n          \"evidence\": [19, 30]\n        }\n      ]\n    },\n    {\n      \"id\": \"code-generation-risks\",\n      \"title\": \"Risks of AI-generated code in production\",\n      \"claims\": [\n        {\n          \"text\": \"AI-generated code can produce overly large and inefficient queries (e.g., 450 lines of raw SQL) that severely degrade performance and raise security concerns.\",\n          \"evidence\": [30]\n        },\n        {\n          \"text\": \"Teams sometimes reject AI-generated features after code review because the output lacks adequacy and can break projects.\",\n          \"evidence\": [35]\n        }\n      ]\n    },\n    {\n      \"id\": \"architecture-observation\",\n      \"title\": \"Observed tech stack pattern\",\n      \"claims\": [\n        {\n          \"text\": \"One participant likens the current setup to a stack consisting of REST, JSON, microservices, Docker, and React.\",\n          \"evidence\": [10]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": []\n}",
+  "thinking": "Need to produce JSON. Identify topics: maybe \"job-search-automation\", \"ai-tools-impact\", \"cloud-setup\", \"code-generation-risks\". We'll extract claims and decisions. No explicit decisions? maybe P10 comment about architecture: \"looks like REST, JSON, Microservices, Docker after React\". That's an observation not decision. No clear decisions. Open questions? none answered. Might have question? none. So maybe empty decisions and openQuestions. Provide claims per topic.\n\nLet's create topics:\n\ntopic1 job-search-automation: claims from #1, #5, #6, #8, #9. topic2 ai-impact: #7, #8, #9, #19, #30. topic3 code-generation-risks: #30, #35. topic4 architecture-comment: #10.\n\nProvide evidence IDs.\n\nReturn JSON.",
+  "parsed": {
+    "title": "Discussion on AI-powered job search, tooling, and code generation risks",
+    "topics": [
+      {
+        "id": "job-search-automation",
+        "title": "Automation of job search and resume generation",
+        "claims": [
+          {
+            "text": "The author plans to set up a cloud system that fully automates searching for job vacancies, generating PDF resumes tailored to each vacancy, and writing cover letters.",
+            "evidence": [1, 5]
+          },
+          {
+            "text": "Modern job seekers need to add many AI-related skills (e.g., Cursor, Claude Code, LLM, RAG, embeddings) to avoid being filtered out by recruiters.",
+            "evidence": [6, 8]
+          },
+          {
+            "text": "The acceleration of development tools started around 2025, making them sufficiently good but also increasingly expensive.",
+            "evidence": [9]
+          }
+        ]
+      },
+      {
+        "id": "ai-impact",
+        "title": "Perceived shift in AI relevance for developers",
+        "claims": [
+          {
+            "text": "AI tools have moved from being a niche curiosity in 2024 to a mainstream market in 2026, making lack of AI knowledge a barrier for JS/Python job seekers.",
+            "evidence": [7, 8]
+          },
+          {
+            "text": "Using LLMs (e.g., GPT) to generate SQL joins and other code can drastically speed up development, but may introduce security and performance issues.",
+            "evidence": [19, 30]
+          }
+        ]
+      },
+      {
+        "id": "code-generation-risks",
+        "title": "Risks of AI-generated code in production",
+        "claims": [
+          {
+            "text": "AI-generated code can produce overly large and inefficient queries (e.g., 450 lines of raw SQL) that severely degrade performance and raise security concerns.",
+            "evidence": [30]
+          },
+          {
+            "text": "Teams sometimes reject AI-generated features after code review because the output lacks adequacy and can break projects.",
+            "evidence": [35]
+          }
+        ]
+      },
+      {
+        "id": "architecture-observation",
+        "title": "Observed tech stack pattern",
+        "claims": [
+          {
+            "text": "One participant likens the current setup to a stack consisting of REST, JSON, microservices, Docker, and React.",
+            "evidence": [10]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": []
+  },
+  "usage": {
+    "durationMs": 8524.229699999996,
+    "ollamaTotalMs": 8275.836601,
+    "promptEvalCount": 3405,
+    "evalCount": 733,
+    "doneReason": "stop",
+    "thinkingTextTokenCount": 175,
+    "finalTextTokenCount": 548
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 4,
+    "claimCount": 8,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.7619047619047619,
+    "goldClaimPrecision": 0.75,
+    "evidencePrecision": 0.6666666666666666,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0.125,
+    "matchedClaimIds": [
+      "job-search.automation-idea",
+      "job-search.ai-skills",
+      "development.routine-speedup",
+      "vibe-coding.bad-backend",
+      "vibe-coding.review-failure",
+      "job-search.keyword-filtering"
+    ],
+    "matchedDecisionIds": [],
+    "matchedOpenQuestionIds": [],
+    "retainedThreadIds": [
+      "ai-job-search",
+      "ai-assisted-development",
+      "vibe-coding-risks"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

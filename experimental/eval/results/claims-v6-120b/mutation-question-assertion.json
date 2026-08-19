@@ -1,0 +1,39 @@
+{
+  "case": "mutation-question-assertion",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Обговорення доступності\",\n  \"claims\": [\n    {\n      \"topic\": \"Недоступність\",\n      \"text\": \"Це недоступно на веб‑сайті.\",\n      \"evidence\": [\n        1\n      ]\n    }\n  ]\n}",
+  "thinking": "We need produce JSON with claims. From given messages only one message #1: \"This is unavailable on the website.\" Claim: something is unavailable on website. No context who says what. Topic maybe \"Availability\". Provide claim.",
+  "parsed": {
+    "title": "Обговорення доступності",
+    "claims": [
+      {
+        "topic": "Недоступність",
+        "text": "Це недоступно на веб‑сайті.",
+        "evidence": [1]
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 1710.9123999999974,
+    "ollamaTotalMs": 1429.354413,
+    "promptEvalCount": 735,
+    "evalCount": 118,
+    "doneReason": "stop",
+    "thinkingTextTokenCount": 46,
+    "finalTextTokenCount": 62
+  },
+  "metrics": {
+    "contentRecall": 1,
+    "claimRecall": 1,
+    "decisionRecall": null,
+    "openQuestionRecall": null,
+    "evidenceSelectionPrecision": 1,
+    "noiseSelectionRate": 0,
+    "forbiddenRate": 0,
+    "atomicityViolationRate": 0,
+    "evidenceIdsPerUnit": 1,
+    "unitCount": 1,
+    "selectedEvidenceCount": 1,
+    "unknownEvidenceCount": 0
+  }
+}

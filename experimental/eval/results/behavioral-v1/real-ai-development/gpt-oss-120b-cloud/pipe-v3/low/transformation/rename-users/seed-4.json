@@ -1,0 +1,135 @@
+{
+  "case": "real-ai-development",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 4,
+  "transformation": "rename-users",
+  "inputHash": "4dd58602882282739faa5356f91372432810f3ed50978ee7285c40fdb16e3f37",
+  "promptHash": "0c45b657a36f50d977da1c5f62dcc9d149d452f6a46ff61fc9da22dbe95ada52",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion on AI tools, job search, and code generation\",\n  \"topics\": [\n    {\n      \"id\": \"ai-job-search\",\n      \"title\": \"Using AI for job search and application preparation\",\n      \"claims\": [\n        {\n          \"text\": \"The author is preparing for a full‑time job search and plans to set up cloud automation for generating PDF resumes tailored to specific vacancies.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"They intend to configure OpenClaw to find vacancies, generate resumes, and write cover letters once their startup is closed.\",\n          \"evidence\": [5]\n        },\n        {\n          \"text\": \"In 2026, adding many AI‑related skills (Cursor, Claude Code, LLM, RAG, embeddings, etc.) is necessary to avoid being filtered out by recruiters.\",\n          \"evidence\": [6]\n        },\n        {\n          \"text\": \"AI has become a market mainstream, and lacking AI knowledge makes job search for JS/Python positions very difficult.\",\n          \"evidence\": [8]\n        },\n        {\n          \"text\": \"The acceleration of development due to AI tools became significant only around 2025, despite earlier theories from 2022.\",\n          \"evidence\": [9]\n        },\n        {\n          \"text\": \"The author expects the recruiter profession to disappear, leaving HR as a personnel management role.\",\n          \"evidence\": [14]\n        }\n      ]\n    },\n    {\n      \"id\": \"ai-code-generation\",\n      \"title\": \"Problems with AI‑generated code and performance\",\n      \"claims\": [\n        {\n          \"text\": \"AI‑generated raw SQL (450 lines) pulled almost all data from the database, leading to unoptimized queries that could take 10–20 minutes in production.\",\n          \"evidence\": [30]\n        },\n        {\n          \"text\": \"Incremental computations have been replaced by a view, suggesting a shift in data handling architecture.\",\n          \"evidence\": [34]\n        },\n        {\n          \"text\": \"A developer used AI to generate code that broke the project; after review the team decided to drop the feature entirely because the code was inadequate.\",\n          \"evidence\": [35]\n        }\n      ]\n    },\n    {\n      \"id\": \"recruiter-role\",\n      \"title\": \"Changing relevance of recruiters\",\n      \"claims\": [\n        {\n          \"text\": \"Candidate search via keyword tags is becoming more detached from reality than before.\",\n          \"evidence\": [13]\n        },\n        {\n          \"text\": \"The author predicts the recruiter profession will become extinct, with HR focusing on personnel management.\",\n          \"evidence\": [14]\n        }\n      ]\n    },\n    {\n      \"id\": \"development-acceleration\",\n      \"title\": \"AI speeding up development workflows\",\n      \"claims\": [\n        {\n          \"text\": \"Using GPT to generate code for joining tables accelerates development by handling routine tasks, allowing developers to focus on higher‑level problems.\",\n          \"evidence\": [19]\n        },\n        {\n          \"text\": \"The author notes that while AI speeds up coding, their projects lack cloud infrastructure and likely never will.\",\n          \"evidence\": [19]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": []\n}",
+  "thinking": "Need to produce JSON. Identify topics. Main themes: AI tools for job search, AI impact on dev, cloud automation, recruiter role, code generation issues, performance concerns, etc. Extract claims with evidence IDs.\n\nDecisions none. Open questions? Maybe none. But there is question about \"якусь деталь упустила\" not answered. Not open? Probably no explicit question unresolved. Might be none.\n\nCreate topics:\n\ntopic-id: ai-job-search claims from #1,5,6,8,9,14.\n\ntopic-id: ai-code-generation issues claims from #30,34,35.\n\ntopic-id: recruiter-role from #13,14.\n\ntopic-id: development-acceleration claim from #9,19,20.\n\nProvide.\n\nLet's craft.\n\n",
+  "parsed": {
+    "title": "Discussion on AI tools, job search, and code generation",
+    "topics": [
+      {
+        "id": "ai-job-search",
+        "title": "Using AI for job search and application preparation",
+        "claims": [
+          {
+            "text": "The author is preparing for a full‑time job search and plans to set up cloud automation for generating PDF resumes tailored to specific vacancies.",
+            "evidence": [1]
+          },
+          {
+            "text": "They intend to configure OpenClaw to find vacancies, generate resumes, and write cover letters once their startup is closed.",
+            "evidence": [5]
+          },
+          {
+            "text": "In 2026, adding many AI‑related skills (Cursor, Claude Code, LLM, RAG, embeddings, etc.) is necessary to avoid being filtered out by recruiters.",
+            "evidence": [6]
+          },
+          {
+            "text": "AI has become a market mainstream, and lacking AI knowledge makes job search for JS/Python positions very difficult.",
+            "evidence": [8]
+          },
+          {
+            "text": "The acceleration of development due to AI tools became significant only around 2025, despite earlier theories from 2022.",
+            "evidence": [9]
+          },
+          {
+            "text": "The author expects the recruiter profession to disappear, leaving HR as a personnel management role.",
+            "evidence": [14]
+          }
+        ]
+      },
+      {
+        "id": "ai-code-generation",
+        "title": "Problems with AI‑generated code and performance",
+        "claims": [
+          {
+            "text": "AI‑generated raw SQL (450 lines) pulled almost all data from the database, leading to unoptimized queries that could take 10–20 minutes in production.",
+            "evidence": [30]
+          },
+          {
+            "text": "Incremental computations have been replaced by a view, suggesting a shift in data handling architecture.",
+            "evidence": [34]
+          },
+          {
+            "text": "A developer used AI to generate code that broke the project; after review the team decided to drop the feature entirely because the code was inadequate.",
+            "evidence": [35]
+          }
+        ]
+      },
+      {
+        "id": "recruiter-role",
+        "title": "Changing relevance of recruiters",
+        "claims": [
+          {
+            "text": "Candidate search via keyword tags is becoming more detached from reality than before.",
+            "evidence": [13]
+          },
+          {
+            "text": "The author predicts the recruiter profession will become extinct, with HR focusing on personnel management.",
+            "evidence": [14]
+          }
+        ]
+      },
+      {
+        "id": "development-acceleration",
+        "title": "AI speeding up development workflows",
+        "claims": [
+          {
+            "text": "Using GPT to generate code for joining tables accelerates development by handling routine tasks, allowing developers to focus on higher‑level problems.",
+            "evidence": [19]
+          },
+          {
+            "text": "The author notes that while AI speeds up coding, their projects lack cloud infrastructure and likely never will.",
+            "evidence": [19]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": []
+  },
+  "usage": {
+    "durationMs": 10066.772499999992,
+    "ollamaTotalMs": 9898.26922,
+    "promptEvalCount": 3260,
+    "evalCount": 863,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 4,
+    "claimCount": 13,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.7619047619047619,
+    "goldClaimPrecision": 0.46153846153846156,
+    "evidencePrecision": 0.46153846153846156,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0,
+    "matchedClaimIds": [
+      "job-search.automation-idea",
+      "job-search.ai-skills",
+      "job-search.keyword-filtering",
+      "development.routine-speedup",
+      "vibe-coding.bad-backend",
+      "vibe-coding.review-failure"
+    ],
+    "retainedThreadIds": [
+      "ai-job-search",
+      "ai-assisted-development",
+      "vibe-coding-risks"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

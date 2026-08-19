@@ -1,0 +1,130 @@
+{
+  "case": "mutation-question-base",
+  "model": "deepseek-v4-pro:preview",
+  "pipeline": "deterministic-shell",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 1,
+  "transformation": "identity",
+  "inputHash": "6a360808f9f41ef21cd7e5b790a3c23313edde24c137222e2804680966a61a1f",
+  "promptHash": "676fdbb03ce87441ebef49845a6caa5f83da943c4e812be1795ab019d5e4240b",
+  "promptVersion": "v4",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Website availability inquiry\",\n  \"events\": [\n    {\n      \"id\": \"m1\",\n      \"topicId\": \"availability\",\n      \"topicTitle\": \"Availability inquiry\",\n      \"speaker\": \"A\",\n      \"statement\": \"Is this unavailable on the website?\",\n      \"speechAct\": \"question\",\n      \"literalness\": \"literal\",\n      \"commitment\": \"none\",\n      \"epistemicStatus\": \"uncertain\",\n      \"settled\": false,\n      \"action\": null,\n      \"refersTo\": [],\n      \"stance\": \"neutral\",\n      \"semanticImportance\": 0.5,\n      \"confidence\": 0.9,\n      \"evidence\": [\n        1\n      ]\n    }\n  ]\n}",
+  "thinking": "We are asked to reconstruct a Telegram conversation as normalized discourse events based on the given input. The input is in \"pipe-v3\" format, but only one message is provided: \"#1|\"A\"|\"10:00\"|^0|\"text\"|\"Is this unavailable on the website?\"\". So there's just one message. The instruction says: \"Reconstruct a Telegram conversation as normalized discourse events. Do not write a summary and do not output decisions or openQuestions.\" We need to output JSON with events array. With only one message, we need to create one event. The message is \"Is this unavailable on the website?\" from speaker \"A\". It's a question. We need to assign properties accordingly. There's no other context, so we can't infer much. The message ID is 1. Evidence: [1]. Topic: unknown, but we can infer something like \"website availability\". speechAct: question. literalness: literal (it's a straightforward question). commitment: none (no commitment to action). epistemicStatus: uncertain (the speaker is asking about availability, implying they don't know). settled: false. action: null. refersTo: [] (no prior events). stance: neutral. semanticImportance: maybe 0.5? The question is important as the only content, but not highly developed. confidence: high. topicId: perhaps \"availability\". topicTitle: \"Availability inquiry\". So I'll produce one event.",
+  "parsed": {
+    "title": "Website availability inquiry",
+    "topics": [],
+    "decisions": [],
+    "openQuestions": [
+      {
+        "text": "A: Is this unavailable on the website?",
+        "evidence": [1]
+      }
+    ]
+  },
+  "reconstruction": {
+    "title": "Website availability inquiry",
+    "events": [
+      {
+        "id": "m1",
+        "topicId": "availability",
+        "topicTitle": "Availability inquiry",
+        "speaker": "A",
+        "statement": "Is this unavailable on the website?",
+        "speechAct": "question",
+        "literalness": "literal",
+        "commitment": "none",
+        "epistemicStatus": "uncertain",
+        "settled": false,
+        "action": null,
+        "refersTo": [],
+        "stance": "neutral",
+        "semanticImportance": 0.5,
+        "confidence": 0.9,
+        "evidence": [1]
+      }
+    ]
+  },
+  "state": {
+    "title": "Website availability inquiry",
+    "events": [
+      {
+        "id": "m1",
+        "topicId": "availability",
+        "topicTitle": "Availability inquiry",
+        "speaker": "A",
+        "statement": "Is this unavailable on the website?",
+        "speechAct": "question",
+        "literalness": "literal",
+        "commitment": "none",
+        "epistemicStatus": "uncertain",
+        "settled": false,
+        "action": null,
+        "refersTo": [],
+        "stance": "neutral",
+        "semanticImportance": 0.5,
+        "confidence": 0.9,
+        "evidence": [1]
+      }
+    ],
+    "resolvedQuestionIds": [],
+    "supersededEventIds": []
+  },
+  "extractorMetrics": {
+    "eventCount": 1,
+    "eventRecall": 1,
+    "eventPrecision": 1,
+    "attributionAccuracy": 1,
+    "evidenceCorrectness": 1,
+    "relationIntegrity": 1
+  },
+  "reducerMetrics": {
+    "deterministic": true,
+    "lifecycleInvariantViolations": 0,
+    "resolvedQuestions": 0,
+    "supersededEvents": 0
+  },
+  "operationalMetrics": {
+    "modelCalls": 1,
+    "sourceMessageWindows": 1,
+    "semanticInterpretations": 1,
+    "semanticAmplification": 1
+  },
+  "projectionDiagnostics": {
+    "decisionCandidates": 0,
+    "decisionsRejectedByInvariant": 0,
+    "questionsResolvedByAnswerEdge": 0
+  },
+  "usage": {
+    "durationMs": 7772.5449999999255,
+    "ollamaTotalMs": 7437.013237,
+    "promptEvalCount": 671,
+    "evalCount": 466,
+    "doneReason": "stop",
+    "thinkingTextTokenCount": 290,
+    "finalTextTokenCount": 159
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 0,
+    "claimCount": 0,
+    "decisionCount": 0,
+    "openQuestionCount": 1,
+    "majorThreadRecall": 0,
+    "weightedClaimRecall": null,
+    "goldClaimPrecision": null,
+    "evidencePrecision": 1,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0,
+    "matchedClaimIds": [],
+    "matchedDecisionIds": [],
+    "matchedOpenQuestionIds": ["website-availability.question"],
+    "retainedThreadIds": [],
+    "triggeredForbiddenIds": []
+  }
+}

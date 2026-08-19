@@ -1,0 +1,117 @@
+{
+  "case": "real-ai-tools-interleaved",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 4,
+  "inputHash": "3e5fb5efeccd172ee2f1e8a3ef61dfdf2ed0fd33f2162906991e5f91c1a0d9ba",
+  "promptHash": "37cf3f4e79d184fd2b0f7efef7545a92b54b985f38a2a5b261ece3d444236cdf",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion on AI toolkits, diploma cover costs, and small PC case hack\",\n  \"topics\": [\n    {\n      \"id\": \"ai-capabilities\",\n      \"title\": \"AI capabilities and toolkits\",\n      \"claims\": [\n        {\n          \"text\": \"AI systems are not inherently intelligent; their complex abilities come from toolkits and ready-made solutions.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"InstinctGPT shows that toolkits can provide a large performance boost but cannot fully compensate for the model's basic ability deficiencies.\",\n          \"evidence\": [8]\n        },\n        {\n          \"text\": \"Older models (2022‑2023) likely cannot handle tasks well due to small context windows.\",\n          \"evidence\": [3]\n        },\n        {\n          \"text\": \"Modern models aim to extract maximal performance from fewer parameters and are sometimes fine‑tuned for specific tasks.\",\n          \"evidence\": [14]\n        }\n      ]\n    },\n    {\n      \"id\": \"diploma-cover-costs\",\n      \"title\": \"Cost of diploma covers\",\n      \"claims\": [\n        {\n          \"text\": \"Some people request 650 UAH for a diploma cover.\",\n          \"evidence\": [23]\n        },\n        {\n          \"text\": \"Others reported paying 47 UAH.\",\n          \"evidence\": [24]\n        },\n        {\n          \"text\": \"A reply mentions 30 UAH as the price.\",\n          \"evidence\": [25]\n        },\n        {\n          \"text\": \"One participant suggests getting the diploma without a cover because it is just paper.\",\n          \"evidence\": [26]\n        },\n        {\n          \"text\": \"Another notes that the cover includes the university seal, which is unique.\",\n          \"evidence\": [27]\n        },\n        {\n          \"text\": \"It is argued that the cover will be looked at only three times in a lifetime.\",\n          \"evidence\": [29]\n        }\n      ]\n    },\n    {\n      \"id\": \"pc-case-mod\",\n      \"title\": \"Fitting multiple GPUs into a small PC case\",\n      \"claims\": [\n        {\n          \"text\": \"A small PC case that officially fits only one small GPU can be modified with straps and force to hold three GPUs.\",\n          \"evidence\": [30]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": []\n}",
+  "thinking": "We need to extract topics. Main discussion about AI capability (messages 1-3,8,14). Also bus anecdote noise maybe ignore. Also diploma cover price (22-30). Also small PC case (30). Create topics.\n\nClaims with evidence IDs.\n\nTopic ai-capabilities: claim that AI kits can give big boost but don't compensate lack of base abilities (msg8). Also claim that old models had large context windows? Actually msg14 about old models trained on everything lacking understanding, modern squeeze parameters. Include claim from msg1 about AI not being inherently smart, only toolkits. Also msg3 desire to test AI with modern toolkit.\n\nDecisions none. Open questions? Any unresolved question? Maybe none. All questions are rhetorical? No explicit question unanswered. So openQuestions empty.\n\nReturn JSON.\n\n",
+  "parsed": {
+    "title": "Discussion on AI toolkits, diploma cover costs, and small PC case hack",
+    "topics": [
+      {
+        "id": "ai-capabilities",
+        "title": "AI capabilities and toolkits",
+        "claims": [
+          {
+            "text": "AI systems are not inherently intelligent; their complex abilities come from toolkits and ready-made solutions.",
+            "evidence": [1]
+          },
+          {
+            "text": "InstinctGPT shows that toolkits can provide a large performance boost but cannot fully compensate for the model's basic ability deficiencies.",
+            "evidence": [8]
+          },
+          {
+            "text": "Older models (2022‑2023) likely cannot handle tasks well due to small context windows.",
+            "evidence": [3]
+          },
+          {
+            "text": "Modern models aim to extract maximal performance from fewer parameters and are sometimes fine‑tuned for specific tasks.",
+            "evidence": [14]
+          }
+        ]
+      },
+      {
+        "id": "diploma-cover-costs",
+        "title": "Cost of diploma covers",
+        "claims": [
+          {
+            "text": "Some people request 650 UAH for a diploma cover.",
+            "evidence": [23]
+          },
+          {
+            "text": "Others reported paying 47 UAH.",
+            "evidence": [24]
+          },
+          {
+            "text": "A reply mentions 30 UAH as the price.",
+            "evidence": [25]
+          },
+          {
+            "text": "One participant suggests getting the diploma without a cover because it is just paper.",
+            "evidence": [26]
+          },
+          {
+            "text": "Another notes that the cover includes the university seal, which is unique.",
+            "evidence": [27]
+          },
+          {
+            "text": "It is argued that the cover will be looked at only three times in a lifetime.",
+            "evidence": [29]
+          }
+        ]
+      },
+      {
+        "id": "pc-case-mod",
+        "title": "Fitting multiple GPUs into a small PC case",
+        "claims": [
+          {
+            "text": "A small PC case that officially fits only one small GPU can be modified with straps and force to hold three GPUs.",
+            "evidence": [30]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": []
+  },
+  "usage": {
+    "durationMs": 9792.000100000005,
+    "ollamaTotalMs": 9612.999599,
+    "promptEvalCount": 2165,
+    "evalCount": 689,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 3,
+    "claimCount": 11,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.8823529411764706,
+    "goldClaimPrecision": 0.6363636363636364,
+    "evidencePrecision": 0.6363636363636364,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0,
+    "matchedClaimIds": [
+      "ai-tooling.capability-view",
+      "ai-tooling.instinctgpt-result",
+      "ai-tooling.old-model-experiment",
+      "ai-tooling.model-comparison",
+      "diploma-cover.prices",
+      "diploma-cover.low-value",
+      "pc-case.three-gpus"
+    ],
+    "retainedThreadIds": ["ai-tooling", "diploma-cover", "pc-case"],
+    "triggeredForbiddenIds": []
+  }
+}

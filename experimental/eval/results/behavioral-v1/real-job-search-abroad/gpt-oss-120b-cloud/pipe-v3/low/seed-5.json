@@ -1,0 +1,146 @@
+{
+  "case": "real-job-search-abroad",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 5,
+  "inputHash": "aac555f3427e2195f145b4a5e3a6d9644961170a8ccc181b8832ae83202b036f",
+  "promptHash": "4bb2c538d807f29994b2ea2ea18e6a6ffaf5d4c95f4f15c7ac0e8801257acb05",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion about working abroad in Slovakia and Austria\",\n  \"topics\": [\n    {\n      \"id\": \"relocation-experiences\",\n      \"title\": \"Personal experiences living and working abroad\",\n      \"claims\": [\n        {\n          \"text\": \"Some participants have lived or worked in Austria and Poland\",\n          \"evidence\": [3, 12, 49]\n        },\n        {\n          \"text\": \"One user has been living in Slovakia for almost a year without speaking the language\",\n          \"evidence\": [43]\n        },\n        {\n          \"text\": \"A partner has lived in Austria for over 10 years and is skeptical about the country's future\",\n          \"evidence\": [60]\n        },\n        {\n          \"text\": \"The speaker plans to move to Warsaw for a tech event\",\n          \"evidence\": [59]\n        }\n      ]\n    },\n    {\n      \"id\": \"language-requirements\",\n      \"title\": \"Language expectations for jobs in Central Europe\",\n      \"claims\": [\n        {\n          \"text\": \"Local language proficiency (often B2) is commonly required for many positions\",\n          \"evidence\": [46]\n        },\n        {\n          \"text\": \"Some companies accept English-only communication, especially in tech roles\",\n          \"evidence\": [15, 55]\n        },\n        {\n          \"text\": \"Many job postings do not specify language level, leading to candidates being filtered out\",\n          \"evidence\": [27]\n        },\n        {\n          \"text\": \"Higher education rarely influences hiring decisions\",\n          \"evidence\": [32]\n        }\n      ]\n    },\n    {\n      \"id\": \"job-search-advice\",\n      \"title\": \"Strategies and outcomes for finding tech jobs abroad\",\n      \"claims\": [\n        {\n          \"text\": \"LinkedIn is recommended as a primary tool for job hunting\",\n          \"evidence\": [18]\n        },\n        {\n          \"text\": \"Applying broadly (100 applications) resulted in only three interviews for the speaker\",\n          \"evidence\": [21]\n        },\n        {\n          \"text\": \"Candidates with 2‑3 years of experience may still receive interviews despite limited language skills\",\n          \"evidence\": [29, 36]\n        },\n        {\n          \"text\": \"Salary expectations abroad are generally higher than in Ukraine, but candidates often accept minimum offers to secure work\",\n          \"evidence\": [35, 37]\n        }\n      ]\n    },\n    {\n      \"id\": \"salary-discussion\",\n      \"title\": \"Compensation levels and expectations\",\n      \"claims\": [\n        {\n          \"text\": \"Tech salaries in Europe are higher than in Ukraine, yet many overlook this advantage\",\n          \"evidence\": [35]\n        },\n        {\n          \"text\": \"The speaker received a higher-than-mcdonald's salary after negotiating a minimum offer\",\n          \"evidence\": [37]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": [\n    {\n      \"text\": \"Who currently lives in Bratislava or elsewhere in Slovakia?\",\n      \"evidence\": [1]\n    }\n  ]\n}",
+  "thinking": "We need JSON with title, topics, decisions, openQuestions. Identify topics like relocation experiences, language requirements, job search advice, salary expectations. Include claims with evidence IDs.\n\nOpen questions: e.g., #1 asking who lives in Bratislava? but no answer? there is some answers later about who knows. No direct answer to who lives there. So open.\n\nAlso question #58 \"А ти як особисто відчуваєш, думаєш лишатись в Австрії?\" responded by #60 gives opinion, so answered.\n\nThus open only #1.\n\nDecisions none.\n\nCreate topics.\n\nLet's craft.\n\n",
+  "parsed": {
+    "title": "Discussion about working abroad in Slovakia and Austria",
+    "topics": [
+      {
+        "id": "relocation-experiences",
+        "title": "Personal experiences living and working abroad",
+        "claims": [
+          {
+            "text": "Some participants have lived or worked in Austria and Poland",
+            "evidence": [3, 12, 49]
+          },
+          {
+            "text": "One user has been living in Slovakia for almost a year without speaking the language",
+            "evidence": [43]
+          },
+          {
+            "text": "A partner has lived in Austria for over 10 years and is skeptical about the country's future",
+            "evidence": [60]
+          },
+          {
+            "text": "The speaker plans to move to Warsaw for a tech event",
+            "evidence": [59]
+          }
+        ]
+      },
+      {
+        "id": "language-requirements",
+        "title": "Language expectations for jobs in Central Europe",
+        "claims": [
+          {
+            "text": "Local language proficiency (often B2) is commonly required for many positions",
+            "evidence": [46]
+          },
+          {
+            "text": "Some companies accept English-only communication, especially in tech roles",
+            "evidence": [15, 55]
+          },
+          {
+            "text": "Many job postings do not specify language level, leading to candidates being filtered out",
+            "evidence": [27]
+          },
+          {
+            "text": "Higher education rarely influences hiring decisions",
+            "evidence": [32]
+          }
+        ]
+      },
+      {
+        "id": "job-search-advice",
+        "title": "Strategies and outcomes for finding tech jobs abroad",
+        "claims": [
+          {
+            "text": "LinkedIn is recommended as a primary tool for job hunting",
+            "evidence": [18]
+          },
+          {
+            "text": "Applying broadly (100 applications) resulted in only three interviews for the speaker",
+            "evidence": [21]
+          },
+          {
+            "text": "Candidates with 2‑3 years of experience may still receive interviews despite limited language skills",
+            "evidence": [29, 36]
+          },
+          {
+            "text": "Salary expectations abroad are generally higher than in Ukraine, but candidates often accept minimum offers to secure work",
+            "evidence": [35, 37]
+          }
+        ]
+      },
+      {
+        "id": "salary-discussion",
+        "title": "Compensation levels and expectations",
+        "claims": [
+          {
+            "text": "Tech salaries in Europe are higher than in Ukraine, yet many overlook this advantage",
+            "evidence": [35]
+          },
+          {
+            "text": "The speaker received a higher-than-mcdonald's salary after negotiating a minimum offer",
+            "evidence": [37]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": [
+      {
+        "text": "Who currently lives in Bratislava or elsewhere in Slovakia?",
+        "evidence": [1]
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 9928.823000000004,
+    "ollamaTotalMs": 9635.494898,
+    "promptEvalCount": 3531,
+    "evalCount": 797,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 4,
+    "claimCount": 14,
+    "decisionCount": 0,
+    "openQuestionCount": 1,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.9,
+    "goldClaimPrecision": 0.5714285714285714,
+    "evidencePrecision": 0.5,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 1,
+    "noiseRetention": 0,
+    "matchedClaimIds": [
+      "networking.participants-abroad",
+      "language.work-vs-daily-life",
+      "austria.outlook",
+      "job-search.local-language-filter",
+      "job-search.education-observation",
+      "job-search.two-months",
+      "job-search.conversion",
+      "job-search.salary-compromise"
+    ],
+    "retainedThreadIds": [
+      "networking-abroad",
+      "language-integration",
+      "life-in-austria",
+      "job-search-abroad"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

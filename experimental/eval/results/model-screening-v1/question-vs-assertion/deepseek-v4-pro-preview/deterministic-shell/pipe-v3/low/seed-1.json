@@ -1,0 +1,130 @@
+{
+  "case": "question-vs-assertion",
+  "model": "deepseek-v4-pro:preview",
+  "pipeline": "deterministic-shell",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 1,
+  "transformation": "identity",
+  "inputHash": "9c0ac954634b92b6bb6ded0b18dd6f04ef6894289c9c828ea886acc3f3d7592a",
+  "promptHash": "a84d10e2886a96215377d8dc69d1c5ea8c597571988d55a05e66e16d6219c817",
+  "promptVersion": "v4",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Website availability query\",\n  \"events\": [\n    {\n      \"id\": \"m1\",\n      \"topicId\": \"website-content\",\n      \"topicTitle\": \"Website content availability\",\n      \"speaker\": \"A\",\n      \"statement\": \"Хіба цього немає на сайті?\",\n      \"speechAct\": \"question\",\n      \"literalness\": \"literal\",\n      \"commitment\": \"none\",\n      \"epistemicStatus\": \"uncertain\",\n      \"settled\": false,\n      \"action\": null,\n      \"refersTo\": [],\n      \"stance\": \"neutral\",\n      \"semanticImportance\": 0.5,\n      \"confidence\": 0.9,\n      \"evidence\": [\n        1\n      ]\n    }\n  ]\n}",
+  "thinking": "We are asked to reconstruct a Telegram conversation as normalized discourse events. The input is in pipe-v3 format, but only one message is given. Let's analyze the provided message.\n\nMessage:\n#1|\"A\"|\"10:00\"|^0|\"text\"|\"Хіба цього немає на сайті?\"\n\nThis is in Ukrainian. Translation: \"Isn't this on the website?\" or more literally \"Is it not on the website?\" It's a rhetorical question implying that something should be on the website. The speaker is \"A\". Time \"10:00\". No parent. Kind \"text\". The text is a single proposition.\n\nWe need to create events from this message. Only one message, so id will be m1 (since the message id is 1). The directive says: \"Create event ids from the primary evidence message id: m17 for message 17. Use suffixes only when one message contains multiple independent propositions (m17a, m17b).\" So for message 1, event id is \"m1\". No multiple independent propositions here, so just \"m1\".\n\nWe need to assign properties: topicId, topicTitle, speaker, statement, speechAct, literalness, commitment, epistemicStatus, settled, action, refersTo, stance, semanticImportance, confidence, evidence.\n\nThe message is a question. But it's a rhetorical question, challenging the absence of something on the website. The speechAct could be \"question\" (since it's a question form) or maybe \"opposition\" if it's opposing an implicit claim. But the instruction says: \"speechAct describes conversational function; literalness describes framing; commitment describes actor commitment; epistemicStatus describes whether the proposition is merely claimed, accepted, rejected, or uncertain.\" A rhetorical question like \"Isn't this on the website?\" suggests that the speaker believes it should be there, and is questioning why it's not. It might be an indirect assertion that it is indeed on the website, or a challenge. However, given the literal form, it's a question. The speechAct options: assertion, question, proposal, answer, request, correction, opposition. \"question\" seems appropriate if we take it literally, but it might be ironic or rhetorical. The literalness property can help. literalness can be \"literal\", \"ironic\", \"uncertain\". This could be ironic, because it's a question expecting a negative answer (it's not on the website, implying someone said it is). So maybe speechAct = \"question\", literalness = \"ironic\". Or speechAct = \"opposition\" if it's opposing a statement. Without context, we only have this one message. It is a reply to nothing (^0). So it's initiating a conversation. \"Хіба цього немає на сайті?\" could be a standalone question. The speaker might be asking if something isn't available on the website, genuinely uncertain. But \"хіба\" often indicates surprise or disbelief that something is not on the website, assuming it should be there. So epistemicStatus: the proposition that \"this\" is not on the website is being questioned. The speaker seems to doubt the absence, implying they think it is on the website. So epistemicStatus could be \"uncertain\" if they are genuinely asking, or \"rejected\" if they are rejecting the idea that it's not on the website. Let's consider the instruction: \"Do not promote participant claims to narrator facts.\" We need to capture the statement as a proposition. The statement could be: \"Is it not on the website?\" That implies the speaker questions the absence. I'll paraphrase: \"Isn't this on the website?\" The underlying claim might be that it should be on the website. But the event should capture the conversational function.\n\nSince there is no prior message, it's not an answer or opposition to any explicit previous event. So refersTo will be [].\n\nCommitment: \"commitment=explicit only when the evidence clearly commits an identifiable actor to an action. A suggestion, preference, prediction, joke, analogy, or isolated first-person opinion is never explicit commitment.\" This is a question, not a commitment to action. So commitment = \"none\".\n\naction: null, because no actionable actor/action exists.\n\nsettled: false, as no action is presented as settled.\n\nstance: neutral, because there's no prior event to support or oppose. Or maybe if we consider it as opposing an implicit claim, but no explicit target, so neutral.\n\nsemanticImportance: I'll assign a moderate value, say 0.5, as it's just a question opening a topic. confidence: 0.9 as it's clear.\n\nevidence: [1] because it's from message 1.\n\ntopicId and topicTitle: We need to infer the topic. The message mentions \"цього\" (this) and \"сайті\" (website). So the topic is about something being on a website. I'll assign topicId: \"website-content\", topicTitle: \"Website content availability\". Something short.\n\nNow, speechAct: I'm leaning toward \"question\", literalness: \"ironic\" because \"хіба\" often signals a rhetorical question. But could be \"literal\" if it's a genuine question. Given the lack of context, it's safer to label it as \"uncertain\" for literalness? The instruction says: \"literalness describes framing: literal, ironic, uncertain.\" If we're unsure whether it's ironic or literal, we can use \"uncertain\". But \"uncertain\" might mean the framing is uncertain, not our confidence. I'll check: \"literalness: 'literal | ironic | uncertain'\". So if the framing is ambiguous, we can put \"uncertain\". I'll set it as \"uncertain\" because we don't know if it's rhetorical. Alternatively, maybe it's literal: he genuinely asks if it's not on the website. I'll go with \"literal\" because it's a straightforward question. Actually, \"хіба\" in Ukrainian can be used in genuine questions expecting a negative answer, e.g., \"Isn't it true that...?\" It's not necessarily ironic. So I'll label literalness as \"literal\".\n\nEpistemic status: The speaker is questioning the proposition \"this is not on the website\". So the epistemic status of that proposition from the speaker's perspective is that they doubt it, i.e., they think it might be on the website. That's a claim of uncertainty or rejection of the negative. For the statement as phrased, the speaker is asserting a question. The epistemic status of the embedded proposition? I think it's \"uncertain\" because they are asking. If they were rejecting, they'd assert \"It is on the website\". So epistemicStatus = \"uncertain\" fits.\n\nThus: \nid: \"m1\",\ntopicId: \"website-content\",\ntopicTitle: \"Website content availability\",\nspeaker: \"A\",\nstatement: \"Хіба цього немає на сайті?\",\nspeechAct: \"question\",\nliteralness: \"literal\",\ncommitment: \"none\",\nepistemicStatus: \"uncertain\",\nsettled: false,\naction: null,\nrefersTo: [],\nstance: \"neutral\",\nsemanticImportance: 0.5,\nconfidence: 0.9,\nevidence: [1]\n\nNow output JSON as per shape. Note: \"statement\" should be a concise proposition, not necessarily the exact text, but I'll keep the original text as concise proposition? The instruction says: \"Concise proposition\". Could rephrase in English? The input is in Ukrainian, but reconstruction event statement can be in the original language or translated? The example didn't specify language. I'll keep the original Ukrainian statement as it's a concise proposition. It's allowed.\n\nTitle: \"Reconstruction of a Telegram conversation\" but the example title is \"Short reconstruction title\". I'll set title: \"Website availability query\".\n\nAll good.",
+  "parsed": {
+    "title": "Website availability query",
+    "topics": [],
+    "decisions": [],
+    "openQuestions": [
+      {
+        "text": "A: Хіба цього немає на сайті?",
+        "evidence": [1]
+      }
+    ]
+  },
+  "reconstruction": {
+    "title": "Website availability query",
+    "events": [
+      {
+        "id": "m1",
+        "topicId": "website-content",
+        "topicTitle": "Website content availability",
+        "speaker": "A",
+        "statement": "Хіба цього немає на сайті?",
+        "speechAct": "question",
+        "literalness": "literal",
+        "commitment": "none",
+        "epistemicStatus": "uncertain",
+        "settled": false,
+        "action": null,
+        "refersTo": [],
+        "stance": "neutral",
+        "semanticImportance": 0.5,
+        "confidence": 0.9,
+        "evidence": [1]
+      }
+    ]
+  },
+  "state": {
+    "title": "Website availability query",
+    "events": [
+      {
+        "id": "m1",
+        "topicId": "website-content",
+        "topicTitle": "Website content availability",
+        "speaker": "A",
+        "statement": "Хіба цього немає на сайті?",
+        "speechAct": "question",
+        "literalness": "literal",
+        "commitment": "none",
+        "epistemicStatus": "uncertain",
+        "settled": false,
+        "action": null,
+        "refersTo": [],
+        "stance": "neutral",
+        "semanticImportance": 0.5,
+        "confidence": 0.9,
+        "evidence": [1]
+      }
+    ],
+    "resolvedQuestionIds": [],
+    "supersededEventIds": []
+  },
+  "extractorMetrics": {
+    "eventCount": 1,
+    "eventRecall": 1,
+    "eventPrecision": 1,
+    "attributionAccuracy": 1,
+    "evidenceCorrectness": 1,
+    "relationIntegrity": 1
+  },
+  "reducerMetrics": {
+    "deterministic": true,
+    "lifecycleInvariantViolations": 0,
+    "resolvedQuestions": 0,
+    "supersededEvents": 0
+  },
+  "operationalMetrics": {
+    "modelCalls": 1,
+    "sourceMessageWindows": 1,
+    "semanticInterpretations": 1,
+    "semanticAmplification": 1
+  },
+  "projectionDiagnostics": {
+    "decisionCandidates": 0,
+    "decisionsRejectedByInvariant": 0,
+    "questionsResolvedByAnswerEdge": 0
+  },
+  "usage": {
+    "durationMs": 29331.978300000075,
+    "ollamaTotalMs": 29015.12554,
+    "promptEvalCount": 676,
+    "evalCount": 1824,
+    "doneReason": "stop",
+    "thinkingTextTokenCount": 1595,
+    "finalTextTokenCount": 164
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 0,
+    "claimCount": 0,
+    "decisionCount": 0,
+    "openQuestionCount": 1,
+    "majorThreadRecall": 0,
+    "weightedClaimRecall": null,
+    "goldClaimPrecision": null,
+    "evidencePrecision": 1,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0,
+    "matchedClaimIds": [],
+    "matchedDecisionIds": [],
+    "matchedOpenQuestionIds": ["website-availability.question"],
+    "retainedThreadIds": [],
+    "triggeredForbiddenIds": []
+  }
+}

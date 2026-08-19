@@ -1,0 +1,129 @@
+{
+  "case": "real-ai-development",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 1,
+  "transformation": "identity",
+  "inputHash": "c44e2d8f381898078b12b50a1dbf1501e5970203c0d4ef386b86fd514114c47c",
+  "promptHash": "3e0a05e203eb442eb676b68edb70e0aab57dbb0cc1feec2958e22a6ddaf40d3c",
+  "promptVersion": "v2",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion on AI-driven job search, development tools, and code generation risks\",\n  \"topics\": [\n    {\n      \"id\": \"ai-job-search\",\n      \"title\": \"AI-assisted job search and resume generation\",\n      \"claims\": [\n        {\n          \"text\": \"The user plans to set up a cloud (OpenClaw) to automate job searching, PDF resume generation per vacancy, and cover letter writing.\",\n          \"evidence\": [5, 6]\n        },\n        {\n          \"text\": \"Lack of AI skills (e.g., Cursor, Claude Code, LLM, RAG, Embeddings) will cause recruiters to filter out candidates.\",\n          \"evidence\": [6, 8]\n        },\n        {\n          \"text\": \"The perception of AI startups shifted from fringe to mainstream between 2024 and 2026.\",\n          \"evidence\": [7, 8]\n        }\n      ]\n    },\n    {\n      \"id\": \"dev-acceleration\",\n      \"title\": \"Acceleration of development with AI code generation\",\n      \"claims\": [\n        {\n          \"text\": \"Using GPT to generate SQL joins significantly speeds up development.\",\n          \"evidence\": [19]\n        },\n        {\n          \"text\": \"Developers on the discussed projects do not use cloud services at all.\",\n          \"evidence\": [19]\n        }\n      ]\n    },\n    {\n      \"id\": \"code-generation-risks\",\n      \"title\": \"Risks of AI-generated code in production\",\n      \"claims\": [\n        {\n          \"text\": \"AI-generated raw SQL can produce inefficient queries that may take 10–20 minutes in production.\",\n          \"evidence\": [30]\n        },\n        {\n          \"text\": \"A developer pushed unreviewed SELECT * queries to production, causing problems.\",\n          \"evidence\": [35]\n        }\n      ]\n    },\n    {\n      \"id\": \"recruiter-future\",\n      \"title\": \"Future of recruiter profession\",\n      \"claims\": [\n        {\n          \"text\": \"The user expects the recruiter profession to become extinct.\",\n          \"evidence\": [14]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [\n    {\n      \"text\": \"The user decided to configure OpenClaw for vacancy searching, resume generation, and cover letter writing once the startup is closed.\",\n      \"evidence\": [5]\n    }\n  ],\n  \"openQuestions\": [\n    {\n      \"text\": \"Should logs be exported to Gemini for earlier issue detection?\",\n      \"evidence\": [20]\n    }\n  ]\n}",
+  "thinking": "Need produce JSON. Identify topics. Probably main topics: job search automation, AI tools impact, cloud usage, code generation risks, recruiter relevance. Extract claims and decisions. No explicit decisions? maybe decision: using OpenClaw for vacancy search (mentioned as plan). That's a decision. Also claim that AI tools accelerate dev (msg19). Claim cloud lowers entry threshold (msg30). Open question maybe: None unresolved? maybe question about logs? no answer? logs discussion not resolved. So open question: \"Should logs be analyzed with Gemini?\" from msg20 not answered. Include.\n\nConstruct.\n\n",
+  "parsed": {
+    "title": "Discussion on AI-driven job search, development tools, and code generation risks",
+    "topics": [
+      {
+        "id": "ai-job-search",
+        "title": "AI-assisted job search and resume generation",
+        "claims": [
+          {
+            "text": "The user plans to set up a cloud (OpenClaw) to automate job searching, PDF resume generation per vacancy, and cover letter writing.",
+            "evidence": [5, 6]
+          },
+          {
+            "text": "Lack of AI skills (e.g., Cursor, Claude Code, LLM, RAG, Embeddings) will cause recruiters to filter out candidates.",
+            "evidence": [6, 8]
+          },
+          {
+            "text": "The perception of AI startups shifted from fringe to mainstream between 2024 and 2026.",
+            "evidence": [7, 8]
+          }
+        ]
+      },
+      {
+        "id": "dev-acceleration",
+        "title": "Acceleration of development with AI code generation",
+        "claims": [
+          {
+            "text": "Using GPT to generate SQL joins significantly speeds up development.",
+            "evidence": [19]
+          },
+          {
+            "text": "Developers on the discussed projects do not use cloud services at all.",
+            "evidence": [19]
+          }
+        ]
+      },
+      {
+        "id": "code-generation-risks",
+        "title": "Risks of AI-generated code in production",
+        "claims": [
+          {
+            "text": "AI-generated raw SQL can produce inefficient queries that may take 10–20 minutes in production.",
+            "evidence": [30]
+          },
+          {
+            "text": "A developer pushed unreviewed SELECT * queries to production, causing problems.",
+            "evidence": [35]
+          }
+        ]
+      },
+      {
+        "id": "recruiter-future",
+        "title": "Future of recruiter profession",
+        "claims": [
+          {
+            "text": "The user expects the recruiter profession to become extinct.",
+            "evidence": [14]
+          }
+        ]
+      }
+    ],
+    "decisions": [
+      {
+        "text": "The user decided to configure OpenClaw for vacancy searching, resume generation, and cover letter writing once the startup is closed.",
+        "evidence": [5]
+      }
+    ],
+    "openQuestions": [
+      {
+        "text": "Should logs be exported to Gemini for earlier issue detection?",
+        "evidence": [20]
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 6834.002099999998,
+    "ollamaTotalMs": 6494.137326,
+    "promptEvalCount": 3405,
+    "evalCount": 672,
+    "doneReason": "stop",
+    "thinkingTextTokenCount": 119,
+    "finalTextTokenCount": 543
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 4,
+    "claimCount": 8,
+    "decisionCount": 1,
+    "openQuestionCount": 1,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.7619047619047619,
+    "goldClaimPrecision": 0.75,
+    "evidencePrecision": 0.5384615384615384,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 1,
+    "noiseRetention": 0.125,
+    "matchedClaimIds": [
+      "job-search.ai-skills",
+      "job-search.automation-idea",
+      "development.routine-speedup",
+      "vibe-coding.bad-backend",
+      "vibe-coding.review-failure",
+      "job-search.keyword-filtering"
+    ],
+    "matchedDecisionIds": [],
+    "matchedOpenQuestionIds": [],
+    "retainedThreadIds": [
+      "ai-job-search",
+      "ai-assisted-development",
+      "vibe-coding-risks"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

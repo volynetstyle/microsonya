@@ -1,0 +1,144 @@
+{
+  "case": "real-fop-calculator",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 3,
+  "inputHash": "d3179cdb8e49a27f55b8dcbb42c5b7b95590527ad18ad16afb38bc499073e8af",
+  "promptHash": "150d78ee667732e96b9a2fcd5fe5354e59b5fd2af6c1920571e8c0ae3bfc95d6",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion summary\",\n  \"topics\": [\n    {\n      \"id\": \"tax-filing\",\n      \"title\": \"Tax filing difficulties and shortcuts\",\n      \"claims\": [\n        {\n          \"text\": \"Paying a small bribe to a relative (Svetlana) can reduce fines and simplify tax declaration corrections.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"The inspector rarely reviews declarations and approves them without scrutiny.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"The whole correction procedure takes about an hour with Excel, possibly one day per month.\",\n          \"evidence\": [5, 6, 7]\n        },\n        {\n          \"text\": \"Mistakes often stem from mis‑identifying columns and numbers rather than calculation errors.\",\n          \"evidence\": [8]\n        }\n      ]\n    },\n    {\n      \"id\": \"domain-purchase\",\n      \"title\": \"Domain acquisition concerns\",\n      \"claims\": [\n        {\n          \"text\": \"Someone suggested buying a calculator to earn money for a domain.\",\n          \"evidence\": [4]\n        },\n        {\n          \"text\": \"User P4 opposes buying a domain, calling it a useless, low‑value item.\",\n          \"evidence\": [9, 10]\n        }\n      ]\n    },\n    {\n      \"id\": \"app-profitability\",\n      \"title\": \"Viability of a quick‑launch app product\",\n      \"claims\": [\n        {\n          \"text\": \"Web platforms are less profitable than Android/iOS, with poor SEO and no organic traffic.\",\n          \"evidence\": [11]\n        },\n        {\n          \"text\": \"Successful rapid delivery (under a week) using a cross‑platform stack like Flutter is highlighted as a strategy.\",\n          \"evidence\": [12]\n        },\n        {\n          \"text\": \"Skepticism that anyone would buy the product within a month.\",\n          \"evidence\": [17]\n        },\n        {\n          \"text\": \"LinkedIn audience for technical posts has dropped below 50%.\",\n          \"evidence\": [18]\n        }\n      ]\n    },\n    {\n      \"id\": \"security-password\",\n      \"title\": \"Password and source‑code concerns for the app\",\n      \"claims\": [\n        {\n          \"text\": \"The app stores a single password in local storage as a 100% discount promo code.\",\n          \"evidence\": [20]\n        },\n        {\n          \"text\": \"User asks if the source code can be found by searching for the password.\",\n          \"evidence\": [21]\n        },\n        {\n          \"text\": \"Another user mocks the idea of paying 299 UAH for such a product.\",\n          \"evidence\": [22, 32]\n        },\n        {\n          \"text\": \"The app is described as a “free vibe‑code” project with no real value.\",\n          \"evidence\": [30, 31]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": [\n    {\n      \"text\": \"Is the source code publicly searchable via the stored password?\",\n      \"evidence\": [21]\n    }\n  ]\n}",
+  "thinking": "Need produce JSON summarizing. Identify topics: tax filing process, domain purchase, app idea profitability, password security. Decisions none. Open questions: maybe about source code? No answer. So open question ID21? Actually 21 asks about source code, not answered. Also maybe about domain purchase? No. Provide topics.\n\nLet's craft.",
+  "parsed": {
+    "title": "Discussion summary",
+    "topics": [
+      {
+        "id": "tax-filing",
+        "title": "Tax filing difficulties and shortcuts",
+        "claims": [
+          {
+            "text": "Paying a small bribe to a relative (Svetlana) can reduce fines and simplify tax declaration corrections.",
+            "evidence": [1]
+          },
+          {
+            "text": "The inspector rarely reviews declarations and approves them without scrutiny.",
+            "evidence": [1]
+          },
+          {
+            "text": "The whole correction procedure takes about an hour with Excel, possibly one day per month.",
+            "evidence": [5, 6, 7]
+          },
+          {
+            "text": "Mistakes often stem from mis‑identifying columns and numbers rather than calculation errors.",
+            "evidence": [8]
+          }
+        ]
+      },
+      {
+        "id": "domain-purchase",
+        "title": "Domain acquisition concerns",
+        "claims": [
+          {
+            "text": "Someone suggested buying a calculator to earn money for a domain.",
+            "evidence": [4]
+          },
+          {
+            "text": "User P4 opposes buying a domain, calling it a useless, low‑value item.",
+            "evidence": [9, 10]
+          }
+        ]
+      },
+      {
+        "id": "app-profitability",
+        "title": "Viability of a quick‑launch app product",
+        "claims": [
+          {
+            "text": "Web platforms are less profitable than Android/iOS, with poor SEO and no organic traffic.",
+            "evidence": [11]
+          },
+          {
+            "text": "Successful rapid delivery (under a week) using a cross‑platform stack like Flutter is highlighted as a strategy.",
+            "evidence": [12]
+          },
+          {
+            "text": "Skepticism that anyone would buy the product within a month.",
+            "evidence": [17]
+          },
+          {
+            "text": "LinkedIn audience for technical posts has dropped below 50%.",
+            "evidence": [18]
+          }
+        ]
+      },
+      {
+        "id": "security-password",
+        "title": "Password and source‑code concerns for the app",
+        "claims": [
+          {
+            "text": "The app stores a single password in local storage as a 100% discount promo code.",
+            "evidence": [20]
+          },
+          {
+            "text": "User asks if the source code can be found by searching for the password.",
+            "evidence": [21]
+          },
+          {
+            "text": "Another user mocks the idea of paying 299 UAH for such a product.",
+            "evidence": [22, 32]
+          },
+          {
+            "text": "The app is described as a “free vibe‑code” project with no real value.",
+            "evidence": [30, 31]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": [
+      {
+        "text": "Is the source code publicly searchable via the stored password?",
+        "evidence": [21]
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 8309.36659999998,
+    "ollamaTotalMs": 8146.929328,
+    "promptEvalCount": 2799,
+    "evalCount": 753,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 4,
+    "claimCount": 14,
+    "decisionCount": 0,
+    "openQuestionCount": 1,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.8888888888888888,
+    "goldClaimPrecision": 0.5,
+    "evidencePrecision": 0.5,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 1,
+    "noiseRetention": 0.07142857142857142,
+    "matchedClaimIds": [
+      "tax-reporting.form-risk",
+      "product.creator-response",
+      "tax-reporting.paid-help",
+      "product.web-limitations",
+      "product.fast-delivery-strategy",
+      "product.validate-demand-first",
+      "security.password-in-bundle"
+    ],
+    "retainedThreadIds": [
+      "tax-reporting",
+      "calculator-product",
+      "calculator-security"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

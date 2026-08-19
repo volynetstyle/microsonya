@@ -1,0 +1,149 @@
+{
+  "case": "real-fop-calculator",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 5,
+  "transformation": "identity-replay",
+  "inputHash": "d3179cdb8e49a27f55b8dcbb42c5b7b95590527ad18ad16afb38bc499073e8af",
+  "promptHash": "150d78ee667732e96b9a2fcd5fe5354e59b5fd2af6c1920571e8c0ae3bfc95d6",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion on taxes, domain purchase, app viability, and potential scam\",\n  \"topics\": [\n    {\n      \"id\": \"tax-filing\",\n      \"title\": \"Tax filing complications and advice\",\n      \"claims\": [\n        {\n          \"text\": \"User P1 claims that paying 500 UAH to aunt Sveta helped avoid larger penalties by correctly resubmitting declarations.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"User P1 states that the tax inspector was previously approving declarations without review and later reprimanded.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"User P3 says the whole tax correction procedure takes about an hour with Excel, at most a day.\",\n          \"evidence\": [5, 6]\n        },\n        {\n          \"text\": \"User P1 emphasizes that the main difficulty is correctly identifying which column to adjust, not the calculation itself.\",\n          \"evidence\": [8]\n        },\n        {\n          \"text\": \"User P1 notes that the calculator works only for hryvnia‑based FOPs, requiring conversion of all transactions to the day's exchange rate.\",\n          \"evidence\": [19]\n        }\n      ]\n    },\n    {\n      \"id\": \"domain-purchase\",\n      \"title\": \"Domain purchase considerations\",\n      \"claims\": [\n        {\n          \"text\": \"User P2 mentions they haven't even bought a domain yet.\",\n          \"evidence\": [2]\n        },\n        {\n          \"text\": \"User P4 jokes that they wouldn't invest in a domain for this project.\",\n          \"evidence\": [9]\n        },\n        {\n          \"text\": \"User P4 describes the domain as a “silly thing that won’t evaporate even in heat” implying low priority.\",\n          \"evidence\": [10]\n        }\n      ]\n    },\n    {\n      \"id\": \"app-viability\",\n      \"title\": \"Viability of a cross‑platform app\",\n      \"claims\": [\n        {\n          \"text\": \"User P1 lists many disadvantages of a web‑based product compared to Android/iOS, including poor SEO, no external traffic, no ad revenue, and low user retention.\",\n          \"evidence\": [11]\n        },\n        {\n          \"text\": \"User P1 shares a podcast insight recommending fast delivery (< 1 week) and a cross‑platform stack like Flutter.\",\n          \"evidence\": [12]\n        },\n        {\n          \"text\": \"User P4 questions whether there is any demand, suggesting at least ten people must be willing to pay 299 UAH.\",\n          \"evidence\": [20]\n        },\n        {\n          \"text\": \"User P4 states the app is positioned as a local‑first bundle with limited online features and that the paid part is just a bundle.\",\n          \"evidence\": [29]\n        }\n      ]\n    },\n    {\n      \"id\": \"scam-concerns\",\n      \"title\": \"Potential scam and security doubts\",\n      \"claims\": [\n        {\n          \"text\": \"User P4 calls the project a “free vibe‑code” experiment with questionable value.\",\n          \"evidence\": [30]\n        },\n        {\n          \"text\": \"User P4 accuses the author of being a scammer.\",\n          \"evidence\": [32]\n        },\n        {\n          \"text\": \"User P5 confirms the accusation with “по факту”.\",\n          \"evidence\": [33]\n        },\n        {\n          \"text\": \"User P5 describes the project as a “vibe‑code”.\",\n          \"evidence\": [34]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": []\n}",
+  "thinking": "Need to produce JSON summarizing. Identify topics: tax filing issues, domain purchase, app profitability, scam concerns. Extract claims with evidence IDs.\n\nDecisions none. Open questions maybe: none? There's question \"Це ти про що?\" answered. No unresolved.\n\nProvide topics.\n\nLet's craft.\n\n",
+  "parsed": {
+    "title": "Discussion on taxes, domain purchase, app viability, and potential scam",
+    "topics": [
+      {
+        "id": "tax-filing",
+        "title": "Tax filing complications and advice",
+        "claims": [
+          {
+            "text": "User P1 claims that paying 500 UAH to aunt Sveta helped avoid larger penalties by correctly resubmitting declarations.",
+            "evidence": [1]
+          },
+          {
+            "text": "User P1 states that the tax inspector was previously approving declarations without review and later reprimanded.",
+            "evidence": [1]
+          },
+          {
+            "text": "User P3 says the whole tax correction procedure takes about an hour with Excel, at most a day.",
+            "evidence": [5, 6]
+          },
+          {
+            "text": "User P1 emphasizes that the main difficulty is correctly identifying which column to adjust, not the calculation itself.",
+            "evidence": [8]
+          },
+          {
+            "text": "User P1 notes that the calculator works only for hryvnia‑based FOPs, requiring conversion of all transactions to the day's exchange rate.",
+            "evidence": [19]
+          }
+        ]
+      },
+      {
+        "id": "domain-purchase",
+        "title": "Domain purchase considerations",
+        "claims": [
+          {
+            "text": "User P2 mentions they haven't even bought a domain yet.",
+            "evidence": [2]
+          },
+          {
+            "text": "User P4 jokes that they wouldn't invest in a domain for this project.",
+            "evidence": [9]
+          },
+          {
+            "text": "User P4 describes the domain as a “silly thing that won’t evaporate even in heat” implying low priority.",
+            "evidence": [10]
+          }
+        ]
+      },
+      {
+        "id": "app-viability",
+        "title": "Viability of a cross‑platform app",
+        "claims": [
+          {
+            "text": "User P1 lists many disadvantages of a web‑based product compared to Android/iOS, including poor SEO, no external traffic, no ad revenue, and low user retention.",
+            "evidence": [11]
+          },
+          {
+            "text": "User P1 shares a podcast insight recommending fast delivery (< 1 week) and a cross‑platform stack like Flutter.",
+            "evidence": [12]
+          },
+          {
+            "text": "User P4 questions whether there is any demand, suggesting at least ten people must be willing to pay 299 UAH.",
+            "evidence": [20]
+          },
+          {
+            "text": "User P4 states the app is positioned as a local‑first bundle with limited online features and that the paid part is just a bundle.",
+            "evidence": [29]
+          }
+        ]
+      },
+      {
+        "id": "scam-concerns",
+        "title": "Potential scam and security doubts",
+        "claims": [
+          {
+            "text": "User P4 calls the project a “free vibe‑code” experiment with questionable value.",
+            "evidence": [30]
+          },
+          {
+            "text": "User P4 accuses the author of being a scammer.",
+            "evidence": [32]
+          },
+          {
+            "text": "User P5 confirms the accusation with “по факту”.",
+            "evidence": [33]
+          },
+          {
+            "text": "User P5 describes the project as a “vibe‑code”.",
+            "evidence": [34]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": []
+  },
+  "usage": {
+    "durationMs": 12179.566299999977,
+    "ollamaTotalMs": 11967.142983,
+    "promptEvalCount": 2799,
+    "evalCount": 854,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 4,
+    "claimCount": 16,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 1,
+    "goldClaimPrecision": 0.5,
+    "evidencePrecision": 0.5294117647058824,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0.1875,
+    "matchedClaimIds": [
+      "tax-reporting.form-risk",
+      "tax-reporting.paid-help",
+      "product.uah-only",
+      "product.web-limitations",
+      "product.fast-delivery-strategy",
+      "product.validate-demand-first",
+      "security.password-in-bundle",
+      "product.creator-response"
+    ],
+    "retainedThreadIds": [
+      "tax-reporting",
+      "calculator-product",
+      "calculator-security"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

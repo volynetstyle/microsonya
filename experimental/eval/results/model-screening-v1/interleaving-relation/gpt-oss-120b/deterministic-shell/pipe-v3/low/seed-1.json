@@ -1,0 +1,266 @@
+{
+  "case": "interleaving-relation",
+  "model": "gpt-oss:120b",
+  "pipeline": "deterministic-shell",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 1,
+  "transformation": "identity",
+  "inputHash": "1d573b0ea83be7587a0ba6c83003a6357d94aa60582bfc570ecb19a2e32e09f5",
+  "promptHash": "3e27211fba2b4611e28208bdc2a1f7760ba1f848c0370360ee1115784d5d1a56",
+  "promptVersion": "v4",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Project planning discussion\",\n  \"events\": [\n    {\n      \"id\": \"m1\",\n      \"topicId\": \"migration\",\n      \"topicTitle\": \"Database migration schedule\",\n      \"speaker\": \"A\",\n      \"statement\": \"The database migration is planned for Friday.\",\n      \"speechAct\": \"assertion\",\n      \"literalness\": \"literal\",\n      \"commitment\": \"none\",\n      \"epistemicStatus\": \"claimed\",\n      \"settled\": false,\n      \"action\": null,\n      \"refersTo\": [],\n      \"stance\": \"neutral\",\n      \"semanticImportance\": 0.7,\n      \"confidence\": 0.95,\n      \"evidence\": [\n        1\n      ]\n    },\n    {\n      \"id\": \"m2\",\n      \"topicId\": \"migration\",\n      \"topicTitle\": \"Database migration schedule\",\n      \"speaker\": \"B\",\n      \"statement\": \"We will create a backup before the migration.\",\n      \"speechAct\": \"assertion\",\n      \"literalness\": \"literal\",\n      \"commitment\": \"tentative\",\n      \"epistemicStatus\": \"claimed\",\n      \"settled\": false,\n      \"action\": null,\n      \"refersTo\": [\"m1\"],\n      \"stance\": \"neutral\",\n      \"semanticImportance\": 0.6,\n      \"confidence\": 0.93,\n      \"evidence\": [\n        2\n      ]\n    },\n    {\n      \"id\": \"m3\",\n      \"topicId\": \"design\",\n      \"topicTitle\": \"Homepage design review\",\n      \"speaker\": \"C\",\n      \"statement\": \"The homepage design is ready for review.\",\n      \"speechAct\": \"assertion\",\n      \"literalness\": \"literal\",\n      \"commitment\": \"none\",\n      \"epistemicStatus\": \"claimed\",\n      \"settled\": false,\n      \"action\": null,\n      \"refersTo\": [],\n      \"stance\": \"neutral\",\n      \"semanticImportance\": 0.7,\n      \"confidence\": 0.95,\n      \"evidence\": [\n        3\n      ]\n    },\n    {\n      \"id\": \"m4\",\n      \"topicId\": \"design\",\n      \"topicTitle\": \"Homepage design review\",\n      \"speaker\": \"D\",\n      \"statement\": \"I will review it today.\",\n      \"speechAct\": \"assertion\",\n      \"literalness\": \"literal\",\n      \"commitment\": \"explicit\",\n      \"epistemicStatus\": \"claimed\",\n      \"settled\": false,\n      \"action\": \"review homepage design\",\n      \"refersTo\": [\"m3\"],\n      \"stance\": \"neutral\",\n      \"semanticImportance\": 0.6,\n      \"confidence\": 0.94,\n      \"evidence\": [\n        4\n      ]\n    }\n  ]\n}",
+  "thinking": "We need produce events. Identify propositions. m1: statement about migration planned Friday. speechAct assertion, literal, commitment none, epistemic claimed, settled false, action null. semantic importance maybe 0.7.\n\nm2: says we will create backup before migration. That's a commitment? It's a plan, but not explicit commitment to action? It's a claim of intention, but not explicit commitment? Might be tentative. We'll set commitment tentative, epistemic claimed.\n\nm3: homepage design ready for review. assertion.\n\nm4: I will review it today. That's explicit commitment to action. action \"review homepage design\". speechAct assertion? Could be proposal? It's commitment. Use speechAct assertion. literal. commitment explicit. epistemic claimed. settled false.\n\nNo replies except m2 replies to m1, m4 replies to m3.\n\nCreate JSON.",
+  "parsed": {
+    "title": "Project planning discussion",
+    "topics": [
+      {
+        "id": "design",
+        "title": "Homepage design review",
+        "claims": [
+          {
+            "text": "C: The homepage design is ready for review.",
+            "evidence": [3]
+          },
+          {
+            "text": "D: I will review it today.",
+            "evidence": [4]
+          }
+        ]
+      },
+      {
+        "id": "migration",
+        "title": "Database migration schedule",
+        "claims": [
+          {
+            "text": "A: The database migration is planned for Friday.",
+            "evidence": [1]
+          },
+          {
+            "text": "B: We will create a backup before the migration.",
+            "evidence": [2]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": []
+  },
+  "reconstruction": {
+    "title": "Project planning discussion",
+    "events": [
+      {
+        "id": "m1",
+        "topicId": "migration",
+        "topicTitle": "Database migration schedule",
+        "speaker": "A",
+        "statement": "The database migration is planned for Friday.",
+        "speechAct": "assertion",
+        "literalness": "literal",
+        "commitment": "none",
+        "epistemicStatus": "claimed",
+        "settled": false,
+        "action": null,
+        "refersTo": [],
+        "stance": "neutral",
+        "semanticImportance": 0.7,
+        "confidence": 0.95,
+        "evidence": [1]
+      },
+      {
+        "id": "m2",
+        "topicId": "migration",
+        "topicTitle": "Database migration schedule",
+        "speaker": "B",
+        "statement": "We will create a backup before the migration.",
+        "speechAct": "assertion",
+        "literalness": "literal",
+        "commitment": "tentative",
+        "epistemicStatus": "claimed",
+        "settled": false,
+        "action": null,
+        "refersTo": ["m1"],
+        "stance": "neutral",
+        "semanticImportance": 0.6,
+        "confidence": 0.93,
+        "evidence": [2]
+      },
+      {
+        "id": "m3",
+        "topicId": "design",
+        "topicTitle": "Homepage design review",
+        "speaker": "C",
+        "statement": "The homepage design is ready for review.",
+        "speechAct": "assertion",
+        "literalness": "literal",
+        "commitment": "none",
+        "epistemicStatus": "claimed",
+        "settled": false,
+        "action": null,
+        "refersTo": [],
+        "stance": "neutral",
+        "semanticImportance": 0.7,
+        "confidence": 0.95,
+        "evidence": [3]
+      },
+      {
+        "id": "m4",
+        "topicId": "design",
+        "topicTitle": "Homepage design review",
+        "speaker": "D",
+        "statement": "I will review it today.",
+        "speechAct": "assertion",
+        "literalness": "literal",
+        "commitment": "explicit",
+        "epistemicStatus": "claimed",
+        "settled": false,
+        "action": "review homepage design",
+        "refersTo": ["m3"],
+        "stance": "neutral",
+        "semanticImportance": 0.6,
+        "confidence": 0.94,
+        "evidence": [4]
+      }
+    ]
+  },
+  "state": {
+    "title": "Project planning discussion",
+    "events": [
+      {
+        "id": "m1",
+        "topicId": "migration",
+        "topicTitle": "Database migration schedule",
+        "speaker": "A",
+        "statement": "The database migration is planned for Friday.",
+        "speechAct": "assertion",
+        "literalness": "literal",
+        "commitment": "none",
+        "epistemicStatus": "claimed",
+        "settled": false,
+        "action": null,
+        "refersTo": [],
+        "stance": "neutral",
+        "semanticImportance": 0.7,
+        "confidence": 0.95,
+        "evidence": [1]
+      },
+      {
+        "id": "m2",
+        "topicId": "migration",
+        "topicTitle": "Database migration schedule",
+        "speaker": "B",
+        "statement": "We will create a backup before the migration.",
+        "speechAct": "assertion",
+        "literalness": "literal",
+        "commitment": "tentative",
+        "epistemicStatus": "claimed",
+        "settled": false,
+        "action": null,
+        "refersTo": ["m1"],
+        "stance": "neutral",
+        "semanticImportance": 0.6,
+        "confidence": 0.93,
+        "evidence": [2]
+      },
+      {
+        "id": "m3",
+        "topicId": "design",
+        "topicTitle": "Homepage design review",
+        "speaker": "C",
+        "statement": "The homepage design is ready for review.",
+        "speechAct": "assertion",
+        "literalness": "literal",
+        "commitment": "none",
+        "epistemicStatus": "claimed",
+        "settled": false,
+        "action": null,
+        "refersTo": [],
+        "stance": "neutral",
+        "semanticImportance": 0.7,
+        "confidence": 0.95,
+        "evidence": [3]
+      },
+      {
+        "id": "m4",
+        "topicId": "design",
+        "topicTitle": "Homepage design review",
+        "speaker": "D",
+        "statement": "I will review it today.",
+        "speechAct": "assertion",
+        "literalness": "literal",
+        "commitment": "explicit",
+        "epistemicStatus": "claimed",
+        "settled": false,
+        "action": "review homepage design",
+        "refersTo": ["m3"],
+        "stance": "neutral",
+        "semanticImportance": 0.6,
+        "confidence": 0.94,
+        "evidence": [4]
+      }
+    ],
+    "resolvedQuestionIds": [],
+    "supersededEventIds": []
+  },
+  "extractorMetrics": {
+    "eventCount": 4,
+    "eventRecall": 0.75,
+    "eventPrecision": 0.75,
+    "attributionAccuracy": 1,
+    "evidenceCorrectness": 1,
+    "relationIntegrity": 1
+  },
+  "reducerMetrics": {
+    "deterministic": true,
+    "lifecycleInvariantViolations": 0,
+    "resolvedQuestions": 0,
+    "supersededEvents": 0
+  },
+  "operationalMetrics": {
+    "modelCalls": 1,
+    "sourceMessageWindows": 1,
+    "semanticInterpretations": 1,
+    "semanticAmplification": 1
+  },
+  "projectionDiagnostics": {
+    "decisionCandidates": 2,
+    "decisionsRejectedByInvariant": 2,
+    "questionsResolvedByAnswerEdge": 0
+  },
+  "usage": {
+    "durationMs": 11581.427400000044,
+    "ollamaTotalMs": 11289.629331,
+    "promptEvalCount": 784,
+    "evalCount": 783,
+    "doneReason": "stop",
+    "thinkingTextTokenCount": 174,
+    "finalTextTokenCount": 599
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 2,
+    "claimCount": 4,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 1,
+    "goldClaimPrecision": 0.75,
+    "evidencePrecision": 0.75,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0,
+    "matchedClaimIds": [
+      "homepage-design.review",
+      "database-migration.schedule",
+      "database-migration.backup"
+    ],
+    "matchedDecisionIds": [],
+    "matchedOpenQuestionIds": [],
+    "retainedThreadIds": ["homepage-design", "database-migration"],
+    "triggeredForbiddenIds": []
+  }
+}

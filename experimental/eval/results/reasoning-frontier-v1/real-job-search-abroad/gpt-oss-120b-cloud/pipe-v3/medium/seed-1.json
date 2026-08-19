@@ -1,0 +1,175 @@
+{
+  "case": "real-job-search-abroad",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v3",
+  "reasoning": "medium",
+  "seed": 1,
+  "transformation": "identity",
+  "inputHash": "aac555f3427e2195f145b4a5e3a6d9644961170a8ccc181b8832ae83202b036f",
+  "promptHash": "f896acc87b54ce9e423829a612eb0b9ece1580d4ffe75c969295d6c8056fdff1",
+  "promptVersion": "v2",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Expats and job hunting in Slovakia and Austria\",\n  \"topics\": [\n    {\n      \"id\": \"expat-locations\",\n      \"title\": \"People living in Slovakia/Bratislava\",\n      \"claims\": [\n        {\n          \"text\": \"Some participants know individuals living abroad, including one in Austria and one in Poland.\",\n          \"evidence\": [3]\n        },\n        {\n          \"text\": \"Participant P3 has at least two acquaintances in Austria, one recently arrived and another who has been there for several years.\",\n          \"evidence\": [12, 13]\n        }\n      ]\n    },\n    {\n      \"id\": \"job-search\",\n      \"title\": \"Job search strategies\",\n      \"claims\": [\n        {\n          \"text\": \"LinkedIn is recommended as the primary tool for finding jobs abroad.\",\n          \"evidence\": [18]\n        },\n        {\n          \"text\": \"A high volume of applications (about 100) typically yields only a few interview invitations (3).\",\n          \"evidence\": [21]\n        },\n        {\n          \"text\": \"Most job postings in the region require knowledge of the local language.\",\n          \"evidence\": [26]\n        }\n      ]\n    },\n    {\n      \"id\": \"language-requirements\",\n      \"title\": \"Language requirements for jobs\",\n      \"claims\": [\n        {\n          \"text\": \"German is the main spoken language in Austria, though English is also used.\",\n          \"evidence\": [14, 15]\n        },\n        {\n          \"text\": \"Employers commonly ask for a B2 level of the local language, with B1 sometimes accepted; certificates are rarely required.\",\n          \"evidence\": [46]\n        },\n        {\n          \"text\": \"Workplace communication can be conducted in English.\",\n          \"evidence\": [44]\n        }\n      ]\n    },\n    {\n      \"id\": \"interview-experience\",\n      \"title\": \"Interview conversion and experience\",\n      \"claims\": [\n        {\n          \"text\": \"Conversion from applications to interviews is low, e.g., 3 interviews from ~100 applications.\",\n          \"evidence\": [21]\n        },\n        {\n          \"text\": \"Candidates with 2–3 years of experience can secure interviews even without strong language skills.\",\n          \"evidence\": [23, 29]\n        }\n      ]\n    },\n    {\n      \"id\": \"salary\",\n      \"title\": \"Salary expectations\",\n      \"claims\": [\n        {\n          \"text\": \"Salaries in Europe are generally higher than in Ukraine, though many overlook this factor.\",\n          \"evidence\": [35]\n        },\n        {\n          \"text\": \"Even the minimal accepted salary was still higher than fast‑food wages.\",\n          \"evidence\": [37]\n        }\n      ]\n    },\n    {\n      \"id\": \"language-learning\",\n      \"title\": \"Learning the local language\",\n      \"claims\": [\n        {\n          \"text\": \"Learning the local language is important for daily life and feeling comfortable in the city.\",\n          \"evidence\": [47]\n        },\n        {\n          \"text\": \"Typical employer requirement is B2, but B1 may be sufficient; candidates often list B2 in resumes without certification.\",\n          \"evidence\": [46]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [\n    {\n      \"text\": \"Use LinkedIn as the primary platform for searching jobs abroad.\",\n      \"evidence\": [18]\n    }\n  ],\n  \"openQuestions\": [\n    {\n      \"text\": \"Who currently lives in Bratislava or elsewhere in Slovakia?\",\n      \"evidence\": [1]\n    },\n    {\n      \"text\": \"Are you working for an Austrian company?\",\n      \"evidence\": [9]\n    },\n    {\n      \"text\": \"What are typical salary ranges for junior positions in this market?\",\n      \"evidence\": [34]\n    }\n  ]\n}",
+  "thinking": "We need to produce JSON with title, topics, decisions, openQuestions. Identify topics: likely about expats, job search, language requirements, salary, interview experience, etc. Need claim statements with evidence IDs.\n\nAlso decisions: any implemented choices? This is a casual chat, not technical choices, but there may be implied decisions like \"use LinkedIn to search\" (recommendation). That's a decision? It's more advice. But they said classify a selected approach as decision. So \"recommend searching on LinkedIn\" could be considered a decision to use LinkedIn for job search (by P3). Also \"use English for communication\" maybe a decision?\n\nOpen questions: need find questions not answered. Let's list questions:\n\n#1 asks who lives in Bratislava or Slovakia, who emigrated. No answer? #3 mentions some names, partially answers. Not fully resolved. Probably open question remains about who else.\n\n#9 asks \"А ти на якусь австрійську компанію воркаєш\" (Do you work for an Austrian company?). No answer. So open.\n\n#14 asks which language they speak in Austria (German). That got answer: German, then English. So closed.\n\n#16 asks \"І як тобі було найти роботу за кордоном, тяжко?\" answered by #17 (hard but succeeded). So closed.\n\n#34 asks about salary, junior? #35 gives answer about higher than Ukraine but not specific. Might still be open regarding exact numbers.\n\n#58 asks \"А ти як особисто відчуваєш, думаєш лишатись в Австрії?\" answered by #60 with view; seems answered.\n\nThus open questions: #1 (who lives in Bratislava) maybe partially answered (#3). Could consider still open.\n\n#9 remains open.\n\n#34 maybe open (salary specifics). Could treat as open.\n\nNow topics: we can group.\n\nTopic IDs: expat-locations, job-search, language-requirements, interview-experience, salary, language-learning, networking.\n\nLet's create topics list.\n\nTopic 1: expat-locations (who lives in Bratislava/Slovakia). Claims: P1 asks. P3 says have at least 2 acquaintances. P2 mentions two individuals. So claims about known expats.\n\nTopic 2: job-search strategies. Claims about using LinkedIn, sending many applications, conversion rates. Decision: \"Search via LinkedIn\" evidence #18. Also maybe decision: \"apply to any job without language requirement\" but that's advice.\n\nTopic 3: language requirements. Claims about German being required, B2/B1 typical, etc. Decision: \"English is acceptable for work\" (maybe). Not sure.\n\nTopic 4: interview experience & conversion. Claims about number of applications and interviews. Evidence #21, #22, #23, #24.\n\nTopic 5: salary expectations. Claims about higher than Ukraine, minimal salary accepted, etc. Evidence #37, #35.\n\nTopic 6: language learning challenges. Claims about personal language learning, B2 needed.\n\nNow decisions: #18 \"раджу шукати в LinkedIn\" as a decision to use LinkedIn. #46 \"найчастіше просять B2...\" gives typical language level requirement; could be considered decision to target B2.\n\nBut decisions should be actual made choices. The chat contains advice decisions. We'll include only clear decisions: use LinkedIn, consider attending Warsaw event (#59). #59 is suggestion to go to event. That might be decision to attend? It's suggested but not confirmed. Could be a potential plan but not decided.\n\nThus only #18.\n\nOpen questions: list #1, #9, #34 maybe. #34 asks about salary, answer partially but not specific. Might still be open. We'll include.\n\nNow prepare JSON.\n\nWe need evidence arrays referencing IDs.\n\nConstruct claims.\n\nTopic expat-locations id: expat-locations.\n\nClaims:\n- Some participants know people living abroad: evidence #3 (P2 mentions two people), #12 (P3 has at least 2 acquaintances), #13 (details). Also #1 is the question.\n\nTopic job-search id: job-search.\n\nClaims:\n- LinkedIn is recommended for job search (evidence #18).\n- High application volume yields low interview conversion (evidence #21 says 100 applications -> 3 interviews).\n- Most job postings require local language (evidence #26 mention 95% require local language). Also #46 about B2.\n\nTopic language-requirements id: language-requirements.\n\nClaims:\n- German is commonly spoken in Austria (evidence #14, #15).\n- Employers often ask for B2 level, sometimes B1 (evidence #46).\n- English can be used at work (evidence #44 \"Робота англійська\").\n\nTopic interview-experience id: interview-experience.\n\nClaims:\n- Conversion from applications to interviews is low (evidence #21).\n- 3 interviews achieved with 2 years experience (evidence #23).\n- Some candidates without language get hired (evidence #29).\n\nTopic salary id: salary.\n\nClaims:\n- Salary in Europe higher than in Ukraine (evidence #35).\n- Accepting minimum salary still higher than fast food (evidence #37).\n- Salary depends on experience, but no exact numbers given.\n\nTopic language-learning id: language-learning.\n\nClaims:\n- Learning the local language is important for daily life (evidence #47).\n- B2 is typical requirement, but B1 may be sufficient (evidence #46).\n- Personal language study started recently (evidence #47).\n\nNow decisions array: one decision.\n\nDecision text: \"Use LinkedIn as primary job search platform.\" evidence [18].\n\nOpenQuestions:\n\n- \"Who lives in Bratislava or Slovakia?\" evidence [1] (question) and maybe not resolved fully; but we need open question not answered: still open. Evidence IDs: question #1 and maybe no answer fully (there are some names). But still open.\n\n- \"Are you working for an Austrian company?\" evidence [9].\n\n- \"What are typical salaries for junior positions?\" evidence [34] (question). maybe not answered.\n\nNow construct JSON.\n\nWe need title short. Something like \"Discussion about expat experiences and job hunting in Slovakia and Austria\".\n\nNow produce JSON.",
+  "parsed": {
+    "title": "Expats and job hunting in Slovakia and Austria",
+    "topics": [
+      {
+        "id": "expat-locations",
+        "title": "People living in Slovakia/Bratislava",
+        "claims": [
+          {
+            "text": "Some participants know individuals living abroad, including one in Austria and one in Poland.",
+            "evidence": [3]
+          },
+          {
+            "text": "Participant P3 has at least two acquaintances in Austria, one recently arrived and another who has been there for several years.",
+            "evidence": [12, 13]
+          }
+        ]
+      },
+      {
+        "id": "job-search",
+        "title": "Job search strategies",
+        "claims": [
+          {
+            "text": "LinkedIn is recommended as the primary tool for finding jobs abroad.",
+            "evidence": [18]
+          },
+          {
+            "text": "A high volume of applications (about 100) typically yields only a few interview invitations (3).",
+            "evidence": [21]
+          },
+          {
+            "text": "Most job postings in the region require knowledge of the local language.",
+            "evidence": [26]
+          }
+        ]
+      },
+      {
+        "id": "language-requirements",
+        "title": "Language requirements for jobs",
+        "claims": [
+          {
+            "text": "German is the main spoken language in Austria, though English is also used.",
+            "evidence": [14, 15]
+          },
+          {
+            "text": "Employers commonly ask for a B2 level of the local language, with B1 sometimes accepted; certificates are rarely required.",
+            "evidence": [46]
+          },
+          {
+            "text": "Workplace communication can be conducted in English.",
+            "evidence": [44]
+          }
+        ]
+      },
+      {
+        "id": "interview-experience",
+        "title": "Interview conversion and experience",
+        "claims": [
+          {
+            "text": "Conversion from applications to interviews is low, e.g., 3 interviews from ~100 applications.",
+            "evidence": [21]
+          },
+          {
+            "text": "Candidates with 2–3 years of experience can secure interviews even without strong language skills.",
+            "evidence": [23, 29]
+          }
+        ]
+      },
+      {
+        "id": "salary",
+        "title": "Salary expectations",
+        "claims": [
+          {
+            "text": "Salaries in Europe are generally higher than in Ukraine, though many overlook this factor.",
+            "evidence": [35]
+          },
+          {
+            "text": "Even the minimal accepted salary was still higher than fast‑food wages.",
+            "evidence": [37]
+          }
+        ]
+      },
+      {
+        "id": "language-learning",
+        "title": "Learning the local language",
+        "claims": [
+          {
+            "text": "Learning the local language is important for daily life and feeling comfortable in the city.",
+            "evidence": [47]
+          },
+          {
+            "text": "Typical employer requirement is B2, but B1 may be sufficient; candidates often list B2 in resumes without certification.",
+            "evidence": [46]
+          }
+        ]
+      }
+    ],
+    "decisions": [
+      {
+        "text": "Use LinkedIn as the primary platform for searching jobs abroad.",
+        "evidence": [18]
+      }
+    ],
+    "openQuestions": [
+      {
+        "text": "Who currently lives in Bratislava or elsewhere in Slovakia?",
+        "evidence": [1]
+      },
+      {
+        "text": "Are you working for an Austrian company?",
+        "evidence": [9]
+      },
+      {
+        "text": "What are typical salary ranges for junior positions in this market?",
+        "evidence": [34]
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 24437.356700000004,
+    "ollamaTotalMs": 24260.450547,
+    "promptEvalCount": 3676,
+    "evalCount": 2135,
+    "doneReason": "stop",
+    "thinkingTextTokenCount": 1302,
+    "finalTextTokenCount": 823
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 6,
+    "claimCount": 14,
+    "decisionCount": 1,
+    "openQuestionCount": 3,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.9,
+    "goldClaimPrecision": 0.5714285714285714,
+    "evidencePrecision": 0.42857142857142855,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 1,
+    "noiseRetention": 0,
+    "matchedClaimIds": [
+      "networking.participants-abroad",
+      "job-search.two-months",
+      "job-search.conversion",
+      "job-search.local-language-filter",
+      "language.work-vs-daily-life",
+      "job-search.education-observation",
+      "job-search.salary-compromise",
+      "language.learning-motivation"
+    ],
+    "matchedDecisionIds": [],
+    "matchedOpenQuestionIds": [],
+    "retainedThreadIds": [
+      "networking-abroad",
+      "job-search-abroad",
+      "language-integration"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

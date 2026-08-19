@@ -1,0 +1,48 @@
+{
+  "case": "real-fop-calculator",
+  "model": "deepseek-v4-pro:preview",
+  "pipeline": "deterministic-shell",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 1,
+  "transformation": "identity",
+  "inputHash": "d3179cdb8e49a27f55b8dcbb42c5b7b95590527ad18ad16afb38bc499073e8af",
+  "promptHash": "19c82bd2ff9c9dc797fb068eec45731ce02d34295767567f04cfef2cde4ff01c",
+  "promptVersion": "v4",
+  "status": "request_failure",
+  "raw": "",
+  "thinking": "",
+  "parsed": null,
+  "requestError": "OllamaRequestError: The operation was aborted due to timeout",
+  "usage": {
+    "durationMs": 180011.43329999968
+  },
+  "operationalMetrics": {
+    "modelCalls": 1,
+    "sourceMessageWindows": 1,
+    "semanticInterpretations": 1,
+    "semanticAmplification": 1
+  },
+  "metrics": {
+    "validJson": false,
+    "schemaValid": false,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 0,
+    "claimCount": 0,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": null,
+    "weightedClaimRecall": null,
+    "goldClaimPrecision": null,
+    "evidencePrecision": null,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": null,
+    "noiseRetention": null,
+    "matchedClaimIds": [],
+    "matchedDecisionIds": [],
+    "matchedOpenQuestionIds": [],
+    "retainedThreadIds": [],
+    "triggeredForbiddenIds": []
+  }
+}

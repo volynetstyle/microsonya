@@ -1,0 +1,153 @@
+{
+  "case": "real-ai-development",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v2",
+  "reasoning": "low",
+  "seed": 1,
+  "inputHash": "c44e2d8f381898078b12b50a1dbf1501e5970203c0d4ef386b86fd514114c47c",
+  "promptHash": "ba14e8eefae73c91c07e64c22ec7c9251a29f2b6b2646f91d6be6875755a361d",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion on AI tools, job search, and code generation risks\",\n  \"topics\": [\n    {\n      \"id\": \"job-search-automation\",\n      \"title\": \"Automation of job search and resume generation\",\n      \"claims\": [\n        {\n          \"text\": \"User P1 is preparing for a full‑time job search and wants to set up cloud tools for automated PDF resume generation per vacancy.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"P1 plans to configure OpenClaw to find vacancies, generate resumes and cover letters once the startup closes.\",\n          \"evidence\": [5]\n        },\n        {\n          \"text\": \"P1 believes lacking AI‑related skills (LLM, RAG, embeddings, etc.) will cause recruiters to filter them out in 2026.\",\n          \"evidence\": [6,7,8]\n        },\n        {\n          \"text\": \"P1 states that the acceleration of development started in 2025, with tools becoming both better and more expensive.\",\n          \"evidence\": [9]\n        }\n      ]\n    },\n    {\n      \"id\": \"ai-impact-hiring\",\n      \"title\": \"Impact of AI on recruiting and hiring\",\n      \"claims\": [\n        {\n          \"text\": \"P1 predicts the recruiter profession will die out and HR will become just personnel management.\",\n          \"evidence\": [14]\n        },\n        {\n          \"text\": \"P4 remarks that keyword‑based candidate search is increasingly detached from reality.\",\n          \"evidence\": [13]\n        },\n        {\n          \"text\": \"P4 comments that nothing has fundamentally changed over time.\",\n          \"evidence\": [11]\n        }\n      ]\n    },\n    {\n      \"id\": \"ai-code-generation-risks\",\n      \"title\": \"Risks of AI‑generated code\",\n      \"claims\": [\n        {\n          \"text\": \"P2 describes using GPT to auto‑generate SQL joins, which speeds up development but can produce unsafe, heavy queries.\",\n          \"evidence\": [19]\n        },\n        {\n          \"text\": \"P1 shares an example where AI generated a 450‑line raw SQL query that pulls all user data, leading to potential security and performance issues.\",\n          \"evidence\": [30]\n        },\n        {\n          \"text\": \"P1 recounts a incident where a teammate pushed SELECT * to production after AI generated code, causing project instability.\",\n          \"evidence\": [35]\n        },\n        {\n          \"text\": \"P4 notes that incremental computations have been replaced by materialized views (implying a shift due to AI code patterns).\",\n          \"evidence\": [34]\n        }\n      ]\n    },\n    {\n      \"id\": \"logging-and-debugging\",\n      \"title\": \"Use of logs and debugging practices\",\n      \"claims\": [\n        {\n          \"text\": \"P2 suggests that analyzing logs (e.g., in JMH) could have helped earlier detection of recurring issues.\",\n          \"evidence\": [20]\n        },\n        {\n          \"text\": \"P4 argues that a well‑configured environment and accumulated context are more valuable than raw logs for problem solving.\",\n          \"evidence\": [22]\n        },\n        {\n          \"text\": \"P2 acknowledges that logs would not have helped much in their current situation.\",\n          \"evidence\": [23]\n        }\n      ]\n    },\n    {\n      \"id\": \"quality-of-answers\",\n      \"title\": \"Quality of AI answers vs question quality\",\n      \"claims\": [\n        {\n          \"text\": \"P4 observes that answer quality often correlates with question quality and the amount of auxiliary knowledge available to the system.\",\n          \"evidence\": [24]\n        },\n        {\n          \"text\": \"P2 agrees with that observation.\",\n          \"evidence\": [25]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": []\n}",
+  "thinking": "Need produce JSON summary. Identify topics: job search automation, AI impact on hiring, AI code generation risks, logging etc. Claims with evidence IDs.\n\nDecisions none. Open questions maybe none. Provide.\n\n",
+  "parsed": {
+    "title": "Discussion on AI tools, job search, and code generation risks",
+    "topics": [
+      {
+        "id": "job-search-automation",
+        "title": "Automation of job search and resume generation",
+        "claims": [
+          {
+            "text": "User P1 is preparing for a full‑time job search and wants to set up cloud tools for automated PDF resume generation per vacancy.",
+            "evidence": [1]
+          },
+          {
+            "text": "P1 plans to configure OpenClaw to find vacancies, generate resumes and cover letters once the startup closes.",
+            "evidence": [5]
+          },
+          {
+            "text": "P1 believes lacking AI‑related skills (LLM, RAG, embeddings, etc.) will cause recruiters to filter them out in 2026.",
+            "evidence": [6, 7, 8]
+          },
+          {
+            "text": "P1 states that the acceleration of development started in 2025, with tools becoming both better and more expensive.",
+            "evidence": [9]
+          }
+        ]
+      },
+      {
+        "id": "ai-impact-hiring",
+        "title": "Impact of AI on recruiting and hiring",
+        "claims": [
+          {
+            "text": "P1 predicts the recruiter profession will die out and HR will become just personnel management.",
+            "evidence": [14]
+          },
+          {
+            "text": "P4 remarks that keyword‑based candidate search is increasingly detached from reality.",
+            "evidence": [13]
+          },
+          {
+            "text": "P4 comments that nothing has fundamentally changed over time.",
+            "evidence": [11]
+          }
+        ]
+      },
+      {
+        "id": "ai-code-generation-risks",
+        "title": "Risks of AI‑generated code",
+        "claims": [
+          {
+            "text": "P2 describes using GPT to auto‑generate SQL joins, which speeds up development but can produce unsafe, heavy queries.",
+            "evidence": [19]
+          },
+          {
+            "text": "P1 shares an example where AI generated a 450‑line raw SQL query that pulls all user data, leading to potential security and performance issues.",
+            "evidence": [30]
+          },
+          {
+            "text": "P1 recounts a incident where a teammate pushed SELECT * to production after AI generated code, causing project instability.",
+            "evidence": [35]
+          },
+          {
+            "text": "P4 notes that incremental computations have been replaced by materialized views (implying a shift due to AI code patterns).",
+            "evidence": [34]
+          }
+        ]
+      },
+      {
+        "id": "logging-and-debugging",
+        "title": "Use of logs and debugging practices",
+        "claims": [
+          {
+            "text": "P2 suggests that analyzing logs (e.g., in JMH) could have helped earlier detection of recurring issues.",
+            "evidence": [20]
+          },
+          {
+            "text": "P4 argues that a well‑configured environment and accumulated context are more valuable than raw logs for problem solving.",
+            "evidence": [22]
+          },
+          {
+            "text": "P2 acknowledges that logs would not have helped much in their current situation.",
+            "evidence": [23]
+          }
+        ]
+      },
+      {
+        "id": "quality-of-answers",
+        "title": "Quality of AI answers vs question quality",
+        "claims": [
+          {
+            "text": "P4 observes that answer quality often correlates with question quality and the amount of auxiliary knowledge available to the system.",
+            "evidence": [24]
+          },
+          {
+            "text": "P2 agrees with that observation.",
+            "evidence": [25]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": []
+  },
+  "usage": {
+    "durationMs": 8859.1711,
+    "ollamaTotalMs": 8691.231448,
+    "promptEvalCount": 3530,
+    "evalCount": 876,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 5,
+    "claimCount": 16,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.9047619047619048,
+    "goldClaimPrecision": 0.4375,
+    "evidencePrecision": 0.4444444444444444,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0.125,
+    "matchedClaimIds": [
+      "job-search.ai-skills",
+      "job-search.automation-idea",
+      "development.routine-speedup",
+      "job-search.keyword-filtering",
+      "vibe-coding.bad-backend",
+      "vibe-coding.review-failure",
+      "development.context-quality"
+    ],
+    "retainedThreadIds": [
+      "ai-job-search",
+      "ai-assisted-development",
+      "vibe-coding-risks"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

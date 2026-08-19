@@ -1,0 +1,130 @@
+{
+  "case": "mutation-question-base",
+  "model": "qwen3.5:397b",
+  "pipeline": "deterministic-shell",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 1,
+  "transformation": "identity",
+  "inputHash": "6a360808f9f41ef21cd7e5b790a3c23313edde24c137222e2804680966a61a1f",
+  "promptHash": "676fdbb03ce87441ebef49845a6caa5f83da943c4e812be1795ab019d5e4240b",
+  "promptVersion": "v4",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Website availability inquiry\",\n  \"events\": [\n    {\n      \"id\": \"m1\",\n      \"topicId\": \"website-availability\",\n      \"topicTitle\": \"Website availability\",\n      \"speaker\": \"A\",\n      \"statement\": \"This is unavailable on the website\",\n      \"speechAct\": \"question\",\n      \"literalness\": \"literal\",\n      \"commitment\": \"none\",\n      \"epistemicStatus\": \"uncertain\",\n      \"settled\": false,\n      \"action\": null,\n      \"refersTo\": [],\n      \"stance\": \"neutral\",\n      \"semanticImportance\": 0.5,\n      \"confidence\": 0.9,\n      \"evidence\": [\n        1\n      ]\n    }\n  ]\n}",
+  "thinking": "Thinking Process:\n\n1.  **Analyze the Request:**\n    *   **Task:** Reconstruct a Telegram conversation as normalized discourse events.\n    *   **Input Format:** `pipe-v3` (Grammar: `#ID|AUTHOR_JSON|TIME_JSON|^PARENT|KIND_JSON|TEXT_JSON_OR_NULL`).\n    *   **Output Format:** JSON only, specific schema (`title`, `events` array with specific fields).\n    *   **Constraints:**\n        *   No summary, no decisions, no openQuestions.\n        *   Event IDs from message ID (e.g., `m17` -> `m17`). Suffixes only for multiple independent propositions.\n        *   Orthogonal properties (`speechAct`, `literalness`, `commitment`, `epistemicStatus`).\n        *   `commitment=explicit` only for clear actor action commitment (no suggestions, preferences, etc.).\n        *   `settled=true` only when action is selected/approved/completed (lack of disagreement != settled).\n        *   `action` only when actionable actor/action exists.\n        *   `refersTo` must contain target event ID for answers, corrections, support, opposition.\n        *   Honor explicit reply edges (`^PARENT`).\n        *   Preserve speaker attribution, do not promote claims to facts.\n        *   `semanticImportance` 0-1.\n        *   Cite source message IDs in `evidence`.\n        *   Omit greetings/noise.\n        *   Kebab-case `topicId`.\n        *   Input provided has only one message: `#1|\"A\"|\"10:00\"|^0|\"text\"|\"Is this unavailable on the website?\"`\n\n2.  **Analyze the Input Data:**\n    *   Message 1:\n        *   ID: `1`\n        *   Author: `\"A\"`\n        *   Time: `\"10:00\"`\n        *   Parent: `^0` (No parent, root message)\n        *   Kind: `\"text\"`\n        *   Text: `\"Is this unavailable on the website?\"`\n\n3.  **Determine Event Properties for Message 1:**\n    *   **ID:** `m1` (derived from message ID 1).\n    *   **Topic:** The content is about website availability. `topicId`: `website-availability`. `topicTitle`: `Website availability inquiry`.\n    *   **Speaker:** `A`.\n    *   **Statement:** The proposition being queried. \"This is unavailable on the website\" (interrogative form). Let's phrase it as the content of the question. \"Asking if this is unavailable on the website\". Or strictly the proposition under question. Usually, for questions, the statement reflects the inquiry content. Let's use: \"Is this unavailable on the website?\"\n    *   **SpeechAct:** `question` (It ends with a question mark and asks for information).\n    *   **Literalness:** `literal` (No indication of irony).\n    *   **Commitment:** `none` (Asking a question does not commit the speaker to an action).\n    *   **EpistemicStatus:** `uncertain` (The speaker is asking because they don't know).\n    *   **Settled:** `false` (It's a question, nothing is settled).\n    *   **Action:** `null` (No actionable task assigned or committed).\n    *   **RefersTo:** `[]` (Root message, no parent).\n    *   **Stance:** `neutral` (It's a question).\n    *   **SemanticImportance:** `0.5` (It's an opening inquiry, important for context but not a conclusion).\n    *   **Confidence:** `0.9` (Clear text).\n    *   **Evidence:** `[1]`.\n\n4.  **Drafting the JSON:**\n    *   Check schema compliance.\n    *   Ensure no extra fields.\n    *   Ensure `refersTo` is an array of strings.\n    *   Ensure `evidence` is an array of numbers.\n\n5.  **Refining Properties:**\n    *   `statement`: Should be a concise proposition. For a question, it's often the content being queried. \"This is unavailable on the website\" is the proposition being tested. However, since the speechAct is `question`, the statement often reflects the inquiry. Let's stick to the text content normalized: \"Inquiring if this is unavailable on the website\". Or simply the question text. The prompt example shows \"Concise proposition\". For a question, the proposition is the underlying assumption being queried. Let's use: \"This item is unavailable on the website\". But since it's a question, `epistemicStatus` is `uncertain`.\n    *   Actually, looking at the instruction: \"statement\": \"Concise proposition\". If I say \"Is this unavailable...\", that's not a proposition. A proposition is \"This is unavailable...\". But the speechAct is question. Let's use the content: \"This is unavailable on the website\".\n    *   Wait, if I write \"This is unavailable on the website\" as the statement, but speechAct is `question`, it implies the speaker is querying that proposition.\n    *   Let's check the constraint: \"Preserve speaker attribution and disagreement. Do not promote participant claims to narrator facts.\"\n    *   Okay, I will formulate the statement as the content of the query.\n    *   `topicId`: `website-availability`.\n    *   `topicTitle`: `Website availability`.\n\n6.  **Final Review against Constraints:**\n    *   JSON only.\n    *   Exact shape.\n    *   No summary/decisions.\n    *   Event ID `m1`.\n    *   Evidence `[1]`.\n    *   `refersTo` empty.\n\n7.  **Construction:**\n    *   `title`: \"Website availability inquiry\"\n    *   `events`: [{...}]\n\n    *   Wait, input says `#1|\"A\"|\"10:00\"|^0|\"text\"|\"Is this unavailable on the website?\"`\n    *   Only one message.\n    *   So only one event.\n\n    *   `statement`: \"Is this unavailable on the website?\" (Keeping it close to text for clarity as a question act). Or \"Availability of this on the website\". Let's go with \"This is unavailable on the website\" as the proposition under query, but since it's a question, maybe \"Inquiring about website availability\" is safer as a statement of what is happening. However, standard discourse representation often puts the propositional content. Let's use: \"This is unavailable on the website\".\n    *   Actually, looking at similar tasks, usually the statement reflects the semantic content. \"This is unavailable on the website\".\n    *   `speechAct`: `question`.\n    *   `epistemicStatus`: `uncertain`.\n\n    *   Let's check `commitment`. Asking a question is not a commitment. `none`.\n    *   `settled`: `false`.\n    *   `action`: `null`.\n\n    *   One detail: \"Use suffixes only when one message contains multiple independent propositions\". Here only one proposition/query. So `m1`.\n\n    *   `semanticImportance`: 0.5 (It's the start of a thread).\n    *   `confidence`: 0.95 (Clear text).\n\n    *   `refersTo`: `[]`.\n\n    *   `evidence`: `[1]`.\n\n    *   `topicId`: `website-availability`.\n    *   `topicTitle`: `Website availability`.\n\n    *   `speaker`: `A`.\n\n    *   `literalness`: `literal`.\n\n    *   `stance`: `neutral`.\n\n    *   Let's assemble.\n\n    *   Wait, I need to make sure I don't output markdown code blocks unless necessary for JSON clarity, but the prompt says \"Return JSON only\". Usually means raw JSON text. I will output raw JSON.\n\n    *   Wait, checking the `statement` field again. \"Concise proposition\". A question isn't a proposition. The proposition is the presupposition or the content. \"This is unavailable on the website\".\n    *   However, if I write \"This is unavailable on the website\", it looks like an assertion. But `speechAct` clarifies it.\n    *   Alternative: \"Querying if this is unavailable on the website\". This describes the act.\n    *   Let's look at the example in the prompt description: `\"statement\": \"Concise proposition\"`.\n    *   If I say \"Is this unavailable on the website?\", it's not a proposition.\n    *   I will use: \"This is unavailable on the website\" as the proposition being queried.\n    *   Actually, to be safe and accurate to the speech act: \"Availability of this on the website\".\n    *   Let's stick to the text meaning: \"This is unavailable on the website\".\n\n    *   Wait, one more check: \"Input representation: pipe-v3\". The input provided is:\n        `PIPECHAT/3`\n        `#1|\"A\"|\"10:00\"|^0|\"text\"|\"Is this unavailable on the website?\"`\n    *   So only message 1 exists.\n\n    *   Okay, ready to generate.\n\n    *   Wait, `topicId` derivation: \"derived only from the topic\". Topic is website availability. `website-availability`.\n    *   `title`: \"Website availability inquiry\".\n\n    *   One more check on `refersTo`. Since `^0`, it refers to nothing. `[]`.\n\n    *   One more check on `evidence`. Must cite source message IDs. `[1]`.\n\n    *   One more check on `commitment`. \"A suggestion, preference, prediction, joke, analogy, or isolated first-person opinion is never explicit commitment.\" A question is definitely not explicit commitment. `none`.\n\n    *   One more check on `settled`. \"Lack of disagreement is not settlement.\" It's a question, so definitely not settled. `false`.\n\n    *   One more check on `action`. \"Never infer an action from a punchline or analogy.\" No action here. `null`.\n\n    *   One more check on `semanticImportance`. \"Prefer developed conclusions over vivid wording, repetition, jokes, or banter.\" This is an opening question. It sets the topic. 0.5 seems appropriate.\n\n    *   One more check on `confidence`. High confidence in parsing. 0.9.\n\n    *   One more check on `literalness`. No irony detected. `literal`.\n\n    *   One more check on `epistemicStatus`. The speaker is asking, so they are uncertain. `uncertain`.\n\n    *   One more check on `stance`. It's a question, not support/oppose. `neutral`.\n\n    *   Final check on JSON structure.\n\n    ```json\n    {\n      \"title\": \"Website availability inquiry\",\n      \"events\": [\n        {\n          \"id\": \"m1\",\n          \"topicId\": \"website-availability\",\n          \"topicTitle\": \"Website availability\",\n          \"speaker\": \"A\",\n          \"statement\": \"This is unavailable on the website\",\n          \"speechAct\": \"question\",\n          \"literalness\": \"literal\",\n          \"commitment\": \"none\",\n          \"epistemicStatus\": \"uncertain\",\n          \"settled\": false,\n          \"action\": null,\n          \"refersTo\": [],\n          \"stance\": \"neutral\",\n          \"semanticImportance\": 0.5,\n          \"confidence\": 0.9,\n          \"evidence\": [\n            1\n          ]\n        }\n      ]\n    }\n    ```\n    Wait, I should check if `statement` should be the question itself or the proposition. \"Concise proposition\". A question is not a proposition. The proposition embedded is \"This is unavailable on the website\". I will use that.\n    Actually, to be most descriptive of the event content without asserting truth: \"Inquiring if this is unavailable on the website\". But that's an act description.\n    Let's look at the instruction: \"statement\": \"Concise proposition\".\n    If I say \"This is unavailable on the website\", combined with `speechAct: question`, it means \"Questioning the proposition: This is unavailable on the website\".\n    I will use \"This is unavailable on the website\".\n\n    Wait, I need to make sure I don't add markdown formatting like ```json ... ``` if \"Return JSON only\" implies raw text. However, usually in these interfaces, wrapped JSON is expected. I will output raw JSON text without markdown blocks to be safe on \"JSON only\". But often \"Return JSON only\" allows markdown code blocks for clarity. I will output plain text JSON to be strictly compliant.\n    Actually, looking at previous interactions, standard is usually code block. But \"Return JSON only\" often means no preamble. I will provide the JSON block.\n\n    Wait, re-reading: \"Return JSON only, with exactly this shape:\".\n    I will output the JSON string.\n\n    One correction: `topicTitle` in the example was \"Hiring discussion\". I should make it similar. \"Website availability inquiry\".\n    `topicId`: `website-availability`.\n\n    Let's finalize the JSON.\n\n    Wait, I need to check if there are any other messages. The input shows `PIPECHAT/3` then `#1...`. It seems only message 1 is provided in the snippet. I must process only what is provided.\n\n    Okay, ready.\n\n    One detail: `evidence` array contains numbers (message IDs). The prompt example shows `evidence: [17]`. My input message ID is `1`. So `evidence: [1]`.\n\n    One detail: `refersTo` array contains strings (event IDs). The prompt example shows `refersTo: [\"m10\"]`. My event has no parent, so `refersTo: []`.\n\n    One detail: `id` format. `m1`.\n\n    One detail: `speaker`. `\"A\"`.\n\n    One detail: `commitment`. `\"none\"`.\n\n    One detail: `epistemicStatus`. `\"uncertain\"`.\n\n    One detail: `settled`. `false`.\n\n    One detail: `action`. `null`.\n\n    One detail: `stance`. `\"neutral\"`.\n\n    One detail: `semanticImportance`. `0.5`.\n\n    One detail: `confidence`. `0.9`.\n\n    One detail: `literalness`. `\"literal\"`.\n\n    One detail: `speechAct`. `\"question\"`.\n\n    One detail: `statement`. \"This is unavailable on the website\".\n\n    One detail: `topicId`. \"website-availability\".\n\n    One detail: `topicTitle`. \"Website availability\".\n\n    One detail: `title`. \"Website availability inquiry\".\n\n    Looks consistent.\n\n    Wait, I need to ensure I don't use markdown ticks if \"JSON only\" is strict. I will output raw JSON.\n    Actually, most systems parse markdown blocks fine. But to be safe on \"JSON only\", I will avoid markdown fences if possible, but usually, it's expected to be valid JSON text. I'll output valid JSON text.\n\n    Wait, one more thing. The prompt says \"Input representation: pipe-v3\". The input starts with `PIPECHAT/3`. This is a header. The message is `#1|...`.\n    I should ignore the header `PIPECHAT/3` and process the message line.\n\n    Okay, proceeding.\n\n    Wait, I notice the prompt example has `evidence: [17]`. My message ID is 1. So `evidence: [1]`.\n    The prompt example has `refersTo: []`. My message has `^0`, so `refersTo: []`.\n\n    Final check on `statement`. If I write \"This is unavailable on the website\", it might be interpreted as the speaker asserting it. But `speechAct: question` clarifies.\n    However, often for questions, the statement is phrased as the content of the question.\n    Let's use: \"Whether this is unavailable on the website\". That is a noun phrase representing the proposition content.\n    Or \"This is unavailable on the website\".\n    I'll stick with \"This is unavailable on the website\" as it is the core proposition being queried.\n\n    Wait, I'll adjust `topicTitle` to match `title` style or be slightly more generic. Example: `topicTitle`: \"Hiring discussion\". My `title`: \"Website availability inquiry\". My `topicTitle`: \"Website availability\". That works.\n\n    Let's write it.",
+  "parsed": {
+    "title": "Website availability inquiry",
+    "topics": [],
+    "decisions": [],
+    "openQuestions": [
+      {
+        "text": "A: This is unavailable on the website",
+        "evidence": [1]
+      }
+    ]
+  },
+  "reconstruction": {
+    "title": "Website availability inquiry",
+    "events": [
+      {
+        "id": "m1",
+        "topicId": "website-availability",
+        "topicTitle": "Website availability",
+        "speaker": "A",
+        "statement": "This is unavailable on the website",
+        "speechAct": "question",
+        "literalness": "literal",
+        "commitment": "none",
+        "epistemicStatus": "uncertain",
+        "settled": false,
+        "action": null,
+        "refersTo": [],
+        "stance": "neutral",
+        "semanticImportance": 0.5,
+        "confidence": 0.9,
+        "evidence": [1]
+      }
+    ]
+  },
+  "state": {
+    "title": "Website availability inquiry",
+    "events": [
+      {
+        "id": "m1",
+        "topicId": "website-availability",
+        "topicTitle": "Website availability",
+        "speaker": "A",
+        "statement": "This is unavailable on the website",
+        "speechAct": "question",
+        "literalness": "literal",
+        "commitment": "none",
+        "epistemicStatus": "uncertain",
+        "settled": false,
+        "action": null,
+        "refersTo": [],
+        "stance": "neutral",
+        "semanticImportance": 0.5,
+        "confidence": 0.9,
+        "evidence": [1]
+      }
+    ],
+    "resolvedQuestionIds": [],
+    "supersededEventIds": []
+  },
+  "extractorMetrics": {
+    "eventCount": 1,
+    "eventRecall": 1,
+    "eventPrecision": 1,
+    "attributionAccuracy": 1,
+    "evidenceCorrectness": 1,
+    "relationIntegrity": 1
+  },
+  "reducerMetrics": {
+    "deterministic": true,
+    "lifecycleInvariantViolations": 0,
+    "resolvedQuestions": 0,
+    "supersededEvents": 0
+  },
+  "operationalMetrics": {
+    "modelCalls": 1,
+    "sourceMessageWindows": 1,
+    "semanticInterpretations": 1,
+    "semanticAmplification": 1
+  },
+  "projectionDiagnostics": {
+    "decisionCandidates": 0,
+    "decisionsRejectedByInvariant": 0,
+    "questionsResolvedByAnswerEdge": 0
+  },
+  "usage": {
+    "durationMs": 36974.78429999994,
+    "ollamaTotalMs": 36631.894719,
+    "promptEvalCount": 713,
+    "evalCount": 3870,
+    "doneReason": "stop",
+    "thinkingTextTokenCount": 3437,
+    "finalTextTokenCount": 161
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 0,
+    "claimCount": 0,
+    "decisionCount": 0,
+    "openQuestionCount": 1,
+    "majorThreadRecall": 0,
+    "weightedClaimRecall": null,
+    "goldClaimPrecision": null,
+    "evidencePrecision": 1,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0,
+    "matchedClaimIds": [],
+    "matchedDecisionIds": [],
+    "matchedOpenQuestionIds": ["website-availability.question"],
+    "retainedThreadIds": [],
+    "triggeredForbiddenIds": []
+  }
+}

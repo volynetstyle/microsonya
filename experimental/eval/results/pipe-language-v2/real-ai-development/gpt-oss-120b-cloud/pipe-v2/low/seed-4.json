@@ -1,0 +1,148 @@
+{
+  "case": "real-ai-development",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v2",
+  "reasoning": "low",
+  "seed": 4,
+  "inputHash": "c44e2d8f381898078b12b50a1dbf1501e5970203c0d4ef386b86fd514114c47c",
+  "promptHash": "ba14e8eefae73c91c07e64c22ec7c9251a29f2b6b2646f91d6be6875755a361d",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion on AI-driven job search, development acceleration, and code generation pitfalls\",\n  \"topics\": [\n    {\n      \"id\": \"ai-job-search\",\n      \"title\": \"AI tools for job search and resume generation\",\n      \"claims\": [\n        {\n          \"text\": \"User P1 plans to set up an OpenClaw pipeline to auto‑search vacancies, generate PDFs of tailored resumes, and write cover letters.\",\n          \"evidence\": [5]\n        },\n        {\n          \"text\": \"P1 believes that lacking AI‑related skills (e.g., Claude, embeddings, RAG) will cause recruiters to filter them out in 2026.\",\n          \"evidence\": [6, 7, 8]\n        },\n        {\n          \"text\": \"P1 predicts that the recruiter profession will become obsolete.\",\n          \"evidence\": [14]\n        }\n      ]\n    },\n    {\n      \"id\": \"ai-development-acceleration\",\n      \"title\": \"AI accelerating software development\",\n      \"claims\": [\n        {\n          \"text\": \"P2 states that using GPT to generate JOIN queries and other code speeds up development dramatically.\",\n          \"evidence\": [19]\n        },\n        {\n          \"text\": \"P2 acknowledges that such acceleration is true even though their projects have no cloud infrastructure.\",\n          \"evidence\": [19]\n        },\n        {\n          \"text\": \"P9 claims that development acceleration trends started in 2022 but became widespread only in 2025.\",\n          \"evidence\": [9]\n        },\n        {\n          \"text\": \"P10 jokes that the current AI stack resembles REST, JSON, microservices, Docker after React.\",\n          \"evidence\": [10]\n        }\n      ]\n    },\n    {\n      \"id\": \"code-generation-risks\",\n      \"title\": \"Risks of AI‑generated code\",\n      \"claims\": [\n        {\n          \"text\": \"P30 describes a case where AI generated a 450‑line raw SQL query that pulls all user data, creating severe performance and security issues.\",\n          \"evidence\": [30]\n        },\n        {\n          \"text\": \"P35 recounts a teammate who pushed SELECT * queries to production after AI generation, causing project instability and eventual code drop.\",\n          \"evidence\": [35]\n        },\n        {\n          \"text\": \"P34 notes that incremental computations have been abandoned in favor of views, hinting at architectural compromises caused by AI code.\",\n          \"evidence\": [34]\n        }\n      ]\n    },\n    {\n      \"id\": \"ai-impact-on-recruitment\",\n      \"title\": \"Perceptions of AI in recruitment\",\n      \"claims\": [\n        {\n          \"text\": \"P3 jokes that AI controls people, not people controlling AI.\",\n          \"evidence\": [3]\n        },\n        {\n          \"text\": \"P4 comments that candidate search by keyword is increasingly detached from reality.\",\n          \"evidence\": [13]\n        }\n      ]\n    },\n    {\n      \"id\": \"misc-conversations\",\n      \"title\": \"Other remarks and humor\",\n      \"claims\": [\n        {\n          \"text\": \"P2 reacts with \\\"Вааата...\\\" to P1’s initial message.\",\n          \"evidence\": [2]\n        },\n        {\n          \"text\": \"P7 humorously contrasts attitudes toward AI in 2024 vs 2026.\",\n          \"evidence\": [7]\n        },\n        {\n          \"text\": \"Multiple participants exchange jokes and nonsensical statements (e.g., \\\"Полуниця\\\", \\\"хахах\\\").\",\n          \"evidence\": [12, 27, 28]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": []\n}",
+  "thinking": "We need JSON summary. Identify topics.\n\nPossible topics: AI job search automation, AI impact on hiring, AI speeding development, code generation issues, cloud vs not, etc.\n\nCreate claims with evidence IDs.\n\nDecisions none? No explicit decisions.\n\nOpen questions? maybe none.\n\nWe'll produce topics list.\n\nLet's craft.\n\n",
+  "parsed": {
+    "title": "Discussion on AI-driven job search, development acceleration, and code generation pitfalls",
+    "topics": [
+      {
+        "id": "ai-job-search",
+        "title": "AI tools for job search and resume generation",
+        "claims": [
+          {
+            "text": "User P1 plans to set up an OpenClaw pipeline to auto‑search vacancies, generate PDFs of tailored resumes, and write cover letters.",
+            "evidence": [5]
+          },
+          {
+            "text": "P1 believes that lacking AI‑related skills (e.g., Claude, embeddings, RAG) will cause recruiters to filter them out in 2026.",
+            "evidence": [6, 7, 8]
+          },
+          {
+            "text": "P1 predicts that the recruiter profession will become obsolete.",
+            "evidence": [14]
+          }
+        ]
+      },
+      {
+        "id": "ai-development-acceleration",
+        "title": "AI accelerating software development",
+        "claims": [
+          {
+            "text": "P2 states that using GPT to generate JOIN queries and other code speeds up development dramatically.",
+            "evidence": [19]
+          },
+          {
+            "text": "P2 acknowledges that such acceleration is true even though their projects have no cloud infrastructure.",
+            "evidence": [19]
+          },
+          {
+            "text": "P9 claims that development acceleration trends started in 2022 but became widespread only in 2025.",
+            "evidence": [9]
+          },
+          {
+            "text": "P10 jokes that the current AI stack resembles REST, JSON, microservices, Docker after React.",
+            "evidence": [10]
+          }
+        ]
+      },
+      {
+        "id": "code-generation-risks",
+        "title": "Risks of AI‑generated code",
+        "claims": [
+          {
+            "text": "P30 describes a case where AI generated a 450‑line raw SQL query that pulls all user data, creating severe performance and security issues.",
+            "evidence": [30]
+          },
+          {
+            "text": "P35 recounts a teammate who pushed SELECT * queries to production after AI generation, causing project instability and eventual code drop.",
+            "evidence": [35]
+          },
+          {
+            "text": "P34 notes that incremental computations have been abandoned in favor of views, hinting at architectural compromises caused by AI code.",
+            "evidence": [34]
+          }
+        ]
+      },
+      {
+        "id": "ai-impact-on-recruitment",
+        "title": "Perceptions of AI in recruitment",
+        "claims": [
+          {
+            "text": "P3 jokes that AI controls people, not people controlling AI.",
+            "evidence": [3]
+          },
+          {
+            "text": "P4 comments that candidate search by keyword is increasingly detached from reality.",
+            "evidence": [13]
+          }
+        ]
+      },
+      {
+        "id": "misc-conversations",
+        "title": "Other remarks and humor",
+        "claims": [
+          {
+            "text": "P2 reacts with \"Вааата...\" to P1’s initial message.",
+            "evidence": [2]
+          },
+          {
+            "text": "P7 humorously contrasts attitudes toward AI in 2024 vs 2026.",
+            "evidence": [7]
+          },
+          {
+            "text": "Multiple participants exchange jokes and nonsensical statements (e.g., \"Полуниця\", \"хахах\").",
+            "evidence": [12, 27, 28]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": []
+  },
+  "usage": {
+    "durationMs": 10439.503899999996,
+    "ollamaTotalMs": 9949.630441,
+    "promptEvalCount": 3530,
+    "evalCount": 860,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 5,
+    "claimCount": 15,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.7619047619047619,
+    "goldClaimPrecision": 0.4,
+    "evidencePrecision": 0.3684210526315789,
+    "forbiddenRate": 0.25,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0.3333333333333333,
+    "matchedClaimIds": [
+      "job-search.ai-skills",
+      "job-search.automation-idea",
+      "job-search.keyword-filtering",
+      "development.routine-speedup",
+      "vibe-coding.bad-backend",
+      "vibe-coding.review-failure"
+    ],
+    "retainedThreadIds": [
+      "ai-job-search",
+      "ai-assisted-development",
+      "vibe-coding-risks"
+    ],
+    "triggeredForbiddenIds": ["ai-controls-people"]
+  }
+}

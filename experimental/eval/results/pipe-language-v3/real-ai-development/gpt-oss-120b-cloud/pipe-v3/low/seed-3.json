@@ -1,0 +1,143 @@
+{
+  "case": "real-ai-development",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 3,
+  "inputHash": "c44e2d8f381898078b12b50a1dbf1501e5970203c0d4ef386b86fd514114c47c",
+  "promptHash": "926769814c3c5c8a23a92b4aa3f016579ab9ed97ce364dc887976527a86b02a8",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion on AI, Job Search Automation, and Development Practices\",\n  \"topics\": [\n    {\n      \"id\": \"job-search-automation\",\n      \"title\": \"Automation of Job Search and Resume Generation\",\n      \"claims\": [\n        {\n          \"text\": \"User is preparing for full‑time job search, awaiting feedback from two vacancies, and wants to set up cloud automation to generate PDF resumes for specific jobs.\",\n          \"evidence\": [1, 5]\n        },\n        {\n          \"text\": \"Plans to configure OpenClaw after startup closes to find vacancies, generate resumes and cover letters.\",\n          \"evidence\": [5]\n        },\n        {\n          \"text\": \"Believes adding many AI‑related skills (Cursor, Claude Code, LLM, RAG, Embeddings) is necessary in 2026 to avoid being filtered by recruiters.\",\n          \"evidence\": [6]\n        }\n      ]\n    },\n    {\n      \"id\": \"ai-tools-impact\",\n      \"title\": \"Impact of AI Tools on Job Market and Development\",\n      \"claims\": [\n        {\n          \"text\": \"AI tools have become a market mainstream, and lack of knowledge in them makes JavaScript/Python job search much harder.\",\n          \"evidence\": [8]\n        },\n        {\n          \"text\": \"Acceleration of development is noticeable since 2025, with tools becoming sufficiently good but also increasingly expensive.\",\n          \"evidence\": [9]\n        },\n        {\n          \"text\": \"Comparison of the current AI‑driven stack to classic REST, JSON, Microservices, Docker after React.\",\n          \"evidence\": [10]\n        }\n      ]\n    },\n    {\n      \"id\": \"development-acceleration\",\n      \"title\": \"AI Accelerating Development Tasks\",\n      \"claims\": [\n        {\n          \"text\": \"Using GPT to generate SQL joins and other code significantly speeds up development, handling routine tasks.\",\n          \"evidence\": [19]\n        },\n        {\n          \"text\": \"Generated code can be massive (e.g., 450 lines of raw SQL) and may lead to performance issues.\",\n          \"evidence\": [30]\n        }\n      ]\n    },\n    {\n      \"id\": \"recruiter-relevance\",\n      \"title\": \"Future of Recruiter Profession\",\n      \"claims\": [\n        {\n          \"text\": \"Speculation that the recruiter profession may become extinct, with HR becoming just personnel management.\",\n          \"evidence\": [13, 14]\n        }\n      ]\n    },\n    {\n      \"id\": \"logs-analysis\",\n      \"title\": \"Effectiveness of Log Analysis\",\n      \"claims\": [\n        {\n          \"text\": \"Logs could help identify recurring issues earlier, but practical experience shows they often don't help much.\",\n          \"evidence\": [20, 22, 23]\n        }\n      ]\n    },\n    {\n      \"id\": \"code-quality-issues\",\n      \"title\": \"Risks of AI‑Generated Code\",\n      \"claims\": [\n        {\n          \"text\": \"AI‑generated SQL queries can be non‑optimal and cause long‑running queries in production.\",\n          \"evidence\": [30]\n        },\n        {\n          \"text\": \"A generated code snippet broke a project and was ultimately dropped because it lacked adequate quality.\",\n          \"evidence\": [35]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": []\n}",
+  "thinking": "We need to produce JSON with topics, claims, decisions, openQuestions. Identify main topics: job search automation, AI tools impact, cloud usage, recruiter relevance, development speed, logs, etc.\n\nWe must cite message IDs.\n\nOpen questions: any unresolved? maybe \"Що ще потрібно?\" not present. There is no explicit question unanswered. There is a question? none.\n\nDecisions none.\n\nSo decisions empty, openQuestions empty.\n\nCreate topics:\n\ntopic-id job-search-automation: claims about wanting to set up cloud for job search, generating PDF resumes, OpenClaw, etc. Cite #1, #5, #6.\n\ntopic-id ai-tools-impact: claims about AI skills needed, market trend, etc. Cite #6, #8, #9, #10 maybe.\n\ntopic-id development-acceleration: claim that AI accelerates development. Cite #19, #30.\n\ntopic-id recruiter-relevance: claim that recruiter profession may die. Cite #13, #14.\n\ntopic-id logs-analysis: claim about logs usefulness debated. Cite #20, #22, #23.\n\ntopic-id code-quality-issues: claim about generated code causing problems. Cite #30, #35.\n\nOkay produce JSON.",
+  "parsed": {
+    "title": "Discussion on AI, Job Search Automation, and Development Practices",
+    "topics": [
+      {
+        "id": "job-search-automation",
+        "title": "Automation of Job Search and Resume Generation",
+        "claims": [
+          {
+            "text": "User is preparing for full‑time job search, awaiting feedback from two vacancies, and wants to set up cloud automation to generate PDF resumes for specific jobs.",
+            "evidence": [1, 5]
+          },
+          {
+            "text": "Plans to configure OpenClaw after startup closes to find vacancies, generate resumes and cover letters.",
+            "evidence": [5]
+          },
+          {
+            "text": "Believes adding many AI‑related skills (Cursor, Claude Code, LLM, RAG, Embeddings) is necessary in 2026 to avoid being filtered by recruiters.",
+            "evidence": [6]
+          }
+        ]
+      },
+      {
+        "id": "ai-tools-impact",
+        "title": "Impact of AI Tools on Job Market and Development",
+        "claims": [
+          {
+            "text": "AI tools have become a market mainstream, and lack of knowledge in them makes JavaScript/Python job search much harder.",
+            "evidence": [8]
+          },
+          {
+            "text": "Acceleration of development is noticeable since 2025, with tools becoming sufficiently good but also increasingly expensive.",
+            "evidence": [9]
+          },
+          {
+            "text": "Comparison of the current AI‑driven stack to classic REST, JSON, Microservices, Docker after React.",
+            "evidence": [10]
+          }
+        ]
+      },
+      {
+        "id": "development-acceleration",
+        "title": "AI Accelerating Development Tasks",
+        "claims": [
+          {
+            "text": "Using GPT to generate SQL joins and other code significantly speeds up development, handling routine tasks.",
+            "evidence": [19]
+          },
+          {
+            "text": "Generated code can be massive (e.g., 450 lines of raw SQL) and may lead to performance issues.",
+            "evidence": [30]
+          }
+        ]
+      },
+      {
+        "id": "recruiter-relevance",
+        "title": "Future of Recruiter Profession",
+        "claims": [
+          {
+            "text": "Speculation that the recruiter profession may become extinct, with HR becoming just personnel management.",
+            "evidence": [13, 14]
+          }
+        ]
+      },
+      {
+        "id": "logs-analysis",
+        "title": "Effectiveness of Log Analysis",
+        "claims": [
+          {
+            "text": "Logs could help identify recurring issues earlier, but practical experience shows they often don't help much.",
+            "evidence": [20, 22, 23]
+          }
+        ]
+      },
+      {
+        "id": "code-quality-issues",
+        "title": "Risks of AI‑Generated Code",
+        "claims": [
+          {
+            "text": "AI‑generated SQL queries can be non‑optimal and cause long‑running queries in production.",
+            "evidence": [30]
+          },
+          {
+            "text": "A generated code snippet broke a project and was ultimately dropped because it lacked adequate quality.",
+            "evidence": [35]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": []
+  },
+  "usage": {
+    "durationMs": 10611.229099999997,
+    "ollamaTotalMs": 10328.413921,
+    "promptEvalCount": 3260,
+    "evalCount": 973,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 6,
+    "claimCount": 12,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.9047619047619048,
+    "goldClaimPrecision": 0.5833333333333334,
+    "evidencePrecision": 0.6875,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0,
+    "matchedClaimIds": [
+      "development.context-quality",
+      "job-search.automation-idea",
+      "job-search.keyword-filtering",
+      "job-search.ai-skills",
+      "development.routine-speedup",
+      "vibe-coding.bad-backend",
+      "vibe-coding.review-failure"
+    ],
+    "retainedThreadIds": [
+      "ai-assisted-development",
+      "ai-job-search",
+      "vibe-coding-risks"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

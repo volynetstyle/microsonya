@@ -1,0 +1,39 @@
+{
+  "case": "question-vs-assertion",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Обговорення наявності інформації на сайті\",\n  \"summary\": \"Учасник A запитує, чи є певна інформація на сайті.\",\n  \"topics\": [\n    {\n      \"topic\": \"Наявність інформації на сайті\",\n      \"summary\": \"A ставить питання про те, чи доступна потрібна інформація на офіційному сайті.\",\n      \"participants\": [\n        \"A\"\n      ],\n      \"evidence\": [\n        1\n      ]\n    }\n  ]\n}",
+  "thinking": "We need to produce JSON. Only one message given? Likely more but truncated. We'll summarize just that. No topics? Might be empty. We'll create no topics.",
+  "parsed": {
+    "title": "Обговорення наявності інформації на сайті",
+    "summary": "Учасник A запитує, чи є певна інформація на сайті.",
+    "topics": [
+      {
+        "topic": "Наявність інформації на сайті",
+        "summary": "A ставить питання про те, чи доступна потрібна інформація на офіційному сайті.",
+        "participants": ["A"],
+        "evidence": [1]
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 2541.4141999999993,
+    "ollamaTotalMs": 2299.085786,
+    "promptEvalCount": 537,
+    "evalCount": 162,
+    "doneReason": "stop",
+    "thinkingTextTokenCount": 34,
+    "finalTextTokenCount": 118
+  },
+  "metrics": {
+    "contentRecall": 1,
+    "claimRecall": null,
+    "decisionRecall": null,
+    "openQuestionRecall": 1,
+    "evidenceSelectionPrecision": 1,
+    "noiseSelectionRate": 0,
+    "forbiddenRate": 0,
+    "unitCount": 1,
+    "selectedEvidenceCount": 1,
+    "unknownEvidenceCount": 0
+  }
+}

@@ -1,0 +1,125 @@
+{
+  "case": "sarcasm",
+  "model": "gpt-oss:120b",
+  "pipeline": "deterministic-shell",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 1,
+  "transformation": "identity",
+  "inputHash": "2e6358a51a083a8302f240a5011e16777fcafa01fa10ea6c05c20488f87aa2d4",
+  "promptHash": "4c4fe4dfdf3520d66901f46484e4ba40d9dda267c5dc9d0cbb04f3eff6d8eb80",
+  "promptVersion": "v4",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Goat‑herding after meetings\",\n  \"events\": [\n    {\n      \"id\": \"m1\",\n      \"topicId\": \"meetings\",\n      \"topicTitle\": \"Discussion of upcoming meetings\",\n      \"speaker\": \"A\",\n      \"statement\": \"After two more meetings I will go herd goats.\",\n      \"speechAct\": \"assertion\",\n      \"literalness\": \"ironic\",\n      \"commitment\": \"none\",\n      \"epistemicStatus\": \"claimed\",\n      \"settled\": false,\n      \"action\": null,\n      \"refersTo\": [],\n      \"stance\": \"neutral\",\n      \"semanticImportance\": 0.3,\n      \"confidence\": 0.95,\n      \"evidence\": [\n        1\n      ]\n    }\n  ]\n}",
+  "thinking": "We need to produce events only from substantive messages. Only one message given. It's a statement: \"Ще два митинги і піду пасти кіз.\" Ukrainian: \"Two more meetings and I'll go herd goats.\" Likely a joke, maybe ironic. speechAct assertion. literalness maybe ironic. commitment none. epistemic claimed. settled false. No action. topic? unclear; maybe meetings. Use topicId \"meetings\". Provide JSON.",
+  "parsed": {
+    "title": "Goat‑herding after meetings",
+    "topics": [],
+    "decisions": [],
+    "openQuestions": []
+  },
+  "reconstruction": {
+    "title": "Goat‑herding after meetings",
+    "events": [
+      {
+        "id": "m1",
+        "topicId": "meetings",
+        "topicTitle": "Discussion of upcoming meetings",
+        "speaker": "A",
+        "statement": "After two more meetings I will go herd goats.",
+        "speechAct": "assertion",
+        "literalness": "ironic",
+        "commitment": "none",
+        "epistemicStatus": "claimed",
+        "settled": false,
+        "action": null,
+        "refersTo": [],
+        "stance": "neutral",
+        "semanticImportance": 0.3,
+        "confidence": 0.95,
+        "evidence": [1]
+      }
+    ]
+  },
+  "state": {
+    "title": "Goat‑herding after meetings",
+    "events": [
+      {
+        "id": "m1",
+        "topicId": "meetings",
+        "topicTitle": "Discussion of upcoming meetings",
+        "speaker": "A",
+        "statement": "After two more meetings I will go herd goats.",
+        "speechAct": "assertion",
+        "literalness": "ironic",
+        "commitment": "none",
+        "epistemicStatus": "claimed",
+        "settled": false,
+        "action": null,
+        "refersTo": [],
+        "stance": "neutral",
+        "semanticImportance": 0.3,
+        "confidence": 0.95,
+        "evidence": [1]
+      }
+    ],
+    "resolvedQuestionIds": [],
+    "supersededEventIds": []
+  },
+  "extractorMetrics": {
+    "eventCount": 1,
+    "eventRecall": null,
+    "eventPrecision": 0,
+    "attributionAccuracy": 1,
+    "evidenceCorrectness": 1,
+    "relationIntegrity": 1
+  },
+  "reducerMetrics": {
+    "deterministic": true,
+    "lifecycleInvariantViolations": 0,
+    "resolvedQuestions": 0,
+    "supersededEvents": 0
+  },
+  "operationalMetrics": {
+    "modelCalls": 1,
+    "sourceMessageWindows": 1,
+    "semanticInterpretations": 1,
+    "semanticAmplification": 1
+  },
+  "projectionDiagnostics": {
+    "decisionCandidates": 0,
+    "decisionsRejectedByInvariant": 0,
+    "questionsResolvedByAnswerEdge": 0
+  },
+  "usage": {
+    "durationMs": 4147.808900000062,
+    "ollamaTotalMs": 3920.967073,
+    "promptEvalCount": 720,
+    "evalCount": 273,
+    "doneReason": "stop",
+    "thinkingTextTokenCount": 93,
+    "finalTextTokenCount": 170
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 0,
+    "claimCount": 0,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 0,
+    "weightedClaimRecall": null,
+    "goldClaimPrecision": null,
+    "evidencePrecision": null,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0,
+    "matchedClaimIds": [],
+    "matchedDecisionIds": [],
+    "matchedOpenQuestionIds": [],
+    "retainedThreadIds": [],
+    "triggeredForbiddenIds": []
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "case": "hypothetical",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Оптимізація за запитом\",\n  \"summary\": \"Учасник A висловив, що перед оптимізацією спочатку запитав би про мету її проведення.\",\n  \"topics\": [\n    {\n      \"topic\": \"Підхід до оптимізації\",\n      \"summary\": \"A зазначив, що спочатку слід з'ясувати, навіщо потрібна оптимізація.\",\n      \"participants\": [\n        \"A\"\n      ],\n      \"evidence\": [\n        1\n      ]\n    }\n  ]\n}",
+  "thinking": "We need to produce JSON summary. Only one message? Then one topic maybe. Provide title, summary. Use participants A. evidence [1].",
+  "parsed": {
+    "title": "Оптимізація за запитом",
+    "summary": "Учасник A висловив, що перед оптимізацією спочатку запитав би про мету її проведення.",
+    "topics": [
+      {
+        "topic": "Підхід до оптимізації",
+        "summary": "A зазначив, що спочатку слід з'ясувати, навіщо потрібна оптимізація.",
+        "participants": ["A"],
+        "evidence": [1]
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 2405.960799999999,
+    "ollamaTotalMs": 2086.609744,
+    "promptEvalCount": 547,
+    "evalCount": 162,
+    "doneReason": "stop",
+    "thinkingTextTokenCount": 29,
+    "finalTextTokenCount": 123
+  },
+  "metrics": {
+    "contentRecall": null,
+    "claimRecall": null,
+    "decisionRecall": null,
+    "openQuestionRecall": null,
+    "evidenceSelectionPrecision": 0,
+    "noiseSelectionRate": 0,
+    "forbiddenRate": 0,
+    "unitCount": 1,
+    "selectedEvidenceCount": 1,
+    "unknownEvidenceCount": 0
+  }
+}

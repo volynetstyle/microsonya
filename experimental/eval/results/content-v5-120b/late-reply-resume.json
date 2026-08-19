@@ -1,0 +1,45 @@
+{
+  "case": "late-reply-resume",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Обговорення CSV‑експорту та випадкові розмови\",\n  \"summary\": \"У розмові спочатку обговорювали потребу експорту звітів у CSV і стан виправлення авторизації, після чого перейшли до випадкових тем повсякденного характеру між користувачами C і D.\",\n  \"topics\": [\n    {\n      \"topic\": \"CSV‑експорт та авторизація\",\n      \"summary\": \"A зазначив, що для експорту звітів потрібен CSV. B пообіцяв додати експорт після виправлення проблеми з авторизацією. Пізніше A повідомив, що авторизацію виправлено і сьогодні буде здійснено CSV‑експорт.\",\n      \"participants\": [\n        \"A\",\n        \"B\"\n      ],\n      \"evidence\": [\n        1,\n        2,\n        33\n      ]\n    },\n    {\n      \"topic\": \"Повсякденне спілкування\",\n      \"summary\": \"C і D обмінювалися короткими повідомленнями про трейлер, погоду, планові зустрічі, їжу, технічні дрібниці тощо, не привносячи нових завдань чи рішень до розмови.\",\n      \"participants\": [\n        \"C\",\n        \"D\"\n      ],\n      \"evidence\": [\n        3,\n        4,\n        9,\n        10,\n        17,\n        18,\n        27,\n        28,\n        31,\n        32\n      ]\n    }\n  ]\n}",
+  "thinking": "Need to produce summary. Identify topics: export CSV, small talk. Only real substantive is #1,#2,#33. Others trivial. So topics: \"CSV export / authorization\" with participants A,B. Evidence IDs 1,2,33. Another topic \"Casual chat\" participants C,D but many trivial; maybe summarize as small talk. Provide IDs some. Use participants C,D. Evidence maybe 3,4,9 etc. Provide.",
+  "parsed": {
+    "title": "Обговорення CSV‑експорту та випадкові розмови",
+    "summary": "У розмові спочатку обговорювали потребу експорту звітів у CSV і стан виправлення авторизації, після чого перейшли до випадкових тем повсякденного характеру між користувачами C і D.",
+    "topics": [
+      {
+        "topic": "CSV‑експорт та авторизація",
+        "summary": "A зазначив, що для експорту звітів потрібен CSV. B пообіцяв додати експорт після виправлення проблеми з авторизацією. Пізніше A повідомив, що авторизацію виправлено і сьогодні буде здійснено CSV‑експорт.",
+        "participants": ["A", "B"],
+        "evidence": [1, 2, 33]
+      },
+      {
+        "topic": "Повсякденне спілкування",
+        "summary": "C і D обмінювалися короткими повідомленнями про трейлер, погоду, планові зустрічі, їжу, технічні дрібниці тощо, не привносячи нових завдань чи рішень до розмови.",
+        "participants": ["C", "D"],
+        "evidence": [3, 4, 9, 10, 17, 18, 27, 28, 31, 32]
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 8654.233999999997,
+    "ollamaTotalMs": 7062.645645,
+    "promptEvalCount": 1286,
+    "evalCount": 459,
+    "doneReason": "stop",
+    "thinkingTextTokenCount": 92,
+    "finalTextTokenCount": 357
+  },
+  "metrics": {
+    "contentRecall": 1,
+    "claimRecall": 1,
+    "decisionRecall": 1,
+    "openQuestionRecall": null,
+    "evidenceSelectionPrecision": 0.23076923076923078,
+    "noiseSelectionRate": 0.7692307692307693,
+    "forbiddenRate": 0,
+    "unitCount": 2,
+    "selectedEvidenceCount": 13,
+    "unknownEvidenceCount": 0
+  }
+}

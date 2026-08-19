@@ -1,0 +1,151 @@
+{
+  "case": "real-fop-calculator",
+  "model": "deepseek-v4-pro:preview",
+  "pipeline": "direct",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 1,
+  "transformation": "identity",
+  "inputHash": "d3179cdb8e49a27f55b8dcbb42c5b7b95590527ad18ad16afb38bc499073e8af",
+  "promptHash": "2eebd1bb4c46d9d16df97d533d7b45490d5b8778ba7d61fe33fe478b1265bb13",
+  "promptVersion": "v4",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Обговорення ФОП калькулятора та ідеї заробітку на мікропродуктах\",\n  \"topics\": [\n    {\n      \"id\": \"calculator-viability\",\n      \"title\": \"Життєздатність ФОП калькулятора\",\n      \"claims\": [\n        {\n          \"text\": \"Калькулятор — це SPA на Vercel без власного домену\",\n          \"evidence\": [2, 3]\n        },\n        {\n          \"text\": \"Платний доступ захищено паролем, який зберігається у localStorage як промокод\",\n          \"evidence\": [20]\n        },\n        {\n          \"text\": \"Калькулятор підтримує лише гривневого ФОП, без обліку валютних транзакцій за курсом на день зарахування\",\n          \"evidence\": [19]\n        },\n        {\n          \"text\": \"Конверсія такої моделі, ймовірно, нульова через жорсткий пейвол, відсутність стороннього трафіку та SEO\",\n          \"evidence\": [11]\n        },\n        {\n          \"text\": \"Автор назвав проєкт фрі вайбкодом, який зроблено від нудьги\",\n          \"evidence\": [30, 31]\n        },\n        {\n          \"text\": \"Пароль можна знайти у вихідному коді, тому технічні користувачі не платитимуть\",\n          \"evidence\": [22, 23, 28, 29]\n        }\n      ]\n    },\n    {\n      \"id\": \"tax-filing-issues\",\n      \"title\": \"Проблеми заповнення податкових декларацій\",\n      \"claims\": [\n        {\n          \"text\": \"Заповнити звітність вручну з Excel займає годину на день максимум\",\n          \"evidence\": [5, 6]\n        },\n        {\n          \"text\": \"Основна проблема не в розрахунку податку, а в ризику помилково позначити колонку чи відняти число\",\n          \"evidence\": [8]\n        },\n        {\n          \"text\": \"Виправлення та переподача декларацій через помічника обійшлися в ~1000 грн, що дешевше за штрафи\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"Навіть помилка на кілька тисяч гривень у розрахунку зазвичай ігнорується податковою\",\n          \"evidence\": [8]\n        }\n      ]\n    },\n    {\n      \"id\": \"micro-product-strategy\",\n      \"title\": \"Стратегія створення невеликих продуктів\",\n      \"claims\": [\n        {\n          \"text\": \"Веб-платформа простіша, але значно менш прибуткова, ніж мобільні застосунки\",\n          \"evidence\": [11]\n        },\n        {\n          \"text\": \"Мобільні магазини самі просувають новинки, що дає тимчасовий трафік\",\n          \"evidence\": [11]\n        },\n        {\n          \"text\": \"Для успіху потрібен дуже швидкий реліз (менше тижня) і кросплатформений стек (напр. Flutter)\",\n          \"evidence\": [12]\n        },\n        {\n          \"text\": \"Копіювання популярних рішень із невеликими поліпшеннями — робоча модель\",\n          \"evidence\": [12]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": [\n    {\n      \"text\": \"Чи купить хтось цей калькулятор за 299 грн?\",\n      \"evidence\": [17, 20]\n    }\n  ]\n}",
+  "thinking": "We are asked to summarize the Telegram conversation and output JSON with the required shape. The conversation is in Ukrainian. We need to extract key topics, claims, decisions, open questions, and provide evidence with message IDs. The messages have IDs from #1 to #34. We must preserve attribution and only cite source message IDs. No invented decisions or open questions if not settled or unanswered.\n\nLet's parse the conversation:\n\n- P1 (Igor?), complains about tax declarations, uses \"aunt Sveta\" to fill forms for 500 UAH to avoid headache, mentions inspector was a rare scum, had to refile declarations, with help paid about 1000 UAH instead of larger fines. (#1)\n- P2 says \"didn't even buy a domain\" (#2), then \"fop calculator vercel app\" (#3). So someone built a sole proprietor tax calculator on Vercel.\n- P1 responds that if someone buys that calculator, there will be money for a domain. (#4, replying to #2)\n- P3 says the whole filling procedure takes an hour with an Excel sheet, a day maximum, and a day per month for quarterly reports, correctly paying everything. (#5, #6, #7)\n- P1 says the trick is not how you calculate the tax (they ignore a few thousand UAH discrepancies) but the risk of missing a column, subtracting the wrong number, etc. (#8)\n- P4 says they wouldn't buy a domain for this, not because of being cheap but because it's so raw that it won't evaporate even in the current heat. (#9, #10)\n- P1 researched earning from own thing, and it's terrible: web is simplest but much less profitable than Android/iOS; SEO is dead; no third-party traffic from Instagram/X/Threads; no contextual ads; no passive income from ads; user retention zero because paywall appears in 10 seconds; conversion likely zero; product doesn't simplify much, no integrations with banks or tax payer's cabinet. (#11)\n- P1 saw a podcast of a guy who does this successfully, key points: very fast delivery time (less than a week from zero to release), fast cross-platform stack (Flutter in that case), just take popular things and copy them, tweaking as needed. (#12)\n- P4 asks \"What is this about?\" (#13, replying to #11)\n- P1 says it's about Igor's attempts to earn something. (#14)\n- P4 says \"Ah, yep\" (#15), then \"You got too serious about a spa in two prompts)))\" (#16) – maybe referring to the calculator being built with a couple of prompts? SPA = single-page application? So it's a joke about over-analyzing a simple app.\n- P1 responds \"Yes but trying to earn on this is a bit strange, I'd bet a hundred that no one will buy it within months\" (#17)\n- P1 says looking at the LinkedIn audience, it's possible; they feel less than 50% of posts are technical/managerial/sales. (#18)\n- P1 found that the calculator only works with UAH based sole proprietor; in his case he had to calculate all transactions relative to the exchange rate on the day of deposit. (#19)\n- P4 says it doesn't matter whether it supports currency FOP or App Store; first need to understand if there are at least ten people ready to pay 299 UAH. They don't see sense in premature analysis while the only password is stored in local storage as a 100% discount promo code. (#20)\n- P1 asks what's the source code like? Can you find the password by search? (#21)\n- P4 retorts \"Do you think I paid 299 UAH for this?)))\" (#22)\n- P4 says \"In bundle\" (#23, perhaps meaning the password was in the bundle/HTML?)\n- P5 calls \"Pirate\" (#24, replying to #22)\n- P5 suggests \"so maybe write to him\" (#25), \"at least for the password\" (#27)\n- P4 says \"A thousand devils! I would like cold rum now\" (#26)\n- P1 says \"Well I think most people from LinkedIn will hack this without problems\" (#28)\n- P4 says \"he positions it as local-first app, quoting about internet: 'Yes, but very little. USD/UAH rate is fetched every 5 minutes. Calculations happen instantly in the browser.' And in fact, what they pay for in the bundle is lying there\" (#29) – meaning the paid content is exposed.\n- P4 says \"Hi, it's a free vibe-code project because was bored, so little point) Those who know, will look up the password, those who don't know will buy, those who think it's crap won't buy\" (#30)\n- P4 says \"But thank you\" (#31)\n- P4 says \"What, scammer😂\" (#32, replying to #30 perhaps self-reply?)\n- P5 says \"in fact\" (#33, replying to #32)\n- P5 says \"vibecode as it really is\" (#34, replying to #30)\n\nNow we need to create a summary with title, topics, claims, decisions, open questions. The shape requires:\n\n- title: short title.\n- topics: array of topic objects, each with id (short-kebab-id), title, claims (array of attributed claim objects with text and evidence array of message IDs).\n- decisions: array of settled actions, each with text and evidence.\n- openQuestions: array of unresolved questions, each with text and evidence.\n\nWe need to pick out the key points. The conversation revolves around a FOP tax calculator that someone (not present) built, likely a simple web app. The group discusses its viability, monetization, quality, security. There are criticisms and observations.\n\nIdentify distinct topics:\n1. The calculator itself: built on Vercel, no domain, simple, password-protected but password exposed in source code, not fully functional for all cases (only UAH, no integration).\n2. Monetization and target audience: price 299 UAH, unclear demand, might be bought by non-technical people, LinkedIn audience possibly less technical.\n3. Comparison with manual tax filing: using Excel is easy, filling takes an hour, the real pain is column details and possible mistakes; using a helper like \"aunt Sveta\" costs 500-1000 UAH and avoids fines.\n4. Viability of such small projects: P1 analysis of web vs mobile, SEO dead, no traffic, no passive income, zero conversion.\n5. The password leak: the password is in local storage as a promo code, essentially anyone can inspect the source/code to get it for free. The creator says it's free vibe-code project.\n\nDecisions? No clear settled actions; the group discusses but doesn't decide to do anything. One might say they decided not to buy? Not really. At the end, P4 says \"But thank you\" and acknowledges it's a free vibe-code project, so maybe the understanding is that it's not a serious commercial product. No explicit decisions like \"we will not buy\" or \"we will contact him\". So decisions might be empty.\n\nOpen questions: Maybe \"Will anyone buy the calculator?\" (expressed uncertainty with bet). Also \"Does the calculator support currency FOP?\" (it doesn't). But open questions are unresolved questions from the conversation. The conversation ends with no resolution on whether it will sell. So we could list that as an open question: \"Чи купить хтось цей калькулятор?\" (Will anyone buy this calculator?) Evidence from #17 (P1 bets nobody will buy it) and #20 (P4 says first need to see if ten people are willing to pay). But is it truly an open question left unanswered? The conversation ends with the creator acknowledging it's a vibe-code project, so maybe it's not a serious product. However, no answer is provided. It's an unresolved question. Also the question about password: \"Чи можна знайти пароль у вихідному коді?\" was answered by P4: indeed, it's in local storage. So that's resolved. No other open questions.\n\nThus, decisions: none. But the shape requires decisions array; we can leave empty array or include one if there is a settled action. There is no explicit \"settled action\". So decisions: [].\n\nOpen questions: one. But we might also consider \"Як монетизувати такі проекти?\" (how to monetize such projects) but that's more general, not a specific unresolved question. The closest is \"Чи є сенс у такому калькуляторі?\" but that's more a discussion. I'll stick to the one about buying.\n\nClaims: we need to attribute claims to speakers using their P numbers, but the required output only asks for \"text\" and \"evidence\" (message IDs). Attribution is preserved through evidence, which links to source messages, thus indirectly attributing. So I can phrase the claim as something said, and provide the message ID(s) where it was said.\n\nThe claims should be factual assertions made by participants. For instance:\n\n- P1: Заповнення декларацій через тітю Свєту обійшлося в 500 грн, а переподача з її допомогою — ~1000 грн, що дешевше за штрафи. (#1)\n- P2: Автор калькулятора навіть не купив домен. (#2)\n- P3: Вся процедура звітності займає годину з екселькою на день максимум. (#5, #6)\n- P1: Проблема не в розрахунку податку, а в уникненні помилок у колонках. (#8)\n- P4: Я б не став купувати домен для цього, бо програма надто сира. (#9, #10)\n- P1: Веб-платформа менш прибуткова за мобільні застосунки, SEO не працює, конверсія нульова. (#11)\n- P1: Успішний підхід — швидкий реліз (менше тижня), кросплатформенний стек (Flutter), копіювання популярних штук. (#12)\n- P4: Калькулятор позиціонується як local-first, але пароль лежить у локальному сховищі, як промокод на 100% знижки. (#20)\n- P1: Калькулятор працює лише з гривневим ФОП, не підтримує валютні транзакції. (#19)\n- P4: Пароль можна знайти у коді/бандлі, автор сам каже, що це фрі вайбкод проект. (#29, #30)\n- P5: Це по факту вайбкод. (#34)\n\nBut we must group claims under topics. Let's create topics:\n\n1. \"Проблеми з податковою звітністю ФОП\" (Tax reporting difficulties)\n   - Claims: about the process, costs, filling errors.\n2. \"Оцінка калькулятора та монетизації\" (Calculator evaluation and monetization)\n   - Claims: about the raw product, no domain, password exposed, limited currency support, analysis of web vs mobile, likelihood of sales.\n3. \"Витік паролю та безпека\" (Password leak and security)\n   - Claims: password in local storage, anyone can inspect, creator's admission.\n4. \"Підходи до створення мікропродуктів\" (Approaches to creating micro-products)\n   - Claims: fast delivery, copying popular things.\n\nBut we need to keep it concise. I'll merge topics 2 and 3 as they are closely related to the calculator itself. The main themes are: the calculator's quality and monetization; the password exposure; the creator's attitude (vibe-code). Also the comparison with manual filing via an aunt is a separate topic but less central. Let's craft.\n\nTitle: \"Обговорення ФОП калькулятора та ідеї заробітку на мікропродуктах\" (Discussion of FOP calculator and earning on micro-products)\n\nTopics:\n- id: \"calculator-viability\"\n  title: \"Життєздатність ФОП калькулятора\"\n  claims: \n    - \"Калькулятор — це SPA на Vercel без власного домену\" (#2, #3)\n    - \"Платний доступ захищено паролем, який зберігається у localStorage як промокод\" (#20)\n    - \"Калькулятор підтримує лише гривневого ФОП, без обліку валютних транзакцій за курсом на день зарахування\" (#19)\n    - \"Конверсія такої моделі, ймовірно, нульова через жорсткий пейвол, відсутність стороннього трафіку та SEO\" (#11)\n    - \"Автор назвав проєкт фрі вайбкодом, який зроблено від нудьги\" (#30, #31)\n    - \"Пароль можна знайти у вихідному коді, тому технічні користувачі не платитимуть\" (#22, #23, #28, #29)\n\n- id: \"tax-filing-issues\"\n  title: \"Проблеми заповнення податкових декларацій\"\n  claims:\n    - \"Заповнити звітність вручну з Excel займає годину на день максимум\" (#5, #6)\n    - \"Основна проблема не в розрахунку податку, а в ризику помилково позначити колонку чи відняти число\" (#8)\n    - \"Виправлення та переподача декларацій через помічника обійшлися в ~1000 грн, що дешевше за штрафи\" (#1)\n    - \"Навіть помилка на кілька тисяч гривень у розрахунку зазвичай ігнорується податковою\" (#8)\n\n- id: \"micro-product-strategy\"\n  title: \"Стратегія створення невеликих продуктів\"\n  claims:\n    - \"Веб-платформа простіша, але значно менш прибуткова, ніж мобільні застосунки\" (#11)\n    - \"Мобільні магазини самі просувають новинки, що дає тимчасовий трафік\" (#11)\n    - \"Для успіху потрібен дуже швидкий реліз (менше тижня) і кросплатформений стек (напр. Flutter)\" (#12)\n    - \"Копіювання популярних рішень із невеликими поліпшеннями — робоча модель\" (#12)\n\nDecisions: none. So [].\n\nOpen questions: \n- \"Чи купить хтось цей калькулятор за 299 грн? \" (Will anyone buy this calculator for 299 UAH?) Evidence from #17 (P1 bets not within months), #20 (P4 says need to see if at least ten people are willing). This remains unresolved. So:\n  text: \"Чи купить хтось цей калькулятор за 299 грн?\",\n  evidence: [17, 20]\n\nMake sure all IDs are numbers. Use the message IDs as evidence arrays.\n\nReturn JSON only.",
+  "parsed": {
+    "title": "Обговорення ФОП калькулятора та ідеї заробітку на мікропродуктах",
+    "topics": [
+      {
+        "id": "calculator-viability",
+        "title": "Життєздатність ФОП калькулятора",
+        "claims": [
+          {
+            "text": "Калькулятор — це SPA на Vercel без власного домену",
+            "evidence": [2, 3]
+          },
+          {
+            "text": "Платний доступ захищено паролем, який зберігається у localStorage як промокод",
+            "evidence": [20]
+          },
+          {
+            "text": "Калькулятор підтримує лише гривневого ФОП, без обліку валютних транзакцій за курсом на день зарахування",
+            "evidence": [19]
+          },
+          {
+            "text": "Конверсія такої моделі, ймовірно, нульова через жорсткий пейвол, відсутність стороннього трафіку та SEO",
+            "evidence": [11]
+          },
+          {
+            "text": "Автор назвав проєкт фрі вайбкодом, який зроблено від нудьги",
+            "evidence": [30, 31]
+          },
+          {
+            "text": "Пароль можна знайти у вихідному коді, тому технічні користувачі не платитимуть",
+            "evidence": [22, 23, 28, 29]
+          }
+        ]
+      },
+      {
+        "id": "tax-filing-issues",
+        "title": "Проблеми заповнення податкових декларацій",
+        "claims": [
+          {
+            "text": "Заповнити звітність вручну з Excel займає годину на день максимум",
+            "evidence": [5, 6]
+          },
+          {
+            "text": "Основна проблема не в розрахунку податку, а в ризику помилково позначити колонку чи відняти число",
+            "evidence": [8]
+          },
+          {
+            "text": "Виправлення та переподача декларацій через помічника обійшлися в ~1000 грн, що дешевше за штрафи",
+            "evidence": [1]
+          },
+          {
+            "text": "Навіть помилка на кілька тисяч гривень у розрахунку зазвичай ігнорується податковою",
+            "evidence": [8]
+          }
+        ]
+      },
+      {
+        "id": "micro-product-strategy",
+        "title": "Стратегія створення невеликих продуктів",
+        "claims": [
+          {
+            "text": "Веб-платформа простіша, але значно менш прибуткова, ніж мобільні застосунки",
+            "evidence": [11]
+          },
+          {
+            "text": "Мобільні магазини самі просувають новинки, що дає тимчасовий трафік",
+            "evidence": [11]
+          },
+          {
+            "text": "Для успіху потрібен дуже швидкий реліз (менше тижня) і кросплатформений стек (напр. Flutter)",
+            "evidence": [12]
+          },
+          {
+            "text": "Копіювання популярних рішень із невеликими поліпшеннями — робоча модель",
+            "evidence": [12]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": [
+      {
+        "text": "Чи купить хтось цей калькулятор за 299 грн?",
+        "evidence": [17, 20]
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 61389.542200000025,
+    "ollamaTotalMs": 61144.215883,
+    "promptEvalCount": 2983,
+    "evalCount": 4398,
+    "doneReason": "stop",
+    "thinkingTextTokenCount": 3243,
+    "finalTextTokenCount": 838
+  },
+  "operationalMetrics": {
+    "modelCalls": 1,
+    "sourceMessageWindows": 1,
+    "semanticInterpretations": 1,
+    "semanticAmplification": 1
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 3,
+    "claimCount": 14,
+    "decisionCount": 0,
+    "openQuestionCount": 1,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 1,
+    "goldClaimPrecision": 0.5714285714285714,
+    "evidencePrecision": 0.5909090909090909,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 1,
+    "noiseRetention": 0,
+    "matchedClaimIds": [
+      "security.password-in-bundle",
+      "product.creator-response",
+      "tax-reporting.form-risk",
+      "product.validate-demand-first",
+      "product.uah-only",
+      "product.web-limitations",
+      "tax-reporting.paid-help",
+      "product.fast-delivery-strategy"
+    ],
+    "matchedDecisionIds": [],
+    "matchedOpenQuestionIds": [],
+    "retainedThreadIds": [
+      "calculator-security",
+      "calculator-product",
+      "tax-reporting"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

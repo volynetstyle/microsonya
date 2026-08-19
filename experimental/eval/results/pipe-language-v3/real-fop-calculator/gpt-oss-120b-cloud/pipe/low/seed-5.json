@@ -1,0 +1,130 @@
+{
+  "case": "real-fop-calculator",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe",
+  "reasoning": "low",
+  "seed": 5,
+  "inputHash": "d3179cdb8e49a27f55b8dcbb42c5b7b95590527ad18ad16afb38bc499073e8af",
+  "promptHash": "669e6d2beeabb2d67c39f324594f945bfec2e42e38c44a69ae401bc77e4e1c35",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion on taxes, domain purchase, app profitability, and potential scam\",\n  \"topics\": [\n    {\n      \"id\": \"tax-declaration\",\n      \"title\": \"Tax declaration issues and using aunt Sveta\",\n      \"claims\": [\n        {\n          \"text\": \"The user paid about 1000 грн to re‑file declarations correctly with the help of aunt Sveta, avoiding larger fines.\",\n          \"evidence\": [1, 8]\n        },\n        {\n          \"text\": \"The tax calculator only works with a hryvnia‑based FOP, requiring conversion of each transaction at the day's exchange rate.\",\n          \"evidence\": [19]\n        }\n      ]\n    },\n    {\n      \"id\": \"domain-buy\",\n      \"title\": \"Debate about buying a domain\",\n      \"claims\": [\n        {\n          \"text\": \"One participant claims they have not even bought a domain.\",\n          \"evidence\": [2]\n        },\n        {\n          \"text\": \"Another suggests that buying a calculator first will generate money for a domain.\",\n          \"evidence\": [4]\n        },\n        {\n          \"text\": \"Someone else refuses to fund the domain purchase.\",\n          \"evidence\": [9, 10]\n        }\n      ]\n    },\n    {\n      \"id\": \"app-profitability\",\n      \"title\": \"Assessment of profitability of a web app\",\n      \"claims\": [\n        {\n          \"text\": \"Web platforms are described as the simplest but far less profitable than Android/iOS, with poor SEO and virtually no traffic.\",\n          \"evidence\": [11]\n        },\n        {\n          \"text\": \"A successful approach mentioned includes very fast delivery (under a week), using a cross‑platform stack like Flutter, and copying popular ideas with minor adjustments.\",\n          \"evidence\": [12]\n        },\n        {\n          \"text\": \"One user doubts the app can generate sales, betting it will not sell in months.\",\n          \"evidence\": [17]\n        },\n        {\n          \"text\": \"Another observation notes LinkedIn audience is shifting away from technical/managerial posts.\",\n          \"evidence\": [18]\n        }\n      ]\n    },\n    {\n      \"id\": \"potential-scam\",\n      \"title\": \"Allegations that the app is a scam\",\n      \"claims\": [\n        {\n          \"text\": \"The app is described as a “local‑first” bundle with a single hard‑coded promo password stored locally.\",\n          \"evidence\": [20, 21, 23]\n        },\n        {\n          \"text\": \"Participants accuse the creator of selling a worthless product for 299 грн, labeling it a pirate product.\",\n          \"evidence\": [22, 24, 30, 32, 33, 34]\n        },\n        {\n          \"text\": \"Someone claims most LinkedIn users could crack the app’s password easily.\",\n          \"evidence\": [28]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": []\n}",
+  "thinking": "We need to output JSON with title, topics, decisions, openQuestions. Identify topics: maybe \"tax-declaration\", \"domain-buy\", \"app-profit\", \"scam\". Provide claims.\n\nLet's pick topics:\n\ntax-declaration: claims about needing aunt Sveta, paying 1000 etc (msg1,8,19).\n\ndomain-buy: discussion about not buying domain (msg2,4,9,10).\n\napp-profit: claims about web being low profit etc (msg11,12,17,18).\n\nscam: claims about app being scam, password, etc (msg20-34).\n\nDecisions? None explicit. Open questions? Maybe none.\n\nProvide IDs.\n\nLet's craft.\n\n",
+  "parsed": {
+    "title": "Discussion on taxes, domain purchase, app profitability, and potential scam",
+    "topics": [
+      {
+        "id": "tax-declaration",
+        "title": "Tax declaration issues and using aunt Sveta",
+        "claims": [
+          {
+            "text": "The user paid about 1000 грн to re‑file declarations correctly with the help of aunt Sveta, avoiding larger fines.",
+            "evidence": [1, 8]
+          },
+          {
+            "text": "The tax calculator only works with a hryvnia‑based FOP, requiring conversion of each transaction at the day's exchange rate.",
+            "evidence": [19]
+          }
+        ]
+      },
+      {
+        "id": "domain-buy",
+        "title": "Debate about buying a domain",
+        "claims": [
+          {
+            "text": "One participant claims they have not even bought a domain.",
+            "evidence": [2]
+          },
+          {
+            "text": "Another suggests that buying a calculator first will generate money for a domain.",
+            "evidence": [4]
+          },
+          {
+            "text": "Someone else refuses to fund the domain purchase.",
+            "evidence": [9, 10]
+          }
+        ]
+      },
+      {
+        "id": "app-profitability",
+        "title": "Assessment of profitability of a web app",
+        "claims": [
+          {
+            "text": "Web platforms are described as the simplest but far less profitable than Android/iOS, with poor SEO and virtually no traffic.",
+            "evidence": [11]
+          },
+          {
+            "text": "A successful approach mentioned includes very fast delivery (under a week), using a cross‑platform stack like Flutter, and copying popular ideas with minor adjustments.",
+            "evidence": [12]
+          },
+          {
+            "text": "One user doubts the app can generate sales, betting it will not sell in months.",
+            "evidence": [17]
+          },
+          {
+            "text": "Another observation notes LinkedIn audience is shifting away from technical/managerial posts.",
+            "evidence": [18]
+          }
+        ]
+      },
+      {
+        "id": "potential-scam",
+        "title": "Allegations that the app is a scam",
+        "claims": [
+          {
+            "text": "The app is described as a “local‑first” bundle with a single hard‑coded promo password stored locally.",
+            "evidence": [20, 21, 23]
+          },
+          {
+            "text": "Participants accuse the creator of selling a worthless product for 299 грн, labeling it a pirate product.",
+            "evidence": [22, 24, 30, 32, 33, 34]
+          },
+          {
+            "text": "Someone claims most LinkedIn users could crack the app’s password easily.",
+            "evidence": [28]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": []
+  },
+  "usage": {
+    "durationMs": 9371.031000000017,
+    "ollamaTotalMs": 9151.629802,
+    "promptEvalCount": 2453,
+    "evalCount": 789,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 4,
+    "claimCount": 12,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.7222222222222222,
+    "goldClaimPrecision": 0.5,
+    "evidencePrecision": 0.38095238095238093,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0.08333333333333333,
+    "matchedClaimIds": [
+      "security.password-in-bundle",
+      "tax-reporting.paid-help",
+      "product.uah-only",
+      "product.web-limitations",
+      "product.fast-delivery-strategy",
+      "product.creator-response"
+    ],
+    "retainedThreadIds": [
+      "calculator-security",
+      "tax-reporting",
+      "calculator-product"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

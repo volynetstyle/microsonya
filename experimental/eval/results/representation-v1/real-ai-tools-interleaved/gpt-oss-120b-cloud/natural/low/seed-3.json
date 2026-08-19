@@ -1,0 +1,102 @@
+{
+  "case": "real-ai-tools-interleaved",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "natural",
+  "reasoning": "low",
+  "seed": 3,
+  "inputHash": "3e5fb5efeccd172ee2f1e8a3ef61dfdf2ed0fd33f2162906991e5f91c1a0d9ba",
+  "promptHash": "d90ce190ca55dfb2d030b0980b2ee1e4fd80003d73bb0e3a93840ab0f6f9ca65",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"AI model discussion and diploma cover pricing\",\n  \"topics\": [\n    {\n      \"id\": \"ai-capabilities\",\n      \"title\": \"AI models are not inherently intelligent\",\n      \"claims\": [\n        {\n          \"text\": \"AI systems are merely toolkits and pretrained examples, not intrinsically intelligent\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"Testing newer toolkits like Opencode with 2022‑2023 models may be limited by small context windows of older models\",\n          \"evidence\": [3]\n        },\n        {\n          \"text\": \"InstinctGPT benchmark shows that toolkits boost performance but cannot fully compensate for lacking base model abilities\",\n          \"evidence\": [8]\n        },\n        {\n          \"text\": \"Modern models focus on extracting more from fewer parameters and are sometimes fine‑tuned for specific tasks\",\n          \"evidence\": [14]\n        }\n      ]\n    },\n    {\n      \"id\": \"diploma-cover-pricing\",\n      \"title\": \"Cost of diploma covers\",\n      \"claims\": [\n        {\n          \"text\": \"Someone is asking for 650 UAH for a diploma cover\",\n          \"evidence\": [23]\n        },\n        {\n          \"text\": \"Another person paid 47 UAH for a cover\",\n          \"evidence\": [24]\n        },\n        {\n          \"text\": \"A third person offers to sell a cover for 30 UAH\",\n          \"evidence\": [25]\n        },\n        {\n          \"text\": \"One participant suggests graduating without a cover because it's essentially waste paper\",\n          \"evidence\": [26]\n        },\n        {\n          \"text\": \"The diploma cover is rarely used beyond the graduation ceremony and occasional document translation\",\n          \"evidence\": [29]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": []\n}",
+  "thinking": "We need JSON summary. Identify topics: AI model capabilities, InstinctGPT, model metrics, AI testing, bus anecdote maybe ignore. Also diploma cover price discussion. Create topics.\n\nLet's craft.",
+  "parsed": {
+    "title": "AI model discussion and diploma cover pricing",
+    "topics": [
+      {
+        "id": "ai-capabilities",
+        "title": "AI models are not inherently intelligent",
+        "claims": [
+          {
+            "text": "AI systems are merely toolkits and pretrained examples, not intrinsically intelligent",
+            "evidence": [1]
+          },
+          {
+            "text": "Testing newer toolkits like Opencode with 2022‑2023 models may be limited by small context windows of older models",
+            "evidence": [3]
+          },
+          {
+            "text": "InstinctGPT benchmark shows that toolkits boost performance but cannot fully compensate for lacking base model abilities",
+            "evidence": [8]
+          },
+          {
+            "text": "Modern models focus on extracting more from fewer parameters and are sometimes fine‑tuned for specific tasks",
+            "evidence": [14]
+          }
+        ]
+      },
+      {
+        "id": "diploma-cover-pricing",
+        "title": "Cost of diploma covers",
+        "claims": [
+          {
+            "text": "Someone is asking for 650 UAH for a diploma cover",
+            "evidence": [23]
+          },
+          {
+            "text": "Another person paid 47 UAH for a cover",
+            "evidence": [24]
+          },
+          {
+            "text": "A third person offers to sell a cover for 30 UAH",
+            "evidence": [25]
+          },
+          {
+            "text": "One participant suggests graduating without a cover because it's essentially waste paper",
+            "evidence": [26]
+          },
+          {
+            "text": "The diploma cover is rarely used beyond the graduation ceremony and occasional document translation",
+            "evidence": [29]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": []
+  },
+  "usage": {
+    "durationMs": 4398.474300000002,
+    "ollamaTotalMs": 4116.141201,
+    "promptEvalCount": 1887,
+    "evalCount": 449,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 2,
+    "claimCount": 9,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.8235294117647058,
+    "goldClaimPrecision": 0.6666666666666666,
+    "evidencePrecision": 0.6666666666666666,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0,
+    "matchedClaimIds": [
+      "ai-tooling.capability-view",
+      "ai-tooling.old-model-experiment",
+      "ai-tooling.instinctgpt-result",
+      "ai-tooling.model-comparison",
+      "diploma-cover.prices",
+      "diploma-cover.low-value"
+    ],
+    "retainedThreadIds": ["ai-tooling", "diploma-cover"],
+    "triggeredForbiddenIds": []
+  }
+}

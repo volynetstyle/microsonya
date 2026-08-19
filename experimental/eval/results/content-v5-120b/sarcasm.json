@@ -1,0 +1,39 @@
+{
+  "case": "sarcasm",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Плани щодо роботи\",\n  \"summary\": \"A повідомив, що після ще двох мітингів збирається зайнятись випасом кіз.\",\n  \"topics\": [\n    {\n      \"topic\": \"План роботи після мітингів\",\n      \"summary\": \"A планує після завершення ще двох мітингів перейти до випасу кіз.\",\n      \"participants\": [\n        \"A\"\n      ],\n      \"evidence\": [\n        1\n      ]\n    }\n  ]\n}",
+  "thinking": "We need to produce JSON. Only one message nontrivial. Summarize. Topic maybe plans. Participants A. evidence [1].",
+  "parsed": {
+    "title": "Плани щодо роботи",
+    "summary": "A повідомив, що після ще двох мітингів збирається зайнятись випасом кіз.",
+    "topics": [
+      {
+        "topic": "План роботи після мітингів",
+        "summary": "A планує після завершення ще двох мітингів перейти до випасу кіз.",
+        "participants": ["A"],
+        "evidence": [1]
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 2298.5234000000055,
+    "ollamaTotalMs": 2138.42873,
+    "promptEvalCount": 542,
+    "evalCount": 156,
+    "doneReason": "stop",
+    "thinkingTextTokenCount": 28,
+    "finalTextTokenCount": 118
+  },
+  "metrics": {
+    "contentRecall": null,
+    "claimRecall": null,
+    "decisionRecall": null,
+    "openQuestionRecall": null,
+    "evidenceSelectionPrecision": 0,
+    "noiseSelectionRate": 0,
+    "forbiddenRate": 0,
+    "unitCount": 1,
+    "selectedEvidenceCount": 1,
+    "unknownEvidenceCount": 0
+  }
+}

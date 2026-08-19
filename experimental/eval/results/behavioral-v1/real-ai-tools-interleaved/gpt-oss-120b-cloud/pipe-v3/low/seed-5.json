@@ -1,0 +1,152 @@
+{
+  "case": "real-ai-tools-interleaved",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 5,
+  "inputHash": "3e5fb5efeccd172ee2f1e8a3ef61dfdf2ed0fd33f2162906991e5f91c1a0d9ba",
+  "promptHash": "37cf3f4e79d184fd2b0f7efef7545a92b54b985f38a2a5b261ece3d444236cdf",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Chat summary\",\n  \"topics\": [\n    {\n      \"id\": \"ai-capability\",\n      \"title\": \"AI capabilities and toolkits\",\n      \"claims\": [\n        {\n          \"text\": \"AI models are not inherently intelligent; their complex abilities come from toolkits and example solutions.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"Testing a 2022-2023 AI with modern toolkits like opencode may be limited by small context windows of older models.\",\n          \"evidence\": [3]\n        },\n        {\n          \"text\": \"InstinctGPT comparison showed that toolkits give large gains but cannot compensate for core model ability deficits.\",\n          \"evidence\": [8]\n        },\n        {\n          \"text\": \"Older models were trained on all data without understanding purpose, while modern models try to maximize performance with fewer parameters and sometimes are fine‑tuned for specific tasks.\",\n          \"evidence\": [14]\n        }\n      ]\n    },\n    {\n      \"id\": \"bus-anecdote\",\n      \"title\": \"Bus incident observations\",\n      \"claims\": [\n        {\n          \"text\": \"The author observed strange people on public transport and remained non‑intrusive.\",\n          \"evidence\": [4,5]\n        },\n        {\n          \"text\": \"A repeat encounter involved another passenger playing loud piano music, then reacting to metro announcements, and later making strange micro‑sounds after a call from his mother.\",\n          \"evidence\": [7,9]\n        }\n      ]\n    },\n    {\n      \"id\": \"weather-feel\",\n      \"title\": \"Weather impressions\",\n      \"claims\": [\n        {\n          \"text\": \"A user described the air feeling like impending rain, though temperature suggested a lava‑like rain.\",\n          \"evidence\": [20]\n        },\n        {\n          \"text\": \"Another user noted it was unusually hot that day.\",\n          \"evidence\": [21]\n        }\n      ]\n    },\n    {\n      \"id\": \"diploma-cover-cost\",\n      \"title\": \"Cost of diploma covers\",\n      \"claims\": [\n        {\n          \"text\": \"Someone asked how much people paid for diploma covers; a reply mentioned 650 UAH from a specific source.\",\n          \"evidence\": [22,23]\n        },\n        {\n          \"text\": \"Another participant stated they paid 47 UAH.\",\n          \"evidence\": [24]\n        },\n        {\n          \"text\": \"A later comment suggested the price could be around 30 UAH.\",\n          \"evidence\": [25]\n        },\n        {\n          \"text\": \"One user expressed indifference, saying they would accept the cover without charge because it's just waste paper.\",\n          \"evidence\": [26]\n        },\n        {\n          \"text\": \"Additional remarks noted the cover includes a unique university emblem and is rarely used beyond a few occasions.\",\n          \"evidence\": [27,28,29]\n        }\n      ]\n    },\n    {\n      \"id\": \"pc-case-mod\",\n      \"title\": \"Fitting multiple GPUs in a small PC case\",\n      \"claims\": [\n        {\n          \"text\": \"In a small PC case that officially fits only one small GPU, users managed to fit three GPUs using brackets and force.\",\n          \"evidence\": [30]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": [\n    {\n      \"text\": \"How much do most people actually pay for diploma covers?\",\n      \"evidence\": [22]\n    }\n  ]\n}",
+  "thinking": "Need to produce JSON. Identify topics: AI capability, bus anecdote, weather comment, diploma cover cost, PC small case hack.\n\nCreate claims with evidence IDs.\n\nDecisions none. Open questions? None resolved. Maybe question about “скільки з нас брали грошей за обкладонки?” Not answered. So open question.\n\nLet's craft.\n\n",
+  "parsed": {
+    "title": "Chat summary",
+    "topics": [
+      {
+        "id": "ai-capability",
+        "title": "AI capabilities and toolkits",
+        "claims": [
+          {
+            "text": "AI models are not inherently intelligent; their complex abilities come from toolkits and example solutions.",
+            "evidence": [1]
+          },
+          {
+            "text": "Testing a 2022-2023 AI with modern toolkits like opencode may be limited by small context windows of older models.",
+            "evidence": [3]
+          },
+          {
+            "text": "InstinctGPT comparison showed that toolkits give large gains but cannot compensate for core model ability deficits.",
+            "evidence": [8]
+          },
+          {
+            "text": "Older models were trained on all data without understanding purpose, while modern models try to maximize performance with fewer parameters and sometimes are fine‑tuned for specific tasks.",
+            "evidence": [14]
+          }
+        ]
+      },
+      {
+        "id": "bus-anecdote",
+        "title": "Bus incident observations",
+        "claims": [
+          {
+            "text": "The author observed strange people on public transport and remained non‑intrusive.",
+            "evidence": [4, 5]
+          },
+          {
+            "text": "A repeat encounter involved another passenger playing loud piano music, then reacting to metro announcements, and later making strange micro‑sounds after a call from his mother.",
+            "evidence": [7, 9]
+          }
+        ]
+      },
+      {
+        "id": "weather-feel",
+        "title": "Weather impressions",
+        "claims": [
+          {
+            "text": "A user described the air feeling like impending rain, though temperature suggested a lava‑like rain.",
+            "evidence": [20]
+          },
+          {
+            "text": "Another user noted it was unusually hot that day.",
+            "evidence": [21]
+          }
+        ]
+      },
+      {
+        "id": "diploma-cover-cost",
+        "title": "Cost of diploma covers",
+        "claims": [
+          {
+            "text": "Someone asked how much people paid for diploma covers; a reply mentioned 650 UAH from a specific source.",
+            "evidence": [22, 23]
+          },
+          {
+            "text": "Another participant stated they paid 47 UAH.",
+            "evidence": [24]
+          },
+          {
+            "text": "A later comment suggested the price could be around 30 UAH.",
+            "evidence": [25]
+          },
+          {
+            "text": "One user expressed indifference, saying they would accept the cover without charge because it's just waste paper.",
+            "evidence": [26]
+          },
+          {
+            "text": "Additional remarks noted the cover includes a unique university emblem and is rarely used beyond a few occasions.",
+            "evidence": [27, 28, 29]
+          }
+        ]
+      },
+      {
+        "id": "pc-case-mod",
+        "title": "Fitting multiple GPUs in a small PC case",
+        "claims": [
+          {
+            "text": "In a small PC case that officially fits only one small GPU, users managed to fit three GPUs using brackets and force.",
+            "evidence": [30]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": [
+      {
+        "text": "How much do most people actually pay for diploma covers?",
+        "evidence": [22]
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 10602.544800000003,
+    "ollamaTotalMs": 10433.200509,
+    "promptEvalCount": 2165,
+    "evalCount": 827,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 5,
+    "claimCount": 14,
+    "decisionCount": 0,
+    "openQuestionCount": 1,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 1,
+    "goldClaimPrecision": 0.5714285714285714,
+    "evidencePrecision": 0.6,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 1,
+    "noiseRetention": 0.14285714285714285,
+    "matchedClaimIds": [
+      "diploma-cover.low-value",
+      "bus-passenger.repeated-encounter",
+      "diploma-cover.prices",
+      "ai-tooling.capability-view",
+      "ai-tooling.old-model-experiment",
+      "ai-tooling.instinctgpt-result",
+      "ai-tooling.model-comparison",
+      "pc-case.three-gpus"
+    ],
+    "retainedThreadIds": [
+      "diploma-cover",
+      "bus-passenger",
+      "ai-tooling",
+      "pc-case"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

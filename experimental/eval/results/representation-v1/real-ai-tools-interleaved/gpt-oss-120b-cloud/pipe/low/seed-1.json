@@ -1,0 +1,115 @@
+{
+  "case": "real-ai-tools-interleaved",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe",
+  "reasoning": "low",
+  "seed": 1,
+  "inputHash": "3e5fb5efeccd172ee2f1e8a3ef61dfdf2ed0fd33f2162906991e5f91c1a0d9ba",
+  "promptHash": "62c0cd54ee76aa7cf75199a0b9604ca2b96687505a2a87be8cad30234af6e90f",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Group chat summary\",\n  \"topics\": [\n    {\n      \"id\": \"ai-capabilities\",\n      \"title\": \"AI model capabilities and tool augmentation\",\n      \"claims\": [\n        {\n          \"text\": \"AI systems are not inherently intelligent; their complex abilities come from toolkits and ready-made solutions rather than innate understanding.\",\n          \"evidence\": [1, 8]\n        },\n        {\n          \"text\": \"Toolkits can provide large performance gains but cannot fully compensate for the lack of basic model capabilities.\",\n          \"evidence\": [8]\n        },\n        {\n          \"text\": \"Older models were trained on massive data without clear purpose, while modern models aim to maximise performance from fewer parameters and are sometimes fine‑tuned for specific tasks.\",\n          \"evidence\": [15]\n        }\n      ]\n    },\n    {\n      \"id\": \"bus-incident\",\n      \"title\": \"Unusual behavior observed on public transport\",\n      \"claims\": [\n        {\n          \"text\": \"The speaker noticed strange people in public transport, including a person who repeatedly emitted gas in the bus.\",\n          \"evidence\": [4, 5, 7, 9]\n        }\n      ]\n    },\n    {\n      \"id\": \"diploma-cover-price\",\n      \"title\": \"Cost of diploma covers\",\n      \"claims\": [\n        {\n          \"text\": \"Some participants reported being asked to pay 650 UAH for a diploma cover, while others paid 47 UAH or 30 UAH.\",\n          \"evidence\": [22, 23, 24, 25]\n        },\n        {\n          \"text\": \"One user suggested skipping the cover altogether, calling it wasteful paper.\",\n          \"evidence\": [26]\n        },\n        {\n          \"text\": \"The cover is considered rarely used, only seen a few times (receiving the diploma, photographing it, later translating documents).\",\n          \"evidence\": [29]\n        }\n      ]\n    },\n    {\n      \"id\": \"small-pc-case\",\n      \"title\": \"Fitting multiple GPUs into a small PC case\",\n      \"claims\": [\n        {\n          \"text\": \"A small PC case officially fits only one small GPU, but with straps and force it can accommodate three GPUs.\",\n          \"evidence\": [30]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": []\n}",
+  "thinking": "We need summarize. Topics likely: AI model capabilities, bus anecdote, media links, diploma cover price, small PC case. Identify claims.\n\nCreate topics. Let's craft.\n\nTitle: \"Group chat summary\".\n\nTopics:\n\n1 id: ai-capabilities\nclaims: AI can't be inherently smart, tools give boost but not substitute (evidence 1,8,15). Also comment about old vs new models (15). \n\n2 id: bus-incident\nclaims: strange people in public transport, description of a person causing gas (evidence 4,5,7,9). \n\n3 id: diploma-cover-price\nclaims: price discussion: 650 from Bogdan, 47 paid, 30 UAH mentioned, suggestion to skip cover (evidence 22,23,24,25,26,27,28,29).\n\n4 id: small-pc-case\nclaim: Small PC case fits only one small GPU, but can fit three with straps and force (evidence 30).\n\nDecisions none. Open questions? maybe none.\n\nReturn JSON.",
+  "parsed": {
+    "title": "Group chat summary",
+    "topics": [
+      {
+        "id": "ai-capabilities",
+        "title": "AI model capabilities and tool augmentation",
+        "claims": [
+          {
+            "text": "AI systems are not inherently intelligent; their complex abilities come from toolkits and ready-made solutions rather than innate understanding.",
+            "evidence": [1, 8]
+          },
+          {
+            "text": "Toolkits can provide large performance gains but cannot fully compensate for the lack of basic model capabilities.",
+            "evidence": [8]
+          },
+          {
+            "text": "Older models were trained on massive data without clear purpose, while modern models aim to maximise performance from fewer parameters and are sometimes fine‑tuned for specific tasks.",
+            "evidence": [15]
+          }
+        ]
+      },
+      {
+        "id": "bus-incident",
+        "title": "Unusual behavior observed on public transport",
+        "claims": [
+          {
+            "text": "The speaker noticed strange people in public transport, including a person who repeatedly emitted gas in the bus.",
+            "evidence": [4, 5, 7, 9]
+          }
+        ]
+      },
+      {
+        "id": "diploma-cover-price",
+        "title": "Cost of diploma covers",
+        "claims": [
+          {
+            "text": "Some participants reported being asked to pay 650 UAH for a diploma cover, while others paid 47 UAH or 30 UAH.",
+            "evidence": [22, 23, 24, 25]
+          },
+          {
+            "text": "One user suggested skipping the cover altogether, calling it wasteful paper.",
+            "evidence": [26]
+          },
+          {
+            "text": "The cover is considered rarely used, only seen a few times (receiving the diploma, photographing it, later translating documents).",
+            "evidence": [29]
+          }
+        ]
+      },
+      {
+        "id": "small-pc-case",
+        "title": "Fitting multiple GPUs into a small PC case",
+        "claims": [
+          {
+            "text": "A small PC case officially fits only one small GPU, but with straps and force it can accommodate three GPUs.",
+            "evidence": [30]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": []
+  },
+  "usage": {
+    "durationMs": 7155.917000000016,
+    "ollamaTotalMs": 6987.655284,
+    "promptEvalCount": 1848,
+    "evalCount": 736,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 4,
+    "claimCount": 8,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.7058823529411765,
+    "goldClaimPrecision": 0.75,
+    "evidencePrecision": 0.8,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0.125,
+    "matchedClaimIds": [
+      "bus-passenger.repeated-encounter",
+      "diploma-cover.prices",
+      "ai-tooling.capability-view",
+      "ai-tooling.instinctgpt-result",
+      "diploma-cover.low-value",
+      "pc-case.three-gpus"
+    ],
+    "retainedThreadIds": [
+      "bus-passenger",
+      "diploma-cover",
+      "ai-tooling",
+      "pc-case"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

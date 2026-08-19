@@ -1,0 +1,108 @@
+{
+  "case": "real-ai-development",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe",
+  "reasoning": "low",
+  "seed": 4,
+  "inputHash": "c44e2d8f381898078b12b50a1dbf1501e5970203c0d4ef386b86fd514114c47c",
+  "promptHash": "ca466985a1b24e688c02f542402eed97a24851c840c6eaa17fc4ea625c145538",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion on AI, cloud tools and job search\",\n  \"topics\": [\n    {\n      \"id\": \"ai-tools-impact\",\n      \"title\": \"Impact of AI tools on development speed and quality\",\n      \"claims\": [\n        {\n          \"text\": \"AI assistants can accelerate development by generating code such as multi‑table joins, reducing routine work.\",\n          \"evidence\": [19]\n        },\n        {\n          \"text\": \"Generated code may be sub‑optimal or insecure, leading to performance issues (e.g., large raw SQL that slows production).\",\n          \"evidence\": [30, 36]\n        },\n        {\n          \"text\": \"The perception that AI tools improve speed became widespread only after 2025, despite earlier hype.\",\n          \"evidence\": [9]\n        },\n        {\n          \"text\": \"Quality of AI responses depends on the quality of the question and available knowledge.\",\n          \"evidence\": [24, 25]\n        }\n      ]\n    },\n    {\n      \"id\": \"cloud-job-search\",\n      \"title\": \"Using cloud/AI for job searching and résumé automation\",\n      \"claims\": [\n        {\n          \"text\": \"The author plans to set up an OpenClaw pipeline to search vacancies, generate PDF résumés and cover letters.\",\n          \"evidence\": [5]\n        },\n        {\n          \"text\": \"Modern AI skills (Cursor, Claude Code, LLM, RAG, embeddings) are now expected by recruiters in 2026.\",\n          \"evidence\": [6, 7, 8]\n        },\n        {\n          \"text\": \"Relying heavily on AI tools may lower the entry barrier to programming, potentially producing low‑quality code.\",\n          \"evidence\": [30]\n        }\n      ]\n    },\n    {\n      \"id\": \"recruiter-role\",\n      \"title\": \"Perception of recruiters and HR\",\n      \"claims\": [\n        {\n          \"text\": \"The author expects the recruiter profession to become obsolete.\",\n          \"evidence\": [14]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": []\n}",
+  "thinking": "We need JSON with claims, decisions, open questions. Identify.\n\nClaims: e.g., AI tools speed up dev (19,9). Also cloud lowers entry threshold (30). etc.\n\nDecisions none. Open questions? maybe none.\n\nConstruct topics: maybe \"ai-tools-impact\", \"cloud-job-search\". Provide claims.\n\nLet's draft.",
+  "parsed": {
+    "title": "Discussion on AI, cloud tools and job search",
+    "topics": [
+      {
+        "id": "ai-tools-impact",
+        "title": "Impact of AI tools on development speed and quality",
+        "claims": [
+          {
+            "text": "AI assistants can accelerate development by generating code such as multi‑table joins, reducing routine work.",
+            "evidence": [19]
+          },
+          {
+            "text": "Generated code may be sub‑optimal or insecure, leading to performance issues (e.g., large raw SQL that slows production).",
+            "evidence": [30, 36]
+          },
+          {
+            "text": "The perception that AI tools improve speed became widespread only after 2025, despite earlier hype.",
+            "evidence": [9]
+          },
+          {
+            "text": "Quality of AI responses depends on the quality of the question and available knowledge.",
+            "evidence": [24, 25]
+          }
+        ]
+      },
+      {
+        "id": "cloud-job-search",
+        "title": "Using cloud/AI for job searching and résumé automation",
+        "claims": [
+          {
+            "text": "The author plans to set up an OpenClaw pipeline to search vacancies, generate PDF résumés and cover letters.",
+            "evidence": [5]
+          },
+          {
+            "text": "Modern AI skills (Cursor, Claude Code, LLM, RAG, embeddings) are now expected by recruiters in 2026.",
+            "evidence": [6, 7, 8]
+          },
+          {
+            "text": "Relying heavily on AI tools may lower the entry barrier to programming, potentially producing low‑quality code.",
+            "evidence": [30]
+          }
+        ]
+      },
+      {
+        "id": "recruiter-role",
+        "title": "Perception of recruiters and HR",
+        "claims": [
+          {
+            "text": "The author expects the recruiter profession to become obsolete.",
+            "evidence": [14]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": []
+  },
+  "usage": {
+    "durationMs": 7985.35560000001,
+    "ollamaTotalMs": 7718.09508,
+    "promptEvalCount": 2911,
+    "evalCount": 528,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 3,
+    "claimCount": 8,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.7619047619047619,
+    "goldClaimPrecision": 0.75,
+    "evidencePrecision": 0.6666666666666666,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0.25,
+    "matchedClaimIds": [
+      "development.context-quality",
+      "job-search.ai-skills",
+      "development.routine-speedup",
+      "vibe-coding.bad-backend",
+      "job-search.automation-idea",
+      "job-search.keyword-filtering"
+    ],
+    "retainedThreadIds": [
+      "ai-assisted-development",
+      "ai-job-search",
+      "vibe-coding-risks"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

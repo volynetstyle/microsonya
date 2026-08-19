@@ -1,0 +1,136 @@
+{
+  "case": "hypothetical",
+  "model": "gpt-oss:120b",
+  "pipeline": "deterministic-shell",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 1,
+  "transformation": "identity",
+  "inputHash": "635920fe92b99a3e5bac93743f863f3d410b1d634799df05e6f4098a35057e48",
+  "promptHash": "3a62ede5a986edf345dd851d308fd5f530ddfdff0e0562389d4fb55ed03d6c92",
+  "promptVersion": "v4",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Optimization motivation\",\n  \"events\": [\n    {\n      \"id\": \"m1\",\n      \"topicId\": \"optimization\",\n      \"topicTitle\": \"Optimization discussion\",\n      \"speaker\": \"A\",\n      \"statement\": \"If asked to optimise, I would first ask why.\",\n      \"speechAct\": \"assertion\",\n      \"literalness\": \"literal\",\n      \"commitment\": \"none\",\n      \"epistemicStatus\": \"claimed\",\n      \"settled\": false,\n      \"action\": null,\n      \"refersTo\": [],\n      \"stance\": \"neutral\",\n      \"semanticImportance\": 0.7,\n      \"confidence\": 0.9,\n      \"evidence\": [\n        1\n      ]\n    }\n  ]\n}",
+  "thinking": "We need to produce events. Only one message given? Only #1. No question etc. It's a statement. So create one event.\n\nDetermine fields: id m1, topic?? need derive from content. It's about optimization, maybe \"optimization\". Use topicId \"optimization\". topicTitle \"Optimization discussion\". speaker \"A\". statement concise: \"If asked to optimise, I would first ask why.\" speechAct assertion. literal. commitment none (just stating intention). epistemicStatus claimed. settled false. action null. refersTo [] stance neutral. importance maybe 0.7. confidence 0.9. evidence [1].\n\nReturn JSON.",
+  "parsed": {
+    "title": "Optimization motivation",
+    "topics": [
+      {
+        "id": "optimization",
+        "title": "Optimization discussion",
+        "claims": [
+          {
+            "text": "A: If asked to optimise, I would first ask why.",
+            "evidence": [1]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": []
+  },
+  "reconstruction": {
+    "title": "Optimization motivation",
+    "events": [
+      {
+        "id": "m1",
+        "topicId": "optimization",
+        "topicTitle": "Optimization discussion",
+        "speaker": "A",
+        "statement": "If asked to optimise, I would first ask why.",
+        "speechAct": "assertion",
+        "literalness": "literal",
+        "commitment": "none",
+        "epistemicStatus": "claimed",
+        "settled": false,
+        "action": null,
+        "refersTo": [],
+        "stance": "neutral",
+        "semanticImportance": 0.7,
+        "confidence": 0.9,
+        "evidence": [1]
+      }
+    ]
+  },
+  "state": {
+    "title": "Optimization motivation",
+    "events": [
+      {
+        "id": "m1",
+        "topicId": "optimization",
+        "topicTitle": "Optimization discussion",
+        "speaker": "A",
+        "statement": "If asked to optimise, I would first ask why.",
+        "speechAct": "assertion",
+        "literalness": "literal",
+        "commitment": "none",
+        "epistemicStatus": "claimed",
+        "settled": false,
+        "action": null,
+        "refersTo": [],
+        "stance": "neutral",
+        "semanticImportance": 0.7,
+        "confidence": 0.9,
+        "evidence": [1]
+      }
+    ],
+    "resolvedQuestionIds": [],
+    "supersededEventIds": []
+  },
+  "extractorMetrics": {
+    "eventCount": 1,
+    "eventRecall": null,
+    "eventPrecision": 0,
+    "attributionAccuracy": 1,
+    "evidenceCorrectness": 1,
+    "relationIntegrity": 1
+  },
+  "reducerMetrics": {
+    "deterministic": true,
+    "lifecycleInvariantViolations": 0,
+    "resolvedQuestions": 0,
+    "supersededEvents": 0
+  },
+  "operationalMetrics": {
+    "modelCalls": 1,
+    "sourceMessageWindows": 1,
+    "semanticInterpretations": 1,
+    "semanticAmplification": 1
+  },
+  "projectionDiagnostics": {
+    "decisionCandidates": 0,
+    "decisionsRejectedByInvariant": 0,
+    "questionsResolvedByAnswerEdge": 0
+  },
+  "usage": {
+    "durationMs": 4368.5611999999965,
+    "ollamaTotalMs": 4084.265788,
+    "promptEvalCount": 725,
+    "evalCount": 303,
+    "doneReason": "stop",
+    "thinkingTextTokenCount": 131,
+    "finalTextTokenCount": 162
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 1,
+    "claimCount": 1,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 0,
+    "weightedClaimRecall": null,
+    "goldClaimPrecision": 0,
+    "evidencePrecision": 0,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0,
+    "matchedClaimIds": [],
+    "matchedDecisionIds": [],
+    "matchedOpenQuestionIds": [],
+    "retainedThreadIds": [],
+    "triggeredForbiddenIds": []
+  }
+}

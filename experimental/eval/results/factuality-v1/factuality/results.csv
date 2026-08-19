@@ -1,0 +1,9 @@
+case,sourceSeed,variant,status,nItems,supportedRate,qaAgreementRate,contradictedRate,insufficientRate,labelValidRate,durationMs
+real-job-search-abroad,1,original,ok,16,1,1,0,0,1,33548.9871
+real-job-search-abroad,1,rotated-evidence,ok,16,0,0,0,1,1,24873.0328
+real-ai-development,1,original,ok,10,1,1,0,0,1,21096.4171
+real-ai-development,1,rotated-evidence,ok,10,0.4,0.4,0,0.6,1,25365.1396
+real-fop-calculator,1,original,ok,18,1,1,0,0,1,31574.201800000003
+real-fop-calculator,1,rotated-evidence,ok,18,0.3333333333333333,0.3333333333333333,0,0.6666666666666666,1,35326.369300000006
+real-ai-tools-interleaved,1,original,ok,16,1,1,0,0,1,27862.541800000006
+real-ai-tools-interleaved,1,rotated-evidence,ok,16,0,0,0,1,1,31120.025999999998

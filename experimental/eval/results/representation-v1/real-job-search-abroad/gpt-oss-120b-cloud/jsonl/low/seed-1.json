@@ -1,0 +1,161 @@
+{
+  "case": "real-job-search-abroad",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "jsonl",
+  "reasoning": "low",
+  "seed": 1,
+  "inputHash": "aac555f3427e2195f145b4a5e3a6d9644961170a8ccc181b8832ae83202b036f",
+  "promptHash": "04c76623f71b9c11838869d5a87465795f6e6a89b924795da025d44285c74482",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Обговорення життя та роботи за кордоном\",\n  \"topics\": [\n    {\n      \"id\": \"living-abroad-slovakia\",\n      \"title\": \"Хто живе в Словакії та інші країни\",\n      \"claims\": [\n        {\n          \"text\": \"У Словакії живе P1 вже майже рік\",\n          \"evidence\": [43]\n        },\n        {\n          \"text\": \"P2 згадує знайомих у Австрії і Польщі\",\n          \"evidence\": [3]\n        },\n        {\n          \"text\": \"P3 має мінімум два знайомих в Австрії, один нещодавно приїхав, інший вже кілька років\",\n          \"evidence\": [12, 13]\n        }\n      ]\n    },\n    {\n      \"id\": \"job-search-abroad\",\n      \"title\": \"Пошук роботи за кордоном\",\n      \"claims\": [\n        {\n          \"text\": \"P3 раджує шукати вакансії в LinkedIn\",\n          \"evidence\": [18]\n        },\n        {\n          \"text\": \"P3 відправив близько 100 відгуків і отримав лише 3 співбесіди\",\n          \"evidence\": [21, 22, 23]\n        },\n        {\n          \"text\": \"95 % вакансій вимагають знання місцевої мови\",\n          \"evidence\": [26]\n        },\n        {\n          \"text\": \"Вища освіта рідко грає роль у відборі кандидатів\",\n          \"evidence\": [32]\n        },\n        {\n          \"text\": \"У більшості випадків, коли в описі не вказано знання німецької, P3 надсилав заявки\",\n          \"evidence\": [36]\n        },\n        {\n          \"text\": \"P3 отримав мінімальну зарплату, хоча могла бути вища\",\n          \"evidence\": [37]\n        }\n      ]\n    },\n    {\n      \"id\": \"language-requirements\",\n      \"title\": \"Вимоги до мови\",\n      \"claims\": [\n        {\n          \"text\": \"Більшість роботодавців просять рівень B2, іноді B1, і сертифікат не обов’язковий\",\n          \"evidence\": [46]\n        },\n        {\n          \"text\": \"P3 почав вивчати німецьку мову через дискомфорт у повсякденному спілкуванні\",\n          \"evidence\": [47]\n        },\n        {\n          \"text\": \"Для технічних подій часто достатньо англійської\",\n          \"evidence\": [55]\n        }\n      ]\n    },\n    {\n      \"id\": \"salary-expectations\",\n      \"title\": \"Очікування зарплати\",\n      \"claims\": [\n        {\n          \"text\": \"Зарплати в Європі зазвичай вищі, ніж в Україні, але претендувати на високі суми не завжди успішно\",\n          \"evidence\": [35]\n        }\n      ]\n    },\n    {\n      \"id\": \"future-plans\",\n      \"title\": \"Плани щодо залишання в Австрії\",\n      \"claims\": [\n        {\n          \"text\": \"P3 розглядає переїзд до Варшави на західну подію WawTech\",\n          \"evidence\": [59]\n        },\n        {\n          \"text\": \"P3 вважає Австрію кращим вибором серед країн Європи, хоча бачить проблеми у місцевих людей\",\n          \"evidence\": [60]\n        },\n        {\n          \"text\": \"P3 розглядав Ірландію, Норвегію та Іспанію як альтернативи\",\n          \"evidence\": [60]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": [\n    {\n      \"text\": \"Чи варто залишатися в Австрії на довгострокову перспективу?\",\n      \"evidence\": [58]\n    }\n  ]\n}",
+  "thinking": "Need produce JSON with topics. Identify topics: living abroad in Slovakia, job search abroad, language requirements, salary expectations, moving decisions. Create claims.\n\nDecisions none? No explicit decision. Open questions: maybe \"Як особисто відчуваєш, залишитись в Австрії?\" but not resolved. That's a question not answered. So open.\n\nProceed.",
+  "parsed": {
+    "title": "Обговорення життя та роботи за кордоном",
+    "topics": [
+      {
+        "id": "living-abroad-slovakia",
+        "title": "Хто живе в Словакії та інші країни",
+        "claims": [
+          {
+            "text": "У Словакії живе P1 вже майже рік",
+            "evidence": [43]
+          },
+          {
+            "text": "P2 згадує знайомих у Австрії і Польщі",
+            "evidence": [3]
+          },
+          {
+            "text": "P3 має мінімум два знайомих в Австрії, один нещодавно приїхав, інший вже кілька років",
+            "evidence": [12, 13]
+          }
+        ]
+      },
+      {
+        "id": "job-search-abroad",
+        "title": "Пошук роботи за кордоном",
+        "claims": [
+          {
+            "text": "P3 раджує шукати вакансії в LinkedIn",
+            "evidence": [18]
+          },
+          {
+            "text": "P3 відправив близько 100 відгуків і отримав лише 3 співбесіди",
+            "evidence": [21, 22, 23]
+          },
+          {
+            "text": "95 % вакансій вимагають знання місцевої мови",
+            "evidence": [26]
+          },
+          {
+            "text": "Вища освіта рідко грає роль у відборі кандидатів",
+            "evidence": [32]
+          },
+          {
+            "text": "У більшості випадків, коли в описі не вказано знання німецької, P3 надсилав заявки",
+            "evidence": [36]
+          },
+          {
+            "text": "P3 отримав мінімальну зарплату, хоча могла бути вища",
+            "evidence": [37]
+          }
+        ]
+      },
+      {
+        "id": "language-requirements",
+        "title": "Вимоги до мови",
+        "claims": [
+          {
+            "text": "Більшість роботодавців просять рівень B2, іноді B1, і сертифікат не обов’язковий",
+            "evidence": [46]
+          },
+          {
+            "text": "P3 почав вивчати німецьку мову через дискомфорт у повсякденному спілкуванні",
+            "evidence": [47]
+          },
+          {
+            "text": "Для технічних подій часто достатньо англійської",
+            "evidence": [55]
+          }
+        ]
+      },
+      {
+        "id": "salary-expectations",
+        "title": "Очікування зарплати",
+        "claims": [
+          {
+            "text": "Зарплати в Європі зазвичай вищі, ніж в Україні, але претендувати на високі суми не завжди успішно",
+            "evidence": [35]
+          }
+        ]
+      },
+      {
+        "id": "future-plans",
+        "title": "Плани щодо залишання в Австрії",
+        "claims": [
+          {
+            "text": "P3 розглядає переїзд до Варшави на західну подію WawTech",
+            "evidence": [59]
+          },
+          {
+            "text": "P3 вважає Австрію кращим вибором серед країн Європи, хоча бачить проблеми у місцевих людей",
+            "evidence": [60]
+          },
+          {
+            "text": "P3 розглядав Ірландію, Норвегію та Іспанію як альтернативи",
+            "evidence": [60]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": [
+      {
+        "text": "Чи варто залишатися в Австрії на довгострокову перспективу?",
+        "evidence": [58]
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 12718.3488,
+    "ollamaTotalMs": 12500.512678,
+    "promptEvalCount": 3594,
+    "evalCount": 997,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 5,
+    "claimCount": 16,
+    "decisionCount": 0,
+    "openQuestionCount": 1,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 1,
+    "goldClaimPrecision": 0.5625,
+    "evidencePrecision": 0.55,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 1,
+    "noiseRetention": 0.0625,
+    "matchedClaimIds": [
+      "job-search.conversion",
+      "networking.participants-abroad",
+      "job-search.two-months",
+      "job-search.local-language-filter",
+      "job-search.education-observation",
+      "job-search.salary-compromise",
+      "language.work-vs-daily-life",
+      "language.learning-motivation",
+      "austria.outlook"
+    ],
+    "retainedThreadIds": [
+      "job-search-abroad",
+      "networking-abroad",
+      "language-integration",
+      "life-in-austria"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

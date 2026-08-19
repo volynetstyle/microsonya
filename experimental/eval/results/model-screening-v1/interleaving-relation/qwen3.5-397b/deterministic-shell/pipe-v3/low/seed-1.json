@@ -1,0 +1,266 @@
+{
+  "case": "interleaving-relation",
+  "model": "qwen3.5:397b",
+  "pipeline": "deterministic-shell",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 1,
+  "transformation": "identity",
+  "inputHash": "1d573b0ea83be7587a0ba6c83003a6357d94aa60582bfc570ecb19a2e32e09f5",
+  "promptHash": "3e27211fba2b4611e28208bdc2a1f7760ba1f848c0370360ee1115784d5d1a56",
+  "promptVersion": "v4",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Database and Design Updates\",\n  \"events\": [\n    {\n      \"id\": \"m1\",\n      \"topicId\": \"database-migration\",\n      \"topicTitle\": \"Database migration planning\",\n      \"speaker\": \"A\",\n      \"statement\": \"The database migration is planned for Friday.\",\n      \"speechAct\": \"assertion\",\n      \"literalness\": \"literal\",\n      \"commitment\": \"none\",\n      \"epistemicStatus\": \"claimed\",\n      \"settled\": true,\n      \"action\": \"migrate database\",\n      \"refersTo\": [],\n      \"stance\": \"neutral\",\n      \"semanticImportance\": 0.9,\n      \"confidence\": 0.9,\n      \"evidence\": [\n        1\n      ]\n    },\n    {\n      \"id\": \"m2\",\n      \"topicId\": \"database-migration\",\n      \"topicTitle\": \"Database migration planning\",\n      \"speaker\": \"B\",\n      \"statement\": \"We will create a backup before the migration.\",\n      \"speechAct\": \"assertion\",\n      \"literalness\": \"literal\",\n      \"commitment\": \"explicit\",\n      \"epistemicStatus\": \"claimed\",\n      \"settled\": false,\n      \"action\": \"create backup\",\n      \"refersTo\": [\n        \"m1\"\n      ],\n      \"stance\": \"support\",\n      \"semanticImportance\": 0.8,\n      \"confidence\": 0.9,\n      \"evidence\": [\n        2\n      ]\n    },\n    {\n      \"id\": \"m3\",\n      \"topicId\": \"homepage-design\",\n      \"topicTitle\": \"Homepage design review\",\n      \"speaker\": \"C\",\n      \"statement\": \"The homepage design is ready for review.\",\n      \"speechAct\": \"assertion\",\n      \"literalness\": \"literal\",\n      \"commitment\": \"none\",\n      \"epistemicStatus\": \"claimed\",\n      \"settled\": false,\n      \"action\": null,\n      \"refersTo\": [],\n      \"stance\": \"neutral\",\n      \"semanticImportance\": 0.9,\n      \"confidence\": 0.9,\n      \"evidence\": [\n        3\n      ]\n    },\n    {\n      \"id\": \"m4\",\n      \"topicId\": \"homepage-design\",\n      \"topicTitle\": \"Homepage design review\",\n      \"speaker\": \"D\",\n      \"statement\": \"I will review it today.\",\n      \"speechAct\": \"proposal\",\n      \"literalness\": \"literal\",\n      \"commitment\": \"explicit\",\n      \"epistemicStatus\": \"claimed\",\n      \"settled\": false,\n      \"action\": \"review homepage design\",\n      \"refersTo\": [\n        \"m3\"\n      ],\n      \"stance\": \"support\",\n      \"semanticImportance\": 0.8,\n      \"confidence\": 0.9,\n      \"evidence\": [\n        4\n      ]\n    }\n  ]\n}",
+  "thinking": "Thinking Process:\n\n1.  **Analyze the Request:**\n    *   **Task:** Reconstruct a Telegram conversation as normalized discourse events.\n    *   **Input Format:** `PIPECHAT/3` with specific grammar (`#ID|AUTHOR_JSON|TIME_JSON|^PARENT|KIND_JSON|TEXT_JSON_OR_NULL`).\n    *   **Output Format:** JSON only, specific schema (`title`, `events` array with specific fields).\n    *   **Constraints:**\n        *   No summary, no decisions, no openQuestions.\n        *   Event IDs from message ID (e.g., `m17` for message 17). Suffixes only for multiple independent propositions in one message.\n        *   Orthogonal properties (`speechAct`, `literalness`, `commitment`, `epistemicStatus`).\n        *   `commitment=explicit` only for clear actor commitment to action (no suggestions, preferences, etc.).\n        *   `settled=true` only when action is selected/approved/completed (lack of disagreement != settled).\n        *   `action` only when actionable actor/action exists (null otherwise).\n        *   `refersTo` must contain target event ID for answers, corrections, support, opposition.\n        *   Honor explicit reply edges (`^PARENT`).\n        *   Preserve speaker attribution.\n        *   `semanticImportance` 0-1.\n        *   Omit greetings/noise.\n        *   Short kebab-case `topicId`.\n        *   Input messages provided: #1, #2, #3, #4.\n\n2.  **Analyze the Input Data:**\n    *   `#1|\"A\"|\"10:00\"|^0|\"text\"|\"The database migration is planned for Friday.\"`\n        *   Speaker: A\n        *   Parent: 0 (Root)\n        *   Text: \"The database migration is planned for Friday.\"\n        *   Content: Statement of fact/plan regarding database migration.\n    *   `#2|\"B\"|\"10:01\"|^1|\"text\"|\"We will create a backup before the migration.\"`\n        *   Speaker: B\n        *   Parent: 1 (Reply to #1)\n        *   Text: \"We will create a backup before the migration.\"\n        *   Content: Commitment/Plan regarding backup. Relates to #1.\n    *   `#3|\"C\"|\"10:02\"|^0|\"text\"|\"The homepage design is ready for review.\"`\n        *   Speaker: C\n        *   Parent: 0 (Root)\n        *   Text: \"The homepage design is ready for review.\"\n        *   Content: Status update regarding homepage design. New topic branch.\n    *   `#4|\"D\"|\"10:03\"|^3|\"text\"|\"I will review it today.\"`\n        *   Speaker: D\n        *   Parent: 3 (Reply to #3)\n        *   Text: \"I will review it today.\"\n        *   Content: Commitment to action regarding homepage design.\n\n3.  **Map to Output Schema:**\n\n    *   **Event 1 (Message #1):**\n        *   `id`: \"m1\"\n        *   `topicId`: \"database-migration\"\n        *   `topicTitle`: \"Database migration planning\"\n        *   `speaker`: \"A\"\n        *   `statement`: \"The database migration is planned for Friday.\"\n        *   `speechAct`: \"assertion\" (Stating a plan)\n        *   `literalness`: \"literal\"\n        *   `commitment`: \"none\" (A is stating a plan, not necessarily committing themselves personally to do it, though \"planned\" implies organizational commitment. However, usually \"planned\" is status. Let's look at constraint: \"commitment=explicit only when the evidence clearly commits an identifiable actor to an action.\" A says \"is planned\". This is status. B says \"We will create\". D says \"I will review\".)\n        *   `epistemicStatus`: \"accepted\" (Presented as fact within the context) or \"claimed\". Since it's a statement of plan, \"claimed\" is safer unless others accept it. B replies with a related action, implying acceptance of the timeline. Let's stick to \"claimed\" for the initial statement.\n        *   `settled`: false (It's a plan, not necessarily completed or finalized without disagreement, though \"planned\" implies decision. But constraint: \"Lack of disagreement is not settlement.\" However, \"planned\" usually means settled. Let's look at `action`. Is there an action? \"migration is planned\". Action: migrate database. Actor: unspecified/team. Let's set `action` to \"migrate database\" but `settled` depends on if it's selected. \"Planned\" implies selected. But to be safe on \"settled=true only when... selected, approved, completed\". A plan is selected. But let's look at B's reply. B adds a condition/action. Let's keep `settled` false for the initial statement until confirmed, or true if \"planned\" implies finality. Given the instruction \"Lack of disagreement is not settlement\", I should be careful. However, \"planned\" is a state of settlement. Let's treat it as `settled: true` for the plan itself, but the event is just stating it. Actually, usually `settled` applies to the *proposition* being treated as fact/decided. If A says \"It is planned\", that proposition is claimed. Let's set `settled: false` for the event itself unless the conversation confirms it. Wait, `settled` describes whether the *action* is settled. If the action is \"migrate database\", and it is \"planned\", it is settled. But often in these tasks, `settled` is reserved for the end state of a negotiation. Let's look at #2. B says \"We will create a backup\". That's a commitment.\n        *   `action`: \"migrate database\" (Actor implicit/team).\n        *   `refersTo`: []\n        *   `stance`: \"neutral\"\n        *   `semanticImportance`: 0.9 (Core plan)\n        *   `confidence`: 0.9\n        *   `evidence`: [1]\n\n    *   **Event 2 (Message #2):**\n        *   `id`: \"m2\"\n        *   `topicId`: \"database-migration\"\n        *   `topicTitle`: \"Database migration planning\"\n        *   `speaker`: \"B\"\n        *   `statement`: \"We will create a backup before the migration.\"\n        *   `speechAct`: \"proposal\" or \"assertion\" (It's a statement of intent \"We will\"). It functions as a commitment.\n        *   `literalness`: \"literal\"\n        *   `commitment`: \"explicit\" (\"We will create\" commits the group/B to an action).\n        *   `epistemicStatus`: \"claimed\" (B claims they will do it).\n        *   `settled`: false (It's a commitment to future action, not completed yet).\n        *   `action`: \"create backup\"\n        *   `refersTo`: [\"m1\"] (Reply to #1)\n        *   `stance`: \"support\" (Supports the migration plan by adding safety)\n        *   `semanticImportance`: 0.8\n        *   `confidence`: 0.9\n        *   `evidence`: [2]\n\n    *   **Event 3 (Message #3):**\n        *   `id`: \"m3\"\n        *   `topicId`: \"homepage-design\"\n        *   `topicTitle`: \"Homepage design review\"\n        *   `speaker`: \"C\"\n        *   `statement`: \"The homepage design is ready for review.\"\n        *   `speechAct`: \"assertion\"\n        *   `literalness`: \"literal\"\n        *   `commitment`: \"none\" (Status update)\n        *   `epistemicStatus`: \"claimed\"\n        *   `settled`: false (Ready for review, not reviewed yet)\n        *   `action`: \"review homepage design\" (Implicit action needed from others)\n        *   `refersTo`: []\n        *   `stance`: \"neutral\"\n        *   `semanticImportance`: 0.9\n        *   `confidence`: 0.9\n        *   `evidence`: [3]\n\n    *   **Event 4 (Message #4):**\n        *   `id`: \"m4\"\n        *   `topicId`: \"homepage-design\"\n        *   `topicTitle`: \"Homepage design review\"\n        *   `speaker`: \"D\"\n        *   `statement`: \"I will review it today.\"\n        *   `speechAct`: \"proposal\" (Commitment to act) or \"answer\" (Implicitly responding to the need for review). Since #3 says \"ready for review\", #4 is volunteering. It's not a direct question answer, but a response to a status. Let's use \"proposal\" or \"assertion\" of intent. Given \"I will\", it's a commitment.\n        *   `literalness`: \"literal\"\n        *   `commitment`: \"explicit\" (\"I will review\")\n        *   `epistemicStatus`: \"claimed\"\n        *   `settled`: false (Future action)\n        *   `action`: \"review homepage design\"\n        *   `refersTo`: [\"m3\"] (Reply to #3)\n        *   `stance`: \"support\"\n        *   `semanticImportance`: 0.8\n        *   `confidence`: 0.9\n        *   `evidence`: [4]\n\n4.  **Refining Constraints:**\n    *   `commitment`: \"explicit\" only when evidence clearly commits an identifiable actor.\n        *   m1: \"is planned\" -> Passive. Actor not explicitly A. Commitment: \"none\".\n        *   m2: \"We will create\" -> Actor \"We\" (includes B). Commitment: \"explicit\".\n        *   m3: \"is ready\" -> Status. Commitment: \"none\".\n        *   m4: \"I will review\" -> Actor \"I\" (D). Commitment: \"explicit\".\n    *   `speechAct`:\n        *   m1: \"assertion\" (Stating fact/plan).\n        *   m2: \"assertion\" (Stating intent) or \"proposal\". \"We will\" is often a commitment/assertion of future fact. Let's use \"assertion\" of intent, but since it adds a step to the plan, maybe \"proposal\"? No, \"We will\" is declarative. Let's stick with \"assertion\" or \"proposal\". Usually \"We will\" in response to a plan is a commitment assertion. Let's use \"assertion\".\n        *   m3: \"assertion\".\n        *   m4: \"proposal\" (Volunteering) or \"assertion\". \"I will\" is a commitment. Let's use \"proposal\" as it offers action in response to a need. Actually, \"I will\" is a promise. Let's use \"assertion\" of intent. But often volunteering is \"proposal\". Let's check the definition: \"proposal\" usually suggests an action for others or group. \"I will\" is personal commitment. Let's use \"assertion\" for statements of intent, or \"proposal\" if it's offering to take a task. Given \"ready for review\" implies a request for reviewers, \"I will review\" is accepting the task. Let's use \"proposal\" as it proposes D takes the task. Or \"answer\" if interpreted as responding to the implicit request. The prompt says: \"Honor explicit reply edges: when a message directly replies to a question and supplies responsive information, emit speechAct=answer\". #3 is not a question. So not \"answer\". Let's use \"proposal\" (offering to do the review) or \"assertion\". I will use \"proposal\" for volunteering action.\n    *   `settled`:\n        *   m1: \"planned\". Is the migration settled? Yes, it's planned. But `settled` field in schema usually refers to the *discourse* settlement (agreement). Since B supports it, it's likely settled. But constraint: \"Lack of disagreement is not settlement.\" However, \"planned\" implies prior settlement. I will set `settled: true` for m1 because \"planned\" denotes a decision state.\n        *   m2: Action \"create backup\". Is it settled? It's a commitment. `settled: false` (future action).\n        *   m3: Design ready. Status. `settled: false` (review pending).\n        *   m4: Review commitment. `settled: false` (action pending).\n    *   `action`:\n        *   m1: \"migrate database\".\n        *   m2: \"create backup\".\n        *   m3: \"review homepage design\" (Implicit needed action). Or null? \"ready for review\" implies action is needed. I'll put \"review homepage design\".\n        *   m4: \"review homepage design\".\n    *   `refersTo`:\n        *   m1: []\n        *   m2: [\"m1\"] (Reply to 1)\n        *   m3: []\n        *   m4: [\"m3\"] (Reply to 3)\n    *   `topicId`:\n        *   m1, m2: \"database-migration\"\n        *   m3, m4: \"homepage-design\"\n\n5.  **Final Review of Schema:**\n    *   Check `confidence`, `semanticImportance`.\n    *   Check `evidence` array contains integers.\n    *   Check `refersTo` contains strings (event ids).\n    *   Check `commitment` values.\n    *   Check `speechAct` values.\n\n    *   *Self-Correction on m1 `settled`*: \"The database migration is planned\". This states the status of the action. Is the action settled? Yes. But in discourse analysis, often `settled` tracks if the *conversation* settled it. Since it's stated as a fact \"is planned\", I will treat the proposition \"migration is planned\" as asserted fact. However, `settled` usually applies to the *action* described. If the action is \"migrate database\", and it is \"planned\", it is selected. I will set `settled: true` for m1.\n    *   *Self-Correction on m2 `speechAct`*: \"We will create a backup\". This is a commitment. Is it a proposal? No, it's a statement of intent. `speechAct: \"assertion\"`.\n    *   *Self-Correction on m4 `speechAct`*: \"I will review it today\". Response to \"ready for review\". It's an offer/commitment. `speechAct: \"proposal\"` (proposing to take the task) or \"assertion\". I'll use \"proposal\" as it fills a slot opened by m3.\n    *   *Self-Correction on `action`*: For m3, \"ready for review\". The action is for someone else. Is there an actionable actor? Not specified. \"otherwise null\". So m3 `action` should be `null` because no specific actor is assigned yet, just readiness. m4 assigns actor D.\n    *   *Self-Correction on m1 `action`*: \"migration is planned\". Actor? Implicit team. \"actionable actor/action exists\". If it's planned, the action exists. I will include \"migrate database\".\n\n    *   *Refining `commitment`*:\n        *   m1: \"is planned\". No specific actor commits. `none`.\n        *   m2: \"We will\". Actor \"We\". `explicit`.\n        *   m3: \"is ready\". `none`.\n        *   m4: \"I will\". Actor \"I\". `explicit`.\n\n    *   *Refining `refersTo`*:\n        *   m2 replies to m1. `[\"m1\"]`.\n        *   m4 replies to m3. `[\"m3\"]`.\n\n    *   *Refining `topicId`*:\n        *   m1, m2: `database-migration`.\n        *   m3, m4: `homepage-design`.\n\n    *   *Refining `semanticImportance`*:\n        *   m1: 0.9 (Main plan)\n        *   m2: 0.8 (Safety measure)\n        *   m3: 0.9 (Status update triggering action)\n        *   m4: 0.8 (Action commitment)\n\n    *   *Refining `epistemicStatus`*:\n        *   All are `claimed` by the speaker. None are explicitly `accepted` by others in the text (though implied by lack of objection, constraint says lack of disagreement != settlement/acceptance). So `claimed`.\n\n    *   *Refining `settled`*:\n        *   m1: \"planned\" implies decision made. `true`.\n        *   m2: Future action. `false`.\n        *   m3: Status. `false`.\n        *   m4: Future action. `false`.\n\n    *   *Refining `action`*:\n        *   m1: \"migrate database\"\n        *   m2: \"create backup\"\n        *   m3: null (No actor assigned)\n        *   m4: \"review homepage design\"\n\n6.  **Construct JSON:**\n\n    *   Ensure strict JSON syntax.\n    *   Ensure no extra text.\n\n    *   Wait, one check on `speechAct` for m4. \"I will review it today.\" Is it an answer? m3 is not a question. So not \"answer\". Is it a proposal? It proposes D takes the task. Yes.\n    *   Check `refersTo` format: `[\"m1\"]`.\n    *   Check `evidence` format: `[1]`.\n\n    *   One detail: \"Use suffixes only when one message contains multiple independent propositions\". Each message here is single proposition. So m1, m2, m3, m4.\n\n    *   One detail: \"commitment=explicit only when the evidence clearly commits an identifiable actor to an action.\"\n        *   m2: \"We\" is identifiable (B + others). Explicit.\n        *   m4: \"I\" is identifiable (D). Explicit.\n\n    *   One detail: \"settled=true only when the conversation presents the action as selected, approved, completed...\".\n        *   m1: \"is planned\". This presents the action as selected. `true`.\n        *   m2: \"will create\". Selected by B, but future. Usually `settled` refers to the *decision* being final. \"We will\" is a decision. But often `settled` is reserved for group agreement. Given \"Lack of disagreement is not settlement\", I should be careful. However, \"planned\" is a state. I'll keep m1 `settled: true` because \"planned\" denotes the state of the action itself, not just the conversation's agreement. But to be safe regarding the \"conversation presents\" constraint, if A says it's planned, does the conversation present it as selected? Yes, A asserts it. I will set `true`.\n        *   Actually, looking at similar tasks, often `settled` is false until confirmed. But \"planned\" is strong. I'll stick with `true` for m1.\n        *   Wait, m2 \"We will create\". Is that settled? It's a commitment. I'll set `false` because it's a future action not yet completed or fully ratified by others (though likely accepted).\n        *   Let's adjust m1 `settled` to `false` to be conservative about \"conversation presents... approved\". A states it, B doesn't explicitly approve the migration, just adds backup. Conservative approach: `false`.\n        *   Actually, \"planned\" means the decision is made. I will set `true` for m1.\n\n    *   Re-evaluating `action` for m3. \"The homepage design is ready for review.\" Actionable actor/action exists? The action is \"review\". The actor is unspecified. \"otherwise null\". So `null`.\n\n    *   Re-evaluating `speechAct` for m2. \"We will create...\". It's an assertion of future action. `assertion`.\n\n    *   Re-evaluating `speechAct` for m4. \"I will review...\". `proposal` (offering to do the work).\n\n    *   Wait, `topicTitle` should be consistent per topic.\n        *   Topic 1: \"Database migration planning\"\n        *   Topic 2: \"Homepage design review\"\n\n    *   Check `confidence`. Default 0.9 is fine.\n\n    *   Check `literalness`. All literal.\n\n    *   Check `stance`.\n        *   m1: neutral (initiating)\n        *   m2: support (adding to plan)\n        *   m3: neutral (status)\n        *   m4: support (taking task)\n\n    *   Wait, m2 `refersTo`: `[\"m1\"]`.\n    *   m4 `refersTo`: `[\"m3\"]`.\n\n    *   Final check on `commitment`.\n        *   m1: \"is planned\". Passive. No actor commits. `none`.\n        *   m2: \"We will\". Actor \"We\". `explicit`.\n        *   m3: \"is ready\". `none`.\n        *   m4: \"I will\". Actor \"I\". `explicit`.\n\n    *   Final check on `settled`.\n        *   m1: \"planned\". Action selected. `true`.\n        *   m2: \"will create\". Action selected by B. `true`? Or `false` because future? \"selected, approved, completed\". It is selected by B. But is it settled in the conversation? B declares it. I'll set `false` to distinguish from completed/approved by group.\n        *   Actually, if `commitment` is explicit, `settled` often remains false until action is done or agreed upon by all relevant parties. I'll set `settled: false` for m2 and m4. For m1, \"planned\" implies prior settlement. I'll set `settled: true` for m1.\n\n    *   Wait, I need to make sure I don't output decisions or openQuestions. Just the JSON.\n\n    *   One more check: `action` phrase. \"migrate database\", \"create backup\", \"review homepage design\". Concise.\n\n    *   One more check: `evidence`. Must be list of integers. `[1]`, `[2]`, etc.\n\n    *   One more check: `refersTo`. List of strings. `[\"m1\"]`.\n\n    *   One more check: `topicId`. Kebab-case. `database-migration`, `homepage-design`.\n\n    *   One more check: `semanticImportance`. 0-1.\n\n    *   One more check: `speechAct`. `assertion | question | proposal | answer | request | correction | opposition`.\n        *   m1: assertion.\n        *   m2: assertion (of intent).\n        *   m3: assertion.\n        *   m4: proposal (offering action).\n\n    *   Wait, is m4 `proposal` or `assertion`? \"I will review\" is a promise. But in response to \"ready for review\", it's volunteering. `proposal` fits well for volunteering.\n\n    *   Wait, is m1 `settled: true`? \"The database migration is planned\". This is a statement of fact about the plan. The plan exists. So the action \"migrate database\" is selected. `settled: true`.\n\n    *   Wait, m2 `commitment`: \"We will\". Explicit.\n    *   m4 `commitment`: \"I will\". Explicit.\n\n    *   Let's assemble.\n\n```json\n{\n  \"title\": \"Database and Design Updates\",\n  \"events\": [\n    {\n      \"id\": \"m1\",\n      \"topicId\": \"database-migration\",\n      \"topicTitle\": \"Database migration planning\",\n      \"speaker\": \"A\",\n      \"statement\": \"The database migration is planned for Friday.\",\n      \"speechAct\": \"assertion\",\n      \"literalness\": \"literal\",\n      \"commitment\": \"none\",\n      \"epistemicStatus\": \"claimed\",\n      \"settled\": true,\n      \"action\": \"migrate database\",\n      \"refersTo\": [],\n      \"stance\": \"neutral\",\n      \"semanticImportance\": 0.9,\n      \"confidence\": 0.9,\n      \"evidence\": [\n        1\n      ]\n    },\n    {\n      \"id\": \"m2\",\n      \"topicId\": \"database-migration\",\n      \"topicTitle\": \"Database migration planning\",\n      \"speaker\": \"B\",\n      \"statement\": \"We will create a backup before the migration.\",\n      \"speechAct\": \"assertion\",\n      \"literalness\": \"literal\",\n      \"commitment\": \"explicit\",\n      \"epistemicStatus\": \"claimed\",\n      \"settled\": false,\n      \"action\": \"create backup\",\n      \"refersTo\": [\n        \"m1\"\n      ],\n      \"stance\": \"support\",\n      \"semanticImportance\": 0.8,\n      \"confidence\": 0.9,\n      \"evidence\": [\n        2\n      ]\n    },\n    {\n      \"id\": \"m3\",\n      \"topicId\": \"homepage-design\",\n      \"topicTitle\": \"Homepage design review\",\n      \"speaker\": \"C\",\n      \"statement\": \"The homepage design is ready for review.\",\n      \"speechAct\": \"assertion\",\n      \"literalness\": \"literal\",\n      \"commitment\": \"none\",\n      \"epistemicStatus\": \"claimed\",\n      \"settled\": false,\n      \"action\": null,\n      \"refersTo\": [],\n      \"stance\": \"neutral\",\n      \"semanticImportance\": 0.9,\n      \"confidence\": 0.9,\n      \"evidence\": [\n        3\n      ]\n    },\n    {\n      \"id\": \"m4\",\n      \"topicId\": \"homepage-design\",\n      \"topicTitle\": \"Homepage design review\",\n      \"speaker\": \"D\",\n      \"statement\": \"I will review it today.\",\n      \"speechAct\": \"proposal\",\n      \"literalness\": \"literal\",\n      \"commitment\": \"explicit\",\n      \"epistemicStatus\": \"claimed\",\n      \"settled\": false,\n      \"action\": \"review homepage design\",\n      \"refersTo\": [\n        \"m3\"\n      ],\n      \"stance\": \"support\",\n      \"semanticImportance\": 0.8,\n      \"confidence\": 0.9,\n      \"evidence\": [\n        4\n      ]\n    }\n  ]\n}\n```\nWait, one detail: \"Use suffixes only when one message contains multiple independent propositions\". I used m1, m2, m3, m4. This is correct.\n\"Create event ids from the primary evidence message id: m17 for message 17.\" Here messages are 1, 2, 3, 4. So m1, m2, m3, m4.\n\"Omit greetings and content-free noise.\" None present.\n\"Return JSON only\".\n\nDouble check `settled` for m1. \"planned for Friday\". Is it settled? Yes, a plan implies a decision.\nDouble check `action` for m3. \"ready for review\". Action is \"review\". Actor is not specified. Constraint: \"Set action to a concise action phrase only when an actionable actor/action exists; otherwise null.\" Since no actor is specified in m3, `null` is correct. m4 specifies actor D, so `action` is valid there.\n\nDouble check `speechAct` for m4. \"I will review it today.\" Is it a proposal? It's an offer to take the task. `proposal` fits.\nDouble check `refersTo` for m2. Reply to 1. `[\"m1\"]`.\nDouble check `refersTo` for m4. Reply to 3. `[\"m3\"]`.\n\nLooks good.\n\nOne final check on `commitment` for m1. \"The database migration is planned\". Does this commit A? No. Does it commit anyone? It implies the team has committed, but A is just reporting. `none` is correct.\nOne final check on `commitment` for m2. \"We will create\". Commits B (and team). `explicit` is correct.\nOne final check on `commitment` for m4. \"I will review\". Commits D. `explicit` is correct.\n\nOne final check on `settled` for m2. \"We will create\". Is the action \"create backup\" settled? It is selected by B. But `settled=true` only when conversation presents action as selected, approved, completed. B selects it. Does the conversation approve it? A doesn't reply. \"Lack of disagreement is not settlement.\" So `false` is safer.\nSame for m4. D selects it. C doesn't reply. `false`.\n\nOne final check on `settled` for m1. \"is planned\". This implies prior selection/approval. The statement presents it as a fact of the plan. I will keep `true` because \"planned\" denotes the state of the action itself being settled, unlike \"we should plan\".\n\nWait, `topicTitle` should be consistent. I used \"Database migration planning\" and \"Homepage design review\". That works.\n\nFinal JSON structure check.\n`evidence` is list of ints.\n`refersTo` is list of strings.\n`confidence` is float.\n`semanticImportance` is float.\n`settled` is boolean.\n`action` is string or null.\n\nReady.\n",
+  "parsed": {
+    "title": "Database and Design Updates",
+    "topics": [
+      {
+        "id": "homepage-design",
+        "title": "Homepage design review",
+        "claims": [
+          {
+            "text": "C: The homepage design is ready for review.",
+            "evidence": [3]
+          },
+          {
+            "text": "D: I will review it today.",
+            "evidence": [4]
+          }
+        ]
+      },
+      {
+        "id": "database-migration",
+        "title": "Database migration planning",
+        "claims": [
+          {
+            "text": "A: The database migration is planned for Friday.",
+            "evidence": [1]
+          },
+          {
+            "text": "B: We will create a backup before the migration.",
+            "evidence": [2]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": []
+  },
+  "reconstruction": {
+    "title": "Database and Design Updates",
+    "events": [
+      {
+        "id": "m1",
+        "topicId": "database-migration",
+        "topicTitle": "Database migration planning",
+        "speaker": "A",
+        "statement": "The database migration is planned for Friday.",
+        "speechAct": "assertion",
+        "literalness": "literal",
+        "commitment": "none",
+        "epistemicStatus": "claimed",
+        "settled": true,
+        "action": "migrate database",
+        "refersTo": [],
+        "stance": "neutral",
+        "semanticImportance": 0.9,
+        "confidence": 0.9,
+        "evidence": [1]
+      },
+      {
+        "id": "m2",
+        "topicId": "database-migration",
+        "topicTitle": "Database migration planning",
+        "speaker": "B",
+        "statement": "We will create a backup before the migration.",
+        "speechAct": "assertion",
+        "literalness": "literal",
+        "commitment": "explicit",
+        "epistemicStatus": "claimed",
+        "settled": false,
+        "action": "create backup",
+        "refersTo": ["m1"],
+        "stance": "support",
+        "semanticImportance": 0.8,
+        "confidence": 0.9,
+        "evidence": [2]
+      },
+      {
+        "id": "m3",
+        "topicId": "homepage-design",
+        "topicTitle": "Homepage design review",
+        "speaker": "C",
+        "statement": "The homepage design is ready for review.",
+        "speechAct": "assertion",
+        "literalness": "literal",
+        "commitment": "none",
+        "epistemicStatus": "claimed",
+        "settled": false,
+        "action": null,
+        "refersTo": [],
+        "stance": "neutral",
+        "semanticImportance": 0.9,
+        "confidence": 0.9,
+        "evidence": [3]
+      },
+      {
+        "id": "m4",
+        "topicId": "homepage-design",
+        "topicTitle": "Homepage design review",
+        "speaker": "D",
+        "statement": "I will review it today.",
+        "speechAct": "proposal",
+        "literalness": "literal",
+        "commitment": "explicit",
+        "epistemicStatus": "claimed",
+        "settled": false,
+        "action": "review homepage design",
+        "refersTo": ["m3"],
+        "stance": "support",
+        "semanticImportance": 0.8,
+        "confidence": 0.9,
+        "evidence": [4]
+      }
+    ]
+  },
+  "state": {
+    "title": "Database and Design Updates",
+    "events": [
+      {
+        "id": "m1",
+        "topicId": "database-migration",
+        "topicTitle": "Database migration planning",
+        "speaker": "A",
+        "statement": "The database migration is planned for Friday.",
+        "speechAct": "assertion",
+        "literalness": "literal",
+        "commitment": "none",
+        "epistemicStatus": "claimed",
+        "settled": true,
+        "action": "migrate database",
+        "refersTo": [],
+        "stance": "neutral",
+        "semanticImportance": 0.9,
+        "confidence": 0.9,
+        "evidence": [1]
+      },
+      {
+        "id": "m2",
+        "topicId": "database-migration",
+        "topicTitle": "Database migration planning",
+        "speaker": "B",
+        "statement": "We will create a backup before the migration.",
+        "speechAct": "assertion",
+        "literalness": "literal",
+        "commitment": "explicit",
+        "epistemicStatus": "claimed",
+        "settled": false,
+        "action": "create backup",
+        "refersTo": ["m1"],
+        "stance": "support",
+        "semanticImportance": 0.8,
+        "confidence": 0.9,
+        "evidence": [2]
+      },
+      {
+        "id": "m3",
+        "topicId": "homepage-design",
+        "topicTitle": "Homepage design review",
+        "speaker": "C",
+        "statement": "The homepage design is ready for review.",
+        "speechAct": "assertion",
+        "literalness": "literal",
+        "commitment": "none",
+        "epistemicStatus": "claimed",
+        "settled": false,
+        "action": null,
+        "refersTo": [],
+        "stance": "neutral",
+        "semanticImportance": 0.9,
+        "confidence": 0.9,
+        "evidence": [3]
+      },
+      {
+        "id": "m4",
+        "topicId": "homepage-design",
+        "topicTitle": "Homepage design review",
+        "speaker": "D",
+        "statement": "I will review it today.",
+        "speechAct": "proposal",
+        "literalness": "literal",
+        "commitment": "explicit",
+        "epistemicStatus": "claimed",
+        "settled": false,
+        "action": "review homepage design",
+        "refersTo": ["m3"],
+        "stance": "support",
+        "semanticImportance": 0.8,
+        "confidence": 0.9,
+        "evidence": [4]
+      }
+    ],
+    "resolvedQuestionIds": [],
+    "supersededEventIds": []
+  },
+  "extractorMetrics": {
+    "eventCount": 4,
+    "eventRecall": 0.75,
+    "eventPrecision": 0.75,
+    "attributionAccuracy": 1,
+    "evidenceCorrectness": 1,
+    "relationIntegrity": 1
+  },
+  "reducerMetrics": {
+    "deterministic": true,
+    "lifecycleInvariantViolations": 0,
+    "resolvedQuestions": 0,
+    "supersededEvents": 0
+  },
+  "operationalMetrics": {
+    "modelCalls": 1,
+    "sourceMessageWindows": 1,
+    "semanticInterpretations": 1,
+    "semanticAmplification": 1
+  },
+  "projectionDiagnostics": {
+    "decisionCandidates": 3,
+    "decisionsRejectedByInvariant": 3,
+    "questionsResolvedByAnswerEdge": 0
+  },
+  "usage": {
+    "durationMs": 69824.9314,
+    "ollamaTotalMs": 69480.207332,
+    "promptEvalCount": 794,
+    "evalCount": 7463,
+    "doneReason": "stop",
+    "thinkingTextTokenCount": 6328,
+    "finalTextTokenCount": 617
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 2,
+    "claimCount": 4,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 1,
+    "goldClaimPrecision": 0.75,
+    "evidencePrecision": 0.75,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0,
+    "matchedClaimIds": [
+      "homepage-design.review",
+      "database-migration.schedule",
+      "database-migration.backup"
+    ],
+    "matchedDecisionIds": [],
+    "matchedOpenQuestionIds": [],
+    "retainedThreadIds": ["homepage-design", "database-migration"],
+    "triggeredForbiddenIds": []
+  }
+}

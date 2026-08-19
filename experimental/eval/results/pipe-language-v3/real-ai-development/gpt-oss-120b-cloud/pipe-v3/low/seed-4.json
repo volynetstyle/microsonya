@@ -1,0 +1,123 @@
+{
+  "case": "real-ai-development",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 4,
+  "inputHash": "c44e2d8f381898078b12b50a1dbf1501e5970203c0d4ef386b86fd514114c47c",
+  "promptHash": "926769814c3c5c8a23a92b4aa3f016579ab9ed97ce364dc887976527a86b02a8",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion on AI tools for job search and software development\",\n  \"topics\": [\n    {\n      \"id\": \"ai-job-search\",\n      \"title\": \"AI for job searching and resume automation\",\n      \"claims\": [\n        {\n          \"text\": \"The author is preparing for a full‑time job search and considers automating PDF resume generation for specific vacancies.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"They plan to set up OpenClaw to find vacancies, generate resumes and cover letters after their startup closes.\",\n          \"evidence\": [5]\n        },\n        {\n          \"text\": \"In 2026, adding many AI‑related skills (Cursor, Claude Code, LLM, RAG, Embeddings, etc.) is necessary to avoid being filtered out by recruiters.\",\n          \"evidence\": [6,7,8]\n        },\n        {\n          \"text\": \"The acceleration of development tools started in 2025, with market‑ready, though expensive, solutions becoming available.\",\n          \"evidence\": [9]\n        },\n        {\n          \"text\": \"Candidate search by keyword is becoming increasingly detached from reality.\",\n          \"evidence\": [13]\n        },\n        {\n          \"text\": \"The author expects the recruiting profession to become obsolete.\",\n          \"evidence\": [14]\n        },\n        {\n          \"text\": \"AI‑generated code can drastically lower the entry barrier to programming but may produce insecure, unoptimized queries.\",\n          \"evidence\": [30]\n        },\n        {\n          \"text\": \"AI‑generated code can lead to poor quality implementations that break projects and are hard to review.\",\n          \"evidence\": [35]\n        }\n      ]\n    },\n    {\n      \"id\": \"ai-development-acceleration\",\n      \"title\": \"AI impact on software development speed\",\n      \"claims\": [\n        {\n          \"text\": \"Using GPT to generate SQL joins and other code significantly speeds up development.\",\n          \"evidence\": [19]\n        },\n        {\n          \"text\": \"The discussed projects do not use cloud infrastructure and are unlikely to adopt it.\",\n          \"evidence\": [19]\n        },\n        {\n          \"text\": \"Log analysis tools (e.g., in JUnit) are of limited help without proper context.\",\n          \"evidence\": [22,23]\n        },\n        {\n          \"text\": \"The quality of an AI's answer is often proportional to the quality of the question and the amount of auxiliary knowledge available.\",\n          \"evidence\": [24]\n        },\n        {\n          \"text\": \"Incremental computation techniques have been replaced by materialized views in some contexts.\",\n          \"evidence\": [34]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": []\n}",
+  "thinking": "We need JSON. Identify topics. Main theme: using AI tools for job search and development speed, concerns.\n\nClaims extract with evidence IDs.\n\nDecisions none? No explicit decisions. Open questions? maybe none.\n\nLet's list claims.\n\nTopic \"ai-job-search\": claim about preparing for job search and automating resume generation (ID1). claim about waiting for startup to close to set up OpenClaw for vacancy search etc (ID5). claim need AI skills to avoid being filtered (ID6). claim market mainstream 2026 (ID8). claim acceleration of development since 2025 (ID9). claim tools expensive but good (ID9). claim candidate search via keywords less realistic (ID13). claim recruiter profession may die (ID14). claim AI can generate huge code leading to security issues (ID30). claim AI lowers entry barrier to programming (ID30). claim AI-generated code can be low quality and cause issues (ID35).\n\nTopic \"ai-development-acceleration\": claim about speeding dev using GPT to generate joins etc (ID19). claim no cloud on projects (ID19). claim logs not helpful (ID22,23). claim quality of answer depends on question quality (ID24). claim incremental calculations etc (ID34). \n\nWe need ids for each claim list evidence array.\n\nOpen questions? maybe none.\n\nDecisions none.\n\nReturn JSON.\n\n",
+  "parsed": {
+    "title": "Discussion on AI tools for job search and software development",
+    "topics": [
+      {
+        "id": "ai-job-search",
+        "title": "AI for job searching and resume automation",
+        "claims": [
+          {
+            "text": "The author is preparing for a full‑time job search and considers automating PDF resume generation for specific vacancies.",
+            "evidence": [1]
+          },
+          {
+            "text": "They plan to set up OpenClaw to find vacancies, generate resumes and cover letters after their startup closes.",
+            "evidence": [5]
+          },
+          {
+            "text": "In 2026, adding many AI‑related skills (Cursor, Claude Code, LLM, RAG, Embeddings, etc.) is necessary to avoid being filtered out by recruiters.",
+            "evidence": [6, 7, 8]
+          },
+          {
+            "text": "The acceleration of development tools started in 2025, with market‑ready, though expensive, solutions becoming available.",
+            "evidence": [9]
+          },
+          {
+            "text": "Candidate search by keyword is becoming increasingly detached from reality.",
+            "evidence": [13]
+          },
+          {
+            "text": "The author expects the recruiting profession to become obsolete.",
+            "evidence": [14]
+          },
+          {
+            "text": "AI‑generated code can drastically lower the entry barrier to programming but may produce insecure, unoptimized queries.",
+            "evidence": [30]
+          },
+          {
+            "text": "AI‑generated code can lead to poor quality implementations that break projects and are hard to review.",
+            "evidence": [35]
+          }
+        ]
+      },
+      {
+        "id": "ai-development-acceleration",
+        "title": "AI impact on software development speed",
+        "claims": [
+          {
+            "text": "Using GPT to generate SQL joins and other code significantly speeds up development.",
+            "evidence": [19]
+          },
+          {
+            "text": "The discussed projects do not use cloud infrastructure and are unlikely to adopt it.",
+            "evidence": [19]
+          },
+          {
+            "text": "Log analysis tools (e.g., in JUnit) are of limited help without proper context.",
+            "evidence": [22, 23]
+          },
+          {
+            "text": "The quality of an AI's answer is often proportional to the quality of the question and the amount of auxiliary knowledge available.",
+            "evidence": [24]
+          },
+          {
+            "text": "Incremental computation techniques have been replaced by materialized views in some contexts.",
+            "evidence": [34]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": []
+  },
+  "usage": {
+    "durationMs": 9919.647400000002,
+    "ollamaTotalMs": 9707.92148,
+    "promptEvalCount": 3260,
+    "evalCount": 870,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 2,
+    "claimCount": 13,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.9047619047619048,
+    "goldClaimPrecision": 0.5384615384615384,
+    "evidencePrecision": 0.5625,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0.07692307692307693,
+    "matchedClaimIds": [
+      "job-search.ai-skills",
+      "development.context-quality",
+      "job-search.automation-idea",
+      "job-search.keyword-filtering",
+      "development.routine-speedup",
+      "vibe-coding.bad-backend",
+      "vibe-coding.review-failure"
+    ],
+    "retainedThreadIds": [
+      "ai-job-search",
+      "ai-assisted-development",
+      "vibe-coding-risks"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

@@ -1,0 +1,167 @@
+{
+  "case": "real-fop-calculator",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 2,
+  "transformation": "identity",
+  "inputHash": "d3179cdb8e49a27f55b8dcbb42c5b7b95590527ad18ad16afb38bc499073e8af",
+  "promptHash": "5060e45df53bd39d6e132ad1a9e4bbcf2ae1de44805740c2d1c480e9b25e240f",
+  "promptVersion": "v2",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion summary\",\n  \"topics\": [\n    {\n      \"id\": \"tax-filing\",\n      \"title\": \"Tax filing and calculator usage\",\n      \"claims\": [\n        {\n          \"text\": \"Using aunt Sveta's help allowed the author to correct declarations and pay about 1000 UAH instead of full penalties.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"The author had to check every column in the declaration to avoid mistakes.\",\n          \"evidence\": [8]\n        },\n        {\n          \"text\": \"The calculator works only with a domestic‑currency (UAH) individual entrepreneur; the author had to convert transactions using the daily exchange rate.\",\n          \"evidence\": [19]\n        },\n        {\n          \"text\": \"Quarterly reports and proper tax payment are required.\",\n          \"evidence\": [7]\n        }\n      ]\n    },\n    {\n      \"id\": \"domain-purchase\",\n      \"title\": \"Domain purchase consideration\",\n      \"claims\": [\n        {\n          \"text\": \"User P2 has not bought a domain yet.\",\n          \"evidence\": [2]\n        },\n        {\n          \"text\": \"P1 suggests that buying the calculator will provide money for a domain.\",\n          \"evidence\": [4]\n        },\n        {\n          \"text\": \"P4 opposes buying a domain, calling it a “raw thing” that won’t be usable.\",\n          \"evidence\": [9, 10]\n        }\n      ]\n    },\n    {\n      \"id\": \"app-profitability\",\n      \"title\": \"Profitability of a web/Flutter app\",\n      \"claims\": [\n        {\n          \"text\": \"Web platform is considered the simplest but less profitable than Android/iOS.\",\n          \"evidence\": [11]\n        },\n        {\n          \"text\": \"Successful approach includes very fast delivery (under a week) and a cross‑platform stack like Flutter.\",\n          \"evidence\": [12]\n        },\n        {\n          \"text\": \"The author doubts anyone will buy the product within months.\",\n          \"evidence\": [17]\n        },\n        {\n          \"text\": \"LinkedIn audience may be suitable, with technical/managerial posts now under 50% of content.\",\n          \"evidence\": [18]\n        }\n      ]\n    },\n    {\n      \"id\": \"source-code-password\",\n      \"title\": \"Source code and password concerns\",\n      \"claims\": [\n        {\n          \"text\": \"User asks if the source code contains the password that could be found by search.\",\n          \"evidence\": [21]\n        },\n        {\n          \"text\": \"P4 responds sarcastically, implying they didn’t pay 299 UAH for it.\",\n          \"evidence\": [22]\n        },\n        {\n          \"text\": \"P4 mentions the password is stored locally in the bundle as a 100 % discount promo code.\",\n          \"evidence\": [23]\n        },\n        {\n          \"text\": \"Others label the code as pirated and joke about stealing the password.\",\n          \"evidence\": [24, 26, 27, 28]\n        }\n      ]\n    },\n    {\n      \"id\": \"bundle-pricing\",\n      \"title\": \"Pricing and perception of the bundle\",\n      \"claims\": [\n        {\n          \"text\": \"P4 describes the project as a “free vibe‑code” with a bundled price, attracting curiosity and skepticism.\",\n          \"evidence\": [30, 32]\n        },\n        {\n          \"text\": \"P5 confirms the reality of the bundle being a “vibe‑code”.\",\n          \"evidence\": [33, 34]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": [\n    {\n      \"text\": \"Is the password searchable within the source code?\",\n      \"evidence\": [21]\n    }\n  ]\n}",
+  "thinking": "We need output JSON with topics, claims, decisions, openQuestions. Identify topics.\n\nProbably topics: tax filing workaround, domain purchase, app profitability, source code password, bundle pricing.\n\nCreate claims with evidence IDs.\n\nDecisions maybe none explicit. Might be decision to not buy domain (message9)? That's a statement of opinion not decision.\n\nOpen question maybe \"А який там сорс код? Можна сам пароль пошуком знайти?\" not answered. No answer later. So open.\n\nLet's craft.\n\n",
+  "parsed": {
+    "title": "Discussion summary",
+    "topics": [
+      {
+        "id": "tax-filing",
+        "title": "Tax filing and calculator usage",
+        "claims": [
+          {
+            "text": "Using aunt Sveta's help allowed the author to correct declarations and pay about 1000 UAH instead of full penalties.",
+            "evidence": [1]
+          },
+          {
+            "text": "The author had to check every column in the declaration to avoid mistakes.",
+            "evidence": [8]
+          },
+          {
+            "text": "The calculator works only with a domestic‑currency (UAH) individual entrepreneur; the author had to convert transactions using the daily exchange rate.",
+            "evidence": [19]
+          },
+          {
+            "text": "Quarterly reports and proper tax payment are required.",
+            "evidence": [7]
+          }
+        ]
+      },
+      {
+        "id": "domain-purchase",
+        "title": "Domain purchase consideration",
+        "claims": [
+          {
+            "text": "User P2 has not bought a domain yet.",
+            "evidence": [2]
+          },
+          {
+            "text": "P1 suggests that buying the calculator will provide money for a domain.",
+            "evidence": [4]
+          },
+          {
+            "text": "P4 opposes buying a domain, calling it a “raw thing” that won’t be usable.",
+            "evidence": [9, 10]
+          }
+        ]
+      },
+      {
+        "id": "app-profitability",
+        "title": "Profitability of a web/Flutter app",
+        "claims": [
+          {
+            "text": "Web platform is considered the simplest but less profitable than Android/iOS.",
+            "evidence": [11]
+          },
+          {
+            "text": "Successful approach includes very fast delivery (under a week) and a cross‑platform stack like Flutter.",
+            "evidence": [12]
+          },
+          {
+            "text": "The author doubts anyone will buy the product within months.",
+            "evidence": [17]
+          },
+          {
+            "text": "LinkedIn audience may be suitable, with technical/managerial posts now under 50% of content.",
+            "evidence": [18]
+          }
+        ]
+      },
+      {
+        "id": "source-code-password",
+        "title": "Source code and password concerns",
+        "claims": [
+          {
+            "text": "User asks if the source code contains the password that could be found by search.",
+            "evidence": [21]
+          },
+          {
+            "text": "P4 responds sarcastically, implying they didn’t pay 299 UAH for it.",
+            "evidence": [22]
+          },
+          {
+            "text": "P4 mentions the password is stored locally in the bundle as a 100 % discount promo code.",
+            "evidence": [23]
+          },
+          {
+            "text": "Others label the code as pirated and joke about stealing the password.",
+            "evidence": [24, 26, 27, 28]
+          }
+        ]
+      },
+      {
+        "id": "bundle-pricing",
+        "title": "Pricing and perception of the bundle",
+        "claims": [
+          {
+            "text": "P4 describes the project as a “free vibe‑code” with a bundled price, attracting curiosity and skepticism.",
+            "evidence": [30, 32]
+          },
+          {
+            "text": "P5 confirms the reality of the bundle being a “vibe‑code”.",
+            "evidence": [33, 34]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": [
+      {
+        "text": "Is the password searchable within the source code?",
+        "evidence": [21]
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 10817.67300000001,
+    "ollamaTotalMs": 10656.105665,
+    "promptEvalCount": 2944,
+    "evalCount": 933,
+    "doneReason": "stop",
+    "thinkingTextTokenCount": 103,
+    "finalTextTokenCount": 820
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 5,
+    "claimCount": 17,
+    "decisionCount": 0,
+    "openQuestionCount": 1,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.8333333333333334,
+    "goldClaimPrecision": 0.4117647058823529,
+    "evidencePrecision": 0.2916666666666667,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 1,
+    "noiseRetention": 0.17647058823529413,
+    "matchedClaimIds": [
+      "tax-reporting.paid-help",
+      "tax-reporting.form-risk",
+      "product.uah-only",
+      "product.web-limitations",
+      "product.fast-delivery-strategy",
+      "security.password-in-bundle",
+      "product.creator-response"
+    ],
+    "matchedDecisionIds": [],
+    "matchedOpenQuestionIds": [],
+    "retainedThreadIds": [
+      "tax-reporting",
+      "calculator-product",
+      "calculator-security"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

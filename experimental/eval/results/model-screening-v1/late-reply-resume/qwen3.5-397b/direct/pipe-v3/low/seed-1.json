@@ -1,0 +1,148 @@
+{
+  "case": "late-reply-resume",
+  "model": "qwen3.5:397b",
+  "pipeline": "direct",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 1,
+  "transformation": "identity",
+  "inputHash": "0253984bce831e693b1e68a0dbfd6555c50195fa1838c562e8335210f125abcc",
+  "promptHash": "d52928aa7aa035465018f381f8688c507fa21677bfad6f3da8aa675d8dfe1b1e",
+  "promptVersion": "v4",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Work Coordination and Office Updates\",\n  \"topics\": [\n    {\n      \"id\": \"report-export\",\n      \"title\": \"Report Export\",\n      \"claims\": [\n        {\n          \"text\": \"A stated CSV export is needed for reports\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"B planned to add export after authorization fix\",\n          \"evidence\": [2]\n        },\n        {\n          \"text\": \"A confirmed authorization is fixed and will take CSV export today\",\n          \"evidence\": [33]\n        }\n      ]\n    },\n    {\n      \"id\": \"lunch\",\n      \"title\": \"Lunch Order\",\n      \"claims\": [\n        {\n          \"text\": \"C asked who orders lunch\",\n          \"evidence\": [17]\n        },\n        {\n          \"text\": \"D stated they already ordered\",\n          \"evidence\": [18]\n        }\n      ]\n    },\n    {\n      \"id\": \"office-logistics\",\n      \"title\": \"Office Logistics\",\n      \"claims\": [\n        {\n          \"text\": \"C noted elevator is under repair\",\n          \"evidence\": [19]\n        },\n        {\n          \"text\": \"C noted charger is on the table\",\n          \"evidence\": [23]\n        }\n      ]\n    },\n    {\n      \"id\": \"schedule\",\n      \"title\": \"Schedule\",\n      \"claims\": [\n        {\n          \"text\": \"C announced meeting at three\",\n          \"evidence\": [9]\n        },\n        {\n          \"text\": \"D confirmed attendance on time\",\n          \"evidence\": [10]\n        },\n        {\n          \"text\": \"C asked if tomorrow is a day off\",\n          \"evidence\": [27]\n        },\n        {\n          \"text\": \"D confirmed tomorrow is a normal day\",\n          \"evidence\": [28]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [\n    {\n      \"text\": \"A will handle CSV export today\",\n      \"evidence\": [33]\n    },\n    {\n      \"text\": \"D already ordered lunch\",\n      \"evidence\": [18]\n    },\n    {\n      \"text\": \"D will take stairs due to elevator repair\",\n      \"evidence\": [20]\n    },\n    {\n      \"text\": \"D will retrieve charger later\",\n      \"evidence\": [24]\n    },\n    {\n      \"text\": \"D will be on time for meeting\",\n      \"evidence\": [10]\n    }\n  ],\n  \"openQuestions\": []\n}",
+  "thinking": "Thinking Process:\n\n1.  **Analyze the Request:**\n    *   Task: Summarize a Telegram conversation.\n    *   Format: JSON only, specific schema (title, topics, decisions, openQuestions).\n    *   Constraints:\n        *   Preserve attribution (who said what).\n        *   Cite only source message IDs (e.g., [17]).\n        *   Do not invent decisions.\n        *   Do not leave answered questions open.\n        *   Input format: pipe-v3 (provided in the prompt).\n        *   Output format: JSON only (no markdown blocks, no explanations).\n\n2.  **Analyze the Input Data (pipe-v3):**\n    *   Messages are numbered #1 to #33.\n    *   Format: `#ID|\"User\"|\"Time\"|\"ReplyTo\"|\"Type\"|\"Content\"`\n    *   Key Messages for Work/Task Context:\n        *   #1 (A): \"Для експорту звітів потрібен CSV.\" (CSV export needed for reports.)\n        *   #2 (B): \"Додам експорт після виправлення авторизації.\" (Will add export after fixing authorization.)\n        *   #33 (A): \"Авторизацію вже виправили, тому беру CSV-експорт сьогодні.\" (Authorization fixed, so taking CSV export today.)\n        *   #17 (C): \"Хто замовляє обід?\" (Who orders lunch?)\n        *   #18 (D): \"Я вже замовив.\" (I already ordered.)\n        *   #9 (C): \"Зустріч о третій.\" (Meeting at three.)\n        *   #10 (D): \"Я буду вчасно.\" (I will be on time.)\n        *   #19 (C): \"Ліфт ремонтують.\" (Elevator under repair.)\n        *   #27 (C): \"Завтра вихідний?\" (Is tomorrow a day off?)\n        *   #28 (D): \"Ні, звичайний день.\" (No, normal day.)\n\n    *   Chatter/Noise (Weather, Coffee, Cookies, Avatar, Email, Stickers, Charger, Noise, Cat, Break):\n        *   #3-#8, #11-#16, #20-#26, #29-#32. These are mostly casual conversation not relevant to decisions or key claims unless they imply action.\n        *   #5/#6 (Coffee/Tea): Casual.\n        *   #11/#12 (Cookies): Casual.\n        *   #15/#16 (Email): Casual observation.\n        *   #19/#20 (Elevator/Stairs): Informational/Action plan for D.\n        *   #23/#24 (Charger): Informational/Action plan for D.\n        *   #27/#28 (Day off): Question answered.\n\n3.  **Identify Topics, Claims, Decisions, Open Questions:**\n\n    *   **Topic 1: Report Export (CSV)**\n        *   Claim: A needs CSV export for reports. (ID: 1)\n        *   Claim: B planned to add export after auth fix. (ID: 2)\n        *   Claim/Decision: A states auth is fixed and they are taking the CSV export today. (ID: 33)\n        *   *Analysis:* This looks like a decision/action item settled. A is taking ownership because the blocker (auth) is resolved.\n\n    *   **Topic 2: Lunch**\n        *   Question: Who orders lunch? (ID: 17)\n        *   Answer/Decision: D already ordered. (ID: 18)\n        *   *Analysis:* Question answered, action settled.\n\n    *   **Topic 3: Meeting**\n        *   Claim: Meeting at 3. (ID: 9)\n        *   Claim: D will be on time. (ID: 10)\n\n    *   **Topic 4: Office Logistics (Elevator/Charger)**\n        *   Claim: Elevator under repair. (ID: 19)\n        *   Claim: D will take stairs. (ID: 20)\n        *   Claim: Charger on table. (ID: 23)\n        *   Claim: D will take it later. (ID: 24)\n\n    *   **Topic 5: Schedule**\n        *   Question: Tomorrow off? (ID: 27)\n        *   Answer: No, normal day. (ID: 28)\n        *   *Analysis:* Question answered.\n\n4.  **Drafting the JSON:**\n\n    *   *Title:* Needs to be short. \"Work Coordination and Office Chat\" or similar.\n    *   *Topics:* Group related claims.\n        *   Topic: CSV Export.\n        *   Topic: Lunch.\n        *   Topic: Office Logistics (Elevator/Charger).\n        *   Topic: Schedule/Meeting.\n    *   *Decisions:* Actions agreed upon or stated as done.\n        *   D ordered lunch.\n        *   A is taking CSV export today.\n        *   D will take stairs (due to elevator).\n        *   D will take charger later.\n    *   *Open Questions:* Are there any unanswered questions?\n        *   #17 answered by #18.\n        *   #27 answered by #28.\n        *   No obvious open questions remaining based on the text provided.\n\n    *Refining Constraints:*\n    *   \"Do not invent decisions or leave answered questions open.\" -> If a question is answered, it goes into claims/topics or decisions, not openQuestions.\n    *   \"Preserve attribution\" -> Include user names in claim text.\n    *   \"Cite only source message IDs\" -> Use the numeric ID from the input (e.g., 1, 2, 33).\n    *   \"JSON only\" -> No markdown code blocks (```json ... ```). Just raw JSON.\n\n    *Selection for Summary:*\n    Focus on the substantive work/coordination items rather than every single chat message (weather, cat, stickers). However, the prompt asks to \"Summarize the Telegram conversation directly\". Usually, this means capturing the key information flow. I will group the logistical items.\n\n    *Topic 1: Report Export*\n    *   Claim: A stated CSV export is needed for reports. (1)\n    *   Claim: B planned to add export after authorization fix. (2)\n    *   Claim: A confirmed authorization is fixed and will take CSV export today. (33)\n    *   Decision: A will handle CSV export today. (33)\n\n    *Topic 2: Lunch*\n    *   Claim: C asked who orders lunch. (17)\n    *   Decision: D already ordered lunch. (18)\n\n    *Topic 3: Office Logistics*\n    *   Claim: C noted elevator is under repair. (19)\n    *   Claim: D will take stairs. (20)\n    *   Claim: C noted charger is on the table. (23)\n    *   Claim: D will take charger later. (24)\n\n    *Topic 4: Schedule*\n    *   Claim: C announced meeting at three. (9)\n    *   Claim: D confirmed attendance on time. (10)\n    *   Claim: C asked if tomorrow is a day off. (27)\n    *   Claim: D confirmed it is a normal day. (28)\n\n    *Decisions List:*\n    *   D ordered lunch. (18)\n    *   A will handle CSV export today. (33)\n    *   D will use stairs due to elevator repair. (20)\n    *   D will retrieve charger later. (24)\n\n    *Open Questions:*\n    *   None identified (all questions in the text were answered).\n\n    *Wait, checking constraint:* \"Do not invent decisions\".\n    Is \"D will use stairs\" a decision or just a statement of action? It's an action statement. I'll put it in decisions as it's a settled action plan.\n    Is \"A will handle CSV export\" a decision? Yes, \"беру... сьогодні\" (I'm taking... today).\n\n    *Attribution:* Must include who said it in the text.\n    *Evidence:* Array of integers (message IDs).\n\n    *JSON Structure Check:*\n    *   title: string\n    *   topics: array of {id, title, claims: [{text, evidence}]}\n    *   decisions: array of {text, evidence}\n    *   openQuestions: array of {text, evidence}\n\n    *Refining Topics:*\n    I should consolidate to avoid too much fragmentation.\n    1. Report Export\n    2. Lunch\n    3. Office Logistics & Schedule\n\n    Let's stick to the schema strictly.\n\n    *Drafting Content:*\n    Title: \"Work Coordination and Office Updates\"\n\n    Topics:\n    1. id: \"report-export\", title: \"Report Export\", claims: [\"A stated CSV export is needed for reports [1]\", \"B planned to add export after authorization fix [2]\", \"A confirmed authorization is fixed and will take CSV export today [33]\"]\n    2. id: \"lunch\", title: \"Lunch Order\", claims: [\"C asked who orders lunch [17]\", \"D stated they already ordered [18]\"]\n    3. id: \"office-logistics\", title: \"Office Logistics\", claims: [\"C noted elevator is under repair [19]\", \"C noted charger is on the table [23]\"]\n    4. id: \"schedule\", title: \"Schedule\", claims: [\"C announced meeting at three [9]\", \"D confirmed tomorrow is a normal day [28]\"]\n\n    Decisions:\n    1. \"A will handle CSV export today\" [33]\n    2. \"D already ordered lunch\" [18]\n    3. \"D will take stairs due to elevator repair\" [20]\n    4. \"D will retrieve charger later\" [24]\n\n    Open Questions:\n    (Empty array, as #17 answered by #18, #27 answered by #28)\n\n    *Wait, one check on Message #33:*\n    #33|\"A\"|\"09:32\"|^2|\"text\"|\"Авторизацію вже виправили, тому беру CSV-експорт сьогодні.\"\n    This is a reply to #2 (B's message). A is taking over the task.\n\n    *Check on Message #20:*\n    #20|\"D\"|\"09:19\"|^0|\"text\"|\"Піднімусь сходами.\"\n    This is an action statement. Can be a decision.\n\n    *Check on Message #24:*\n    #24|\"D\"|\"09:23\"|^0|\"text\"|\"Заберу пізніше.\"\n    Action statement. Can be a decision.\n\n    *Check on Open Questions:*\n    Are there any unanswered questions?\n    #17 (Who orders lunch?) -> #18 (I did). Answered.\n    #27 (Tomorrow off?) -> #28 (No). Answered.\n    No open questions.\n\n    *Final Review of JSON:*\n    Ensure no markdown formatting.\n    Ensure IDs are integers in the evidence arrays.\n    Ensure attribution is in the text.\n\n    *One detail:* \"Preserve attribution\". I will include names (A, B, C, D) in the claim/decision text.\n\n    *Constructing JSON:*\n    {\n      \"title\": \"Work Coordination and Office Updates\",\n      \"topics\": [\n        {\n          \"id\": \"report-export\",\n          \"title\": \"Report Export\",\n          \"claims\": [\n            {\n              \"text\": \"A stated CSV export is needed for reports\",\n              \"evidence\": [1]\n            },\n            {\n              \"text\": \"B planned to add export after authorization fix\",\n              \"evidence\": [2]\n            },\n            {\n              \"text\": \"A confirmed authorization is fixed and will take CSV export today\",\n              \"evidence\": [33]\n            }\n          ]\n        },\n        {\n          \"id\": \"lunch\",\n          \"title\": \"Lunch Order\",\n          \"claims\": [\n            {\n              \"text\": \"C asked who orders lunch\",\n              \"evidence\": [17]\n            },\n            {\n              \"text\": \"D stated they already ordered\",\n              \"evidence\": [18]\n            }\n          ]\n        },\n        {\n          \"id\": \"office-logistics\",\n          \"title\": \"Office Logistics\",\n          \"claims\": [\n            {\n              \"text\": \"C noted elevator is under repair\",\n              \"evidence\": [19]\n            },\n            {\n              \"text\": \"C noted charger is on the table\",\n              \"evidence\": [23]\n            }\n          ]\n        },\n        {\n          \"id\": \"schedule\",\n          \"title\": \"Schedule\",\n          \"claims\": [\n            {\n              \"text\": \"C announced meeting at three\",\n              \"evidence\": [9]\n            },\n            {\n              \"text\": \"D confirmed tomorrow is a normal day\",\n              \"evidence\": [28]\n            }\n          ]\n        }\n      ],\n      \"decisions\": [\n        {\n          \"text\": \"A will handle CSV export today\",\n          \"evidence\": [33]\n        },\n        {\n          \"text\": \"D already ordered lunch\",\n          \"evidence\": [18]\n        },\n        {\n          \"text\": \"D will take stairs due to elevator repair\",\n          \"evidence\": [20]\n        },\n        {\n          \"text\": \"D will retrieve charger later\",\n          \"evidence\": [24]\n        }\n      ],\n      \"openQuestions\": []\n    }\n\n    *Wait, checking constraint:* \"Return JSON only\". I must not wrap it in ```json ```.\n    *Checking constraint:* \"cite only source message IDs\". The input has IDs like #1, #2. I should use the integer part (1, 2).\n    *Checking constraint:* \"Preserve attribution\". Included A, B, C, D in text.\n    *Checking constraint:* \"Do not invent decisions\". All decisions are explicitly stated actions.\n    *Checking constraint:* \"leave answered questions open\". All questions are answered, so openQuestions is empty.\n\n    *Refining Topics:*\n    Maybe combine Logistics and Schedule? No, keep them separate for clarity.\n    Is \"D confirmed attendance on time\" (#10) important? Yes, adds to meeting topic.\n    Is \"D confirmed tomorrow is a normal day\" (#28) important? Yes.\n\n    Let's add #10 to Schedule claims.\n    Let's add #10 to decisions? \"D will be on time\" is a commitment. I'll add it to decisions.\n\n    Revised Decisions:\n    1. A will handle CSV export today [33]\n    2. D already ordered lunch [18]\n    3. D will take stairs [20]\n    4. D will retrieve charger later [24]\n    5. D will be on time for meeting [10]\n\n    Revised Schedule Claims:\n    1. C announced meeting at three [9]\n    2. D confirmed attendance on time [10]\n    3. C asked if tomorrow is a day off [27]\n    4. D confirmed tomorrow is a normal day [28]\n\n    Wait, #27 is a question. Should it be in claims or openQuestions? Since it's answered, it's part of the topic history (claims). OpenQuestions is for unresolved ones.\n\n    Final check on JSON validity.\n    Keys: title, topics, decisions, openQuestions.\n    Topics items: id, title, claims.\n    Claims items: text, evidence.\n    Decisions items: text, evidence.\n    OpenQuestions items: text, evidence.\n\n    One more check: \"cite only source message IDs\". The input shows `#1`, `#2`. I will use `1`, `2` as integers.\n    Attribution: \"A\", \"B\", \"C\", \"D\".\n\n    Let's assemble.\n\n    Wait, I should check if there are any other open questions.\n    #17 (Who orders lunch?) -> Answered #18.\n    #27 (Tomorrow off?) -> Answered #28.\n    Any others?\n    #1 (Statement)\n    #2 (Statement)\n    #3 (Question: Seen new trailer?) -> #4 (Answer: Yes). This is casual chat. Should I include it? The prompt says \"Summarize the Telegram conversation directly\". Usually, work-related summaries filter out casual chat unless requested otherwise. However, \"Summarize... directly\" might imply capturing the flow. But given the schema (decisions, topics), it implies a structured summary of substance. Including \"Trailer\" and \"Cat\" might clutter the \"Work Coordination\" title. I will focus on the coordination/logistics/work aspects as they fit the \"decisions/topics\" schema better. Casual chat rarely has \"decisions\".\n    Actually, looking at the messages, there is a mix. But typically, summaries for this type of task focus on actionable items. I will stick to the actionable/logistical items (Export, Lunch, Meeting, Elevator, Charger, Schedule). I will exclude the trailer, coffee, weather, cookies, avatar, email, stickers, noise, cat, break messages as they are noise relative to a structured summary with decisions.\n\n    Wait, I need to make sure I don't miss anything that could be construed as a decision.\n    #5/#6 (Coffee/Tea): C going for coffee, D asks for tea. #6 is a request, #5 is an action. Is it a decision? \"Take me tea\". \"I'm going for coffee\". Not really a settled team decision. I'll skip casual favors.\n    #11/#12 (Cookies): Similar.\n    #15/#16 (Email): Observation.\n    #21/#22 (Stickers): Observation.\n    #25/#26 (Noise): Observation.\n    #29/#30 (Cat): Observation.\n    #31/#32 (Break): Observation.\n\n    Okay, focusing on Work/Office Logistics.\n\n    One detail: \"Preserve attribution\". I will ensure names are in the text.\n    One detail: \"cite only source message IDs\". I will use the numbers.\n\n    Final check on JSON syntax. No trailing commas.\n\n    Let's write the JSON.\n",
+  "parsed": {
+    "title": "Work Coordination and Office Updates",
+    "topics": [
+      {
+        "id": "report-export",
+        "title": "Report Export",
+        "claims": [
+          {
+            "text": "A stated CSV export is needed for reports",
+            "evidence": [1]
+          },
+          {
+            "text": "B planned to add export after authorization fix",
+            "evidence": [2]
+          },
+          {
+            "text": "A confirmed authorization is fixed and will take CSV export today",
+            "evidence": [33]
+          }
+        ]
+      },
+      {
+        "id": "lunch",
+        "title": "Lunch Order",
+        "claims": [
+          {
+            "text": "C asked who orders lunch",
+            "evidence": [17]
+          },
+          {
+            "text": "D stated they already ordered",
+            "evidence": [18]
+          }
+        ]
+      },
+      {
+        "id": "office-logistics",
+        "title": "Office Logistics",
+        "claims": [
+          {
+            "text": "C noted elevator is under repair",
+            "evidence": [19]
+          },
+          {
+            "text": "C noted charger is on the table",
+            "evidence": [23]
+          }
+        ]
+      },
+      {
+        "id": "schedule",
+        "title": "Schedule",
+        "claims": [
+          {
+            "text": "C announced meeting at three",
+            "evidence": [9]
+          },
+          {
+            "text": "D confirmed attendance on time",
+            "evidence": [10]
+          },
+          {
+            "text": "C asked if tomorrow is a day off",
+            "evidence": [27]
+          },
+          {
+            "text": "D confirmed tomorrow is a normal day",
+            "evidence": [28]
+          }
+        ]
+      }
+    ],
+    "decisions": [
+      {
+        "text": "A will handle CSV export today",
+        "evidence": [33]
+      },
+      {
+        "text": "D already ordered lunch",
+        "evidence": [18]
+      },
+      {
+        "text": "D will take stairs due to elevator repair",
+        "evidence": [20]
+      },
+      {
+        "text": "D will retrieve charger later",
+        "evidence": [24]
+      },
+      {
+        "text": "D will be on time for meeting",
+        "evidence": [10]
+      }
+    ],
+    "openQuestions": []
+  },
+  "usage": {
+    "durationMs": 42216.30960000004,
+    "ollamaTotalMs": 41944.594588,
+    "promptEvalCount": 1140,
+    "evalCount": 4880,
+    "doneReason": "stop",
+    "thinkingTextTokenCount": 3805,
+    "finalTextTokenCount": 534
+  },
+  "operationalMetrics": {
+    "modelCalls": 1,
+    "sourceMessageWindows": 1,
+    "semanticInterpretations": 1,
+    "semanticAmplification": 1
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 4,
+    "claimCount": 11,
+    "decisionCount": 5,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 1,
+    "goldClaimPrecision": 0.18181818181818182,
+    "evidencePrecision": 0.1875,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0.7272727272727273,
+    "matchedClaimIds": ["csv-export.required", "csv-export.resumed"],
+    "matchedDecisionIds": ["csv-export.do-today"],
+    "matchedOpenQuestionIds": [],
+    "retainedThreadIds": ["csv-export"],
+    "triggeredForbiddenIds": []
+  }
+}

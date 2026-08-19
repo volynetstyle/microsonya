@@ -1,0 +1,173 @@
+{
+  "case": "real-job-search-abroad",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe",
+  "reasoning": "low",
+  "seed": 4,
+  "inputHash": "aac555f3427e2195f145b4a5e3a6d9644961170a8ccc181b8832ae83202b036f",
+  "promptHash": "53a7b2484d09e12a9b7a868c284de4b86419dc2bac740bd289675ea6076141ac",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion about living and working abroad\",\n  \"topics\": [\n    {\n      \"id\": \"expat-slovakia\",\n      \"title\": \"People living or planning to live in Slovakia\",\n      \"claims\": [\n        {\n          \"text\": \"Some members live in Bratislava or elsewhere in Slovakia\",\n          \"evidence\": [1, 43]\n        },\n        {\n          \"text\": \"The user P1 has been in Slovakia for almost a year\",\n          \"evidence\": [43]\n        },\n        {\n          \"text\": \"There are acquaintances of the group in Austria and Poland\",\n          \"evidence\": [3, 12]\n        }\n      ]\n    },\n    {\n      \"id\": \"job-search-abroad\",\n      \"title\": \"Finding jobs abroad\",\n      \"claims\": [\n        {\n          \"text\": \"LinkedIn is recommended for job hunting\",\n          \"evidence\": [18]\n        },\n        {\n          \"text\": \"About 100 applications yielded only 3 interviews for P3\",\n          \"evidence\": [21]\n        },\n        {\n          \"text\": \"Local language requirement appears in most job postings (about 95%)\",\n          \"evidence\": [26]\n        },\n        {\n          \"text\": \"Higher education rarely matters for getting interviews\",\n          \"evidence\": [32]\n        },\n        {\n          \"text\": \"Salary expectations in Europe are generally higher than in Ukraine, but many ignore it\",\n          \"evidence\": [35]\n        },\n        {\n          \"text\": \"Candidate accepted a low salary because they needed any job urgently\",\n          \"evidence\": [37, 40, 41]\n        }\n      ]\n    },\n    {\n      \"id\": \"language-requirements\",\n      \"title\": \"Language needs for work and daily life\",\n      \"claims\": [\n        {\n          \"text\": \"German is commonly spoken at work in Austria, but English is also used\",\n          \"evidence\": [14, 16]\n        },\n        {\n          \"text\": \"Employers often request B2 level German, sometimes B1, and certificates are not always required\",\n          \"evidence\": [46]\n        },\n        {\n          \"text\": \"The speaker feels uncomfortable speaking German in everyday situations\",\n          \"evidence\": [47]\n        },\n        {\n          \"text\": \"In Slovakia the surrounding community speaks Ukrainian, while work language is English\",\n          \"evidence\": [44, 45]\n        }\n      ]\n    },\n    {\n      \"id\": \"salary-info\",\n      \"title\": \"Salary discussions\",\n      \"claims\": [\n        {\n          \"text\": \"Salary for the speaker's position was higher than a minimum wage but still low compared to expectations\",\n          \"evidence\": [37]\n        },\n        {\n          \"text\": \"In Europe developers tend to earn more than in Ukraine\",\n          \"evidence\": [35]\n        }\n      ]\n    },\n    {\n      \"id\": \"future-plans\",\n      \"title\": \"Future relocation considerations\",\n      \"claims\": [\n        {\n          \"text\": \"One participant is considering attending a Warsaw tech event (wawtech.io/summer)\",\n          \"evidence\": [59]\n        },\n        {\n          \"text\": \"A partner living in Austria for over 10 years is pessimistic about the country's future\",\n          \"evidence\": [60]\n        },\n        {\n          \"text\": \"The same participant views Austria as the best choice among European countries\",\n          \"evidence\": [60]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": [\n    {\n      \"text\": \"Should the group focus on learning German to improve job prospects?\",\n      \"evidence\": [46, 47]\n    },\n    {\n      \"text\": \"Is moving to Warsaw for the tech event a viable next step?\",\n      \"evidence\": [59]\n    }\n  ]\n}",
+  "thinking": "Need to produce JSON with claims, decisions, open questions. Identify topics. Likely topics: expats in Slovakia, job search abroad, language requirements, salary expectations, event planning. No decisions made. Open questions: \"А ти на якусь австрійську компанію воркаєш?\" answered? not resolved. Also \"Чекай а на якій мові там балакають...\" answered. Open maybe about staying in Austria? There's suggestion event. Not resolved. We'll create topics.\n\nTopic ids: expat-slovakia, job-search-abroad, language-requirements, salary-info, future-plans.\n\nCollect claims with evidence ids.\n\nLet's craft.\n\n",
+  "parsed": {
+    "title": "Discussion about living and working abroad",
+    "topics": [
+      {
+        "id": "expat-slovakia",
+        "title": "People living or planning to live in Slovakia",
+        "claims": [
+          {
+            "text": "Some members live in Bratislava or elsewhere in Slovakia",
+            "evidence": [1, 43]
+          },
+          {
+            "text": "The user P1 has been in Slovakia for almost a year",
+            "evidence": [43]
+          },
+          {
+            "text": "There are acquaintances of the group in Austria and Poland",
+            "evidence": [3, 12]
+          }
+        ]
+      },
+      {
+        "id": "job-search-abroad",
+        "title": "Finding jobs abroad",
+        "claims": [
+          {
+            "text": "LinkedIn is recommended for job hunting",
+            "evidence": [18]
+          },
+          {
+            "text": "About 100 applications yielded only 3 interviews for P3",
+            "evidence": [21]
+          },
+          {
+            "text": "Local language requirement appears in most job postings (about 95%)",
+            "evidence": [26]
+          },
+          {
+            "text": "Higher education rarely matters for getting interviews",
+            "evidence": [32]
+          },
+          {
+            "text": "Salary expectations in Europe are generally higher than in Ukraine, but many ignore it",
+            "evidence": [35]
+          },
+          {
+            "text": "Candidate accepted a low salary because they needed any job urgently",
+            "evidence": [37, 40, 41]
+          }
+        ]
+      },
+      {
+        "id": "language-requirements",
+        "title": "Language needs for work and daily life",
+        "claims": [
+          {
+            "text": "German is commonly spoken at work in Austria, but English is also used",
+            "evidence": [14, 16]
+          },
+          {
+            "text": "Employers often request B2 level German, sometimes B1, and certificates are not always required",
+            "evidence": [46]
+          },
+          {
+            "text": "The speaker feels uncomfortable speaking German in everyday situations",
+            "evidence": [47]
+          },
+          {
+            "text": "In Slovakia the surrounding community speaks Ukrainian, while work language is English",
+            "evidence": [44, 45]
+          }
+        ]
+      },
+      {
+        "id": "salary-info",
+        "title": "Salary discussions",
+        "claims": [
+          {
+            "text": "Salary for the speaker's position was higher than a minimum wage but still low compared to expectations",
+            "evidence": [37]
+          },
+          {
+            "text": "In Europe developers tend to earn more than in Ukraine",
+            "evidence": [35]
+          }
+        ]
+      },
+      {
+        "id": "future-plans",
+        "title": "Future relocation considerations",
+        "claims": [
+          {
+            "text": "One participant is considering attending a Warsaw tech event (wawtech.io/summer)",
+            "evidence": [59]
+          },
+          {
+            "text": "A partner living in Austria for over 10 years is pessimistic about the country's future",
+            "evidence": [60]
+          },
+          {
+            "text": "The same participant views Austria as the best choice among European countries",
+            "evidence": [60]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": [
+      {
+        "text": "Should the group focus on learning German to improve job prospects?",
+        "evidence": [46, 47]
+      },
+      {
+        "text": "Is moving to Warsaw for the tech event a viable next step?",
+        "evidence": [59]
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 11883.381499999989,
+    "ollamaTotalMs": 11717.679548,
+    "promptEvalCount": 2995,
+    "evalCount": 968,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 5,
+    "claimCount": 18,
+    "decisionCount": 0,
+    "openQuestionCount": 2,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 1,
+    "goldClaimPrecision": 0.5,
+    "evidencePrecision": 0.37037037037037035,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 1,
+    "noiseRetention": 0,
+    "matchedClaimIds": [
+      "networking.participants-abroad",
+      "job-search.two-months",
+      "job-search.conversion",
+      "job-search.local-language-filter",
+      "job-search.education-observation",
+      "job-search.salary-compromise",
+      "language.work-vs-daily-life",
+      "language.learning-motivation",
+      "austria.outlook"
+    ],
+    "retainedThreadIds": [
+      "networking-abroad",
+      "job-search-abroad",
+      "language-integration",
+      "life-in-austria"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

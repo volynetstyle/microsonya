@@ -1,0 +1,174 @@
+{
+  "case": "real-fop-calculator",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 4,
+  "transformation": "rename-users",
+  "inputHash": "6c36faa5f852486a060747c860a4d99ec3b2e02263aa75953582eba7889cc060",
+  "promptHash": "03764dbcd9414a0769ae98d353fa72a1d80eb4ae7464e8b98ffdad77543649a5",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion on tax shortcuts, domain purchase, and low‑profit app idea\",\n  \"topics\": [\n    {\n      \"id\": \"tax-shortcut\",\n      \"title\": \"Using aunt Svetlana to reduce tax penalties\",\n      \"claims\": [\n        {\n          \"text\": \"Paying aunt Svetlana 500 UAH helped avoid larger penalties by having her re‑file declarations.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"The inspector ignored the author's declarations for 1.5 years and was later reprimanded, leading to a thorough check of all years.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"With Svetlana's help the author paid about 1000 UAH instead of the full fines.\",\n          \"evidence\": [1]\n        }\n      ]\n    },\n    {\n      \"id\": \"domain-fundraising\",\n      \"title\": \"Funding a domain purchase with tax calculator earnings\",\n      \"claims\": [\n        {\n          \"text\": \"User U2 mentions not having bought a domain yet.\",\n          \"evidence\": [2]\n        },\n        {\n          \"text\": \"User U1 suggests that buying a tax calculator could generate money for a domain.\",\n          \"evidence\": [4]\n        },\n        {\n          \"text\": \"User U4 doubts anyone will buy a domain for this purpose.\",\n          \"evidence\": [9]\n        }\n      ]\n    },\n    {\n      \"id\": \"app-profitability\",\n      \"title\": \"Low profitability of a simple web app\",\n      \"claims\": [\n        {\n          \"text\": \"Web is the easiest platform but far less profitable than Android/iOS.\",\n          \"evidence\": [11]\n        },\n        {\n          \"text\": \"SEO is poor; even on the 10th Google page the site is not found.\",\n          \"evidence\": [11]\n        },\n        {\n          \"text\": \"No external traffic sources (Instagram, Threads, contextual ads) are available.\",\n          \"evidence\": [11]\n        },\n        {\n          \"text\": \"User acquisition is near zero because a paywall appears within the first seconds.\",\n          \"evidence\": [11]\n        },\n        {\n          \"text\": \"Conversion is presumed zero; the product offers little simplification and lacks integrations.\",\n          \"evidence\": [11]\n        },\n        {\n          \"text\": \"Successful cases involve fast delivery (< 1 week) and cross‑platform stacks like Flutter.\",\n          \"evidence\": [12]\n        },\n        {\n          \"text\": \"U4 questions the seriousness of the effort, likening it to a scam.\",\n          \"evidence\": [16, 32]\n        },\n        {\n          \"text\": \"U1 doubts anyone would buy the app, betting on a low chance of sales.\",\n          \"evidence\": [17]\n        }\n      ]\n    },\n    {\n      \"id\": \"currency-support\",\n      \"title\": \"Calculator limited to UAH‑only FOP\",\n      \"claims\": [\n        {\n          \"text\": \"The tax calculator works only with Ukrainian‑hryvnia FOPs; the author had to convert transactions using daily exchange rates.\",\n          \"evidence\": [19]\n        }\n      ]\n    },\n    {\n      \"id\": \"source-code-password\",\n      \"title\": \"Questions about source code access and password\",\n      \"claims\": [\n        {\n          \"text\": \"U4 says the app’s source code is hidden and the only password is stored locally as a 100 % discount promo code.\",\n          \"evidence\": [20]\n        },\n        {\n          \"text\": \"U1 asks if the password can be found by searching the source code.\",\n          \"evidence\": [21]\n        },\n        {\n          \"text\": \"U4 replies sarcastically that they did not pay 299 UAH for it.\",\n          \"evidence\": [22]\n        },\n        {\n          \"text\": \"U5 labels the app as a pirated bundle.\",\n          \"evidence\": [24]\n        },\n        {\n          \"text\": \"U1 predicts most LinkedIn users could hack the app easily.\",\n          \"evidence\": [28]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": [\n    {\n      \"text\": \"Will the source code ever be publicly released or is the password permanently hidden?\",\n      \"evidence\": [21, 22]\n    }\n  ]\n}",
+  "thinking": "We need summarize. Identify topics: tax declaration hack, domain purchase, app idea profitability, password source code, etc.\n\nCreate claims, decisions (none), open questions (maybe about source code availability). Let's craft.\n\n",
+  "parsed": {
+    "title": "Discussion on tax shortcuts, domain purchase, and low‑profit app idea",
+    "topics": [
+      {
+        "id": "tax-shortcut",
+        "title": "Using aunt Svetlana to reduce tax penalties",
+        "claims": [
+          {
+            "text": "Paying aunt Svetlana 500 UAH helped avoid larger penalties by having her re‑file declarations.",
+            "evidence": [1]
+          },
+          {
+            "text": "The inspector ignored the author's declarations for 1.5 years and was later reprimanded, leading to a thorough check of all years.",
+            "evidence": [1]
+          },
+          {
+            "text": "With Svetlana's help the author paid about 1000 UAH instead of the full fines.",
+            "evidence": [1]
+          }
+        ]
+      },
+      {
+        "id": "domain-fundraising",
+        "title": "Funding a domain purchase with tax calculator earnings",
+        "claims": [
+          {
+            "text": "User U2 mentions not having bought a domain yet.",
+            "evidence": [2]
+          },
+          {
+            "text": "User U1 suggests that buying a tax calculator could generate money for a domain.",
+            "evidence": [4]
+          },
+          {
+            "text": "User U4 doubts anyone will buy a domain for this purpose.",
+            "evidence": [9]
+          }
+        ]
+      },
+      {
+        "id": "app-profitability",
+        "title": "Low profitability of a simple web app",
+        "claims": [
+          {
+            "text": "Web is the easiest platform but far less profitable than Android/iOS.",
+            "evidence": [11]
+          },
+          {
+            "text": "SEO is poor; even on the 10th Google page the site is not found.",
+            "evidence": [11]
+          },
+          {
+            "text": "No external traffic sources (Instagram, Threads, contextual ads) are available.",
+            "evidence": [11]
+          },
+          {
+            "text": "User acquisition is near zero because a paywall appears within the first seconds.",
+            "evidence": [11]
+          },
+          {
+            "text": "Conversion is presumed zero; the product offers little simplification and lacks integrations.",
+            "evidence": [11]
+          },
+          {
+            "text": "Successful cases involve fast delivery (< 1 week) and cross‑platform stacks like Flutter.",
+            "evidence": [12]
+          },
+          {
+            "text": "U4 questions the seriousness of the effort, likening it to a scam.",
+            "evidence": [16, 32]
+          },
+          {
+            "text": "U1 doubts anyone would buy the app, betting on a low chance of sales.",
+            "evidence": [17]
+          }
+        ]
+      },
+      {
+        "id": "currency-support",
+        "title": "Calculator limited to UAH‑only FOP",
+        "claims": [
+          {
+            "text": "The tax calculator works only with Ukrainian‑hryvnia FOPs; the author had to convert transactions using daily exchange rates.",
+            "evidence": [19]
+          }
+        ]
+      },
+      {
+        "id": "source-code-password",
+        "title": "Questions about source code access and password",
+        "claims": [
+          {
+            "text": "U4 says the app’s source code is hidden and the only password is stored locally as a 100 % discount promo code.",
+            "evidence": [20]
+          },
+          {
+            "text": "U1 asks if the password can be found by searching the source code.",
+            "evidence": [21]
+          },
+          {
+            "text": "U4 replies sarcastically that they did not pay 299 UAH for it.",
+            "evidence": [22]
+          },
+          {
+            "text": "U5 labels the app as a pirated bundle.",
+            "evidence": [24]
+          },
+          {
+            "text": "U1 predicts most LinkedIn users could hack the app easily.",
+            "evidence": [28]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": [
+      {
+        "text": "Will the source code ever be publicly released or is the password permanently hidden?",
+        "evidence": [21, 22]
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 12599.032799999986,
+    "ollamaTotalMs": 12273.484305,
+    "promptEvalCount": 2799,
+    "evalCount": 994,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 5,
+    "claimCount": 20,
+    "decisionCount": 0,
+    "openQuestionCount": 1,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.7777777777777778,
+    "goldClaimPrecision": 0.3,
+    "evidencePrecision": 0.2608695652173913,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 1,
+    "noiseRetention": 0.1,
+    "matchedClaimIds": [
+      "tax-reporting.paid-help",
+      "product.web-limitations",
+      "product.fast-delivery-strategy",
+      "product.uah-only",
+      "product.validate-demand-first",
+      "security.password-in-bundle"
+    ],
+    "retainedThreadIds": [
+      "tax-reporting",
+      "calculator-product",
+      "calculator-security"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

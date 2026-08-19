@@ -1,0 +1,147 @@
+{
+  "case": "real-ai-development",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "jsonl",
+  "reasoning": "low",
+  "seed": 4,
+  "inputHash": "c44e2d8f381898078b12b50a1dbf1501e5970203c0d4ef386b86fd514114c47c",
+  "promptHash": "281eab4cb9e60e73560b247e4ca48181f5b52dc9969b7dc8d1b92236e4721471",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion on AI in Job Search and Development\",\n  \"topics\": [\n    {\n      \"id\": \"ai-job-search\",\n      \"title\": \"AI tools for job hunting\",\n      \"claims\": [\n        {\n          \"text\": \"The author plans to set up automation (OpenClaw) for finding vacancies, generating PDFs of resumes, and writing cover letters.\",\n          \"evidence\": [5]\n        },\n        {\n          \"text\": \"Having AI‑related skills (Cursor, Claude Code, LLM, RAG, embeddings) is now essential for job seekers in 2026.\",\n          \"evidence\": [6, 8]\n        },\n        {\n          \"text\": \"The acceleration of development with AI started in 2025, with tools becoming both better and more expensive.\",\n          \"evidence\": [9]\n        },\n        {\n          \"text\": \"AI‑generated code can introduce serious performance and security issues, as illustrated by a 450‑line raw SQL query that caused 10‑20 min production queries.\",\n          \"evidence\": [30, 35]\n        },\n        {\n          \"text\": \"Some participants view AI as a market mainstream and believe lack of AI knowledge makes job search harder for JS/Python developers.\",\n          \"evidence\": [8]\n        }\n      ]\n    },\n    {\n      \"id\": \"ai-code-generation\",\n      \"title\": \"Risks of AI‑generated code\",\n      \"claims\": [\n        {\n          \"text\": \"Developers sometimes rely on GPT to generate joins and other code, which can speed up routine work.\",\n          \"evidence\": [19]\n        },\n        {\n          \"text\": \"In one case, AI‑generated code (SELECT *) was pushed to production without review, leading to inefficient queries.\",\n          \"evidence\": [35]\n        },\n        {\n          \"text\": \"Some team members are skeptical that such low‑quality AI code could exist.\",\n          \"evidence\": [36]\n        }\n      ]\n    },\n    {\n      \"id\": \"recruiter-ai-critique\",\n      \"title\": \"Critique of recruiters and AI\",\n      \"claims\": [\n        {\n          \"text\": \"The author jokes that the recruiter profession will become extinct and HR should become personnel management.\",\n          \"evidence\": [14]\n        },\n        {\n          \"text\": \"Search for candidates using keyword matching is considered increasingly detached from reality.\",\n          \"evidence\": [13]\n        }\n      ]\n    },\n    {\n      \"id\": \"development-workflow\",\n      \"title\": \"Development workflow observations\",\n      \"claims\": [\n        {\n          \"text\": \"Debugging logs in JUnit could have helped identify repeated issues earlier.\",\n          \"evidence\": [20]\n        },\n        {\n          \"text\": \"Long‑term context accumulation in a developer's mind cannot be fully captured by simple AI models.\",\n          \"evidence\": [22]\n        },\n        {\n          \"text\": \"Quality of AI responses is often proportional to the quality of the question and available knowledge.\",\n          \"evidence\": [24, 25]\n        }\n      ]\n    },\n    {\n      \"id\": \"casual-conversation\",\n      \"title\": \"Side remarks and humor\",\n      \"claims\": [\n        {\n          \"text\": \"Several messages are jokes or hypothetical statements and are not treated as facts.\",\n          \"evidence\": [2, 3, 7, 29, 27, 28]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": []\n}",
+  "thinking": "We need to produce JSON summary. Identify topics: AI tools for job search, impact on recruitment, code generation risks, performance issues, etc.\n\nCreate claims with evidence ids.\n\nDecisions none. Open questions maybe none.\n\nProceed.",
+  "parsed": {
+    "title": "Discussion on AI in Job Search and Development",
+    "topics": [
+      {
+        "id": "ai-job-search",
+        "title": "AI tools for job hunting",
+        "claims": [
+          {
+            "text": "The author plans to set up automation (OpenClaw) for finding vacancies, generating PDFs of resumes, and writing cover letters.",
+            "evidence": [5]
+          },
+          {
+            "text": "Having AI‑related skills (Cursor, Claude Code, LLM, RAG, embeddings) is now essential for job seekers in 2026.",
+            "evidence": [6, 8]
+          },
+          {
+            "text": "The acceleration of development with AI started in 2025, with tools becoming both better and more expensive.",
+            "evidence": [9]
+          },
+          {
+            "text": "AI‑generated code can introduce serious performance and security issues, as illustrated by a 450‑line raw SQL query that caused 10‑20 min production queries.",
+            "evidence": [30, 35]
+          },
+          {
+            "text": "Some participants view AI as a market mainstream and believe lack of AI knowledge makes job search harder for JS/Python developers.",
+            "evidence": [8]
+          }
+        ]
+      },
+      {
+        "id": "ai-code-generation",
+        "title": "Risks of AI‑generated code",
+        "claims": [
+          {
+            "text": "Developers sometimes rely on GPT to generate joins and other code, which can speed up routine work.",
+            "evidence": [19]
+          },
+          {
+            "text": "In one case, AI‑generated code (SELECT *) was pushed to production without review, leading to inefficient queries.",
+            "evidence": [35]
+          },
+          {
+            "text": "Some team members are skeptical that such low‑quality AI code could exist.",
+            "evidence": [36]
+          }
+        ]
+      },
+      {
+        "id": "recruiter-ai-critique",
+        "title": "Critique of recruiters and AI",
+        "claims": [
+          {
+            "text": "The author jokes that the recruiter profession will become extinct and HR should become personnel management.",
+            "evidence": [14]
+          },
+          {
+            "text": "Search for candidates using keyword matching is considered increasingly detached from reality.",
+            "evidence": [13]
+          }
+        ]
+      },
+      {
+        "id": "development-workflow",
+        "title": "Development workflow observations",
+        "claims": [
+          {
+            "text": "Debugging logs in JUnit could have helped identify repeated issues earlier.",
+            "evidence": [20]
+          },
+          {
+            "text": "Long‑term context accumulation in a developer's mind cannot be fully captured by simple AI models.",
+            "evidence": [22]
+          },
+          {
+            "text": "Quality of AI responses is often proportional to the quality of the question and available knowledge.",
+            "evidence": [24, 25]
+          }
+        ]
+      },
+      {
+        "id": "casual-conversation",
+        "title": "Side remarks and humor",
+        "claims": [
+          {
+            "text": "Several messages are jokes or hypothetical statements and are not treated as facts.",
+            "evidence": [2, 3, 7, 29, 27, 28]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": []
+  },
+  "usage": {
+    "durationMs": 8896.546300000016,
+    "ollamaTotalMs": 8706.747033,
+    "promptEvalCount": 3302,
+    "evalCount": 800,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 5,
+    "claimCount": 14,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.9523809523809523,
+    "goldClaimPrecision": 0.5714285714285714,
+    "evidencePrecision": 0.45454545454545453,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0.14285714285714285,
+    "matchedClaimIds": [
+      "job-search.ai-skills",
+      "development.context-quality",
+      "job-search.automation-idea",
+      "development.routine-speedup",
+      "vibe-coding.bad-backend",
+      "vibe-coding.review-failure",
+      "job-search.keyword-filtering",
+      "cars.miata-preference"
+    ],
+    "retainedThreadIds": [
+      "ai-job-search",
+      "ai-assisted-development",
+      "vibe-coding-risks",
+      "cars"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

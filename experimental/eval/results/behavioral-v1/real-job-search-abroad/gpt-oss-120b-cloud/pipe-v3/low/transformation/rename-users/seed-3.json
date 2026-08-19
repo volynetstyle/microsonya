@@ -1,0 +1,137 @@
+{
+  "case": "real-job-search-abroad",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 3,
+  "transformation": "rename-users",
+  "inputHash": "36093e7976dba493889a933ed10b1a3c991862af89b13afae30dd423eda8af86",
+  "promptHash": "3bc94b06a2808b41728e0eda5fc3a1bbe358d37d06c646cb13d3da3225c6f939",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion about working abroad in Slovakia and Austria\",\n  \"topics\": [\n    {\n      \"id\": \"job-search\",\n      \"title\": \"Job search experiences\",\n      \"claims\": [\n        {\n          \"text\": \"Finding a job abroad was difficult but the speaker managed it within two months\",\n          \"evidence\": [17]\n        },\n        {\n          \"text\": \"The speaker sent about 100 job applications and received only three interview invitations\",\n          \"evidence\": [21]\n        },\n        {\n          \"text\": \"Candidates with 3 years of experience still receive few interview calls\",\n          \"evidence\": [23]\n        },\n        {\n          \"text\": \"Even candidates with little or no local language skills can sometimes be hired\",\n          \"evidence\": [29]\n        }\n      ]\n    },\n    {\n      \"id\": \"language-requirements\",\n      \"title\": \"Language requirements for jobs\",\n      \"claims\": [\n        {\n          \"text\": \"Approximately 95% of vacancies specify that a local language is required\",\n          \"evidence\": [26]\n        },\n        {\n          \"text\": \"Most companies request a B2 level language proficiency, sometimes B1, and usually do not require a certificate\",\n          \"evidence\": [46]\n        },\n        {\n          \"text\": \"In Austria, everyday communication is mainly in German, but many colleagues speak English\",\n          \"evidence\": [15, 47]\n        }\n      ]\n    },\n    {\n      \"id\": \"salary\",\n      \"title\": \"Salary expectations and offers\",\n      \"claims\": [\n        {\n          \"text\": \"The speaker’s salary was higher than minimum wage but still modest compared to expectations\",\n          \"evidence\": [37]\n        },\n        {\n          \"text\": \"Salaries in Europe are generally higher than in Ukraine, though many candidates do not focus on this factor\",\n          \"evidence\": [35]\n        }\n      ]\n    },\n    {\n      \"id\": \"living-abroad\",\n      \"title\": \"Living abroad experiences\",\n      \"claims\": [\n        {\n          \"text\": \"The speaker has been living in Slovakia for almost a year and does not know the local language well\",\n          \"evidence\": [43]\n        },\n        {\n          \"text\": \"The speaker lives with a partner who has been in Austria for over 10 years and sees Austria as the best choice among European countries\",\n          \"evidence\": [60]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": [\n    {\n      \"text\": \"Do you personally feel you will stay in Austria?\",\n      \"evidence\": [58]\n    },\n    {\n      \"text\": \"What salary range do you expect as a junior developer?\",\n      \"evidence\": [34]\n    }\n  ]\n}",
+  "thinking": "We need to produce JSON with title, topics, decisions, openQuestions. Identify main topics: living abroad in Slovakia, job search abroad, language requirements, salary expectations, etc.\n\nExtract claims with evidence IDs.\n\nDecisions? none clear. Open questions: maybe \"А ти як особисто відчуваєш, думаєш лишатись в Австрії?\" not answered. Also earlier question about language in Austria answered partially. We'll list open question IDs 58 (no answer). Also maybe earlier \"А ти на якусь австрійську компанію воркаєш\" answered with \"угу\" not substantive but maybe resolved? It's a yes/no, answered with \"угу\". So not open.\n\nCompile topics:\n\ntopic1: people living in Slovakia/abroad – claim from #1 and #2? #1 asks who lives in Bratislava or Slovakia. No claim.\n\ntopic2: job search experiences – claims about difficulty, applications, interviews, language required.\n\nCreate claims:\n\n- Finding job abroad was hard; author found it in 2 months. #16 question, #17 answer \"тяжко... за 2 місяці\". Claim: It took 2 months to find job. evidence [17].\n\n- Sent ~100 applications, got 3 interviews. #21. claim.\n\n- 95% of vacancies require local language. #26.\n\n- Most companies ask for B2 level language, sometimes B1, certificates not required. #46.\n\n- Salary was higher than minimum but still low. #37.\n\n- Language proficiency affects interview chances. #29 mentions cases without language still hired.\n\nOpen question: #58 unanswered. Also maybe #34 about salary expectations unanswered. No answer after #35? No. So open.\n\nDecisions none.\n\nCreate topics IDs: job-search, language-requirements, salary, living-abroad.\n\nAdd claims accordingly.\n\nReturn JSON.",
+  "parsed": {
+    "title": "Discussion about working abroad in Slovakia and Austria",
+    "topics": [
+      {
+        "id": "job-search",
+        "title": "Job search experiences",
+        "claims": [
+          {
+            "text": "Finding a job abroad was difficult but the speaker managed it within two months",
+            "evidence": [17]
+          },
+          {
+            "text": "The speaker sent about 100 job applications and received only three interview invitations",
+            "evidence": [21]
+          },
+          {
+            "text": "Candidates with 3 years of experience still receive few interview calls",
+            "evidence": [23]
+          },
+          {
+            "text": "Even candidates with little or no local language skills can sometimes be hired",
+            "evidence": [29]
+          }
+        ]
+      },
+      {
+        "id": "language-requirements",
+        "title": "Language requirements for jobs",
+        "claims": [
+          {
+            "text": "Approximately 95% of vacancies specify that a local language is required",
+            "evidence": [26]
+          },
+          {
+            "text": "Most companies request a B2 level language proficiency, sometimes B1, and usually do not require a certificate",
+            "evidence": [46]
+          },
+          {
+            "text": "In Austria, everyday communication is mainly in German, but many colleagues speak English",
+            "evidence": [15, 47]
+          }
+        ]
+      },
+      {
+        "id": "salary",
+        "title": "Salary expectations and offers",
+        "claims": [
+          {
+            "text": "The speaker’s salary was higher than minimum wage but still modest compared to expectations",
+            "evidence": [37]
+          },
+          {
+            "text": "Salaries in Europe are generally higher than in Ukraine, though many candidates do not focus on this factor",
+            "evidence": [35]
+          }
+        ]
+      },
+      {
+        "id": "living-abroad",
+        "title": "Living abroad experiences",
+        "claims": [
+          {
+            "text": "The speaker has been living in Slovakia for almost a year and does not know the local language well",
+            "evidence": [43]
+          },
+          {
+            "text": "The speaker lives with a partner who has been in Austria for over 10 years and sees Austria as the best choice among European countries",
+            "evidence": [60]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": [
+      {
+        "text": "Do you personally feel you will stay in Austria?",
+        "evidence": [58]
+      },
+      {
+        "text": "What salary range do you expect as a junior developer?",
+        "evidence": [34]
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 13668.064299999998,
+    "ollamaTotalMs": 13503.817981,
+    "promptEvalCount": 3531,
+    "evalCount": 989,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 4,
+    "claimCount": 11,
+    "decisionCount": 0,
+    "openQuestionCount": 2,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.85,
+    "goldClaimPrecision": 0.6363636363636364,
+    "evidencePrecision": 0.5714285714285714,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 1,
+    "noiseRetention": 0,
+    "matchedClaimIds": [
+      "language.work-vs-daily-life",
+      "job-search.two-months",
+      "job-search.conversion",
+      "job-search.local-language-filter",
+      "job-search.salary-compromise",
+      "job-search.education-observation",
+      "austria.outlook"
+    ],
+    "retainedThreadIds": [
+      "language-integration",
+      "job-search-abroad",
+      "life-in-austria"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "case": "interleaved",
+  "model": "deepseek-v4-pro:preview",
+  "pipeline": "direct",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 1,
+  "transformation": "identity",
+  "inputHash": "101aac579ee9cb035e03d018da1b428941a345f8f0148544fc3b5ce8ec246fef",
+  "promptHash": "1917e928c54125cbc9fc5ebd47183cec2ce1d8c72454878ce293d1fc1e4896e4",
+  "promptVersion": "v4",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Database Migration and Layout Review Updates\",\n  \"topics\": [\n    {\n      \"id\": \"database-migration\",\n      \"title\": \"Database Migration\",\n      \"claims\": [\n        {\n          \"text\": \"A announced that the database migration is planned for Friday.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"C replied that they will make a backup before the migration.\",\n          \"evidence\": [3]\n        }\n      ]\n    },\n    {\n      \"id\": \"layout-review\",\n      \"title\": \"Layout Review\",\n      \"claims\": [\n        {\n          \"text\": \"B reported that the main page layout is ready for review.\",\n          \"evidence\": [2]\n        },\n        {\n          \"text\": \"D stated that he will review the layout today.\",\n          \"evidence\": [4]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": []\n}",
+  "thinking": "We need to produce a JSON summary based on the given pipe-v3 representation of a Telegram conversation. The input shows messages with IDs #1, #2, #3, #4. Each message has a sender (A, B, C, D), timestamp, reply-to (^0 means no reply, ^1 means reply to message 1, ^2 to message 2), type \"text\", and the text content.\n\nWe need to summarize the conversation directly, preserving attribution, citing only source message IDs. The output must be JSON with title, topics, decisions, openQuestions. We must not invent decisions or leave answered questions open.\n\nInterpretation: The messages are:\n\n- #1: A says \"Міграцію бази заплановано на п'ятницю.\" (Database migration planned for Friday.)\n- #2: B says \"Макет головної сторінки готовий до рев'ю.\" (Main page layout ready for review.)\n- #3: C replies to #1: \"Перед міграцією зробимо резервну копію.\" (Before migration, we'll make a backup.)\n- #4: D replies to #2: \"Я перегляну макет сьогодні.\" (I will review the layout today.)\n\nSo there are two threads: one about database migration (A and C) and one about layout review (B and D). No decisions explicitly made, just statements of plans/actions. No open questions. The conversation is informational: A states migration is scheduled on Friday, C adds they'll backup before it. B says layout ready for review, D says he'll review today. There are no decisions settled, actions already planned but no final decisions recorded. The openQuestions: none. But we need to capture the claims.\n\nWe'll create topics:\n\n- Topic 1: Database migration. Claims:\n  - Migration planned for Friday (A, message #1)\n  - Backup will be made before migration (C, message #3)\n\n- Topic 2: Layout review. Claims:\n  - Main page layout ready for review (B, message #2)\n  - D will review it today (D, message #4)\n\nDecisions: none. Open questions: none.\n\nBut careful: \"decisions\" might be if there's something like \"We decided to ...\". Here, it's just announcements, no collective decision. So empty array. Similarly, openQuestions empty.\n\nEvidence: just the message IDs. Provide as arrays of integers.\n\nEnsure JSON exactly as shape.\n\nTitle: \"Conversation Summary\" or something concise. \"Database Migration and Layout Review\" would be descriptive. \"Плани міграції та рев'ю макету\". But the title can be in English or Ukrainian? The input is in Ukrainian. The output guidelines don't specify language, but I'll keep summary in English maybe, or mirror the conversation. The instruction says \"Summarize the Telegram conversation directly.\" I'll produce title in English that captures both topics: \"Database Migration and Layout Review Updates\". I'll use \"Short title\". It's fine.\n\nNow construct JSON.\n\ntopics: array with two objects. ids: \"database-migration\" and \"layout-review\". Claims arrays:\n\nFirst topic claims: \"A announced that database migration is planned for Friday.\" evidence [1], then \"C replied that they will make a backup before migration.\" evidence [3].\n\nSecond topic claims: \"B reported that the main page layout is ready for review.\" evidence [2], \"D stated he will review the layout today.\" evidence [4].\n\nNo decisions or open questions.\n\nCheck: Must return only JSON, no other text. So output the JSON string.\n\nNow produce the final answer.",
+  "parsed": {
+    "title": "Database Migration and Layout Review Updates",
+    "topics": [
+      {
+        "id": "database-migration",
+        "title": "Database Migration",
+        "claims": [
+          {
+            "text": "A announced that the database migration is planned for Friday.",
+            "evidence": [1]
+          },
+          {
+            "text": "C replied that they will make a backup before the migration.",
+            "evidence": [3]
+          }
+        ]
+      },
+      {
+        "id": "layout-review",
+        "title": "Layout Review",
+        "claims": [
+          {
+            "text": "B reported that the main page layout is ready for review.",
+            "evidence": [2]
+          },
+          {
+            "text": "D stated that he will review the layout today.",
+            "evidence": [4]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": []
+  },
+  "usage": {
+    "durationMs": 15599.920199999935,
+    "ollamaTotalMs": 15269.861608,
+    "promptEvalCount": 342,
+    "evalCount": 977,
+    "doneReason": "stop",
+    "thinkingTextTokenCount": 743,
+    "finalTextTokenCount": 201
+  },
+  "operationalMetrics": {
+    "modelCalls": 1,
+    "sourceMessageWindows": 1,
+    "semanticInterpretations": 1,
+    "semanticAmplification": 1
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 2,
+    "claimCount": 4,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 1,
+    "goldClaimPrecision": 0.75,
+    "evidencePrecision": 0.75,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0,
+    "matchedClaimIds": [
+      "database-migration.friday",
+      "database-migration.backup",
+      "homepage-design.review"
+    ],
+    "matchedDecisionIds": [],
+    "matchedOpenQuestionIds": [],
+    "retainedThreadIds": ["database-migration", "homepage-design"],
+    "triggeredForbiddenIds": []
+  }
+}

@@ -1,0 +1,144 @@
+{
+  "case": "real-fop-calculator",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 5,
+  "transformation": "rename-users",
+  "inputHash": "6c36faa5f852486a060747c860a4d99ec3b2e02263aa75953582eba7889cc060",
+  "promptHash": "03764dbcd9414a0769ae98d353fa72a1d80eb4ae7464e8b98ffdad77543649a5",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion on tax filing, domain purchase, and app viability\",\n  \"topics\": [\n    {\n      \"id\": \"tax-filing\",\n      \"title\": \"Tax filing and declaration issues\",\n      \"claims\": [\n        {\n          \"text\": \"User U1 paid ~500 UAH to aunt Sveta to correct a large tax declaration error caused by mislabelled columns.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"U1's inspector ignored declarations for 1.5 years and only later demanded re‑verification of all years, leading to a correct re‑submission costing about 1000 UAH.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"The tax calculation procedure takes about an hour with Excel, possibly a day per month.\",\n          \"evidence\": [5,6]\n        },\n        {\n          \"text\": \"Quarterly reports must be filed correctly to avoid penalties.\",\n          \"evidence\": [7]\n        },\n        {\n          \"text\": \"Mistakes in column selection dramatically affect tax amounts, often by several thousand hryvnias.\",\n          \"evidence\": [8]\n        }\n      ]\n    },\n    {\n      \"id\": \"domain-purchase\",\n      \"title\": \"Domain purchase considerations\",\n      \"claims\": [\n        {\n          \"text\": \"U2 has not bought a domain yet.\",\n          \"evidence\": [2]\n        },\n        {\n          \"text\": \"U4 doubts buying a domain, calling it a “silly thing” that won’t be profitable.\",\n          \"evidence\": [9,10]\n        },\n        {\n          \"text\": \"U1 suggests that buying a tax calculator could free money for a domain.\",\n          \"evidence\": [4]\n        }\n      ]\n    },\n    {\n      \"id\": \"app-profitability\",\n      \"title\": \"Viability of a cross‑platform app\",\n      \"claims\": [\n        {\n          \"text\": \"U1 reports that web platforms are less profitable than Android/iOS, with poor SEO and no passive ad revenue.\",\n          \"evidence\": [11]\n        },\n        {\n          \"text\": \"A successful approach cited involves fast delivery (< 1 week) using a cross‑platform stack like Flutter and copying popular ideas.\",\n          \"evidence\": [12]\n        },\n        {\n          \"text\": \"U4 questions the audience size, asking if there are at least ten people willing to pay 299 UAH.\",\n          \"evidence\": [20]\n        },\n        {\n          \"text\": \"U1 wonders if the source code could be found by searching for the password.\",\n          \"evidence\": [21]\n        }\n      ]\n    },\n    {\n      \"id\": \"scam-concerns\",\n      \"title\": \"Potential scam and security doubts\",\n      \"claims\": [\n        {\n          \"text\": \"U4 suspects the project is a scam, calling it “local‑first app” with minimal features and a hidden password for a 100 % discount.\",\n          \"evidence\": [30,32]\n        },\n        {\n          \"text\": \"U5 labels the offer as “pirate” and confirms it’s a scam.\",\n          \"evidence\": [24,33]\n        },\n        {\n          \"text\": \"U1 jokingly claims most LinkedIn users could hack the app easily.\",\n          \"evidence\": [28]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": []\n}",
+  "thinking": "Need produce JSON summary. Identify topics: tax filing process, domain purchase, app profitability, scam concerns. Extract claims with evidence IDs.\n\nDecisions none. Open questions maybe none.\n\nLet's craft.\n\n",
+  "parsed": {
+    "title": "Discussion on tax filing, domain purchase, and app viability",
+    "topics": [
+      {
+        "id": "tax-filing",
+        "title": "Tax filing and declaration issues",
+        "claims": [
+          {
+            "text": "User U1 paid ~500 UAH to aunt Sveta to correct a large tax declaration error caused by mislabelled columns.",
+            "evidence": [1]
+          },
+          {
+            "text": "U1's inspector ignored declarations for 1.5 years and only later demanded re‑verification of all years, leading to a correct re‑submission costing about 1000 UAH.",
+            "evidence": [1]
+          },
+          {
+            "text": "The tax calculation procedure takes about an hour with Excel, possibly a day per month.",
+            "evidence": [5, 6]
+          },
+          {
+            "text": "Quarterly reports must be filed correctly to avoid penalties.",
+            "evidence": [7]
+          },
+          {
+            "text": "Mistakes in column selection dramatically affect tax amounts, often by several thousand hryvnias.",
+            "evidence": [8]
+          }
+        ]
+      },
+      {
+        "id": "domain-purchase",
+        "title": "Domain purchase considerations",
+        "claims": [
+          {
+            "text": "U2 has not bought a domain yet.",
+            "evidence": [2]
+          },
+          {
+            "text": "U4 doubts buying a domain, calling it a “silly thing” that won’t be profitable.",
+            "evidence": [9, 10]
+          },
+          {
+            "text": "U1 suggests that buying a tax calculator could free money for a domain.",
+            "evidence": [4]
+          }
+        ]
+      },
+      {
+        "id": "app-profitability",
+        "title": "Viability of a cross‑platform app",
+        "claims": [
+          {
+            "text": "U1 reports that web platforms are less profitable than Android/iOS, with poor SEO and no passive ad revenue.",
+            "evidence": [11]
+          },
+          {
+            "text": "A successful approach cited involves fast delivery (< 1 week) using a cross‑platform stack like Flutter and copying popular ideas.",
+            "evidence": [12]
+          },
+          {
+            "text": "U4 questions the audience size, asking if there are at least ten people willing to pay 299 UAH.",
+            "evidence": [20]
+          },
+          {
+            "text": "U1 wonders if the source code could be found by searching for the password.",
+            "evidence": [21]
+          }
+        ]
+      },
+      {
+        "id": "scam-concerns",
+        "title": "Potential scam and security doubts",
+        "claims": [
+          {
+            "text": "U4 suspects the project is a scam, calling it “local‑first app” with minimal features and a hidden password for a 100 % discount.",
+            "evidence": [30, 32]
+          },
+          {
+            "text": "U5 labels the offer as “pirate” and confirms it’s a scam.",
+            "evidence": [24, 33]
+          },
+          {
+            "text": "U1 jokingly claims most LinkedIn users could hack the app easily.",
+            "evidence": [28]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": []
+  },
+  "usage": {
+    "durationMs": 8597.630099999951,
+    "ollamaTotalMs": 8238.286069,
+    "promptEvalCount": 2799,
+    "evalCount": 788,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 4,
+    "claimCount": 15,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.8888888888888888,
+    "goldClaimPrecision": 0.4666666666666667,
+    "evidencePrecision": 0.42105263157894735,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0.13333333333333333,
+    "matchedClaimIds": [
+      "tax-reporting.form-risk",
+      "tax-reporting.paid-help",
+      "product.web-limitations",
+      "product.fast-delivery-strategy",
+      "product.validate-demand-first",
+      "security.password-in-bundle",
+      "product.creator-response"
+    ],
+    "retainedThreadIds": [
+      "tax-reporting",
+      "calculator-product",
+      "calculator-security"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

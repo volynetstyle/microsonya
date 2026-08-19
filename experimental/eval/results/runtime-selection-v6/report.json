@@ -1,0 +1,555 @@
+{
+  "experiment": "runtime-selection-v6",
+  "source": "frozen claims-v6-120b outputs",
+  "targetRecall": 0.9,
+  "cases": 13,
+  "policies": 180,
+  "baseline": {
+    "all": {
+      "cases": 13,
+      "candidateClaims": 84,
+      "selectedClaims": 84,
+      "matchedClaims": 42,
+      "weightedRecall": 0.9454545454545454,
+      "microPrecision": 0.5,
+      "macroRecall": 0.9639900404606286,
+      "macroPrecision": 0.5602020202020203,
+      "noiseRate": 0.14285714285714285,
+      "evidencePrecision": 0.5,
+      "retainedRatio": 1
+    },
+    "real": {
+      "cases": 4,
+      "candidateClaims": 61,
+      "selectedClaims": 61,
+      "matchedClaims": 30,
+      "weightedRecall": 0.9210526315789473,
+      "microPrecision": 0.4918032786885246,
+      "macroRecall": 0.9189775910364145,
+      "macroPrecision": 0.5338383838383838,
+      "noiseRate": 0.13114754098360656,
+      "evidencePrecision": 0.4925373134328358,
+      "retainedRatio": 1
+    }
+  },
+  "inSample": {
+    "all": {
+      "policy": {
+        "dedupe": false,
+        "rankBy": "source-support",
+        "limit": {
+          "kind": "top-k",
+          "k": 14
+        }
+      },
+      "result": {
+        "cases": 13,
+        "candidateClaims": 84,
+        "selectedClaims": 72,
+        "matchedClaims": 39,
+        "weightedRecall": 0.9,
+        "microPrecision": 0.5416666666666666,
+        "macroRecall": 0.9352422450461666,
+        "macroPrecision": 0.5703030303030303,
+        "noiseRate": 0.1527777777777778,
+        "evidencePrecision": 0.5384615384615384,
+        "retainedRatio": 0.8571428571428571
+      }
+    },
+    "real": {
+      "policy": {
+        "dedupe": false,
+        "rankBy": "model-order",
+        "limit": {
+          "kind": "top-k",
+          "k": 20
+        }
+      },
+      "result": {
+        "cases": 4,
+        "candidateClaims": 61,
+        "selectedClaims": 59,
+        "matchedClaims": 30,
+        "weightedRecall": 0.9210526315789473,
+        "microPrecision": 0.5084745762711864,
+        "macroRecall": 0.9189775910364145,
+        "macroPrecision": 0.5429292929292929,
+        "noiseRate": 0.11864406779661017,
+        "evidencePrecision": 0.5076923076923077,
+        "retainedRatio": 0.9672131147540983
+      }
+    },
+    "frontiers": [
+      {
+        "threshold": 0.95,
+        "all": null,
+        "real": null
+      },
+      {
+        "threshold": 0.92,
+        "all": {
+          "policy": {
+            "dedupe": false,
+            "rankBy": "model-order",
+            "limit": {
+              "kind": "top-k",
+              "k": 20
+            }
+          },
+          "result": {
+            "cases": 13,
+            "candidateClaims": 84,
+            "selectedClaims": 82,
+            "matchedClaims": 42,
+            "weightedRecall": 0.9454545454545454,
+            "microPrecision": 0.5121951219512195,
+            "macroRecall": 0.9639900404606286,
+            "macroPrecision": 0.5638383838383839,
+            "noiseRate": 0.13414634146341464,
+            "evidencePrecision": 0.5113636363636364,
+            "retainedRatio": 0.9761904761904762
+          }
+        },
+        "real": {
+          "policy": {
+            "dedupe": false,
+            "rankBy": "model-order",
+            "limit": {
+              "kind": "top-k",
+              "k": 20
+            }
+          },
+          "result": {
+            "cases": 4,
+            "candidateClaims": 61,
+            "selectedClaims": 59,
+            "matchedClaims": 30,
+            "weightedRecall": 0.9210526315789473,
+            "microPrecision": 0.5084745762711864,
+            "macroRecall": 0.9189775910364145,
+            "macroPrecision": 0.5429292929292929,
+            "noiseRate": 0.11864406779661017,
+            "evidencePrecision": 0.5076923076923077,
+            "retainedRatio": 0.9672131147540983
+          }
+        }
+      },
+      {
+        "threshold": 0.9,
+        "all": {
+          "policy": {
+            "dedupe": false,
+            "rankBy": "source-support",
+            "limit": {
+              "kind": "top-k",
+              "k": 14
+            }
+          },
+          "result": {
+            "cases": 13,
+            "candidateClaims": 84,
+            "selectedClaims": 72,
+            "matchedClaims": 39,
+            "weightedRecall": 0.9,
+            "microPrecision": 0.5416666666666666,
+            "macroRecall": 0.9352422450461666,
+            "macroPrecision": 0.5703030303030303,
+            "noiseRate": 0.1527777777777778,
+            "evidencePrecision": 0.5384615384615384,
+            "retainedRatio": 0.8571428571428571
+          }
+        },
+        "real": {
+          "policy": {
+            "dedupe": false,
+            "rankBy": "model-order",
+            "limit": {
+              "kind": "top-k",
+              "k": 20
+            }
+          },
+          "result": {
+            "cases": 4,
+            "candidateClaims": 61,
+            "selectedClaims": 59,
+            "matchedClaims": 30,
+            "weightedRecall": 0.9210526315789473,
+            "microPrecision": 0.5084745762711864,
+            "macroRecall": 0.9189775910364145,
+            "macroPrecision": 0.5429292929292929,
+            "noiseRate": 0.11864406779661017,
+            "evidencePrecision": 0.5076923076923077,
+            "retainedRatio": 0.9672131147540983
+          }
+        }
+      },
+      {
+        "threshold": 0.85,
+        "all": {
+          "policy": {
+            "dedupe": false,
+            "rankBy": "reply-centrality",
+            "limit": {
+              "kind": "top-k",
+              "k": 12
+            }
+          },
+          "result": {
+            "cases": 13,
+            "candidateClaims": 84,
+            "selectedClaims": 68,
+            "matchedClaims": 38,
+            "weightedRecall": 0.8909090909090909,
+            "microPrecision": 0.5588235294117647,
+            "macroRecall": 0.9290694055399938,
+            "macroPrecision": 0.5786363636363636,
+            "noiseRate": 0.1323529411764706,
+            "evidencePrecision": 0.5540540540540541,
+            "retainedRatio": 0.8095238095238095
+          }
+        },
+        "real": {
+          "policy": {
+            "dedupe": false,
+            "rankBy": "source-support",
+            "limit": {
+              "kind": "top-k",
+              "k": 14
+            }
+          },
+          "result": {
+            "cases": 4,
+            "candidateClaims": 61,
+            "selectedClaims": 49,
+            "matchedClaims": 27,
+            "weightedRecall": 0.8552631578947368,
+            "microPrecision": 0.5510204081632653,
+            "macroRecall": 0.854295051353875,
+            "macroPrecision": 0.5590909090909091,
+            "noiseRate": 0.14285714285714285,
+            "evidencePrecision": 0.5454545454545454,
+            "retainedRatio": 0.8032786885245902
+          }
+        }
+      }
+    ]
+  },
+  "leaveOneCaseOut": {
+    "result": {
+      "cases": 13,
+      "candidateClaims": 84,
+      "selectedClaims": 66,
+      "matchedClaims": 35,
+      "weightedRecall": 0.7909090909090909,
+      "microPrecision": 0.5303030303030303,
+      "macroRecall": 0.869281045751634,
+      "macroPrecision": 0.5653571428571429,
+      "noiseRate": 0.13636363636363635,
+      "evidencePrecision": 0.5211267605633803,
+      "retainedRatio": 0.7857142857142857
+    },
+    "selections": [
+      {
+        "case": "discourse-state-lifecycle",
+        "policy": {
+          "dedupe": false,
+          "rankBy": "model-order",
+          "limit": {
+            "kind": "ratio",
+            "ratio": 0.9,
+            "min": 2,
+            "max": 20
+          }
+        },
+        "trainRecall": 0.912621359223301,
+        "testRecall": 1,
+        "testPrecision": 0.3333333333333333,
+        "testNoise": 0.3333333333333333,
+        "retainedClaims": 9
+      },
+      {
+        "case": "hypothetical",
+        "policy": {
+          "dedupe": false,
+          "rankBy": "source-support",
+          "limit": {
+            "kind": "top-k",
+            "k": 14
+          }
+        },
+        "trainRecall": 0.9,
+        "testRecall": null,
+        "testPrecision": 0,
+        "testNoise": 0,
+        "retainedClaims": 1
+      },
+      {
+        "case": "interleaved",
+        "policy": {
+          "dedupe": false,
+          "rankBy": "model-order",
+          "limit": {
+            "kind": "ratio",
+            "ratio": 0.9,
+            "min": 2,
+            "max": 20
+          }
+        },
+        "trainRecall": 0.9108910891089109,
+        "testRecall": 1,
+        "testPrecision": 0.75,
+        "testNoise": 0,
+        "retainedClaims": 4
+      },
+      {
+        "case": "interleaving-relation",
+        "policy": {
+          "dedupe": false,
+          "rankBy": "model-order",
+          "limit": {
+            "kind": "ratio",
+            "ratio": 0.9,
+            "min": 2,
+            "max": 20
+          }
+        },
+        "trainRecall": 0.9108910891089109,
+        "testRecall": 1,
+        "testPrecision": 0.75,
+        "testNoise": 0,
+        "retainedClaims": 4
+      },
+      {
+        "case": "late-reply-resume",
+        "policy": {
+          "dedupe": false,
+          "rankBy": "model-order",
+          "limit": {
+            "kind": "ratio",
+            "ratio": 0.9,
+            "min": 2,
+            "max": 20
+          }
+        },
+        "trainRecall": 0.9134615384615384,
+        "testRecall": 1,
+        "testPrecision": 0.6666666666666666,
+        "testNoise": 0,
+        "retainedClaims": 3
+      },
+      {
+        "case": "mutation-question-assertion",
+        "policy": {
+          "dedupe": false,
+          "rankBy": "model-order",
+          "limit": {
+            "kind": "ratio",
+            "ratio": 0.9,
+            "min": 2,
+            "max": 20
+          }
+        },
+        "trainRecall": 0.9158878504672897,
+        "testRecall": 1,
+        "testPrecision": 1,
+        "testNoise": 0,
+        "retainedClaims": 1
+      },
+      {
+        "case": "mutation-question-base",
+        "policy": {
+          "dedupe": false,
+          "rankBy": "source-support",
+          "limit": {
+            "kind": "top-k",
+            "k": 14
+          }
+        },
+        "trainRecall": 0.9,
+        "testRecall": null,
+        "testPrecision": null,
+        "testNoise": 0,
+        "retainedClaims": 0
+      },
+      {
+        "case": "question-vs-assertion",
+        "policy": {
+          "dedupe": false,
+          "rankBy": "source-support",
+          "limit": {
+            "kind": "top-k",
+            "k": 14
+          }
+        },
+        "trainRecall": 0.9,
+        "testRecall": null,
+        "testPrecision": null,
+        "testNoise": 0,
+        "retainedClaims": 0
+      },
+      {
+        "case": "real-ai-development",
+        "policy": {
+          "dedupe": false,
+          "rankBy": "model-order",
+          "limit": {
+            "kind": "top-k",
+            "k": 14
+          }
+        },
+        "trainRecall": 0.9213483146067416,
+        "testRecall": 0.6666666666666666,
+        "testPrecision": 0.42857142857142855,
+        "testNoise": 0.14285714285714285,
+        "retainedClaims": 14
+      },
+      {
+        "case": "real-ai-tools-interleaved",
+        "policy": {
+          "dedupe": false,
+          "rankBy": "reply-centrality",
+          "limit": {
+            "kind": "top-k",
+            "k": 12
+          }
+        },
+        "trainRecall": 0.9032258064516129,
+        "testRecall": 0.8235294117647058,
+        "testPrecision": 0.6,
+        "testNoise": 0.3,
+        "retainedClaims": 10
+      },
+      {
+        "case": "real-fop-calculator",
+        "policy": {
+          "dedupe": false,
+          "rankBy": "reply-centrality",
+          "limit": {
+            "kind": "top-k",
+            "k": 12
+          }
+        },
+        "trainRecall": 0.9021739130434783,
+        "testRecall": 0.8333333333333334,
+        "testPrecision": 0.5,
+        "testNoise": 0.08333333333333333,
+        "retainedClaims": 12
+      },
+      {
+        "case": "real-job-search-abroad",
+        "policy": {
+          "dedupe": false,
+          "rankBy": "reply-centrality",
+          "limit": {
+            "kind": "ratio",
+            "ratio": 0.7,
+            "min": 2,
+            "max": 20
+          }
+        },
+        "trainRecall": 0.9,
+        "testRecall": 0.5,
+        "testPrecision": 0.625,
+        "testNoise": 0,
+        "retainedClaims": 8
+      },
+      {
+        "case": "sarcasm",
+        "policy": {
+          "dedupe": false,
+          "rankBy": "source-support",
+          "limit": {
+            "kind": "top-k",
+            "k": 14
+          }
+        },
+        "trainRecall": 0.9,
+        "testRecall": null,
+        "testPrecision": null,
+        "testNoise": 0,
+        "retainedClaims": 0
+      }
+    ]
+  },
+  "leaveOneRealChatOut": {
+    "result": {
+      "cases": 4,
+      "candidateClaims": 61,
+      "selectedClaims": 60,
+      "matchedClaims": 29,
+      "weightedRecall": 0.9078947368421053,
+      "microPrecision": 0.48333333333333334,
+      "macroRecall": 0.9042717086834734,
+      "macroPrecision": 0.5227272727272727,
+      "noiseRate": 0.13333333333333333,
+      "evidencePrecision": 0.48484848484848486,
+      "retainedRatio": 0.9836065573770492
+    },
+    "selections": [
+      {
+        "case": "real-ai-development",
+        "policy": {
+          "dedupe": false,
+          "rankBy": "model-order",
+          "limit": {
+            "kind": "all"
+          }
+        },
+        "trainRecall": 0.9090909090909091,
+        "testRecall": 0.9523809523809523,
+        "testPrecision": 0.36363636363636365,
+        "testNoise": 0.18181818181818182,
+        "retainedClaims": 22
+      },
+      {
+        "case": "real-ai-tools-interleaved",
+        "policy": {
+          "dedupe": false,
+          "rankBy": "model-order",
+          "limit": {
+            "kind": "ratio",
+            "ratio": 0.9,
+            "min": 2,
+            "max": 20
+          }
+        },
+        "trainRecall": 0.9152542372881356,
+        "testRecall": 0.7647058823529411,
+        "testPrecision": 0.5555555555555556,
+        "testNoise": 0.3333333333333333,
+        "retainedClaims": 9
+      },
+      {
+        "case": "real-fop-calculator",
+        "policy": {
+          "dedupe": false,
+          "rankBy": "model-order",
+          "limit": {
+            "kind": "all"
+          }
+        },
+        "trainRecall": 0.896551724137931,
+        "testRecall": 1,
+        "testPrecision": 0.4444444444444444,
+        "testNoise": 0.05555555555555555,
+        "retainedClaims": 18
+      },
+      {
+        "case": "real-job-search-abroad",
+        "policy": {
+          "dedupe": false,
+          "rankBy": "model-order",
+          "limit": {
+            "kind": "top-k",
+            "k": 20
+          }
+        },
+        "trainRecall": 0.9285714285714286,
+        "testRecall": 0.9,
+        "testPrecision": 0.7272727272727273,
+        "testNoise": 0,
+        "retainedClaims": 11
+      }
+    ]
+  }
+}

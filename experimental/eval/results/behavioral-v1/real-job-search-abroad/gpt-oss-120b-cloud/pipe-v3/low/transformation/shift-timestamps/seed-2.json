@@ -1,0 +1,196 @@
+{
+  "case": "real-job-search-abroad",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 2,
+  "transformation": "shift-timestamps",
+  "inputHash": "9c081a3f77f71f9a86ecaf947444a54c9426def1245bba61e3d26b4f2813cda2",
+  "promptHash": "c3e43cafa2c115fb8acd4f704bf7c053eda213b92cb4ea9607dd1933b43232ff",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion about living and working abroad in Central Europe\",\n  \"topics\": [\n    {\n      \"id\": \"living-abroad\",\n      \"title\": \"Who lives or has lived abroad\",\n      \"claims\": [\n        {\n          \"text\": \"P1 asked if anyone lives in Bratislava or elsewhere in Slovakia and who has moved abroad\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"P2 mentioned two acquaintances abroad: @AndriiRaccoon in Austria and walternet134 in Poland\",\n          \"evidence\": [3]\n        },\n        {\n          \"text\": \"P3 said they have at least two acquaintances in Austria\",\n          \"evidence\": [12]\n        },\n        {\n          \"text\": \"P3 reported one acquaintance recently arrived in Austria and another has been there for several years\",\n          \"evidence\": [13]\n        },\n        {\n          \"text\": \"P3 stated they have been living in Austria since 17.11.2025\",\n          \"evidence\": [49]\n        },\n        {\n          \"text\": \"P1 said they have been in Slovakia for almost a year\",\n          \"evidence\": [43]\n        }\n      ]\n    },\n    {\n      \"id\": \"job-search\",\n      \"title\": \"Finding a job abroad\",\n      \"claims\": [\n        {\n          \"text\": \"P1 asked how P3 found a job in Austria and whether it was difficult\",\n          \"evidence\": [16]\n        },\n        {\n          \"text\": \"P3 said it was hard but they managed within two months\",\n          \"evidence\": [17]\n        },\n        {\n          \"text\": \"P3 recommended searching on LinkedIn\",\n          \"evidence\": [18]\n        },\n        {\n          \"text\": \"P3 said they sent about 100 applications and got only three interviews\",\n          \"evidence\": [21]\n        },\n        {\n          \"text\": \"P3 noted that most job postings require local language proficiency\",\n          \"evidence\": [26]\n        },\n        {\n          \"text\": \"P3 mentioned they sometimes applied to positions without language requirements and were still considered\",\n          \"evidence\": [29]\n        },\n        {\n          \"text\": \"P3 stated they accepted a low salary because they needed a job quickly\",\n          \"evidence\": [37]\n        },\n        {\n          \"text\": \"P3 said they needed to find a job by 04.03 and therefore accepted the offer\",\n          \"evidence\": [39]\n        },\n        {\n          \"text\": \"P3 indicated they started working on 02.03\",\n          \"evidence\": [41]\n        }\n      ]\n    },\n    {\n      \"id\": \"language-requirements\",\n      \"title\": \"Language expectations for jobs\",\n      \"claims\": [\n        {\n          \"text\": \"P1 asked which language is spoken in Austria; P3 replied German but they communicate in English with them\",\n          \"evidence\": [14,15]\n        },\n        {\n          \"text\": \"P3 said most job ads ask for B2 level German, sometimes B1, and a certificate is rarely required\",\n          \"evidence\": [46]\n        },\n        {\n          \"text\": \"P3 is learning the local language because of daily life difficulties\",\n          \"evidence\": [47]\n        },\n        {\n          \"text\": \"P1 noted that language barrier makes English feel awkward outside of work\",\n          \"evidence\": [51]\n        },\n        {\n          \"text\": \"P1 feels not very confident in English beyond work contexts\",\n          \"evidence\": [52]\n        }\n      ]\n    },\n    {\n      \"id\": \"salary\",\n      \"title\": \"Salary expectations\",\n      \"claims\": [\n        {\n          \"text\": \"P1 asked about approximate salary for a junior position\",\n          \"evidence\": [34]\n        },\n        {\n          \"text\": \"P3 believes salaries in Europe are higher than in Ukraine but few notice\",\n          \"evidence\": [35]\n        },\n        {\n          \"text\": \"P3 said their salary was higher than a minimum wage but still low compared to other jobs\",\n          \"evidence\": [37]\n        }\n      ]\n    },\n    {\n      \"id\": \"networking-and-learning\",\n      \"title\": \"Improving language and networking\",\n      \"claims\": [\n        {\n          \"text\": \"P1 suggested joining Discord channels to improve spoken English\",\n          \"evidence\": [56,57]\n        },\n        {\n          \"text\": \"P3 mentioned attending international events (e.g., wawtech.io summer) as a way to use English\",\n          \"evidence\": [59]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": [\n    {\n      \"text\": \"P1 asked if P3 plans to stay in Austria long term\",\n      \"evidence\": [58]\n    }\n  ]\n}",
+  "thinking": "Need to produce JSON. Identify topics: living abroad, job search, language requirements, salary, networking. Extract claims.\n\nWill create topics ids.\n\nLet's craft.",
+  "parsed": {
+    "title": "Discussion about living and working abroad in Central Europe",
+    "topics": [
+      {
+        "id": "living-abroad",
+        "title": "Who lives or has lived abroad",
+        "claims": [
+          {
+            "text": "P1 asked if anyone lives in Bratislava or elsewhere in Slovakia and who has moved abroad",
+            "evidence": [1]
+          },
+          {
+            "text": "P2 mentioned two acquaintances abroad: @AndriiRaccoon in Austria and walternet134 in Poland",
+            "evidence": [3]
+          },
+          {
+            "text": "P3 said they have at least two acquaintances in Austria",
+            "evidence": [12]
+          },
+          {
+            "text": "P3 reported one acquaintance recently arrived in Austria and another has been there for several years",
+            "evidence": [13]
+          },
+          {
+            "text": "P3 stated they have been living in Austria since 17.11.2025",
+            "evidence": [49]
+          },
+          {
+            "text": "P1 said they have been in Slovakia for almost a year",
+            "evidence": [43]
+          }
+        ]
+      },
+      {
+        "id": "job-search",
+        "title": "Finding a job abroad",
+        "claims": [
+          {
+            "text": "P1 asked how P3 found a job in Austria and whether it was difficult",
+            "evidence": [16]
+          },
+          {
+            "text": "P3 said it was hard but they managed within two months",
+            "evidence": [17]
+          },
+          {
+            "text": "P3 recommended searching on LinkedIn",
+            "evidence": [18]
+          },
+          {
+            "text": "P3 said they sent about 100 applications and got only three interviews",
+            "evidence": [21]
+          },
+          {
+            "text": "P3 noted that most job postings require local language proficiency",
+            "evidence": [26]
+          },
+          {
+            "text": "P3 mentioned they sometimes applied to positions without language requirements and were still considered",
+            "evidence": [29]
+          },
+          {
+            "text": "P3 stated they accepted a low salary because they needed a job quickly",
+            "evidence": [37]
+          },
+          {
+            "text": "P3 said they needed to find a job by 04.03 and therefore accepted the offer",
+            "evidence": [39]
+          },
+          {
+            "text": "P3 indicated they started working on 02.03",
+            "evidence": [41]
+          }
+        ]
+      },
+      {
+        "id": "language-requirements",
+        "title": "Language expectations for jobs",
+        "claims": [
+          {
+            "text": "P1 asked which language is spoken in Austria; P3 replied German but they communicate in English with them",
+            "evidence": [14, 15]
+          },
+          {
+            "text": "P3 said most job ads ask for B2 level German, sometimes B1, and a certificate is rarely required",
+            "evidence": [46]
+          },
+          {
+            "text": "P3 is learning the local language because of daily life difficulties",
+            "evidence": [47]
+          },
+          {
+            "text": "P1 noted that language barrier makes English feel awkward outside of work",
+            "evidence": [51]
+          },
+          {
+            "text": "P1 feels not very confident in English beyond work contexts",
+            "evidence": [52]
+          }
+        ]
+      },
+      {
+        "id": "salary",
+        "title": "Salary expectations",
+        "claims": [
+          {
+            "text": "P1 asked about approximate salary for a junior position",
+            "evidence": [34]
+          },
+          {
+            "text": "P3 believes salaries in Europe are higher than in Ukraine but few notice",
+            "evidence": [35]
+          },
+          {
+            "text": "P3 said their salary was higher than a minimum wage but still low compared to other jobs",
+            "evidence": [37]
+          }
+        ]
+      },
+      {
+        "id": "networking-and-learning",
+        "title": "Improving language and networking",
+        "claims": [
+          {
+            "text": "P1 suggested joining Discord channels to improve spoken English",
+            "evidence": [56, 57]
+          },
+          {
+            "text": "P3 mentioned attending international events (e.g., wawtech.io summer) as a way to use English",
+            "evidence": [59]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": [
+      {
+        "text": "P1 asked if P3 plans to stay in Austria long term",
+        "evidence": [58]
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 12797.598900000012,
+    "ollamaTotalMs": 12508.760675,
+    "promptEvalCount": 3531,
+    "evalCount": 1083,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 5,
+    "claimCount": 25,
+    "decisionCount": 0,
+    "openQuestionCount": 1,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.9,
+    "goldClaimPrecision": 0.32,
+    "evidencePrecision": 0.2857142857142857,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 1,
+    "noiseRetention": 0.04,
+    "matchedClaimIds": [
+      "networking.participants-abroad",
+      "language.learning-motivation",
+      "language.work-vs-daily-life",
+      "job-search.two-months",
+      "job-search.conversion",
+      "job-search.local-language-filter",
+      "job-search.salary-compromise",
+      "job-search.education-observation"
+    ],
+    "retainedThreadIds": [
+      "networking-abroad",
+      "language-integration",
+      "job-search-abroad"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

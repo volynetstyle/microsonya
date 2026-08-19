@@ -1,0 +1,118 @@
+{
+  "case": "real-ai-development",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 5,
+  "transformation": "rename-users",
+  "inputHash": "4dd58602882282739faa5356f91372432810f3ed50978ee7285c40fdb16e3f37",
+  "promptHash": "0c45b657a36f50d977da1c5f62dcc9d149d452f6a46ff61fc9da22dbe95ada52",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion on AI tools in job search and software development\",\n  \"topics\": [\n    {\n      \"id\": \"job-search-automation\",\n      \"title\": \"Automation of job search and resume generation\",\n      \"claims\": [\n        {\n          \"text\": \"User U1 plans to set up an automated system (OpenClaw) to find vacancies, generate resumes and cover letters.\",\n          \"evidence\": [5]\n        },\n        {\n          \"text\": \"User U1 believes adding AI-related skills (Cursor, Claude Code, LLM, RAG, Embeddings) is necessary for 2026 job market.\",\n          \"evidence\": [6]\n        },\n        {\n          \"text\": \"User U1 expects that recruiters will become obsolete and HR will shift to personnel management.\",\n          \"evidence\": [14]\n        }\n      ]\n    },\n    {\n      \"id\": \"ai-impact-on-development\",\n      \"title\": \"Impact of AI code generation on development speed and quality\",\n      \"claims\": [\n        {\n          \"text\": \"User U2 reports that using GPT to generate SQL joins speeds up development by handling routine tasks.\",\n          \"evidence\": [19]\n        },\n        {\n          \"text\": \"User U2 notes that their projects have no cloud infrastructure and likely will never adopt it.\",\n          \"evidence\": [19]\n        },\n        {\n          \"text\": \"User U1 warns that AI-generated code can lower the barrier to programming and produce insecure, inefficient queries.\",\n          \"evidence\": [30]\n        },\n        {\n          \"text\": \"User U1 describes a case where AI-generated code broke the project and was later discarded.\",\n          \"evidence\": [35]\n        }\n      ]\n    },\n    {\n      \"id\": \"ai-tools-and-knowledge-gap\",\n      \"title\": \"Need for AI tool knowledge in the job market\",\n      \"claims\": [\n        {\n          \"text\": \"User U1 states that lack of AI tool knowledge makes job searching for JS/Python positions very hard in 2026.\",\n          \"evidence\": [8]\n        },\n        {\n          \"text\": \"User U4 compares the current AI tool stack to past technologies like REST, JSON, Microservices, Docker.\",\n          \"evidence\": [10]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": [\n    {\n      \"text\": \"Will recruiters truly become obsolete as AI tools handle candidate search?\",\n      \"evidence\": [14]\n    }\n  ]\n}",
+  "thinking": "Need to produce JSON. Identify topics. Probably \"job-search-automation\", \"ai-impact\", \"code-generation-risks\". Claims with evidence IDs.\n\nDecisions none. Open questions? maybe none.\n\nLet's craft.",
+  "parsed": {
+    "title": "Discussion on AI tools in job search and software development",
+    "topics": [
+      {
+        "id": "job-search-automation",
+        "title": "Automation of job search and resume generation",
+        "claims": [
+          {
+            "text": "User U1 plans to set up an automated system (OpenClaw) to find vacancies, generate resumes and cover letters.",
+            "evidence": [5]
+          },
+          {
+            "text": "User U1 believes adding AI-related skills (Cursor, Claude Code, LLM, RAG, Embeddings) is necessary for 2026 job market.",
+            "evidence": [6]
+          },
+          {
+            "text": "User U1 expects that recruiters will become obsolete and HR will shift to personnel management.",
+            "evidence": [14]
+          }
+        ]
+      },
+      {
+        "id": "ai-impact-on-development",
+        "title": "Impact of AI code generation on development speed and quality",
+        "claims": [
+          {
+            "text": "User U2 reports that using GPT to generate SQL joins speeds up development by handling routine tasks.",
+            "evidence": [19]
+          },
+          {
+            "text": "User U2 notes that their projects have no cloud infrastructure and likely will never adopt it.",
+            "evidence": [19]
+          },
+          {
+            "text": "User U1 warns that AI-generated code can lower the barrier to programming and produce insecure, inefficient queries.",
+            "evidence": [30]
+          },
+          {
+            "text": "User U1 describes a case where AI-generated code broke the project and was later discarded.",
+            "evidence": [35]
+          }
+        ]
+      },
+      {
+        "id": "ai-tools-and-knowledge-gap",
+        "title": "Need for AI tool knowledge in the job market",
+        "claims": [
+          {
+            "text": "User U1 states that lack of AI tool knowledge makes job searching for JS/Python positions very hard in 2026.",
+            "evidence": [8]
+          },
+          {
+            "text": "User U4 compares the current AI tool stack to past technologies like REST, JSON, Microservices, Docker.",
+            "evidence": [10]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": [
+      {
+        "text": "Will recruiters truly become obsolete as AI tools handle candidate search?",
+        "evidence": [14]
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 7459.090100000001,
+    "ollamaTotalMs": 7179.986913,
+    "promptEvalCount": 3260,
+    "evalCount": 581,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 3,
+    "claimCount": 9,
+    "decisionCount": 0,
+    "openQuestionCount": 1,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.7619047619047619,
+    "goldClaimPrecision": 0.6666666666666666,
+    "evidencePrecision": 0.6,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 1,
+    "noiseRetention": 0,
+    "matchedClaimIds": [
+      "job-search.automation-idea",
+      "job-search.ai-skills",
+      "job-search.keyword-filtering",
+      "development.routine-speedup",
+      "vibe-coding.bad-backend",
+      "vibe-coding.review-failure"
+    ],
+    "retainedThreadIds": [
+      "ai-job-search",
+      "ai-assisted-development",
+      "vibe-coding-risks"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

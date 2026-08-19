@@ -1,0 +1,132 @@
+{
+  "case": "real-ai-development",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 1,
+  "transformation": "identity-replay",
+  "inputHash": "c44e2d8f381898078b12b50a1dbf1501e5970203c0d4ef386b86fd514114c47c",
+  "promptHash": "926769814c3c5c8a23a92b4aa3f016579ab9ed97ce364dc887976527a86b02a8",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion on AI in Job Search, Development, and Recruitment\",\n  \"topics\": [\n    {\n      \"id\": \"ai-job-search\",\n      \"title\": \"Using AI to automate job search and resume generation\",\n      \"claims\": [\n        {\n          \"text\": \"The user plans to set up an OpenClaw system to find vacancies, generate resumes, and write cover letters.\",\n          \"evidence\": [5]\n        },\n        {\n          \"text\": \"Automation with PDF resume generation is seen as better because humans can still analyze the document during technical interviews.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"AI tools (Cursor, Claude Code, LLM, RAG, Embeddings) are considered essential skills for 2026 job markets.\",\n          \"evidence\": [6]\n        },\n        {\n          \"text\": \"AI-driven job search may eventually make the recruiter profession obsolete.\",\n          \"evidence\": [14]\n        },\n        {\n          \"text\": \"AI can dramatically accelerate development by generating code such as SQL queries, but may produce insecure or inefficient code.\",\n          \"evidence\": [30]\n        },\n        {\n          \"text\": \"Relying on AI-generated code can lead to poorly optimized queries and security risks in production.\",\n          \"evidence\": [30]\n        }\n      ]\n    },\n    {\n      \"id\": \"ai-impact-on-recruitment\",\n      \"title\": \"Perception of recruiters and AI's effect on hiring\",\n      \"claims\": [\n        {\n          \"text\": \"Recruiters are criticized for not reading resumes and forgetting to attach them to job postings.\",\n          \"evidence\": [15]\n        },\n        {\n          \"text\": \"Search for candidates using AI-related keywords is considered detached from reality.\",\n          \"evidence\": [13]\n        }\n      ]\n    },\n    {\n      \"id\": \"development-acceleration\",\n      \"title\": \"AI accelerating software development\",\n      \"claims\": [\n        {\n          \"text\": \"Developers use GPT to generate join queries, reducing routine work and speeding up development.\",\n          \"evidence\": [19]\n        },\n        {\n          \"text\": \"Even without cloud infrastructure, AI can speed up development tasks.\",\n          \"evidence\": [19]\n        },\n        {\n          \"text\": \"Quality of AI responses is often proportional to the quality of the question and available knowledge.\",\n          \"evidence\": [24]\n        }\n      ]\n    },\n    {\n      \"id\": \"tool-comparison\",\n      \"title\": \"Comparisons of modern development stacks\",\n      \"claims\": [\n        {\n          \"text\": \"The current stack is likened to REST, JSON, Microservices, Docker after React.\",\n          \"evidence\": [10]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": []\n}",
+  "thinking": "We need to produce JSON summary. Identify topics: AI tools for job search, impact of AI on hiring, speed of development, quality of answers, etc. Extract claims with evidence IDs.\n\nDecisions none. Open questions? maybe none. Let's see any unanswered question: No clear question. So empty.\n\nCreate topics list.\n\nTopic ids kebab-case.\n\nLet's craft.\n\n",
+  "parsed": {
+    "title": "Discussion on AI in Job Search, Development, and Recruitment",
+    "topics": [
+      {
+        "id": "ai-job-search",
+        "title": "Using AI to automate job search and resume generation",
+        "claims": [
+          {
+            "text": "The user plans to set up an OpenClaw system to find vacancies, generate resumes, and write cover letters.",
+            "evidence": [5]
+          },
+          {
+            "text": "Automation with PDF resume generation is seen as better because humans can still analyze the document during technical interviews.",
+            "evidence": [1]
+          },
+          {
+            "text": "AI tools (Cursor, Claude Code, LLM, RAG, Embeddings) are considered essential skills for 2026 job markets.",
+            "evidence": [6]
+          },
+          {
+            "text": "AI-driven job search may eventually make the recruiter profession obsolete.",
+            "evidence": [14]
+          },
+          {
+            "text": "AI can dramatically accelerate development by generating code such as SQL queries, but may produce insecure or inefficient code.",
+            "evidence": [30]
+          },
+          {
+            "text": "Relying on AI-generated code can lead to poorly optimized queries and security risks in production.",
+            "evidence": [30]
+          }
+        ]
+      },
+      {
+        "id": "ai-impact-on-recruitment",
+        "title": "Perception of recruiters and AI's effect on hiring",
+        "claims": [
+          {
+            "text": "Recruiters are criticized for not reading resumes and forgetting to attach them to job postings.",
+            "evidence": [15]
+          },
+          {
+            "text": "Search for candidates using AI-related keywords is considered detached from reality.",
+            "evidence": [13]
+          }
+        ]
+      },
+      {
+        "id": "development-acceleration",
+        "title": "AI accelerating software development",
+        "claims": [
+          {
+            "text": "Developers use GPT to generate join queries, reducing routine work and speeding up development.",
+            "evidence": [19]
+          },
+          {
+            "text": "Even without cloud infrastructure, AI can speed up development tasks.",
+            "evidence": [19]
+          },
+          {
+            "text": "Quality of AI responses is often proportional to the quality of the question and available knowledge.",
+            "evidence": [24]
+          }
+        ]
+      },
+      {
+        "id": "tool-comparison",
+        "title": "Comparisons of modern development stacks",
+        "claims": [
+          {
+            "text": "The current stack is likened to REST, JSON, Microservices, Docker after React.",
+            "evidence": [10]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": []
+  },
+  "usage": {
+    "durationMs": 10383.076799999995,
+    "ollamaTotalMs": 10195.258205,
+    "promptEvalCount": 3260,
+    "evalCount": 680,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 4,
+    "claimCount": 12,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.8095238095238095,
+    "goldClaimPrecision": 0.5833333333333334,
+    "evidencePrecision": 0.5833333333333334,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0,
+    "matchedClaimIds": [
+      "job-search.automation-idea",
+      "job-search.ai-skills",
+      "job-search.keyword-filtering",
+      "vibe-coding.bad-backend",
+      "job-search.angular-anecdote",
+      "development.routine-speedup",
+      "development.context-quality"
+    ],
+    "retainedThreadIds": [
+      "ai-job-search",
+      "vibe-coding-risks",
+      "ai-assisted-development"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

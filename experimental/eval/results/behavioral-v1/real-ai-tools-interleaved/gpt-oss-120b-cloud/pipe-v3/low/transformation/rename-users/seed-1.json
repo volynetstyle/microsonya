@@ -1,0 +1,127 @@
+{
+  "case": "real-ai-tools-interleaved",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 1,
+  "transformation": "rename-users",
+  "inputHash": "433caaaa641962fb3b39914e268460e3d2d405764e9742c259bceb9b158d6180",
+  "promptHash": "91df243abbde66e217b0e5a111db744c14d023f86e5fee123762b3a9ababe5f8",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Chat summary\",\n  \"topics\": [\n    {\n      \"id\": \"ai-toolkit\",\n      \"title\": \"AI models and toolkits\",\n      \"claims\": [\n        {\n          \"text\": \"AI systems are not inherently intelligent; their capabilities come from toolkits and example solutions.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"Testing AI with modern toolkits like opencode is desired, but older models may struggle due to small context windows.\",\n          \"evidence\": [3]\n        },\n        {\n          \"text\": \"InstinctGPT compared a ~3B model with GPT-3 175B using external runtime and tools, showing toolkits give large gains but cannot fully compensate for lacking base model abilities.\",\n          \"evidence\": [8]\n        },\n        {\n          \"text\": \"Modern models aim to extract maximum performance from fewer parameters and are sometimes fine‑tuned for specific tasks.\",\n          \"evidence\": [14]\n        }\n      ]\n    },\n    {\n      \"id\": \"diploma-cover-cost\",\n      \"title\": \"Costs for diploma covers\",\n      \"claims\": [\n        {\n          \"text\": \"Some sources charge 650 UAH for diploma covers (from Богдан).\",\n          \"evidence\": [23]\n        },\n        {\n          \"text\": \"Another user reported paying 47 UAH.\",\n          \"evidence\": [24]\n        },\n        {\n          \"text\": \"A participant mentioned 30 UAH as a price.\",\n          \"evidence\": [25]\n        },\n        {\n          \"text\": \"One user suggested that covers are essentially waste paper and could be omitted.\",\n          \"evidence\": [26]\n        },\n        {\n          \"text\": \"Another comment noted the cover bears the university seal, making it unique.\",\n          \"evidence\": [27]\n        },\n        {\n          \"text\": \"Someone claimed no one will actually take the cover.\",\n          \"evidence\": [28]\n        },\n        {\n          \"text\": \"A remark explained the cover will be seen only three times: receiving the diploma, photographing it, and later when translating documents.\",\n          \"evidence\": [29]\n        }\n      ]\n    },\n    {\n      \"id\": \"bus-odd-people\",\n      \"title\": \"Strange people on public transport\",\n      \"claims\": [\n        {\n          \"text\": \"The author observed strange people in a bus, describing one who plays piano loudly, then listens to metro announcements, and later makes micro‑sounds before being silenced.\",\n          \"evidence\": [9]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": [\n    {\n      \"text\": \"How much are people being charged for diploma covers?\",\n      \"evidence\": [22]\n    }\n  ]\n}",
+  "thinking": "Need to extract topics. Main substantive discussion about AI toolkits. Also about diploma cover fees. Also random comments. We'll create topics: ai-toolkit, diploma-cover-cost, bus-odd-people, weather-comment maybe ignore. Claims and decisions none. Open question maybe about cost? No answer. So open question: \"Скільки з нас брали грошей за обкладинки диплому?\" (msg22) unresolved. Also maybe about \"Take a look!\" no. Provide JSON.",
+  "parsed": {
+    "title": "Chat summary",
+    "topics": [
+      {
+        "id": "ai-toolkit",
+        "title": "AI models and toolkits",
+        "claims": [
+          {
+            "text": "AI systems are not inherently intelligent; their capabilities come from toolkits and example solutions.",
+            "evidence": [1]
+          },
+          {
+            "text": "Testing AI with modern toolkits like opencode is desired, but older models may struggle due to small context windows.",
+            "evidence": [3]
+          },
+          {
+            "text": "InstinctGPT compared a ~3B model with GPT-3 175B using external runtime and tools, showing toolkits give large gains but cannot fully compensate for lacking base model abilities.",
+            "evidence": [8]
+          },
+          {
+            "text": "Modern models aim to extract maximum performance from fewer parameters and are sometimes fine‑tuned for specific tasks.",
+            "evidence": [14]
+          }
+        ]
+      },
+      {
+        "id": "diploma-cover-cost",
+        "title": "Costs for diploma covers",
+        "claims": [
+          {
+            "text": "Some sources charge 650 UAH for diploma covers (from Богдан).",
+            "evidence": [23]
+          },
+          {
+            "text": "Another user reported paying 47 UAH.",
+            "evidence": [24]
+          },
+          {
+            "text": "A participant mentioned 30 UAH as a price.",
+            "evidence": [25]
+          },
+          {
+            "text": "One user suggested that covers are essentially waste paper and could be omitted.",
+            "evidence": [26]
+          },
+          {
+            "text": "Another comment noted the cover bears the university seal, making it unique.",
+            "evidence": [27]
+          },
+          {
+            "text": "Someone claimed no one will actually take the cover.",
+            "evidence": [28]
+          },
+          {
+            "text": "A remark explained the cover will be seen only three times: receiving the diploma, photographing it, and later when translating documents.",
+            "evidence": [29]
+          }
+        ]
+      },
+      {
+        "id": "bus-odd-people",
+        "title": "Strange people on public transport",
+        "claims": [
+          {
+            "text": "The author observed strange people in a bus, describing one who plays piano loudly, then listens to metro announcements, and later makes micro‑sounds before being silenced.",
+            "evidence": [9]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": [
+      {
+        "text": "How much are people being charged for diploma covers?",
+        "evidence": [22]
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 8489.969499999948,
+    "ollamaTotalMs": 8321.839181,
+    "promptEvalCount": 2165,
+    "evalCount": 705,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 3,
+    "claimCount": 12,
+    "decisionCount": 0,
+    "openQuestionCount": 1,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.9411764705882353,
+    "goldClaimPrecision": 0.5833333333333334,
+    "evidencePrecision": 0.5384615384615384,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 1,
+    "noiseRetention": 0,
+    "matchedClaimIds": [
+      "ai-tooling.capability-view",
+      "ai-tooling.old-model-experiment",
+      "ai-tooling.instinctgpt-result",
+      "ai-tooling.model-comparison",
+      "diploma-cover.prices",
+      "diploma-cover.low-value",
+      "bus-passenger.repeated-encounter"
+    ],
+    "retainedThreadIds": ["ai-tooling", "diploma-cover", "bus-passenger"],
+    "triggeredForbiddenIds": []
+  }
+}

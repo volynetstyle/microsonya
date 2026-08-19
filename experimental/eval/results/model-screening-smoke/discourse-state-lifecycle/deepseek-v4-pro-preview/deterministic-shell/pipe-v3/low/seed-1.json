@@ -1,0 +1,48 @@
+{
+  "case": "discourse-state-lifecycle",
+  "model": "deepseek-v4-pro:preview",
+  "pipeline": "deterministic-shell",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 1,
+  "transformation": "identity",
+  "inputHash": "3e0fb3123264b2ed93d7e55c24f65afcaee37966422338b7ee2648925ba3e2da",
+  "promptHash": "ce6b2f9864a8be0cf25edd1fdf80b65111b322395d06d714e346983189f45e39",
+  "promptVersion": "v4",
+  "status": "request_failure",
+  "raw": "{\"error\":\"you (NoNameCat) have reached your weekly usage limit, upgrade for higher limits: https://ollama.com/upgrade or add extra usage: https://ollama.com/settings (ref: 7b29598c-4aa3-46ae-813e-c11b63a4e917)\"}\n",
+  "thinking": "",
+  "parsed": null,
+  "requestError": "OllamaRequestError: 429: {\"error\":\"you (NoNameCat) have reached your weekly usage limit, upgrade for higher limits: https://ollama.com/upgrade or add extra usage: https://ollama.com/settings (ref: 7b29598c-4aa3-46ae-813e-c11b63a4e917)\"}\n",
+  "usage": {
+    "durationMs": 297.14660000000003
+  },
+  "operationalMetrics": {
+    "modelCalls": 1,
+    "sourceMessageWindows": 1,
+    "semanticInterpretations": 1,
+    "semanticAmplification": 1
+  },
+  "metrics": {
+    "validJson": false,
+    "schemaValid": false,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 0,
+    "claimCount": 0,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": null,
+    "weightedClaimRecall": null,
+    "goldClaimPrecision": null,
+    "evidencePrecision": null,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": null,
+    "noiseRetention": null,
+    "matchedClaimIds": [],
+    "matchedDecisionIds": [],
+    "matchedOpenQuestionIds": [],
+    "retainedThreadIds": [],
+    "triggeredForbiddenIds": []
+  }
+}

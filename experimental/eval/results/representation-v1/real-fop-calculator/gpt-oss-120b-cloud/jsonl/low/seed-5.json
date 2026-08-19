@@ -1,0 +1,169 @@
+{
+  "case": "real-fop-calculator",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "jsonl",
+  "reasoning": "low",
+  "seed": 5,
+  "inputHash": "d3179cdb8e49a27f55b8dcbb42c5b7b95590527ad18ad16afb38bc499073e8af",
+  "promptHash": "114122d145c377590c11e05d8b156410db1a9d40bb770ac7d73e6ca9fe65c0ce",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion on tax filing, domain purchase, and low‑profit app idea\",\n  \"topics\": [\n    {\n      \"id\": \"tax-filing\",\n      \"title\": \"Tax filing complications and workaround\",\n      \"claims\": [\n        {\n          \"text\": \"P1 paid ~500 UAH to an uncle (Sveta) to correct a large tax error caused by a mis‑labelled column in a declaration.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"The inspector ignored P1’s declarations for 1.5 years, later demanded re‑verification of all years.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"With Sveta’s help P1 managed to re‑file correctly and paid about 1 000 UAH instead of the full fines.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"The main difficulty is not the tax calculation itself but ensuring every column is correctly matched.\",\n          \"evidence\": [8]\n        },\n        {\n          \"text\": \"The calculator P1 uses works only with a domestic‑currency (₴) FOP; for foreign currency transactions it requires conversion based on the day’s exchange rate.\",\n          \"evidence\": [19]\n        }\n      ]\n    },\n    {\n      \"id\": \"domain-purchase\",\n      \"title\": \"Domain purchase discussion\",\n      \"claims\": [\n        {\n          \"text\": \"P2 mentions not having bought a domain.\",\n          \"evidence\": [2]\n        },\n        {\n          \"text\": \"P4 jokes that nobody will buy the domain.\",\n          \"evidence\": [9]\n        },\n        {\n          \"text\": \"P4 argues the domain is irrelevant because the project is a “silly thing” that won’t generate revenue.\",\n          \"evidence\": [10]\n        }\n      ]\n    },\n    {\n      \"id\": \"app-profitability\",\n      \"title\": \"Viability of a low‑cost app / “vibe‑code” project\",\n      \"claims\": [\n        {\n          \"text\": \"P1 reports that web platforms are less profitable than Android/iOS and suffer from poor SEO, no external traffic, and low user retention due to paywalls.\",\n          \"evidence\": [11]\n        },\n        {\n          \"text\": \"P1 notes a successful case where fast delivery (< 1 week) using Flutter and copying popular ideas was highlighted.\",\n          \"evidence\": [12]\n        },\n        {\n          \"text\": \"P4 doubts there are even ten people willing to pay 299 UAH for the app.\",\n          \"evidence\": [20]\n        },\n        {\n          \"text\": \"P4 describes the app as a “local‑first” bundle where the paid functionality is merely hidden in the bundle.\",\n          \"evidence\": [29]\n        },\n        {\n          \"text\": \"P4 labels the project as a “free vibe‑code” experiment with little sense.\",\n          \"evidence\": [30]\n        }\n      ]\n    },\n    {\n      \"id\": \"source-code-password\",\n      \"title\": \"Source code access and password speculation\",\n      \"claims\": [\n        {\n          \"text\": \"P1 asks if the source code is searchable for the password.\",\n          \"evidence\": [21]\n        },\n        {\n          \"text\": \"P4 responds sarcastically, implying they didn’t pay 299 UAH for it.\",\n          \"evidence\": [22]\n        },\n        {\n          \"text\": \"P4 says the password is stored “in the bundle”.\",\n          \"evidence\": [23]\n        },\n        {\n          \"text\": \"P5 calls P4 a pirate.\",\n          \"evidence\": [24]\n        },\n        {\n          \"text\": \"P5 suggests writing to the developer for the password.\",\n          \"evidence\": [25]\n        },\n        {\n          \"text\": \"P4 claims they would like a cold rum right now (implying frustration).\",\n          \"evidence\": [26]\n        },\n        {\n          \"text\": \"P1 believes most LinkedIn users could hack the app without problems.\",\n          \"evidence\": [28]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": [\n    {\n      \"text\": \"Is there a market of at least ten users willing to pay 299 UAH for the app?\",\n      \"evidence\": [20]\n    }\n  ]\n}",
+  "thinking": "We need JSON summary. Identify topics: tax filing issues, domain purchase, app profitability, source code/password, etc.\n\nCreate claims with evidence IDs.\n\nDecisions none. Open questions maybe about viability? No explicit question unresolved: maybe \"чи є хоча б десяток людей готових віддати 299 грн\" is a question by P4 (20). That's open.\n\nMake topics.\n\nLet's craft.\n\n",
+  "parsed": {
+    "title": "Discussion on tax filing, domain purchase, and low‑profit app idea",
+    "topics": [
+      {
+        "id": "tax-filing",
+        "title": "Tax filing complications and workaround",
+        "claims": [
+          {
+            "text": "P1 paid ~500 UAH to an uncle (Sveta) to correct a large tax error caused by a mis‑labelled column in a declaration.",
+            "evidence": [1]
+          },
+          {
+            "text": "The inspector ignored P1’s declarations for 1.5 years, later demanded re‑verification of all years.",
+            "evidence": [1]
+          },
+          {
+            "text": "With Sveta’s help P1 managed to re‑file correctly and paid about 1 000 UAH instead of the full fines.",
+            "evidence": [1]
+          },
+          {
+            "text": "The main difficulty is not the tax calculation itself but ensuring every column is correctly matched.",
+            "evidence": [8]
+          },
+          {
+            "text": "The calculator P1 uses works only with a domestic‑currency (₴) FOP; for foreign currency transactions it requires conversion based on the day’s exchange rate.",
+            "evidence": [19]
+          }
+        ]
+      },
+      {
+        "id": "domain-purchase",
+        "title": "Domain purchase discussion",
+        "claims": [
+          {
+            "text": "P2 mentions not having bought a domain.",
+            "evidence": [2]
+          },
+          {
+            "text": "P4 jokes that nobody will buy the domain.",
+            "evidence": [9]
+          },
+          {
+            "text": "P4 argues the domain is irrelevant because the project is a “silly thing” that won’t generate revenue.",
+            "evidence": [10]
+          }
+        ]
+      },
+      {
+        "id": "app-profitability",
+        "title": "Viability of a low‑cost app / “vibe‑code” project",
+        "claims": [
+          {
+            "text": "P1 reports that web platforms are less profitable than Android/iOS and suffer from poor SEO, no external traffic, and low user retention due to paywalls.",
+            "evidence": [11]
+          },
+          {
+            "text": "P1 notes a successful case where fast delivery (< 1 week) using Flutter and copying popular ideas was highlighted.",
+            "evidence": [12]
+          },
+          {
+            "text": "P4 doubts there are even ten people willing to pay 299 UAH for the app.",
+            "evidence": [20]
+          },
+          {
+            "text": "P4 describes the app as a “local‑first” bundle where the paid functionality is merely hidden in the bundle.",
+            "evidence": [29]
+          },
+          {
+            "text": "P4 labels the project as a “free vibe‑code” experiment with little sense.",
+            "evidence": [30]
+          }
+        ]
+      },
+      {
+        "id": "source-code-password",
+        "title": "Source code access and password speculation",
+        "claims": [
+          {
+            "text": "P1 asks if the source code is searchable for the password.",
+            "evidence": [21]
+          },
+          {
+            "text": "P4 responds sarcastically, implying they didn’t pay 299 UAH for it.",
+            "evidence": [22]
+          },
+          {
+            "text": "P4 says the password is stored “in the bundle”.",
+            "evidence": [23]
+          },
+          {
+            "text": "P5 calls P4 a pirate.",
+            "evidence": [24]
+          },
+          {
+            "text": "P5 suggests writing to the developer for the password.",
+            "evidence": [25]
+          },
+          {
+            "text": "P4 claims they would like a cold rum right now (implying frustration).",
+            "evidence": [26]
+          },
+          {
+            "text": "P1 believes most LinkedIn users could hack the app without problems.",
+            "evidence": [28]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": [
+      {
+        "text": "Is there a market of at least ten users willing to pay 299 UAH for the app?",
+        "evidence": [20]
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 12187.876700000023,
+    "ollamaTotalMs": 12021.649242,
+    "promptEvalCount": 2805,
+    "evalCount": 1038,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 4,
+    "claimCount": 20,
+    "decisionCount": 0,
+    "openQuestionCount": 1,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 1,
+    "goldClaimPrecision": 0.4,
+    "evidencePrecision": 0.38095238095238093,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 1,
+    "noiseRetention": 0.1,
+    "matchedClaimIds": [
+      "tax-reporting.paid-help",
+      "tax-reporting.form-risk",
+      "product.uah-only",
+      "product.web-limitations",
+      "product.fast-delivery-strategy",
+      "product.validate-demand-first",
+      "security.password-in-bundle",
+      "product.creator-response"
+    ],
+    "retainedThreadIds": [
+      "tax-reporting",
+      "calculator-product",
+      "calculator-security"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

@@ -1,0 +1,146 @@
+{
+  "case": "real-ai-tools-interleaved",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe",
+  "reasoning": "low",
+  "seed": 3,
+  "inputHash": "3e5fb5efeccd172ee2f1e8a3ef61dfdf2ed0fd33f2162906991e5f91c1a0d9ba",
+  "promptHash": "62c0cd54ee76aa7cf75199a0b9604ca2b96687505a2a87be8cad30234af6e90f",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Chat discussion summary\",\n  \"topics\": [\n    {\n      \"id\": \"ai-capabilities\",\n      \"title\": \"AI capabilities and toolkits\",\n      \"claims\": [\n        {\n          \"text\": \"AI models are not inherently intelligent; their complex abilities come from toolkits and ready-made solutions.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"Testing recent AI toolkits like Opencode on 2022-2023 models may be limited by small context windows of older models.\",\n          \"evidence\": [3]\n        },\n        {\n          \"text\": \"InstinctGPT comparison showed that toolkits can give a large boost but cannot fully compensate for base model deficiencies.\",\n          \"evidence\": [8]\n        },\n        {\n          \"text\": \"Older models were trained on broad data without clear purpose, while modern models aim to squeeze performance from fewer parameters and may be fine‑tuned for specific tasks.\",\n          \"evidence\": [15]\n        }\n      ]\n    },\n    {\n      \"id\": \"bus-anecdote\",\n      \"title\": \"Bus observations\",\n      \"claims\": [\n        {\n          \"text\": \"The author observed strange behavior of a person repeatedly riding the same bus and emitting gas.\",\n          \"evidence\": [7, 9]\n        },\n        {\n          \"text\": \"The author is currently sitting in a bus without interacting with anyone.\",\n          \"evidence\": [5]\n        }\n      ]\n    },\n    {\n      \"id\": \"media-shares\",\n      \"title\": \"Shared media content\",\n      \"claims\": [\n        {\n          \"text\": \"User P1 shared a media file at 15:59:36.\",\n          \"evidence\": [6]\n        },\n        {\n          \"text\": \"User P3 shared a media file at 16:00:39.\",\n          \"evidence\": [13]\n        }\n      ]\n    },\n    {\n      \"id\": \"diploma-cover-pricing\",\n      \"title\": \"Diploma cover pricing discussion\",\n      \"claims\": [\n        {\n          \"text\": \"Someone claimed a charge of 650 (currency) for diploma covers.\",\n          \"evidence\": [24]\n        },\n        {\n          \"text\": \"Another user replied that the price was 30 hryvnias.\",\n          \"evidence\": [25]\n        },\n        {\n          \"text\": \"A user suggested they don't need a cover because it's just paper.\",\n          \"evidence\": [26]\n        },\n        {\n          \"text\": \"It was noted that the cover bears a unique university emblem.\",\n          \"evidence\": [27]\n        },\n        {\n          \"text\": \"One participant argued that no one will take the cover and it's seen only three times in a lifetime.\",\n          \"evidence\": [28, 29]\n        }\n      ]\n    },\n    {\n      \"id\": \"small-pc-case\",\n      \"title\": \"Fitting multiple GPUs in a small PC case\",\n      \"claims\": [\n        {\n          \"text\": \"A small PC case can normally hold only one small GPU, but with straps and brute force three GPUs can be fitted.\",\n          \"evidence\": [30]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": []\n}",
+  "thinking": "Need to produce JSON summarizing. Identify topics: AI capability, InstinctGPT comparison, bus anecdote, media links, diploma cover price, small PC case. Decisions none. Open questions none.\n\nCreate topics with ids. Provide claims with evidence IDs.\n\nLet's craft.",
+  "parsed": {
+    "title": "Chat discussion summary",
+    "topics": [
+      {
+        "id": "ai-capabilities",
+        "title": "AI capabilities and toolkits",
+        "claims": [
+          {
+            "text": "AI models are not inherently intelligent; their complex abilities come from toolkits and ready-made solutions.",
+            "evidence": [1]
+          },
+          {
+            "text": "Testing recent AI toolkits like Opencode on 2022-2023 models may be limited by small context windows of older models.",
+            "evidence": [3]
+          },
+          {
+            "text": "InstinctGPT comparison showed that toolkits can give a large boost but cannot fully compensate for base model deficiencies.",
+            "evidence": [8]
+          },
+          {
+            "text": "Older models were trained on broad data without clear purpose, while modern models aim to squeeze performance from fewer parameters and may be fine‑tuned for specific tasks.",
+            "evidence": [15]
+          }
+        ]
+      },
+      {
+        "id": "bus-anecdote",
+        "title": "Bus observations",
+        "claims": [
+          {
+            "text": "The author observed strange behavior of a person repeatedly riding the same bus and emitting gas.",
+            "evidence": [7, 9]
+          },
+          {
+            "text": "The author is currently sitting in a bus without interacting with anyone.",
+            "evidence": [5]
+          }
+        ]
+      },
+      {
+        "id": "media-shares",
+        "title": "Shared media content",
+        "claims": [
+          {
+            "text": "User P1 shared a media file at 15:59:36.",
+            "evidence": [6]
+          },
+          {
+            "text": "User P3 shared a media file at 16:00:39.",
+            "evidence": [13]
+          }
+        ]
+      },
+      {
+        "id": "diploma-cover-pricing",
+        "title": "Diploma cover pricing discussion",
+        "claims": [
+          {
+            "text": "Someone claimed a charge of 650 (currency) for diploma covers.",
+            "evidence": [24]
+          },
+          {
+            "text": "Another user replied that the price was 30 hryvnias.",
+            "evidence": [25]
+          },
+          {
+            "text": "A user suggested they don't need a cover because it's just paper.",
+            "evidence": [26]
+          },
+          {
+            "text": "It was noted that the cover bears a unique university emblem.",
+            "evidence": [27]
+          },
+          {
+            "text": "One participant argued that no one will take the cover and it's seen only three times in a lifetime.",
+            "evidence": [28, 29]
+          }
+        ]
+      },
+      {
+        "id": "small-pc-case",
+        "title": "Fitting multiple GPUs in a small PC case",
+        "claims": [
+          {
+            "text": "A small PC case can normally hold only one small GPU, but with straps and brute force three GPUs can be fitted.",
+            "evidence": [30]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": []
+  },
+  "usage": {
+    "durationMs": 7212.357200000028,
+    "ollamaTotalMs": 6857.532397,
+    "promptEvalCount": 1848,
+    "evalCount": 753,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 5,
+    "claimCount": 14,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.8823529411764706,
+    "goldClaimPrecision": 0.5,
+    "evidencePrecision": 0.5625,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0.21428571428571427,
+    "matchedClaimIds": [
+      "bus-passenger.repeated-encounter",
+      "diploma-cover.low-value",
+      "ai-tooling.capability-view",
+      "ai-tooling.old-model-experiment",
+      "ai-tooling.instinctgpt-result",
+      "diploma-cover.prices",
+      "pc-case.three-gpus"
+    ],
+    "retainedThreadIds": [
+      "bus-passenger",
+      "diploma-cover",
+      "ai-tooling",
+      "pc-case"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

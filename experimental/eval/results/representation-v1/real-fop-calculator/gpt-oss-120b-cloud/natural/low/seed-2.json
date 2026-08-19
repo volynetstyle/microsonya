@@ -1,0 +1,149 @@
+{
+  "case": "real-fop-calculator",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "natural",
+  "reasoning": "low",
+  "seed": 2,
+  "inputHash": "d3179cdb8e49a27f55b8dcbb42c5b7b95590527ad18ad16afb38bc499073e8af",
+  "promptHash": "e7d189efec66e64c41edf6c64c2cb6aedaedfb502e8546a50ba8651ace41b9fb",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion on tax filing, domain purchase, and app profitability\",\n  \"topics\": [\n    {\n      \"id\": \"tax-filing\",\n      \"title\": \"Tax filing complications\",\n      \"claims\": [\n        {\n          \"text\": \"P1 paid about 1000 UAH to correctly refile taxes after an inspector approved declarations without review for 1.5 years.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"The main difficulty is correctly matching columns and numbers in the declaration, not the tax calculation itself.\",\n          \"evidence\": [8]\n        },\n        {\n          \"text\": \"The whole procedure takes about one hour with Excel, once per day, and a day per month for quarterly reports.\",\n          \"evidence\": [5, 6, 7]\n        }\n      ]\n    },\n    {\n      \"id\": \"domain-purchase\",\n      \"title\": \"Domain purchase discussion\",\n      \"claims\": [\n        {\n          \"text\": \"P2 said they haven't bought a domain yet.\",\n          \"evidence\": [2]\n        },\n        {\n          \"text\": \"P4 expressed doubt that anyone would buy a domain for the project.\",\n          \"evidence\": [9, 10]\n        },\n        {\n          \"text\": \"P4 later described the project as a “free vibe‑code” experiment with little sense.\",\n          \"evidence\": [30]\n        }\n      ]\n    },\n    {\n      \"id\": \"app-profitability\",\n      \"title\": \"Profitability of a web/app product\",\n      \"claims\": [\n        {\n          \"text\": \"P1 researched earning on a personal project and found web platforms less profitable than Android/iOS.\",\n          \"evidence\": [11]\n        },\n        {\n          \"text\": \"P1 noted poor SEO, no external traffic, no ad revenue, and low user retention due to immediate paywall.\",\n          \"evidence\": [11]\n        },\n        {\n          \"text\": \"P1 observed a successful podcast described fast delivery (< 1 week) and a cross‑platform stack (Flutter) by copying popular apps.\",\n          \"evidence\": [12]\n        },\n        {\n          \"text\": \"P1 is skeptical that anyone would buy the product, betting it wouldn't sell for months.\",\n          \"evidence\": [17]\n        }\n      ]\n    },\n    {\n      \"id\": \"calculator-limitations\",\n      \"title\": \"FOP calculator constraints\",\n      \"claims\": [\n        {\n          \"text\": \"P1 discovered the calculator works only with Ukrainian‑currency FOPs; they had to convert all transactions using the daily exchange rate.\",\n          \"evidence\": [19]\n        }\n      ]\n    },\n    {\n      \"id\": \"security-and-password\",\n      \"title\": \"Password and source code concerns\",\n      \"claims\": [\n        {\n          \"text\": \"P4 joked about not having paid 299 UAH for the app and hinted the password is stored in plain local storage.\",\n          \"evidence\": [22, 23]\n        },\n        {\n          \"text\": \"P5 called it piracy and suggested writing to the author.\",\n          \"evidence\": [24, 25]\n        },\n        {\n          \"text\": \"P1 believes most LinkedIn users could hack the app easily.\",\n          \"evidence\": [28]\n        },\n        {\n          \"text\": \"P4 described the app as a local‑first app with USD/UAH rates refreshed every 5 minutes, but the paid bundle contains hidden code.\",\n          \"evidence\": [29]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": []\n}",
+  "thinking": "We need JSON summarizing. Identify topics. Probably topics: tax filing issues, domain purchase, app profitability, calculator limitations, password security, project legitimacy. Create claims.\n\nDecisions none. Open questions maybe none.\n\nConstruct.",
+  "parsed": {
+    "title": "Discussion on tax filing, domain purchase, and app profitability",
+    "topics": [
+      {
+        "id": "tax-filing",
+        "title": "Tax filing complications",
+        "claims": [
+          {
+            "text": "P1 paid about 1000 UAH to correctly refile taxes after an inspector approved declarations without review for 1.5 years.",
+            "evidence": [1]
+          },
+          {
+            "text": "The main difficulty is correctly matching columns and numbers in the declaration, not the tax calculation itself.",
+            "evidence": [8]
+          },
+          {
+            "text": "The whole procedure takes about one hour with Excel, once per day, and a day per month for quarterly reports.",
+            "evidence": [5, 6, 7]
+          }
+        ]
+      },
+      {
+        "id": "domain-purchase",
+        "title": "Domain purchase discussion",
+        "claims": [
+          {
+            "text": "P2 said they haven't bought a domain yet.",
+            "evidence": [2]
+          },
+          {
+            "text": "P4 expressed doubt that anyone would buy a domain for the project.",
+            "evidence": [9, 10]
+          },
+          {
+            "text": "P4 later described the project as a “free vibe‑code” experiment with little sense.",
+            "evidence": [30]
+          }
+        ]
+      },
+      {
+        "id": "app-profitability",
+        "title": "Profitability of a web/app product",
+        "claims": [
+          {
+            "text": "P1 researched earning on a personal project and found web platforms less profitable than Android/iOS.",
+            "evidence": [11]
+          },
+          {
+            "text": "P1 noted poor SEO, no external traffic, no ad revenue, and low user retention due to immediate paywall.",
+            "evidence": [11]
+          },
+          {
+            "text": "P1 observed a successful podcast described fast delivery (< 1 week) and a cross‑platform stack (Flutter) by copying popular apps.",
+            "evidence": [12]
+          },
+          {
+            "text": "P1 is skeptical that anyone would buy the product, betting it wouldn't sell for months.",
+            "evidence": [17]
+          }
+        ]
+      },
+      {
+        "id": "calculator-limitations",
+        "title": "FOP calculator constraints",
+        "claims": [
+          {
+            "text": "P1 discovered the calculator works only with Ukrainian‑currency FOPs; they had to convert all transactions using the daily exchange rate.",
+            "evidence": [19]
+          }
+        ]
+      },
+      {
+        "id": "security-and-password",
+        "title": "Password and source code concerns",
+        "claims": [
+          {
+            "text": "P4 joked about not having paid 299 UAH for the app and hinted the password is stored in plain local storage.",
+            "evidence": [22, 23]
+          },
+          {
+            "text": "P5 called it piracy and suggested writing to the author.",
+            "evidence": [24, 25]
+          },
+          {
+            "text": "P1 believes most LinkedIn users could hack the app easily.",
+            "evidence": [28]
+          },
+          {
+            "text": "P4 described the app as a local‑first app with USD/UAH rates refreshed every 5 minutes, but the paid bundle contains hidden code.",
+            "evidence": [29]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": []
+  },
+  "usage": {
+    "durationMs": 11267.30110000004,
+    "ollamaTotalMs": 10987.728751,
+    "promptEvalCount": 2510,
+    "evalCount": 829,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 5,
+    "claimCount": 15,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.8333333333333334,
+    "goldClaimPrecision": 0.4666666666666667,
+    "evidencePrecision": 0.5,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0.06666666666666667,
+    "matchedClaimIds": [
+      "tax-reporting.form-risk",
+      "security.password-in-bundle",
+      "tax-reporting.paid-help",
+      "product.creator-response",
+      "product.web-limitations",
+      "product.fast-delivery-strategy",
+      "product.uah-only"
+    ],
+    "retainedThreadIds": [
+      "tax-reporting",
+      "calculator-security",
+      "calculator-product"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

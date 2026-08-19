@@ -1,0 +1,193 @@
+{
+  "case": "real-job-search-abroad",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 4,
+  "transformation": "rename-users",
+  "inputHash": "36093e7976dba493889a933ed10b1a3c991862af89b13afae30dd423eda8af86",
+  "promptHash": "3bc94b06a2808b41728e0eda5fc3a1bbe358d37d06c646cb13d3da3225c6f939",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion about living and working abroad\",\n  \"topics\": [\n    {\n      \"id\": \"people-in-slovakia\",\n      \"title\": \"Who is in Bratislava or Slovakia\",\n      \"claims\": [\n        {\n          \"text\": \"User U1 asked if anyone lives in Bratislava or Slovakia and who has moved abroad\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"User U2 replied that among those abroad they know @AndriiRaccoon in Austria and walternet134 in Poland\",\n          \"evidence\": [3]\n        },\n        {\n          \"text\": \"User U2 mentioned \\\"Мафіозя повернулась на рідну землю\\\" indicating a return to the homeland\",\n          \"evidence\": [4]\n        }\n      ]\n    },\n    {\n      \"id\": \"job-search-abroad\",\n      \"title\": \"Finding jobs abroad\",\n      \"claims\": [\n        {\n          \"text\": \"User U3 has at least two acquaintances in Austria who have found jobs\",\n          \"evidence\": [12]\n        },\n        {\n          \"text\": \"User U3 reported that one acquaintance recently arrived and another has been there for several years\",\n          \"evidence\": [13]\n        },\n        {\n          \"text\": \"User U3 suggested searching on LinkedIn\",\n          \"evidence\": [18]\n        },\n        {\n          \"text\": \"User U3 said they sent about 100 applications and got only 3 interviews\",\n          \"evidence\": [21]\n        },\n        {\n          \"text\": \"User U3 claimed 95% of job listings require a local language\",\n          \"evidence\": [26]\n        },\n        {\n          \"text\": \"User U3 noted that some companies accept candidates with little language skill\",\n          \"evidence\": [29]\n        },\n        {\n          \"text\": \"User U3 said higher education rarely matters for hiring\",\n          \"evidence\": [32]\n        },\n        {\n          \"text\": \"User U3 mentioned they accepted a low salary because they needed any work\",\n          \"evidence\": [37]\n        },\n        {\n          \"text\": \"User U3 stated the typical language requirement is B2 (sometimes B1) and certificates are not usually required\",\n          \"evidence\": [46]\n        }\n      ]\n    },\n    {\n      \"id\": \"language-requirements\",\n      \"title\": \"Language expectations in Slovakia/Austria\",\n      \"claims\": [\n        {\n          \"text\": \"User U1 asked which language is spoken in Austria; answer: German\",\n          \"evidence\": [14]\n        },\n        {\n          \"text\": \"User U3 replied that they communicate with them in English\",\n          \"evidence\": [15]\n        },\n        {\n          \"text\": \"User U1 noted that many jobs in Bratislava require English\",\n          \"evidence\": [44]\n        },\n        {\n          \"text\": \"User U1 said they personally do not know Slovak after a year in Slovakia\",\n          \"evidence\": [43]\n        },\n        {\n          \"text\": \"User U3 said most employers ask for B2 level Slovak, sometimes B1, and a certificate is not needed\",\n          \"evidence\": [46]\n        }\n      ]\n    },\n    {\n      \"id\": \"salary-expectations\",\n      \"title\": \"Salary expectations abroad\",\n      \"claims\": [\n        {\n          \"text\": \"User U3 believes salaries in Europe are higher than in Ukraine but few notice\",\n          \"evidence\": [35]\n        },\n        {\n          \"text\": \"User U3 said they received a higher salary offer but negotiated down to a minimum because they needed a job\",\n          \"evidence\": [37]\n        }\n      ]\n    },\n    {\n      \"id\": \"future-plans\",\n      \"title\": \"Future relocation considerations\",\n      \"claims\": [\n        {\n          \"text\": \"User U1 wonders whether to stay in Austria\",\n          \"evidence\": [58]\n        },\n        {\n          \"text\": \"User U3 is considering moving to Warsaw for an event (wawtech.io)\",\n          \"evidence\": [59]\n        },\n        {\n          \"text\": \"User U3’s partner has lived in Austria for over 10 years and is pessimistic about the country’s future\",\n          \"evidence\": [60]\n        },\n        {\n          \"text\": \"User U3 prefers Austria over other countries but has also looked at Ireland, Norway, and Spain\",\n          \"evidence\": [60]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": [\n    {\n      \"text\": \"Who lives in Bratislava or Slovakia and who has moved abroad?\",\n      \"evidence\": [1]\n    },\n    {\n      \"text\": \"Will U1 stay in Austria?\",\n      \"evidence\": [58]\n    }\n  ]\n}",
+  "thinking": "We need JSON summary. Identify topics: e.g., \"people in Slovakia\", \"job search abroad\", \"language requirements\", \"salary expectations\", \"future plans\". Extract claims with evidence IDs.\n\nDecisions none. Open questions? There is question #1 about who lives in Bratislava or Slovakia, but later no answer? No direct answer. So open question.\n\nAlso question #58 about staying in Austria unresolved. No answer. So another open.\n\nCreate topics.\n\nLet's craft.\n\n",
+  "parsed": {
+    "title": "Discussion about living and working abroad",
+    "topics": [
+      {
+        "id": "people-in-slovakia",
+        "title": "Who is in Bratislava or Slovakia",
+        "claims": [
+          {
+            "text": "User U1 asked if anyone lives in Bratislava or Slovakia and who has moved abroad",
+            "evidence": [1]
+          },
+          {
+            "text": "User U2 replied that among those abroad they know @AndriiRaccoon in Austria and walternet134 in Poland",
+            "evidence": [3]
+          },
+          {
+            "text": "User U2 mentioned \"Мафіозя повернулась на рідну землю\" indicating a return to the homeland",
+            "evidence": [4]
+          }
+        ]
+      },
+      {
+        "id": "job-search-abroad",
+        "title": "Finding jobs abroad",
+        "claims": [
+          {
+            "text": "User U3 has at least two acquaintances in Austria who have found jobs",
+            "evidence": [12]
+          },
+          {
+            "text": "User U3 reported that one acquaintance recently arrived and another has been there for several years",
+            "evidence": [13]
+          },
+          {
+            "text": "User U3 suggested searching on LinkedIn",
+            "evidence": [18]
+          },
+          {
+            "text": "User U3 said they sent about 100 applications and got only 3 interviews",
+            "evidence": [21]
+          },
+          {
+            "text": "User U3 claimed 95% of job listings require a local language",
+            "evidence": [26]
+          },
+          {
+            "text": "User U3 noted that some companies accept candidates with little language skill",
+            "evidence": [29]
+          },
+          {
+            "text": "User U3 said higher education rarely matters for hiring",
+            "evidence": [32]
+          },
+          {
+            "text": "User U3 mentioned they accepted a low salary because they needed any work",
+            "evidence": [37]
+          },
+          {
+            "text": "User U3 stated the typical language requirement is B2 (sometimes B1) and certificates are not usually required",
+            "evidence": [46]
+          }
+        ]
+      },
+      {
+        "id": "language-requirements",
+        "title": "Language expectations in Slovakia/Austria",
+        "claims": [
+          {
+            "text": "User U1 asked which language is spoken in Austria; answer: German",
+            "evidence": [14]
+          },
+          {
+            "text": "User U3 replied that they communicate with them in English",
+            "evidence": [15]
+          },
+          {
+            "text": "User U1 noted that many jobs in Bratislava require English",
+            "evidence": [44]
+          },
+          {
+            "text": "User U1 said they personally do not know Slovak after a year in Slovakia",
+            "evidence": [43]
+          },
+          {
+            "text": "User U3 said most employers ask for B2 level Slovak, sometimes B1, and a certificate is not needed",
+            "evidence": [46]
+          }
+        ]
+      },
+      {
+        "id": "salary-expectations",
+        "title": "Salary expectations abroad",
+        "claims": [
+          {
+            "text": "User U3 believes salaries in Europe are higher than in Ukraine but few notice",
+            "evidence": [35]
+          },
+          {
+            "text": "User U3 said they received a higher salary offer but negotiated down to a minimum because they needed a job",
+            "evidence": [37]
+          }
+        ]
+      },
+      {
+        "id": "future-plans",
+        "title": "Future relocation considerations",
+        "claims": [
+          {
+            "text": "User U1 wonders whether to stay in Austria",
+            "evidence": [58]
+          },
+          {
+            "text": "User U3 is considering moving to Warsaw for an event (wawtech.io)",
+            "evidence": [59]
+          },
+          {
+            "text": "User U3’s partner has lived in Austria for over 10 years and is pessimistic about the country’s future",
+            "evidence": [60]
+          },
+          {
+            "text": "User U3 prefers Austria over other countries but has also looked at Ireland, Norway, and Spain",
+            "evidence": [60]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": [
+      {
+        "text": "Who lives in Bratislava or Slovakia and who has moved abroad?",
+        "evidence": [1]
+      },
+      {
+        "text": "Will U1 stay in Austria?",
+        "evidence": [58]
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 16118.628499999999,
+    "ollamaTotalMs": 15948.363462,
+    "promptEvalCount": 3531,
+    "evalCount": 1139,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 5,
+    "claimCount": 23,
+    "decisionCount": 0,
+    "openQuestionCount": 2,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.9,
+    "goldClaimPrecision": 0.34782608695652173,
+    "evidencePrecision": 0.32,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 1,
+    "noiseRetention": 0.043478260869565216,
+    "matchedClaimIds": [
+      "job-search.two-months",
+      "job-search.conversion",
+      "job-search.local-language-filter",
+      "job-search.education-observation",
+      "job-search.salary-compromise",
+      "networking.participants-abroad",
+      "language.work-vs-daily-life",
+      "austria.outlook"
+    ],
+    "retainedThreadIds": [
+      "job-search-abroad",
+      "networking-abroad",
+      "language-integration",
+      "life-in-austria"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

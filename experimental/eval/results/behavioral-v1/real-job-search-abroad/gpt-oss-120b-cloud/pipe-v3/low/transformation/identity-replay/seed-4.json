@@ -1,0 +1,142 @@
+{
+  "case": "real-job-search-abroad",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 4,
+  "transformation": "identity-replay",
+  "inputHash": "aac555f3427e2195f145b4a5e3a6d9644961170a8ccc181b8832ae83202b036f",
+  "promptHash": "4bb2c538d807f29994b2ea2ea18e6a6ffaf5d4c95f4f15c7ac0e8801257acb05",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Обговорення досвіду роботи та життя за кордоном\",\n  \"topics\": [\n    {\n      \"id\": \"relocation\",\n      \"title\": \"Хто живе за кордоном та досвід переїзду\",\n      \"claims\": [\n        {\n          \"text\": \"Учасники групи живуть у різних країнах: Австрія, Польща, Словакія.\",\n          \"evidence\": [3, 12, 49, 54]\n        },\n        {\n          \"text\": \"Автор P1 живе в Словакії майже рік без знання мови.\",\n          \"evidence\": [43, 44, 45]\n        },\n        {\n          \"text\": \"P3 живе в Австрії з листопада 2025 року.\",\n          \"evidence\": [49, 54]\n        }\n      ]\n    },\n    {\n      \"id\": \"job-search\",\n      \"title\": \"Пошук роботи за кордоном\",\n      \"claims\": [\n        {\n          \"text\": \"LinkedIn рекомендовано для пошуку роботи.\",\n          \"evidence\": [18]\n        },\n        {\n          \"text\": \"У процесі пошуку надсилалися близько 100 заявок, з яких було 3 співбесіди.\",\n          \"evidence\": [21]\n        },\n        {\n          \"text\": \"Для отримання інтерв'ю часто потрібне знання місцевої мови (B1‑B2).\",\n          \"evidence\": [26, 46]\n        },\n        {\n          \"text\": \"Можна подавати на вакансії без вимоги знання мови, якщо в описі мова не зазначена.\",\n          \"evidence\": [36]\n        },\n        {\n          \"text\": \"Зарплата на позиції P3 була вища, ніж мінімальна, але прийняли мінімальну з огляду на термін пошуку роботи.\",\n          \"evidence\": [37]\n        }\n      ]\n    },\n    {\n      \"id\": \"language-requirements\",\n      \"title\": \"Вимоги до мови в країнах\",\n      \"claims\": [\n        {\n          \"text\": \"Німецька — основна мова спілкування в Австрії.\",\n          \"evidence\": [14, 15]\n        },\n        {\n          \"text\": \"Володіння англійською достатньо для роботи, але в повсякденному житті діляться українською та місцевою мовою.\",\n          \"evidence\": [44, 45, 55]\n        },\n        {\n          \"text\": \"Більшість вакансій вимагають B2, іноді B1, сертифікат не обов’язковий.\",\n          \"evidence\": [46]\n        }\n      ]\n    },\n    {\n      \"id\": \"salary-expectations\",\n      \"title\": \"Очікування та реальність зарплат\",\n      \"claims\": [\n        {\n          \"text\": \"Зарплата в Європі загалом вища, ніж в Україні, проте це не завжди помітно при пошуку.\",\n          \"evidence\": [35]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": [\n    {\n      \"text\": \"Хто живе в Братиславі або в Словакії, і хто вже виїхав за кордон?\",\n      \"evidence\": [1]\n    },\n    {\n      \"text\": \"А ти особисто відчуваєш, думаєш лишатись в Австрії?\",\n      \"evidence\": [58]\n    }\n  ]\n}",
+  "thinking": "Need to produce JSON with topics. Identify main topics: living abroad, job search, language requirements, salary, etc. We'll create topics.\n\nClaims with evidence IDs.\n\nDecisions none. Open questions: maybe \"Хто живе в Братиславі...\" unanswered. Also \"А ти як особисто відчуваєш, думаєш лишатись в Австрії?\" not answered. Also maybe salary question unresolved.\n\nLet's craft.\n\n",
+  "parsed": {
+    "title": "Обговорення досвіду роботи та життя за кордоном",
+    "topics": [
+      {
+        "id": "relocation",
+        "title": "Хто живе за кордоном та досвід переїзду",
+        "claims": [
+          {
+            "text": "Учасники групи живуть у різних країнах: Австрія, Польща, Словакія.",
+            "evidence": [3, 12, 49, 54]
+          },
+          {
+            "text": "Автор P1 живе в Словакії майже рік без знання мови.",
+            "evidence": [43, 44, 45]
+          },
+          {
+            "text": "P3 живе в Австрії з листопада 2025 року.",
+            "evidence": [49, 54]
+          }
+        ]
+      },
+      {
+        "id": "job-search",
+        "title": "Пошук роботи за кордоном",
+        "claims": [
+          {
+            "text": "LinkedIn рекомендовано для пошуку роботи.",
+            "evidence": [18]
+          },
+          {
+            "text": "У процесі пошуку надсилалися близько 100 заявок, з яких було 3 співбесіди.",
+            "evidence": [21]
+          },
+          {
+            "text": "Для отримання інтерв'ю часто потрібне знання місцевої мови (B1‑B2).",
+            "evidence": [26, 46]
+          },
+          {
+            "text": "Можна подавати на вакансії без вимоги знання мови, якщо в описі мова не зазначена.",
+            "evidence": [36]
+          },
+          {
+            "text": "Зарплата на позиції P3 була вища, ніж мінімальна, але прийняли мінімальну з огляду на термін пошуку роботи.",
+            "evidence": [37]
+          }
+        ]
+      },
+      {
+        "id": "language-requirements",
+        "title": "Вимоги до мови в країнах",
+        "claims": [
+          {
+            "text": "Німецька — основна мова спілкування в Австрії.",
+            "evidence": [14, 15]
+          },
+          {
+            "text": "Володіння англійською достатньо для роботи, але в повсякденному житті діляться українською та місцевою мовою.",
+            "evidence": [44, 45, 55]
+          },
+          {
+            "text": "Більшість вакансій вимагають B2, іноді B1, сертифікат не обов’язковий.",
+            "evidence": [46]
+          }
+        ]
+      },
+      {
+        "id": "salary-expectations",
+        "title": "Очікування та реальність зарплат",
+        "claims": [
+          {
+            "text": "Зарплата в Європі загалом вища, ніж в Україні, проте це не завжди помітно при пошуку.",
+            "evidence": [35]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": [
+      {
+        "text": "Хто живе в Братиславі або в Словакії, і хто вже виїхав за кордон?",
+        "evidence": [1]
+      },
+      {
+        "text": "А ти особисто відчуваєш, думаєш лишатись в Австрії?",
+        "evidence": [58]
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 15772.106999999996,
+    "ollamaTotalMs": 15611.442683,
+    "promptEvalCount": 3531,
+    "evalCount": 909,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 4,
+    "claimCount": 12,
+    "decisionCount": 0,
+    "openQuestionCount": 2,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.9,
+    "goldClaimPrecision": 0.6666666666666666,
+    "evidencePrecision": 0.4166666666666667,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 1,
+    "noiseRetention": 0,
+    "matchedClaimIds": [
+      "networking.participants-abroad",
+      "language.work-vs-daily-life",
+      "language.learning-motivation",
+      "job-search.two-months",
+      "job-search.conversion",
+      "job-search.local-language-filter",
+      "job-search.salary-compromise",
+      "job-search.education-observation"
+    ],
+    "retainedThreadIds": [
+      "networking-abroad",
+      "language-integration",
+      "job-search-abroad"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

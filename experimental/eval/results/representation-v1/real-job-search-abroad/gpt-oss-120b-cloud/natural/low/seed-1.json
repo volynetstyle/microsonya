@@ -1,0 +1,130 @@
+{
+  "case": "real-job-search-abroad",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "natural",
+  "reasoning": "low",
+  "seed": 1,
+  "inputHash": "aac555f3427e2195f145b4a5e3a6d9644961170a8ccc181b8832ae83202b036f",
+  "promptHash": "560c66248f85abd41cefa53cb55a59ad7185a705a3683f41dbea854bc47abc02",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Обговорення життя та роботи за кордоном\",\n  \"topics\": [\n    {\n      \"id\": \"living-abroad\",\n      \"title\": \"Хто живе чи планує жити за кордоном\",\n      \"claims\": [\n        {\n          \"text\": \"У групі є учасники, які живуть в Братиславі, Австрії та Польщі.\",\n          \"evidence\": [1, 3, 12, 13, 49, 54]\n        },\n        {\n          \"text\": \"Деякі учасники повернулися в Україну.\",\n          \"evidence\": [4, 5]\n        }\n      ]\n    },\n    {\n      \"id\": \"job-search-abroad\",\n      \"title\": \"Пошук роботи за кордоном\",\n      \"claims\": [\n        {\n          \"text\": \"Для пошуку роботи в Європі рекомендується використовувати LinkedIn.\",\n          \"evidence\": [18]\n        },\n        {\n          \"text\": \"Успішне отримання інтерв'ю за два місяці при 100 відгуках і 3 інтерв'ю.\",\n          \"evidence\": [21, 17]\n        },\n        {\n          \"text\": \"Більшість вакансій вимагає знання місцевої мови, часто B2 або B1.\",\n          \"evidence\": [26, 46, 47]\n        },\n        {\n          \"text\": \"Деякі випадки, коли кандидат не знає мови, все ж отримує роботу.\",\n          \"evidence\": [29]\n        },\n        {\n          \"text\": \"Заробітна плата в Європі вища, ніж в Україні, але часто беруть мінімальну.\",\n          \"evidence\": [35, 37]\n        }\n      ]\n    },\n    {\n      \"id\": \"language-requirements\",\n      \"title\": \"Вимоги до мовних навичок\",\n      \"claims\": [\n        {\n          \"text\": \"Найчастіше вимагається рівень B2, іноді B1, без обов'язкових сертифікатів.\",\n          \"evidence\": [46, 47]\n        },\n        {\n          \"text\": \"У більшості випадків робота здійснюється англійською, а спілкування поза роботою ускладнює мовний бар'єр.\",\n          \"evidence\": [44, 45, 55, 52]\n        }\n      ]\n    },\n    {\n      \"id\": \"future-plans-austria\",\n      \"title\": \"Плани щодо залишання в Австрії\",\n      \"claims\": [\n        {\n          \"text\": \"Один учасник розглядає варіант поїхати до Варшави на івент, але вважає Австрію найкращим вибором.\",\n          \"evidence\": [59, 60]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": [\n    {\n      \"text\": \"Чи плануєш ти залишатися в Австрії надовго?\",\n      \"evidence\": [58]\n    }\n  ]\n}",
+  "thinking": "Need to produce JSON with topics. Identify topics: living abroad, job search, language requirements, salary expectations, future plans Austria vs elsewhere.\n\nCreate claims with evidence IDs.\n\nDecisions none. Open questions maybe \"А ти як особисто відчуваєш, думаєш лишатись в Австрії?\" unresolved.\n\nLet's craft.\n\n",
+  "parsed": {
+    "title": "Обговорення життя та роботи за кордоном",
+    "topics": [
+      {
+        "id": "living-abroad",
+        "title": "Хто живе чи планує жити за кордоном",
+        "claims": [
+          {
+            "text": "У групі є учасники, які живуть в Братиславі, Австрії та Польщі.",
+            "evidence": [1, 3, 12, 13, 49, 54]
+          },
+          {
+            "text": "Деякі учасники повернулися в Україну.",
+            "evidence": [4, 5]
+          }
+        ]
+      },
+      {
+        "id": "job-search-abroad",
+        "title": "Пошук роботи за кордоном",
+        "claims": [
+          {
+            "text": "Для пошуку роботи в Європі рекомендується використовувати LinkedIn.",
+            "evidence": [18]
+          },
+          {
+            "text": "Успішне отримання інтерв'ю за два місяці при 100 відгуках і 3 інтерв'ю.",
+            "evidence": [21, 17]
+          },
+          {
+            "text": "Більшість вакансій вимагає знання місцевої мови, часто B2 або B1.",
+            "evidence": [26, 46, 47]
+          },
+          {
+            "text": "Деякі випадки, коли кандидат не знає мови, все ж отримує роботу.",
+            "evidence": [29]
+          },
+          {
+            "text": "Заробітна плата в Європі вища, ніж в Україні, але часто беруть мінімальну.",
+            "evidence": [35, 37]
+          }
+        ]
+      },
+      {
+        "id": "language-requirements",
+        "title": "Вимоги до мовних навичок",
+        "claims": [
+          {
+            "text": "Найчастіше вимагається рівень B2, іноді B1, без обов'язкових сертифікатів.",
+            "evidence": [46, 47]
+          },
+          {
+            "text": "У більшості випадків робота здійснюється англійською, а спілкування поза роботою ускладнює мовний бар'єр.",
+            "evidence": [44, 45, 55, 52]
+          }
+        ]
+      },
+      {
+        "id": "future-plans-austria",
+        "title": "Плани щодо залишання в Австрії",
+        "claims": [
+          {
+            "text": "Один учасник розглядає варіант поїхати до Варшави на івент, але вважає Австрію найкращим вибором.",
+            "evidence": [59, 60]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": [
+      {
+        "text": "Чи плануєш ти залишатися в Австрії надовго?",
+        "evidence": [58]
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 7289.571199999991,
+    "ollamaTotalMs": 7118.607159,
+    "promptEvalCount": 3086,
+    "evalCount": 783,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 4,
+    "claimCount": 10,
+    "decisionCount": 0,
+    "openQuestionCount": 1,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.9,
+    "goldClaimPrecision": 0.8,
+    "evidencePrecision": 0.5,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 1,
+    "noiseRetention": 0.1,
+    "matchedClaimIds": [
+      "networking.participants-abroad",
+      "language.work-vs-daily-life",
+      "job-search.two-months",
+      "job-search.conversion",
+      "job-search.local-language-filter",
+      "job-search.education-observation",
+      "language.learning-motivation",
+      "austria.outlook"
+    ],
+    "retainedThreadIds": [
+      "networking-abroad",
+      "language-integration",
+      "job-search-abroad",
+      "life-in-austria"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

@@ -1,0 +1,130 @@
+{
+  "case": "real-fop-calculator",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 1,
+  "transformation": "shift-timestamps",
+  "inputHash": "7d7752a60656dcdf93af0ab3551da41cb4a03d8bb0e7e7dab5ae153d39dcf1d2",
+  "promptHash": "31520601a01d8aacb76b99ee5765218a3cd55cd5ebf047de384d5c6fd05f698a",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion on tax filing, domain purchase, and app monetization\",\n  \"topics\": [\n    {\n      \"id\": \"tax-filing\",\n      \"title\": \"Complications with tax filing and calculator usage\",\n      \"claims\": [\n        {\n          \"text\": \"Using aunt Sveta's help allowed the user to correctly refile and pay about 1000 UAH instead of all fines\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"The inspector had not reviewed the user's declarations for 1.5 years and was later reprimanded\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"The tax calculation process is error‑prone, especially regarding which column to subtract which number\",\n          \"evidence\": [8]\n        },\n        {\n          \"text\": \"Quarterly reports must be filed and taxes paid correctly\",\n          \"evidence\": [7]\n        },\n        {\n          \"text\": \"The calculator only works with Ukrainian‑currency FOPs, requiring conversion based on daily exchange rates\",\n          \"evidence\": [19]\n        }\n      ]\n    },\n    {\n      \"id\": \"domain-purchase\",\n      \"title\": \"Considerations about buying a domain\",\n      \"claims\": [\n        {\n          \"text\": \"One participant suggests buying a calculator first before affording a domain\",\n          \"evidence\": [4]\n        },\n        {\n          \"text\": \"Another participant doubts buying a domain due to its low value\",\n          \"evidence\": [9, 10]\n        }\n      ]\n    },\n    {\n      \"id\": \"app-monetization\",\n      \"title\": \"Ideas and skepticism about earning from a cross‑platform app\",\n      \"claims\": [\n        {\n          \"text\": \"Web platforms are less profitable than Android/iOS and have poor SEO and traffic\",\n          \"evidence\": [11]\n        },\n        {\n          \"text\": \"Successful projects have very fast delivery (under a week) and use a cross‑platform stack like Flutter\",\n          \"evidence\": [12]\n        },\n        {\n          \"text\": \"There is skepticism that anyone would pay 299 UAH for the app without verified demand\",\n          \"evidence\": [20, 22]\n        },\n        {\n          \"text\": \"The app claims to fetch USD/UAH rates every 5 minutes and perform calculations locally in the browser\",\n          \"evidence\": [29]\n        },\n        {\n          \"text\": \"The source code and password for a 100 % discount are presumed easy to find or crack\",\n          \"evidence\": [21, 28]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": [\n    {\n      \"text\": \"Is the source code or password for the app searchable and accessible?\",\n      \"evidence\": [21]\n    }\n  ]\n}",
+  "thinking": "We need produce JSON with title, topics, claims, decisions, openQuestions. Identify topics: tax filing process, domain purchase, earning via app, password source, etc. Probably one topic: tax-filing difficulties. Claims with evidence IDs.\n\nOpen questions: any unresolved? Possibly \"А який там сорс код? Можна сам пароль пошуком знайти?\" not answered. Also \"Це ти про що?\" answered. So open question #21 unresolved? No answer later. So include.\n\nDecisions none.\n\nLet's craft.",
+  "parsed": {
+    "title": "Discussion on tax filing, domain purchase, and app monetization",
+    "topics": [
+      {
+        "id": "tax-filing",
+        "title": "Complications with tax filing and calculator usage",
+        "claims": [
+          {
+            "text": "Using aunt Sveta's help allowed the user to correctly refile and pay about 1000 UAH instead of all fines",
+            "evidence": [1]
+          },
+          {
+            "text": "The inspector had not reviewed the user's declarations for 1.5 years and was later reprimanded",
+            "evidence": [1]
+          },
+          {
+            "text": "The tax calculation process is error‑prone, especially regarding which column to subtract which number",
+            "evidence": [8]
+          },
+          {
+            "text": "Quarterly reports must be filed and taxes paid correctly",
+            "evidence": [7]
+          },
+          {
+            "text": "The calculator only works with Ukrainian‑currency FOPs, requiring conversion based on daily exchange rates",
+            "evidence": [19]
+          }
+        ]
+      },
+      {
+        "id": "domain-purchase",
+        "title": "Considerations about buying a domain",
+        "claims": [
+          {
+            "text": "One participant suggests buying a calculator first before affording a domain",
+            "evidence": [4]
+          },
+          {
+            "text": "Another participant doubts buying a domain due to its low value",
+            "evidence": [9, 10]
+          }
+        ]
+      },
+      {
+        "id": "app-monetization",
+        "title": "Ideas and skepticism about earning from a cross‑platform app",
+        "claims": [
+          {
+            "text": "Web platforms are less profitable than Android/iOS and have poor SEO and traffic",
+            "evidence": [11]
+          },
+          {
+            "text": "Successful projects have very fast delivery (under a week) and use a cross‑platform stack like Flutter",
+            "evidence": [12]
+          },
+          {
+            "text": "There is skepticism that anyone would pay 299 UAH for the app without verified demand",
+            "evidence": [20, 22]
+          },
+          {
+            "text": "The app claims to fetch USD/UAH rates every 5 minutes and perform calculations locally in the browser",
+            "evidence": [29]
+          },
+          {
+            "text": "The source code and password for a 100 % discount are presumed easy to find or crack",
+            "evidence": [21, 28]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": [
+      {
+        "text": "Is the source code or password for the app searchable and accessible?",
+        "evidence": [21]
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 10360.529800000018,
+    "ollamaTotalMs": 10198.409775,
+    "promptEvalCount": 2799,
+    "evalCount": 727,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 3,
+    "claimCount": 12,
+    "decisionCount": 0,
+    "openQuestionCount": 1,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.7222222222222222,
+    "goldClaimPrecision": 0.5,
+    "evidencePrecision": 0.4375,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 1,
+    "noiseRetention": 0,
+    "matchedClaimIds": [
+      "security.password-in-bundle",
+      "tax-reporting.paid-help",
+      "tax-reporting.form-risk",
+      "product.uah-only",
+      "product.web-limitations",
+      "product.fast-delivery-strategy"
+    ],
+    "retainedThreadIds": [
+      "calculator-security",
+      "tax-reporting",
+      "calculator-product"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

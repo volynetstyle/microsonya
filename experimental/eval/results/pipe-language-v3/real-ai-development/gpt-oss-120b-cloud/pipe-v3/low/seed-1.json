@@ -1,0 +1,134 @@
+{
+  "case": "real-ai-development",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 1,
+  "inputHash": "c44e2d8f381898078b12b50a1dbf1501e5970203c0d4ef386b86fd514114c47c",
+  "promptHash": "926769814c3c5c8a23a92b4aa3f016579ab9ed97ce364dc887976527a86b02a8",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion on AI, Job Search, and Development Practices\",\n  \"topics\": [\n    {\n      \"id\": \"job-search-automation\",\n      \"title\": \"Automation of Job Search and Resume Generation\",\n      \"claims\": [\n        {\n          \"text\": \"P1 is preparing for a full‑time job search and is considering setting up cloud automation to generate PDF resumes tailored to specific vacancies.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"P1 plans to configure OpenClaw to find vacancies, generate resumes, and write cover letters once the startup closes.\",\n          \"evidence\": [5]\n        }\n      ]\n    },\n    {\n      \"id\": \"ai-skill-requirements\",\n      \"title\": \"Need for Modern AI‑related Skills\",\n      \"claims\": [\n        {\n          \"text\": \"P1 states that in 2026 job seekers must add many AI‑related skills (Cursor, Claude Code, LLM, RAG, embeddings, etc.) to avoid being filtered out by recruiters.\",\n          \"evidence\": [6]\n        },\n        {\n          \"text\": \"P1 notes that AI has become a market mainstream, and lacking AI knowledge makes job searching for JS/Python roles very difficult.\",\n          \"evidence\": [8]\n        }\n      ]\n    },\n    {\n      \"id\": \"ai-impact-development\",\n      \"title\": \"AI Effects on Development Speed and Code Quality\",\n      \"claims\": [\n        {\n          \"text\": \"P2 claims AI accelerates development by having GPT write join queries and other code, reducing routine work.\",\n          \"evidence\": [19]\n        },\n        {\n          \"text\": \"P1 describes a case where AI‑generated raw SQL (450 lines) caused massive, inefficient queries and security issues, illustrating risks of over‑reliance on AI code generation.\",\n          \"evidence\": [30]\n        },\n        {\n          \"text\": \"P1 observes that cloud lowers the entry barrier to programming, leading to poorly optimized code being introduced into production.\",\n          \"evidence\": [30]\n        }\n      ]\n    },\n    {\n      \"id\": \"recruiter-future\",\n      \"title\": \"Speculation on the Future of Recruiters\",\n      \"claims\": [\n        {\n          \"text\": \"P1 expects the recruiting profession to become extinct, with HR functions reduced to internal personnel management.\",\n          \"evidence\": [14]\n        }\n      ]\n    },\n    {\n      \"id\": \"candidate-search-keywords\",\n      \"title\": \"Ineffectiveness of Keyword‑Based Candidate Search\",\n      \"claims\": [\n        {\n          \"text\": \"P4 believes candidate search by keywords is even more detached from reality than before.\",\n          \"evidence\": [13]\n        }\n      ]\n    },\n    {\n      \"id\": \"answer-quality\",\n      \"title\": \"Relation Between Question Quality and Answer Quality\",\n      \"claims\": [\n        {\n          \"text\": \"P4 notes that the quality of a system's answer is often proportional to the quality of the question and the amount of additional knowledge available.\",\n          \"evidence\": [24]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": []\n}",
+  "thinking": "We need to output JSON summarizing. Identify topics. Likely topics: job search automation, AI tools impact, development speed, recruiter search, cloud issues, code generation problems. Gather claims.\n\nLet's extract claims with evidence IDs.\n\nClaims:\n- P1 wants to set up cloud for job search automation generating PDFs (ID1). (claim about planning automation)\n- P1 will set up OpenClaw for vacancy search, resume generation (ID5).\n- Need to add many AI skills like Cursor, Claude Code, LLM, RAG etc to avoid being filtered by recruiters (ID6).\n- AI becomes market mainstream, lack of knowledge makes job search hard (ID8).\n- Acceleration of development due to AI code generation (ID19 and ID9). Actually ID9 about acceleration claim. ID19 is detailed example of bad generation leading to issues. So claim: AI code generation can speed up dev but also cause problems (IDs19,30).\n- Cloud lowers entry barrier to programming (ID30).\n- Recruiter profession may become extinct (ID14).\n- Search for candidates via keywords is detached from reality (ID13).\n- Quality of answers proportional to question quality (ID24).\n\nDecisions none? No explicit decisions.\n\nOpen questions: perhaps any unresolved? No question answered. There is a question? none.\n\nCheck for questions: none evident.\n\nThus decisions empty, openQuestions empty.\n\nCreate topics with ids.\n\ntopic ids:\n- job-search-automation\n- ai-skill-requirements\n- ai-impact-development\n- recruiter-future\n- candidate-search-keywords\n- answer-quality\n\nAssign claims.\n\nNow produce JSON.",
+  "parsed": {
+    "title": "Discussion on AI, Job Search, and Development Practices",
+    "topics": [
+      {
+        "id": "job-search-automation",
+        "title": "Automation of Job Search and Resume Generation",
+        "claims": [
+          {
+            "text": "P1 is preparing for a full‑time job search and is considering setting up cloud automation to generate PDF resumes tailored to specific vacancies.",
+            "evidence": [1]
+          },
+          {
+            "text": "P1 plans to configure OpenClaw to find vacancies, generate resumes, and write cover letters once the startup closes.",
+            "evidence": [5]
+          }
+        ]
+      },
+      {
+        "id": "ai-skill-requirements",
+        "title": "Need for Modern AI‑related Skills",
+        "claims": [
+          {
+            "text": "P1 states that in 2026 job seekers must add many AI‑related skills (Cursor, Claude Code, LLM, RAG, embeddings, etc.) to avoid being filtered out by recruiters.",
+            "evidence": [6]
+          },
+          {
+            "text": "P1 notes that AI has become a market mainstream, and lacking AI knowledge makes job searching for JS/Python roles very difficult.",
+            "evidence": [8]
+          }
+        ]
+      },
+      {
+        "id": "ai-impact-development",
+        "title": "AI Effects on Development Speed and Code Quality",
+        "claims": [
+          {
+            "text": "P2 claims AI accelerates development by having GPT write join queries and other code, reducing routine work.",
+            "evidence": [19]
+          },
+          {
+            "text": "P1 describes a case where AI‑generated raw SQL (450 lines) caused massive, inefficient queries and security issues, illustrating risks of over‑reliance on AI code generation.",
+            "evidence": [30]
+          },
+          {
+            "text": "P1 observes that cloud lowers the entry barrier to programming, leading to poorly optimized code being introduced into production.",
+            "evidence": [30]
+          }
+        ]
+      },
+      {
+        "id": "recruiter-future",
+        "title": "Speculation on the Future of Recruiters",
+        "claims": [
+          {
+            "text": "P1 expects the recruiting profession to become extinct, with HR functions reduced to internal personnel management.",
+            "evidence": [14]
+          }
+        ]
+      },
+      {
+        "id": "candidate-search-keywords",
+        "title": "Ineffectiveness of Keyword‑Based Candidate Search",
+        "claims": [
+          {
+            "text": "P4 believes candidate search by keywords is even more detached from reality than before.",
+            "evidence": [13]
+          }
+        ]
+      },
+      {
+        "id": "answer-quality",
+        "title": "Relation Between Question Quality and Answer Quality",
+        "claims": [
+          {
+            "text": "P4 notes that the quality of a system's answer is often proportional to the quality of the question and the amount of additional knowledge available.",
+            "evidence": [24]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": []
+  },
+  "usage": {
+    "durationMs": 11862.15589999999,
+    "ollamaTotalMs": 11688.752569,
+    "promptEvalCount": 3260,
+    "evalCount": 1018,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 6,
+    "claimCount": 10,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.7619047619047619,
+    "goldClaimPrecision": 0.6,
+    "evidencePrecision": 0.6,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0,
+    "matchedClaimIds": [
+      "job-search.automation-idea",
+      "job-search.ai-skills",
+      "development.routine-speedup",
+      "vibe-coding.bad-backend",
+      "job-search.keyword-filtering",
+      "development.context-quality"
+    ],
+    "retainedThreadIds": [
+      "ai-job-search",
+      "ai-assisted-development",
+      "vibe-coding-risks"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

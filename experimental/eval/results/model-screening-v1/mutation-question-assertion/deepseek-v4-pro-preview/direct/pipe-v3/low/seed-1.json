@@ -1,0 +1,69 @@
+{
+  "case": "mutation-question-assertion",
+  "model": "deepseek-v4-pro:preview",
+  "pipeline": "direct",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 1,
+  "transformation": "identity",
+  "inputHash": "0dbe9198a71f89ced4983a27d503574f78ee09505578d229b071d00127fff702",
+  "promptHash": "12996407cb8a6c1d46000ecd84080c152a101fb61895d63ae717d57e6bc58004",
+  "promptVersion": "v4",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Unavailability notice\",\n  \"topics\": [\n    {\n      \"id\": \"unavailability\",\n      \"title\": \"Unavailability\",\n      \"claims\": [\n        {\n          \"text\": \"This is unavailable on the website.\",\n          \"evidence\": [1]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": []\n}",
+  "thinking": "We are asked: \"Summarize the Telegram conversation directly. Preserve attribution and cite only source message IDs. Do not invent decisions or leave answered questions open. Return JSON only...\"\n\nWe are given an input in a \"pipe-v3\" format. The input shows just one message:\n\nPIPECHAT/3\n#1|\"A\"|\"10:00\"|^0|\"text\"|\"This is unavailable on the website.\"\n\nSo there is a single message with ID 1, sender \"A\", timestamp \"10:00\", unknown flag ^0, type \"text\", content \"This is unavailable on the website.\"\n\nWe need to summarize. There are no other messages. There is no conversation to summarize beyond a single statement. The summary should reflect that there is only one claim. There are no decisions or open questions because nothing is settled or unresolved. We must not invent anything.\n\nThe output should be JSON with the shape: title, topics, decisions, openQuestions. The topics array could have one topic with the claim from A. The claim text: \"This is unavailable on the website.\" Evidence: [1] (message id 1). There are no decisions or open questions, so empty arrays. Title could be something like \"Unavailability of something\" but we don't know what \"this\" refers to. The conversation is just one message, so title could be \"Unavailability notice\". I'll set title to \"Unavailability Notice\" or just \"Single Message\". I'll keep it concise.\n\nThe user says: \"Do not invent decisions or leave answered questions open.\" So I'll have no decisions and no open questions. Topics: one topic, id \"unavailability\", title \"Unavailability\", claim: \"This is unavailable on the website.\" Evidence: [1]. That's all.\n\nOutput JSON only.",
+  "parsed": {
+    "title": "Unavailability notice",
+    "topics": [
+      {
+        "id": "unavailability",
+        "title": "Unavailability",
+        "claims": [
+          {
+            "text": "This is unavailable on the website.",
+            "evidence": [1]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": []
+  },
+  "usage": {
+    "durationMs": 8200.910499999998,
+    "ollamaTotalMs": 7853.22125,
+    "promptEvalCount": 218,
+    "evalCount": 458,
+    "doneReason": "stop",
+    "thinkingTextTokenCount": 363,
+    "finalTextTokenCount": 81
+  },
+  "operationalMetrics": {
+    "modelCalls": 1,
+    "sourceMessageWindows": 1,
+    "semanticInterpretations": 1,
+    "semanticAmplification": 1
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 1,
+    "claimCount": 1,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 1,
+    "goldClaimPrecision": 1,
+    "evidencePrecision": 1,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0,
+    "matchedClaimIds": ["website-unavailable.assertion"],
+    "matchedDecisionIds": [],
+    "matchedOpenQuestionIds": [],
+    "retainedThreadIds": ["website-availability"],
+    "triggeredForbiddenIds": []
+  }
+}

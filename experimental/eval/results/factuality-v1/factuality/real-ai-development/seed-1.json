@@ -1,0 +1,126 @@
+{
+  "case": "real-ai-development",
+  "sourceExperiment": "pipe-language-v3",
+  "sourceModel": "gpt-oss:120b-cloud",
+  "sourceRepresentation": "pipe-v3",
+  "sourceReasoning": "low",
+  "sourceSeed": 1,
+  "judgeModel": "gpt-oss:120b-cloud",
+  "judgeReasoning": "low",
+  "promptVersion": "qa-factuality-v1",
+  "sourceRunHash": "2f63e358efa3c7583d62ae53ddcd0ed70985c988a7e3dbd2ca7cba080c727d4c",
+  "promptHash": "badf2fd462a37486326cf075430cf62b95a3680d44bc6841a865122408020b86",
+  "status": "ok",
+  "raw": "{\n  \"checks\": [\n    {\n      \"itemIndex\": 0,\n      \"question\": \"Is P1 preparing for a full‑time job search and considering setting up cloud automation to generate PDF resumes for specific vacancies?\",\n      \"candidateAnswer\": \"Yes, P1 is preparing for a full‑time job search and is thinking about configuring cloud automation to generate PDF resumes tailored to particular vacancies.\",\n      \"sourceAnswer\": \"Так, П1 каже, що готується до повноцінного пошуку роботи і розмірковує про налаштування клауд‑автоматизації для генерації PDF‑резюме під конкретну вакансію.\",\n      \"answerRelation\": \"equivalent\",\n      \"verdict\": \"supported\",\n      \"explanation\": \"The source text states the same preparation and cloud automation idea as the claim.\"\n    },\n    {\n      \"itemIndex\": 1,\n      \"question\": \"Does P1 plan to configure OpenClaw to find vacancies, generate resumes, and write cover letters after the startup closes?\",\n      \"candidateAnswer\": \"Yes, P1 intends to set up OpenClaw for vacancy searching, resume generation, and cover‑letter writing once the startup shuts down.\",\n      \"sourceAnswer\": \"П1 каже, що чекає закриття стартапу, щоб мати час налаштувати OpenClaw для пошуку вакансій, генерації резюме і написання кавер‑леттер.\",\n      \"answerRelation\": \"equivalent\",\n      \"verdict\": \"supported\",\n      \"explanation\": \"The source directly expresses this future plan.\"\n    },\n    {\n      \"itemIndex\": 2,\n      \"question\": \"Does P1 say that in 2026 job seekers need many AI‑related skills (Cursor, Claude Code, LLM, RAG, embeddings, etc.) to avoid being filtered out by recruiters?\",\n      \"candidateAnswer\": \"Yes, P1 states that in 2026 one must add numerous AI skills like Cursor, Claude Code, LLM, RAG, embeddings to prevent recruiter filtering.\",\n      \"sourceAnswer\": \"П1 зазначає, що у 2026 році потрібно додавати безліч AI‑навыків (Cursor, Claude Code, LLM, RAG, Embeddings тощо), інакше recruiters відсіюватимуть кандидатів.\",\n      \"answerRelation\": \"equivalent\",\n      \"verdict\": \"supported\",\n      \"explanation\": \"The claim mirrors the source wording about required AI skills in 2026.\"\n    },\n    {\n      \"itemIndex\": 3,\n      \"question\": \"Does P1 note that AI has become a market mainstream and lacking AI knowledge makes job searching for JS/Python roles very difficult?\",\n      \"candidateAnswer\": \"Yes, P1 observes that AI is now mainstream and lacking AI knowledge makes finding JS/Python jobs hard.\",\n      \"sourceAnswer\": \"П1 стверджує, що AI став ринковим мейнстрімом і відсутність знань у цій сфері ускладнює пошук роботи на JS/Python.\",\n      \"answerRelation\": \"equivalent\",\n      \"verdict\": \"supported\",\n      \"explanation\": \"The source directly expresses the same observation.\"\n    },\n    {\n      \"itemIndex\": 4,\n      \"question\": \"Does P2 claim that using GPT to write join queries and other code speeds up development by reducing routine work?\",\n      \"candidateAnswer\": \"Yes, P2 claims that GPT writing join queries and code accelerates development by handling routine tasks.\",\n      \"sourceAnswer\": \"П2 зазначає, що замість ручного написання join‑запитів він просить GPT зробити це, що прискорює розробку і знижує рутину.\",\n      \"answerRelation\": \"equivalent\",\n      \"verdict\": \"supported\",\n      \"explanation\": \"The source text matches the claim about GPT‑generated code speeding up work.\"\n    },\n    {\n      \"itemIndex\": 5,\n      \"question\": \"Does P1 describe an incident where AI‑generated raw SQL of about 450 lines caused large, inefficient queries and security problems?\",\n      \"candidateAnswer\": \"Yes, P1 describes a case where AI produced a 450‑line raw SQL query that fetched almost all data, leading to inefficient queries and security issues.\",\n      \"sourceAnswer\": \"П1 розповідає, що AI згенерував 450‑рядковий raw SQL, який тягне майже всі дані, створюючи неоптимальні запити та проблеми безпеки.\",\n      \"answerRelation\": \"equivalent\",\n      \"verdict\": \"supported\",\n      \"explanation\": \"The source provides the exact details cited in the claim.\"\n    },\n    {\n      \"itemIndex\": 6,\n      \"question\": \"Does P1 observe that cloud lowers the entry barrier to programming, resulting in poorly optimized code being deployed to production?\",\n      \"candidateAnswer\": \"Yes, P1 observes that cloud reduces programming entry barriers and leads to suboptimal code in production.\",\n      \"sourceAnswer\": \"П1 зазначає, що клауд сильно знижує поріг входу в програмування, що призводить до неоптимального коду в продакшн.\",\n      \"answerRelation\": \"equivalent\",\n      \"verdict\": \"supported\",\n      \"explanation\": \"The source explicitly links cloud’s low barrier with poorly optimized production code.\"\n    },\n    {\n      \"itemIndex\": 7,\n      \"question\": \"Does P1 expect the recruiting profession to become extinct, leaving HR only for internal personnel management?\",\n      \"candidateAnswer\": \"Yes, P1 expects recruiters to disappear and HR to remain only for internal personnel management.\",\n      \"sourceAnswer\": \"П1 каже, що чекає, коли професія рекрутерів вимре, а HR залишиться лише для менеджингу персоналу.\",\n      \"answerRelation\": \"equivalent\",\n      \"verdict\": \"supported\",\n      \"explanation\": \"The source directly mirrors the claim about the future of recruiting.\"\n    },\n    {\n      \"itemIndex\": 8,\n      \"question\": \"Does P4 believe that searching for candidates by keywords is now more detached from reality than before?\",\n      \"candidateAnswer\": \"Yes, P4 believes keyword‑based candidate search is even more disconnected from reality now.\",\n      \"sourceAnswer\": \"П4 стверджує, що пошук кандидатів за ключовими словами ще більш відсторонений від реальності, ніж раніше.\",\n      \"answerRelation\": \"equivalent\",\n      \"verdict\": \"supported\",\n      \"explanation\": \"The source expresses the same sentiment about keyword search.\"\n    },\n    {\n      \"itemIndex\": 9,\n      \"question\": \"Does P4 note that the quality of a system's answer often correlates with the quality of the question and the amount of additional knowledge available?\",\n      \"candidateAnswer\": \"Yes, P4 notes that answer quality is often proportional to question quality and the extra knowledge the system has.\",\n      \"sourceAnswer\": \"П4 зазначає, що якість відповіді часто пропорційна якості питання та кількості додаткових знань, доступних системі.\",\n      \"answerRelation\": \"equivalent\",\n      \"verdict\": \"supported\",\n      \"explanation\": \"The source directly supports the claim about answer quality dependence.\"\n    }\n  ]\n}",
+  "thinking": "We need to produce checks. For each, create diagnostic question, answer from candidate (same as text), source answer, compare.\n\nAll are claims directly from source, so answers match. So relation equivalent, verdict supported.\n\nWe must ensure question tests central factual content.\n\nProceed.",
+  "parsed": {
+    "checks": [
+      {
+        "itemIndex": 0,
+        "question": "Is P1 preparing for a full‑time job search and considering setting up cloud automation to generate PDF resumes for specific vacancies?",
+        "candidateAnswer": "Yes, P1 is preparing for a full‑time job search and is thinking about configuring cloud automation to generate PDF resumes tailored to particular vacancies.",
+        "sourceAnswer": "Так, П1 каже, що готується до повноцінного пошуку роботи і розмірковує про налаштування клауд‑автоматизації для генерації PDF‑резюме під конкретну вакансію.",
+        "answerRelation": "equivalent",
+        "verdict": "supported",
+        "explanation": "The source text states the same preparation and cloud automation idea as the claim."
+      },
+      {
+        "itemIndex": 1,
+        "question": "Does P1 plan to configure OpenClaw to find vacancies, generate resumes, and write cover letters after the startup closes?",
+        "candidateAnswer": "Yes, P1 intends to set up OpenClaw for vacancy searching, resume generation, and cover‑letter writing once the startup shuts down.",
+        "sourceAnswer": "П1 каже, що чекає закриття стартапу, щоб мати час налаштувати OpenClaw для пошуку вакансій, генерації резюме і написання кавер‑леттер.",
+        "answerRelation": "equivalent",
+        "verdict": "supported",
+        "explanation": "The source directly expresses this future plan."
+      },
+      {
+        "itemIndex": 2,
+        "question": "Does P1 say that in 2026 job seekers need many AI‑related skills (Cursor, Claude Code, LLM, RAG, embeddings, etc.) to avoid being filtered out by recruiters?",
+        "candidateAnswer": "Yes, P1 states that in 2026 one must add numerous AI skills like Cursor, Claude Code, LLM, RAG, embeddings to prevent recruiter filtering.",
+        "sourceAnswer": "П1 зазначає, що у 2026 році потрібно додавати безліч AI‑навыків (Cursor, Claude Code, LLM, RAG, Embeddings тощо), інакше recruiters відсіюватимуть кандидатів.",
+        "answerRelation": "equivalent",
+        "verdict": "supported",
+        "explanation": "The claim mirrors the source wording about required AI skills in 2026."
+      },
+      {
+        "itemIndex": 3,
+        "question": "Does P1 note that AI has become a market mainstream and lacking AI knowledge makes job searching for JS/Python roles very difficult?",
+        "candidateAnswer": "Yes, P1 observes that AI is now mainstream and lacking AI knowledge makes finding JS/Python jobs hard.",
+        "sourceAnswer": "П1 стверджує, що AI став ринковим мейнстрімом і відсутність знань у цій сфері ускладнює пошук роботи на JS/Python.",
+        "answerRelation": "equivalent",
+        "verdict": "supported",
+        "explanation": "The source directly expresses the same observation."
+      },
+      {
+        "itemIndex": 4,
+        "question": "Does P2 claim that using GPT to write join queries and other code speeds up development by reducing routine work?",
+        "candidateAnswer": "Yes, P2 claims that GPT writing join queries and code accelerates development by handling routine tasks.",
+        "sourceAnswer": "П2 зазначає, що замість ручного написання join‑запитів він просить GPT зробити це, що прискорює розробку і знижує рутину.",
+        "answerRelation": "equivalent",
+        "verdict": "supported",
+        "explanation": "The source text matches the claim about GPT‑generated code speeding up work."
+      },
+      {
+        "itemIndex": 5,
+        "question": "Does P1 describe an incident where AI‑generated raw SQL of about 450 lines caused large, inefficient queries and security problems?",
+        "candidateAnswer": "Yes, P1 describes a case where AI produced a 450‑line raw SQL query that fetched almost all data, leading to inefficient queries and security issues.",
+        "sourceAnswer": "П1 розповідає, що AI згенерував 450‑рядковий raw SQL, який тягне майже всі дані, створюючи неоптимальні запити та проблеми безпеки.",
+        "answerRelation": "equivalent",
+        "verdict": "supported",
+        "explanation": "The source provides the exact details cited in the claim."
+      },
+      {
+        "itemIndex": 6,
+        "question": "Does P1 observe that cloud lowers the entry barrier to programming, resulting in poorly optimized code being deployed to production?",
+        "candidateAnswer": "Yes, P1 observes that cloud reduces programming entry barriers and leads to suboptimal code in production.",
+        "sourceAnswer": "П1 зазначає, що клауд сильно знижує поріг входу в програмування, що призводить до неоптимального коду в продакшн.",
+        "answerRelation": "equivalent",
+        "verdict": "supported",
+        "explanation": "The source explicitly links cloud’s low barrier with poorly optimized production code."
+      },
+      {
+        "itemIndex": 7,
+        "question": "Does P1 expect the recruiting profession to become extinct, leaving HR only for internal personnel management?",
+        "candidateAnswer": "Yes, P1 expects recruiters to disappear and HR to remain only for internal personnel management.",
+        "sourceAnswer": "П1 каже, що чекає, коли професія рекрутерів вимре, а HR залишиться лише для менеджингу персоналу.",
+        "answerRelation": "equivalent",
+        "verdict": "supported",
+        "explanation": "The source directly mirrors the claim about the future of recruiting."
+      },
+      {
+        "itemIndex": 8,
+        "question": "Does P4 believe that searching for candidates by keywords is now more detached from reality than before?",
+        "candidateAnswer": "Yes, P4 believes keyword‑based candidate search is even more disconnected from reality now.",
+        "sourceAnswer": "П4 стверджує, що пошук кандидатів за ключовими словами ще більш відсторонений від реальності, ніж раніше.",
+        "answerRelation": "equivalent",
+        "verdict": "supported",
+        "explanation": "The source expresses the same sentiment about keyword search."
+      },
+      {
+        "itemIndex": 9,
+        "question": "Does P4 note that the quality of a system's answer often correlates with the quality of the question and the amount of additional knowledge available?",
+        "candidateAnswer": "Yes, P4 notes that answer quality is often proportional to question quality and the extra knowledge the system has.",
+        "sourceAnswer": "П4 зазначає, що якість відповіді часто пропорційна якості питання та кількості додаткових знань, доступних системі.",
+        "answerRelation": "equivalent",
+        "verdict": "supported",
+        "explanation": "The source directly supports the claim about answer quality dependence."
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 21096.4171,
+    "ollamaTotalMs": 20907.259113,
+    "promptEvalCount": 2260,
+    "evalCount": 1629,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "nItems": 10,
+    "supportedRate": 1,
+    "qaAgreementRate": 1,
+    "contradictedRate": 0,
+    "insufficientRate": 0,
+    "labelValidRate": 1
+  },
+  "variant": "original"
+}

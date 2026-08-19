@@ -1,0 +1,156 @@
+{
+  "case": "real-ai-tools-interleaved",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "jsonl",
+  "reasoning": "low",
+  "seed": 1,
+  "inputHash": "3e5fb5efeccd172ee2f1e8a3ef61dfdf2ed0fd33f2162906991e5f91c1a0d9ba",
+  "promptHash": "fd2f5f3cb9ea89d88080a5bc3208c4cd11f653489ff26dc3ae28bacb13e5d025",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Chat summary\",\n  \"topics\": [\n    {\n      \"id\": \"ai-toolkit\",\n      \"title\": \"AI toolkits and model capabilities\",\n      \"claims\": [\n        {\n          \"text\": \"AI systems are not inherently intelligent; their complex abilities come from toolkits and ready-made solutions.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"InstinctGPT showed that adding a toolkit gives a large boost but cannot fully compensate for a model's base capability gap.\",\n          \"evidence\": [8]\n        },\n        {\n          \"text\": \"Older large models (e.g., GPT‑3 with 175B parameters) were trained on massive data without clear purpose, while modern models aim to achieve more with fewer parameters and sometimes are fine‑tuned for specific tasks.\",\n          \"evidence\": [14]\n        }\n      ]\n    },\n    {\n      \"id\": \"bus-anecdote\",\n      \"title\": \"Odd behavior in public transport\",\n      \"claims\": [\n        {\n          \"text\": \"User P1 described encountering a strange person in a bus who repeatedly emitted gas.\",\n          \"evidence\": [7]\n        },\n        {\n          \"text\": \"User P1 made additional humorous observations about the person’s actions (playing piano, listening to metro announcements, etc.).\",\n          \"evidence\": [9]\n        }\n      ]\n    },\n    {\n      \"id\": \"pin-link\",\n      \"title\": \"Shared Pinboard link\",\n      \"claims\": [\n        {\n          \"text\": \"User P4 shared a Pinboard link and hoped it was still relevant.\",\n          \"evidence\": [16, 18]\n        },\n        {\n          \"text\": \"User P5 cited the source of the Pinboard link as @fionalt.\",\n          \"evidence\": [17]\n        }\n      ]\n    },\n    {\n      \"id\": \"weather-feeling\",\n      \"title\": \"Atmospheric impression\",\n      \"claims\": [\n        {\n          \"text\": \"User P6 commented that the air feels like it could rain, but temperature suggests a lava‑like rain.\",\n          \"evidence\": [20]\n        }\n      ]\n    },\n    {\n      \"id\": \"diploma-cover-price\",\n      \"title\": \"Cost of diploma covers\",\n      \"claims\": [\n        {\n          \"text\": \"User P8 reported a demand of 650 UAH for a diploma cover from Богдан.\",\n          \"evidence\": [23]\n        },\n        {\n          \"text\": \"User P9 said they paid 47 UAH for a cover.\",\n          \"evidence\": [24]\n        },\n        {\n          \"text\": \"User P4 replied that the price is 30 UAH.\",\n          \"evidence\": [25]\n        },\n        {\n          \"text\": \"User P1 expressed indifference, saying a cover is just waste paper.\",\n          \"evidence\": [26]\n        },\n        {\n          \"text\": \"User P8 noted the cover bears the КПІ emblem, which is unique.\",\n          \"evidence\": [27]\n        },\n        {\n          \"text\": \"User P8 argued that no one will keep the cover, as it will be seen only three times in a lifetime.\",\n          \"evidence\": [28, 29]\n        }\n      ]\n    },\n    {\n      \"id\": \"pc-case-space\",\n      \"title\": \"Fitting multiple GPUs in a small PC case\",\n      \"claims\": [\n        {\n          \"text\": \"User P1 discovered that a small PC case, originally fitting one small GPU, can be forced to hold three GPUs using clamps and brute force.\",\n          \"evidence\": [30]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": []\n}",
+  "thinking": "We need to produce JSON summary. Identify topics: AI toolkits, bus anecdote, pin link, weather, diploma cover price, PC case space. Claims accordingly.\n\nDecisions none. Open questions maybe about price? No resolution. So open question: \"Скільки платить за обкладинки диплому?\" but answered with amounts. No unresolved. Maybe none.\n\nLet's craft.\n\n",
+  "parsed": {
+    "title": "Chat summary",
+    "topics": [
+      {
+        "id": "ai-toolkit",
+        "title": "AI toolkits and model capabilities",
+        "claims": [
+          {
+            "text": "AI systems are not inherently intelligent; their complex abilities come from toolkits and ready-made solutions.",
+            "evidence": [1]
+          },
+          {
+            "text": "InstinctGPT showed that adding a toolkit gives a large boost but cannot fully compensate for a model's base capability gap.",
+            "evidence": [8]
+          },
+          {
+            "text": "Older large models (e.g., GPT‑3 with 175B parameters) were trained on massive data without clear purpose, while modern models aim to achieve more with fewer parameters and sometimes are fine‑tuned for specific tasks.",
+            "evidence": [14]
+          }
+        ]
+      },
+      {
+        "id": "bus-anecdote",
+        "title": "Odd behavior in public transport",
+        "claims": [
+          {
+            "text": "User P1 described encountering a strange person in a bus who repeatedly emitted gas.",
+            "evidence": [7]
+          },
+          {
+            "text": "User P1 made additional humorous observations about the person’s actions (playing piano, listening to metro announcements, etc.).",
+            "evidence": [9]
+          }
+        ]
+      },
+      {
+        "id": "pin-link",
+        "title": "Shared Pinboard link",
+        "claims": [
+          {
+            "text": "User P4 shared a Pinboard link and hoped it was still relevant.",
+            "evidence": [16, 18]
+          },
+          {
+            "text": "User P5 cited the source of the Pinboard link as @fionalt.",
+            "evidence": [17]
+          }
+        ]
+      },
+      {
+        "id": "weather-feeling",
+        "title": "Atmospheric impression",
+        "claims": [
+          {
+            "text": "User P6 commented that the air feels like it could rain, but temperature suggests a lava‑like rain.",
+            "evidence": [20]
+          }
+        ]
+      },
+      {
+        "id": "diploma-cover-price",
+        "title": "Cost of diploma covers",
+        "claims": [
+          {
+            "text": "User P8 reported a demand of 650 UAH for a diploma cover from Богдан.",
+            "evidence": [23]
+          },
+          {
+            "text": "User P9 said they paid 47 UAH for a cover.",
+            "evidence": [24]
+          },
+          {
+            "text": "User P4 replied that the price is 30 UAH.",
+            "evidence": [25]
+          },
+          {
+            "text": "User P1 expressed indifference, saying a cover is just waste paper.",
+            "evidence": [26]
+          },
+          {
+            "text": "User P8 noted the cover bears the КПІ emblem, which is unique.",
+            "evidence": [27]
+          },
+          {
+            "text": "User P8 argued that no one will keep the cover, as it will be seen only three times in a lifetime.",
+            "evidence": [28, 29]
+          }
+        ]
+      },
+      {
+        "id": "pc-case-space",
+        "title": "Fitting multiple GPUs in a small PC case",
+        "claims": [
+          {
+            "text": "User P1 discovered that a small PC case, originally fitting one small GPU, can be forced to hold three GPUs using clamps and brute force.",
+            "evidence": [30]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": []
+  },
+  "usage": {
+    "durationMs": 11014.20650000003,
+    "ollamaTotalMs": 10735.9197,
+    "promptEvalCount": 2136,
+    "evalCount": 881,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 6,
+    "claimCount": 15,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.8235294117647058,
+    "goldClaimPrecision": 0.4666666666666667,
+    "evidencePrecision": 0.47058823529411764,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0.2,
+    "matchedClaimIds": [
+      "diploma-cover.low-value",
+      "ai-tooling.capability-view",
+      "ai-tooling.instinctgpt-result",
+      "ai-tooling.model-comparison",
+      "bus-passenger.repeated-encounter",
+      "diploma-cover.prices",
+      "pc-case.three-gpus"
+    ],
+    "retainedThreadIds": [
+      "diploma-cover",
+      "ai-tooling",
+      "bus-passenger",
+      "pc-case"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

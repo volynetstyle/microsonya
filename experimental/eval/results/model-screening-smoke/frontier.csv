@@ -1,0 +1,4 @@
+model,pipeline,representation,transformation,reasoning,n,okRuns,okRate,recallMean,goldClaimPrecisionMean,evidencePrecisionMean,falseOpenQuestionRateMean,noiseRetentionMean,promptTokensMean,thinkingTokensMean,finalTokensMean,generatedTokensMean,reasoningShareMean,latencyMsMean
+gpt-oss:120b,deterministic-shell,pipe-v3,identity,low,1,0,0,,,,,,,,,,,820.002900
+qwen3.5:397b,deterministic-shell,pipe-v3,identity,low,1,0,0,,,,,,,,,,,312.558100
+deepseek-v4-pro:preview,deterministic-shell,pipe-v3,identity,low,1,0,0,,,,,,,,,,,297.146600

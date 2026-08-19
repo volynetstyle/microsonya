@@ -1,0 +1,134 @@
+{
+  "case": "real-ai-development",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "natural",
+  "reasoning": "low",
+  "seed": 5,
+  "inputHash": "c44e2d8f381898078b12b50a1dbf1501e5970203c0d4ef386b86fd514114c47c",
+  "promptHash": "6f6a93a1a7c17bdd442d22544b6808e07d5479865ebaeb3a171a61b9e72ad468",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion on AI tools, job search automation, and code generation risks\",\n  \"topics\": [\n    {\n      \"id\": \"job-search-automation\",\n      \"title\": \"Automation of job search and résumé generation\",\n      \"claims\": [\n        {\n          \"text\": \"User plans to set up OpenClaw for finding vacancies, generating résumés and cover letters.\",\n          \"evidence\": [5]\n        },\n        {\n          \"text\": \"Full automation with PDF résumé generation is seen as better because recruiters can analyze the document during technical interviews.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"Lack of AI‑related skills (e.g., Cursor, Claude Code, LLM, RAG, embeddings) makes job search for JS/Python positions difficult in 2026.\",\n          \"evidence\": [6, 8]\n        }\n      ]\n    },\n    {\n      \"id\": \"ai-tools-impact\",\n      \"title\": \"Impact of modern AI tools on development speed\",\n      \"claims\": [\n        {\n          \"text\": \"Acceleration of development became significant only after 2025, despite early ideas appearing around 2022.\",\n          \"evidence\": [9]\n        },\n        {\n          \"text\": \"Using GPT to generate SQL joins and other code dramatically speeds up routine tasks.\",\n          \"evidence\": [19]\n        },\n        {\n          \"text\": \"AI‑generated code can introduce performance and security problems, such as overly large raw SQL queries that are slow in production.\",\n          \"evidence\": [30, 35]\n        }\n      ]\n    },\n    {\n      \"id\": \"ai-recruiter-critique\",\n      \"title\": \"Critique of AI in recruiting and HR\",\n      \"claims\": [\n        {\n          \"text\": \"The speaker expects the recruiting profession to become obsolete and sees HR as merely personnel management.\",\n          \"evidence\": [14]\n        },\n        {\n          \"text\": \"Search for candidates using AI‑related keywords is detached from reality.\",\n          \"evidence\": [13]\n        }\n      ]\n    },\n    {\n      \"id\": \"code-quality-concerns\",\n      \"title\": \"Concerns about code quality from AI generation\",\n      \"claims\": [\n        {\n          \"text\": \"Generated code may be inefficient (e.g., SELECT * without approval) and cause production issues.\",\n          \"evidence\": [35]\n        },\n        {\n          \"text\": \"Incremental computation ideas are being replaced by views, indicating a shift in engineering practice.\",\n          \"evidence\": [34]\n        }\n      ]\n    },\n    {\n      \"id\": \"casual-conversation\",\n      \"title\": \"Irrelevant or humorous remarks\",\n      \"claims\": [\n        {\n          \"text\": \"Several participants made jokes, sarcasm, or unrelated comments (e.g., about “Ford Mustang”, “strawberries”, or random text).\",\n          \"evidence\": [29, 27, 28]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": []\n}",
+  "thinking": "Need produce JSON. Identify topics: job search automation, AI tools impact, code generation risks, AI in recruiting, etc. Claims with evidence ids. Decisions none. Open questions? maybe none. Provide.\n\n",
+  "parsed": {
+    "title": "Discussion on AI tools, job search automation, and code generation risks",
+    "topics": [
+      {
+        "id": "job-search-automation",
+        "title": "Automation of job search and résumé generation",
+        "claims": [
+          {
+            "text": "User plans to set up OpenClaw for finding vacancies, generating résumés and cover letters.",
+            "evidence": [5]
+          },
+          {
+            "text": "Full automation with PDF résumé generation is seen as better because recruiters can analyze the document during technical interviews.",
+            "evidence": [1]
+          },
+          {
+            "text": "Lack of AI‑related skills (e.g., Cursor, Claude Code, LLM, RAG, embeddings) makes job search for JS/Python positions difficult in 2026.",
+            "evidence": [6, 8]
+          }
+        ]
+      },
+      {
+        "id": "ai-tools-impact",
+        "title": "Impact of modern AI tools on development speed",
+        "claims": [
+          {
+            "text": "Acceleration of development became significant only after 2025, despite early ideas appearing around 2022.",
+            "evidence": [9]
+          },
+          {
+            "text": "Using GPT to generate SQL joins and other code dramatically speeds up routine tasks.",
+            "evidence": [19]
+          },
+          {
+            "text": "AI‑generated code can introduce performance and security problems, such as overly large raw SQL queries that are slow in production.",
+            "evidence": [30, 35]
+          }
+        ]
+      },
+      {
+        "id": "ai-recruiter-critique",
+        "title": "Critique of AI in recruiting and HR",
+        "claims": [
+          {
+            "text": "The speaker expects the recruiting profession to become obsolete and sees HR as merely personnel management.",
+            "evidence": [14]
+          },
+          {
+            "text": "Search for candidates using AI‑related keywords is detached from reality.",
+            "evidence": [13]
+          }
+        ]
+      },
+      {
+        "id": "code-quality-concerns",
+        "title": "Concerns about code quality from AI generation",
+        "claims": [
+          {
+            "text": "Generated code may be inefficient (e.g., SELECT * without approval) and cause production issues.",
+            "evidence": [35]
+          },
+          {
+            "text": "Incremental computation ideas are being replaced by views, indicating a shift in engineering practice.",
+            "evidence": [34]
+          }
+        ]
+      },
+      {
+        "id": "casual-conversation",
+        "title": "Irrelevant or humorous remarks",
+        "claims": [
+          {
+            "text": "Several participants made jokes, sarcasm, or unrelated comments (e.g., about “Ford Mustang”, “strawberries”, or random text).",
+            "evidence": [29, 27, 28]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": []
+  },
+  "usage": {
+    "durationMs": 7723.759900000005,
+    "ollamaTotalMs": 7503.906217,
+    "promptEvalCount": 2990,
+    "evalCount": 698,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 5,
+    "claimCount": 11,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.8095238095238095,
+    "goldClaimPrecision": 0.6363636363636364,
+    "evidencePrecision": 0.5333333333333333,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0.09090909090909091,
+    "matchedClaimIds": [
+      "job-search.ai-skills",
+      "job-search.automation-idea",
+      "development.routine-speedup",
+      "vibe-coding.bad-backend",
+      "job-search.keyword-filtering",
+      "vibe-coding.review-failure",
+      "cars.miata-preference"
+    ],
+    "retainedThreadIds": [
+      "ai-job-search",
+      "ai-assisted-development",
+      "vibe-coding-risks",
+      "cars"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

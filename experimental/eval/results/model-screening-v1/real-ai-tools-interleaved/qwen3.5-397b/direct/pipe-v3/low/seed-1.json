@@ -1,0 +1,158 @@
+{
+  "case": "real-ai-tools-interleaved",
+  "model": "qwen3.5:397b",
+  "pipeline": "direct",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 1,
+  "transformation": "identity",
+  "inputHash": "3e5fb5efeccd172ee2f1e8a3ef61dfdf2ed0fd33f2162906991e5f91c1a0d9ba",
+  "promptHash": "30f37e73b18d156c5b76a5c837f23851d30f215fa15a006cd17ed981ceaf0f4c",
+  "promptVersion": "v4",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Обговорення ШІ, інциденту в транспорті та витрат на диплом\",\n  \"topics\": [\n    {\n      \"id\": \"ai-capabilities\",\n      \"title\": \"Можливості та розвиток ШІ\",\n      \"claims\": [\n        {\n          \"text\": \"P1 стверджує, що ШІ не може бути розумним апріорі, це лише тулкіт та готові приклади\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"P2 вважає, що людям не потрібно, щоб ШІ був розумним\",\n          \"evidence\": [2]\n        },\n        {\n          \"text\": \"P1 хоче протестувати моделі 2022-2023 років із сучасним тулкітом\",\n          \"evidence\": [3]\n        },\n        {\n          \"text\": \"P2 посилається на InstinctGPT, де тулкіт не компенсував нестачу базових здібностей моделі\",\n          \"evidence\": [8]\n        },\n        {\n          \"text\": \"P1 обговорює метрику параметрів моделей та підходи до тренування coder-моделей\",\n          \"evidence\": [14]\n        }\n      ]\n    },\n    {\n      \"id\": \"transport-incident\",\n      \"title\": \"Інцидент у громадському транспорті\",\n      \"claims\": [\n        {\n          \"text\": \"P1 описує дивну поведінку чоловіка в автобусі, який грав на піаніно та імітував звуки блювоти\",\n          \"evidence\": [4, 7, 9]\n        },\n        {\n          \"text\": \"P2 висловлює здивування почутим\",\n          \"evidence\": [11, 12]\n        }\n      ]\n    },\n    {\n      \"id\": \"diploma-covers\",\n      \"title\": \"Вартість обкладинок для дипломів\",\n      \"claims\": [\n        {\n          \"text\": \"P8 запитує про ціни та згадує суму 650 гривень для Богдана\",\n          \"evidence\": [22, 23]\n        },\n        {\n          \"text\": \"P9 та P4 повідомляють про сплачені суми 47 та 30 гривень відповідно\",\n          \"evidence\": [24, 25]\n        },\n        {\n          \"text\": \"P1 пропонує відмовитися від обкладинки, називаючи її макулатурою\",\n          \"evidence\": [26]\n        },\n        {\n          \"text\": \"P8 зазначає унікальність герба КПП, але визнає, що обкладинку рідко бачать\",\n          \"evidence\": [27, 29]\n        }\n      ]\n    },\n    {\n      \"id\": \"weather-and-hardware\",\n      \"title\": \"Погода та комп'ютерне залізо\",\n      \"claims\": [\n        {\n          \"text\": \"P3 описує частину міста під хмарами\",\n          \"evidence\": [15]\n        },\n        {\n          \"text\": \"P6 та P7 описують спеку та відчуття дощу з лави\",\n          \"evidence\": [20, 21]\n        },\n        {\n          \"text\": \"P1 повідомляє про можливість розміщення трьох відеокарт у маленькому корпусі за допомогою стяжок\",\n          \"evidence\": [30]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": [\n    {\n      \"text\": \"P1 планує дослідити, що не так з підходом до тренування coder-моделей\",\n      \"evidence\": [14]\n    }\n  ]\n}",
+  "thinking": "Thinking Process:\n\n1.  **Analyze the Request:**\n    *   Task: Summarize the Telegram conversation directly.\n    *   Constraints:\n        *   Preserve attribution (who said what).\n        *   Cite only source message IDs (e.g., `#1`, `#2`).\n        *   Do not invent decisions or leave answered questions open.\n        *   Return JSON only.\n        *   Exact JSON shape provided.\n    *   Input Format: `pipe-v3` (Telegram export style).\n    *   Language: Ukrainian (based on input).\n\n2.  **Analyze the Input Data (Messages):**\n    *   #1 (P1): AI isn't smart by default, it's a toolkit/examples/MCP.\n    *   #2 (P2): Nobody needs AI to be smart, people don't know how.\n    *   #3 (P1): Wants to test 2022-2023 AI with modern toolkit (opencode), suspects old models fail due to context window.\n    *   #4-#7, #9 (P1): Story about strange people in public transport (guy playing piano loud, listening to metro announcements, vomiting sounds on phone).\n    *   #8 (P2): Mentions InstinctGPT study (3B vs GPT-3 175B with tools), toolkit helps but doesn't compensate for lack of base capabilities.\n    *   #10 (P1): Sarcastic description of someone (ambassador of \"niche\", etc.).\n    *   #11-#12 (P2): Reaction to P1's transport story (\"та єбать\", \"я офігів\").\n    *   #14 (P1): Discusses AI parameters (ChatGPT 3 175B vs active parameters), modern models optimize fewer parameters, coder models exist but are ignored.\n    *   #15 (P3): \"частина міста під хмарами\" (part of city under clouds).\n    *   #16 (P4): Pinterest link.\n    *   #17 (P5): Source attribution for link.\n    *   #18 (P4): Hopes it's still relevant.\n    *   #19 (P6): Reacts to #10 (\"sounds cool based on your words\").\n    *   #20 (P6): Weather comment (feels like rain, but lava rain temperature).\n    *   #21 (P7): It was especially hot today.\n    *   #22-#23 (P8): Diploma cover costs (Bohdan asked 650).\n    *   #24 (P9): Paid 47 recently.\n    *   #25 (P4): 30 hryvnias.\n    *   #26 (P1): Let them give without cover, it's waste paper anyway.\n    *   #27 (P8): But it has KPI emblem (unique).\n    *   #28-#29 (P8): Nobody will take that cover, you look at it 3 times in life.\n    *   #30 (P1): PC case fit story (docs say 1 GPU, fit 3 with zip ties).\n\n3.  **Identify Topics:**\n    *   **AI Capabilities & Tools:** Messages #1, #2, #3, #8, #14. Discussion on AI intelligence, toolkits, model parameters, old vs new models.\n    *   **Public Transport Incident:** Messages #4, #5, #7, #9, #11, #12. P1 describing a strange guy on the bus, P2 reacting.\n    *   **Weather/Environment:** Messages #15, #20, #21. Clouds, heat, lava rain feeling.\n    *   **Diploma Cover Costs:** Messages #22, #23, #24, #25, #26, #27, #28, #29. Discussion on prices (650, 47, 30) and necessity.\n    *   **PC Hardware:** Message #30. Fitting GPUs in a case.\n    *   **Random/Links:** #10, #16, #17, #18, #19. (P10 is sarcastic description, P16-18 is a link, P19 reacts to P10). These seem fragmented. P10/P19 fits loosely with personal commentary. P16-18 is a shared link. I should probably group the link share or ignore if too minor, but the prompt asks to summarize the conversation. The link share is a distinct interaction. However, looking at the main threads: AI, Transport, Weather, Diploma, PC. The link (#16-18) is minor. P10/P19 is minor. I will focus on the substantive topics.\n    *   Actually, looking closely at #10 and #19: P1 describes someone sarcastically, P6 says it sounds cool. This is a minor topic.\n    *   Looking at #16-18: P4 shares a link, P5 cites source, P4 hopes it's relevant. Minor topic.\n    *   I should prioritize the main discussion threads.\n    *   Topic 1: AI Discussion ( #1, #2, #3, #8, #14).\n    *   Topic 2: Public Transport Story ( #4, #5, #7, #9, #11, #12).\n    *   Topic 3: Diploma Covers ( #22, #23, #24, #25, #26, #27, #28, #29).\n    *   Topic 4: Weather ( #15, #20, #21).\n    *   Topic 5: PC Case ( #30).\n\n    Let's consolidate smaller topics if possible or keep them distinct if they represent distinct \"claims\". The schema asks for \"topics\" with \"claims\".\n    I will group AI, Transport, Diploma, Weather, PC.\n\n4.  **Identify Decisions:**\n    *   Are there any settled actions?\n    *   Diploma discussion: P1 suggests \"Let them give without cover\" (#26), P8 argues against taking it (#28). No clear decision made to *not* buy or *to* buy, just opinions exchanged.\n    *   AI: P1 wants to test old AI (#3), but no decision to actually do it.\n    *   No clear decisions found.\n\n5.  **Identify Open Questions:**\n    *   P1 mentions needing to check what's wrong with coder models approach (#14): \"треба буде глянути що не так з цим підходом\". This is an open question/task.\n    *   Diploma cost variance is discussed, but no specific question left open other than rhetorical ones.\n    *   P4 hopes link is relevant (#18), not really a question.\n    *   The most clear open question/intent is P1's statement about checking coder models (#14).\n\n6.  **Drafting the JSON:**\n\n    *   *Title:* \"Обговорення ШІ, транспорту та витрат на диплом\" (Discussion on AI, Transport, and Diploma Costs).\n    *   *Topic 1: AI Capabilities.*\n        *   Claim: P1 says AI isn't smart by default, it's a toolkit (#1).\n        *   Claim: P2 says nobody needs AI to be smart (#2).\n        *   Claim: P2 cites InstinctGPT study showing toolkit doesn't compensate for base capabilities (#8).\n        *   Claim: P1 discusses model parameters and training approaches (#14).\n    *   *Topic 2: Public Transport Incident.*\n        *   Claim: P1 describes a strange man on the bus playing piano and making vomiting sounds (#4, #7, #9).\n        *   Claim: P2 reacts with shock (#11, #12).\n    *   *Topic 3: Diploma Cover Costs.*\n        *   Claim: P8 asks about costs, mentions 650 for Bohdan (#22, #23).\n        *   Claim: P9 paid 47 recently (#24).\n        *   Claim: P4 paid 30 (#25).\n        *   Claim: P1 suggests skipping the cover as it's waste (#26).\n        *   Claim: P8 argues it has a unique KPI emblem but admits nobody looks at it (#27, #29).\n    *   *Topic 4: Weather & Hardware.*\n        *   Claim: P6 and P7 describe hot weather and feeling of lava rain (#20, #21).\n        *   Claim: P1 mentions fitting 3 GPUs in a small PC case using zip ties (#30).\n\n    *   *Decisions:* None clearly settled.\n    *   *Open Questions:* P1 intends to check what's wrong with the coder model training approach (#14).\n\n    *Refining Claims for Attribution:*\n    Need to ensure attribution is in the text (\"P1 says...\", \"P2 notes...\").\n    Need to ensure evidence IDs are correct.\n\n    *Refining Topics:*\n    Maybe combine Weather and PC? They are unrelated. Better keep separate or group minor ones. The schema allows multiple topics. I'll keep AI, Transport, Diploma as main ones. Weather and PC are single messages mostly. I will include them as topics to be comprehensive.\n\n    *Check Constraints:*\n    \"Do not invent decisions or leave answered questions open.\" -> If there is no decision, leave array empty or omit? The schema shows `\"decisions\": []`. I should include the key if it exists in the template, even if empty? The prompt says \"Return JSON only, with exactly this shape\". I should include the keys.\n    \"Cite only source message IDs\".\n    \"Preserve attribution\".\n\n    *Drafting Content:*\n\n    Title: \"Чат про ШІ, дивні випадки та витрати\"\n    Topics:\n    1. AI Discussion\n    2. Transport Story\n    3. Diploma Covers\n    4. Weather & Hardware (Minor topics)\n\n    Let's map IDs carefully.\n    AI: #1, #2, #3, #8, #14.\n    Transport: #4, #5, #7, #9, #11, #12.\n    Diploma: #22, #23, #24, #25, #26, #27, #28, #29.\n    Weather: #15, #20, #21.\n    PC: #30.\n    Link: #16, #17, #18. (Maybe skip link as it's just a share without discussion).\n    Sarcasm: #10, #19. (Skip or merge).\n\n    Let's focus on the substantive ones.\n    Topic 1: ШІ та моделі (AI & Models)\n    Topic 2: Інцидент в транспорті (Transport Incident)\n    Topic 3: Вартість обкладинок дипломів (Diploma Cover Costs)\n    Topic 4: Погода та залізо (Weather & Hardware)\n\n    Decisions: Empty list? Or maybe P8's statement \"ніхто ту обкладинку не буде брати\" (#28) is a conclusion? No, it's an opinion. P1's \"треба буде глянути\" (#14) is an open question/task.\n\n    Open Questions: P1 plans to investigate coder model training issues (#14).\n\n    *JSON Construction:*\n    Ensure valid JSON.\n    Ensure IDs are numbers in the evidence arrays.\n    Ensure attribution in claim text.\n\n    *Reviewing Message #14:* \"треба буде глянути що не так з цим підходом\" (need to check what's wrong with this approach). This is an open question/intent.\n    *Reviewing Message #26:* \"Хай без обкладинки дають\" (Let them give without cover). This is a suggestion, not a decision.\n    *Reviewing Message #28:* \"нікто ту обкладинку не буде брати\" (nobody will take that cover). Prediction.\n\n    Okay, ready to generate.\n\n    *Self-Correction on Attribution:* The prompt says \"Preserve attribution\". I should use the participant IDs (P1, P2, etc.) in the claim text.\n    *Self-Correction on IDs:* The input uses `#1`, `#2`. The JSON example shows `17`, `18`. I should use the integer ID (1, 2, 3...).\n\n    *Topic Grouping:*\n    To keep it concise, I might merge Weather and PC into \"Miscellaneous\" or keep separate. Separate is clearer.\n    Actually, looking at the volume, AI, Transport, Diploma are the main threads. Weather and PC are single messages (mostly). I will include them to be accurate to the \"Summarize the conversation\" instruction.\n\n    *Decisions:* There are no explicit decisions (e.g., \"Okay, we will do X\"). So `decisions` will be empty.\n    *Open Questions:* P1's intent to research (#14).\n\n    *Final check on JSON shape:*\n    Keys: title, topics, decisions, openQuestions.\n    Topics structure: id, title, claims (text, evidence).\n    Decisions structure: text, evidence.\n    OpenQuestions structure: text, evidence.\n\n    Let's write the claims.\n\n    Topic: AI Discussion\n    Claim: P1 states AI isn't smart by default but uses toolkits (#1).\n    Claim: P2 argues people don't need AI to be smart (#2).\n    Claim: P2 cites InstinctGPT study showing toolkits don't compensate for base model weaknesses (#8).\n    Claim: P1 discusses parameter metrics and coder model training issues (#14).\n\n    Topic: Transport Story\n    Claim: P1 describes encountering a strange man on the bus twice (#4, #7).\n    Claim: P1 details the man's behavior including playing piano and vomiting sounds (#9).\n    Claim: P2 expresses shock at the story (#11, #12).\n\n    Topic: Diploma Covers\n    Claim: P8 asks about costs and mentions 650 UAH for Bohdan (#22, #23).\n    Claim: P9 and P4 report paying 47 and 30 UAH respectively (#24, #25).\n    Claim: P1 suggests refusing the cover as it's waste (#26).\n    Claim: P8 notes the cover has a unique KPI emblem but admits it's rarely seen (#27, #29).\n\n    Topic: Weather and Hardware\n    Claim: P6 and P7 describe hot weather resembling lava rain (#20, #21).\n    Claim: P1 shares experience fitting 3 GPUs in a small case using zip ties (#30).\n\n    Open Question:\n    Text: P1 intends to check what is wrong with the coder model training approach.\n    Evidence: [14]\n\n    Decisions: [] (Empty)\n\n    Wait, I need to make sure I don't leave answered questions open. There aren't really questions asked that were answered. P8 asks \"А скільки з нас брали грошей за обкладинки диплому?\" (#22). Answers were given (#23, #24, #25). So that question is answered. I should not list it as open.\n    The only open thing is P1's self-assigned task in #14.\n\n    One more check: \"Preserve attribution\". I will write \"P1 states...\", \"P2 argues...\".\n    \"Cite only source message IDs\". I will use numbers like 1, 2, 3.\n\n    Let's assemble the JSON.\n\n    One detail: \"Return JSON only, with exactly this shape\".\n    I need to make sure I don't add markdown code blocks like ```json ... ``` unless implied, but usually \"Return JSON only\" means raw JSON. However, often in these prompts, markdown wrapping is expected for clarity. The instruction says \"Return JSON only\". I will output raw JSON text.\n    Wait, looking at the instruction \"Return JSON only, with exactly this shape\". I will provide the raw JSON string.\n\n    Wait, I should check if there are any decisions.\n    Is \"ніхто ту обкладинку не буде брати\" (#28) a decision? No, it's a prediction.\n    Is \"Хай без обкладинки дають\" (#26) a decision? No, it's a wish/suggestion.\n    So decisions array is empty.\n\n    Open Questions:\n    P1 says \"треба буде глянути\" (will need to check). This is an open task/question.\n\n    Okay, ready.\n\n    One detail on IDs: The input shows `#1`, `#2`. I will use `1`, `2` in the evidence arrays.\n\n    Let's refine the topics to be concise.\n    Title: \"Обговорення ШІ, інциденту в транспорті та витрат на диплом\"\n\n    Topic IDs: kebab-case.\n    \"ai-discussion\"\n    \"transport-incident\"\n    \"diploma-covers\"\n    \"weather-and-hardware\"\n\n    Claims need to be attributed.\n    Evidence arrays must contain integers.\n\n    Let's double check message #10 and #19.\n    #10 P1: Sarcastic description.\n    #19 P6: \"Sounds cool based on your words\".\n    This is a tiny thread. I might skip it to keep the summary focused on main topics, or include it in a \"Misc\" topic. Given the instruction \"Summarize the conversation directly\", skipping very minor chit-chat is acceptable for a summary, but including it is more accurate. I'll stick to the main substantive topics to keep the summary high-quality. The prompt says \"Summarize\", implying extraction of key information. The AI, Transport, Diploma threads are the key information. Weather/PC are single liners but distinct. I'll include Weather/PC as they are distinct statements. I'll skip the #10/#19 sarcasm and #16/#17/#18 link share as they lack substantive content for a summary.\n\n    Wait, #15 \"частина міста під хмарами\" is also minor.\n    I will group Weather (#15, #20, #21) and PC (#30) into one topic \"Miscellaneous Observations\" or keep separate. Let's keep separate for clarity.\n    Actually, to avoid bloating, I'll combine Weather and PC into \"Environment and Hardware\".\n\n    Final plan:\n    1. AI\n    2. Transport\n    3. Diploma\n    4. Environment/Hardware\n\n    Open Questions: #14.\n    Decisions: None.\n\n    Let's construct the JSON.\n\n    One check: \"Do not invent decisions or leave answered questions open.\"\n    Question #22 \"А скільки з нас брали грошей...\" was answered by #23, #24, #25. So not open.\n    Question #14 \"треба буде глянути\" is open.\n\n    Okay.\n\n    One more check on IDs.\n    Input:\n    #1 ...\n    #2 ...\n    ...\n    #30 ...\n\n    I will use 1, 2, ... 30 in the evidence arrays.\n\n    Attribution: \"P1\", \"P2\", etc.\n\n    Let's write.\n\n    ```json\n    {\n      \"title\": \"Обговорення ШІ, інциденту в транспорті та витрат на диплом\",\n      \"topics\": [\n        {\n          \"id\": \"ai-capabilities\",\n          \"title\": \"Можливості та розвиток ШІ\",\n          \"claims\": [\n            {\n              \"text\": \"P1 стверджує, що ШІ не може бути розумним апріорі, це лише тулкіт та готові приклади\",\n              \"evidence\": [1]\n            },\n            {\n              \"text\": \"P2 вважає, що людям не потрібно, щоб ШІ був розумним\",\n              \"evidence\": [2]\n            },\n            {\n              \"text\": \"P2 посилається на InstinctGPT, де тулкіт не компенсував нестачу базових здібностей моделі\",\n              \"evidence\": [8]\n            },\n            {\n              \"text\": \"P1 обговорює метрику параметрів моделей та підходи до тренування coder-моделей\",\n              \"evidence\": [14]\n            }\n          ]\n        },\n        {\n          \"id\": \"transport-incident\",\n          \"title\": \"Інцидент у громадському транспорті\",\n          \"claims\": [\n            {\n              \"text\": \"P1 описує дивну поведінку чоловіка в автобусі, який грав на піаніно та імітував звуки блювоти\",\n              \"evidence\": [4, 7, 9]\n            },\n            {\n              \"text\": \"P2 висловлює здивування почутим\",\n              \"evidence\": [11, 12]\n            }\n          ]\n        },\n        {\n          \"id\": \"diploma-covers\",\n          \"title\": \"Вартість обкладинок для дипломів\",\n          \"claims\": [\n            {\n              \"text\": \"P8 запитує про ціни та згадує суму 650 гривень для Богдана\",\n              \"evidence\": [22, 23]\n            },\n            {\n              \"text\": \"P9 та P4 повідомляють про сплачені суми 47 та 30 гривень відповідно\",\n              \"evidence\": [24, 25]\n            },\n            {\n              \"text\": \"P1 пропонує відмовитися від обкладинки, називаючи її макулатурою\",\n              \"evidence\": [26]\n            },\n            {\n              \"text\": \"P8 зазначає унікальність герба КПП, але визнає, що обкладинку рідко бачать\",\n              \"evidence\": [27, 29]\n            }\n          ]\n        },\n        {\n          \"id\": \"weather-and-hardware\",\n          \"title\": \"Погода та комп'ютерне залізо\",\n          \"claims\": [\n            {\n              \"text\": \"P6 та P7 описують спеку та відчуття дощу з лави\",\n              \"evidence\": [20, 21]\n            },\n            {\n              \"text\": \"P1 повідомляє про можливість розміщення трьох відеокарт у маленькому корпусі за допомогою стяжок\",\n              \"evidence\": [30]\n            }\n          ]\n        }\n      ],\n      \"decisions\": [],\n      \"openQuestions\": [\n        {\n          \"text\": \"P1 планує дослідити, що не так з підходом до тренування coder-моделей\",\n          \"evidence\": [14]\n        }\n      ]\n    }\n    ```\n\n    Wait, I need to check if I missed anything important.\n    Message #3: P1 wants to test old AI. This is an intent, maybe an open question? \"Просто хочеться якось спробувати...\". It's similar to #14. I can add it to open questions or claims. It's more of a wish. #14 is more of a \"need to check\". I'll keep #14 as open question. I can add #3 to AI claims.\n    Claim: P1 wants to test 2022-2023 AI with modern toolkit.\n    I'll add this to AI claims.\n\n    Also Message #15 \"частина міста під хмарами\". I skipped it in the draft above for Weather topic (used 20, 21). I should include 15 if it fits weather. Yes, \"city under clouds\". I'll add 15 to evidence for weather.\n\n    Message #10 and #19. I decided to skip.\n    Message #16-18. Link share. Skip.\n\n    Revised AI Claims:\n    1. P1 states AI isn't smart by default... (#1)\n    2. P2 says nobody needs AI to be smart... (#2)\n    3. P1 wants to test old AI with modern toolkit... (#3)\n    4. P2 cites InstinctGPT... (#8)\n    5. P1 discusses parameters... (#14)\n\n    Revised Weather Claims:\n    1. P3 mentions city under clouds (#15)\n    2. P6/P7 describe heat (#20, #21)\n\n    Let's update the JSON.\n\n    One more check: \"Do not invent decisions\".\n    Is there a decision on the diploma? P8 says \"ніхто ту обкладинку не буде брати\" (#28). It's a statement, not a group decision.\n    So decisions remains empty.\n\n    Final check on JSON syntax.\n    Keys must be double quoted.\n    No trailing commas.\n    Integers in evidence.\n\n    Ready.",
+  "parsed": {
+    "title": "Обговорення ШІ, інциденту в транспорті та витрат на диплом",
+    "topics": [
+      {
+        "id": "ai-capabilities",
+        "title": "Можливості та розвиток ШІ",
+        "claims": [
+          {
+            "text": "P1 стверджує, що ШІ не може бути розумним апріорі, це лише тулкіт та готові приклади",
+            "evidence": [1]
+          },
+          {
+            "text": "P2 вважає, що людям не потрібно, щоб ШІ був розумним",
+            "evidence": [2]
+          },
+          {
+            "text": "P1 хоче протестувати моделі 2022-2023 років із сучасним тулкітом",
+            "evidence": [3]
+          },
+          {
+            "text": "P2 посилається на InstinctGPT, де тулкіт не компенсував нестачу базових здібностей моделі",
+            "evidence": [8]
+          },
+          {
+            "text": "P1 обговорює метрику параметрів моделей та підходи до тренування coder-моделей",
+            "evidence": [14]
+          }
+        ]
+      },
+      {
+        "id": "transport-incident",
+        "title": "Інцидент у громадському транспорті",
+        "claims": [
+          {
+            "text": "P1 описує дивну поведінку чоловіка в автобусі, який грав на піаніно та імітував звуки блювоти",
+            "evidence": [4, 7, 9]
+          },
+          {
+            "text": "P2 висловлює здивування почутим",
+            "evidence": [11, 12]
+          }
+        ]
+      },
+      {
+        "id": "diploma-covers",
+        "title": "Вартість обкладинок для дипломів",
+        "claims": [
+          {
+            "text": "P8 запитує про ціни та згадує суму 650 гривень для Богдана",
+            "evidence": [22, 23]
+          },
+          {
+            "text": "P9 та P4 повідомляють про сплачені суми 47 та 30 гривень відповідно",
+            "evidence": [24, 25]
+          },
+          {
+            "text": "P1 пропонує відмовитися від обкладинки, називаючи її макулатурою",
+            "evidence": [26]
+          },
+          {
+            "text": "P8 зазначає унікальність герба КПП, але визнає, що обкладинку рідко бачать",
+            "evidence": [27, 29]
+          }
+        ]
+      },
+      {
+        "id": "weather-and-hardware",
+        "title": "Погода та комп'ютерне залізо",
+        "claims": [
+          {
+            "text": "P3 описує частину міста під хмарами",
+            "evidence": [15]
+          },
+          {
+            "text": "P6 та P7 описують спеку та відчуття дощу з лави",
+            "evidence": [20, 21]
+          },
+          {
+            "text": "P1 повідомляє про можливість розміщення трьох відеокарт у маленькому корпусі за допомогою стяжок",
+            "evidence": [30]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": [
+      {
+        "text": "P1 планує дослідити, що не так з підходом до тренування coder-моделей",
+        "evidence": [14]
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 63199.90260000015,
+    "ollamaTotalMs": 62931.695321,
+    "promptEvalCount": 2295,
+    "evalCount": 6695,
+    "doneReason": "stop",
+    "thinkingTextTokenCount": 5124,
+    "finalTextTokenCount": 830
+  },
+  "operationalMetrics": {
+    "modelCalls": 1,
+    "sourceMessageWindows": 1,
+    "semanticInterpretations": 1,
+    "semanticAmplification": 1
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 4,
+    "claimCount": 14,
+    "decisionCount": 0,
+    "openQuestionCount": 1,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 1,
+    "goldClaimPrecision": 0.5714285714285714,
+    "evidencePrecision": 0.5909090909090909,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0.21428571428571427,
+    "matchedClaimIds": [
+      "bus-passenger.repeated-encounter",
+      "diploma-cover.prices",
+      "diploma-cover.low-value",
+      "ai-tooling.capability-view",
+      "ai-tooling.old-model-experiment",
+      "ai-tooling.instinctgpt-result",
+      "ai-tooling.model-comparison",
+      "pc-case.three-gpus"
+    ],
+    "matchedDecisionIds": [],
+    "matchedOpenQuestionIds": ["ai-tooling.coder-models"],
+    "retainedThreadIds": [
+      "bus-passenger",
+      "diploma-cover",
+      "ai-tooling",
+      "pc-case"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

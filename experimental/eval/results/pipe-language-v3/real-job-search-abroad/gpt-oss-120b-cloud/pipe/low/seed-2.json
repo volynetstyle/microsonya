@@ -1,0 +1,144 @@
+{
+  "case": "real-job-search-abroad",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe",
+  "reasoning": "low",
+  "seed": 2,
+  "inputHash": "aac555f3427e2195f145b4a5e3a6d9644961170a8ccc181b8832ae83202b036f",
+  "promptHash": "53a7b2484d09e12a9b7a868c284de4b86419dc2bac740bd289675ea6076141ac",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Обговорення роботи та життя за кордоном у Словаччині, Австрії та інших країнах\",\n  \"topics\": [\n    {\n      \"id\": \"people-abroad\",\n      \"title\": \"Хто живе чи працює за кордоном\",\n      \"claims\": [\n        {\n          \"text\": \"У учасників є знайомі в Австрії та Польщі\",\n          \"evidence\": [3]\n        },\n        {\n          \"text\": \"У одного учасника є мінімум два знайомих в Австрії\",\n          \"evidence\": [12]\n        },\n        {\n          \"text\": \"Один з знайомих нещодавно приїхав, інший живе там кілька років\",\n          \"evidence\": [13]\n        },\n        {\n          \"text\": \"У автора повідомлення є знайомий, який живе в Австрії більше 10 років\",\n          \"evidence\": [60]\n        },\n        {\n          \"text\": \"Автор повідомлення живе в Словакії майже рік\",\n          \"evidence\": [43]\n        }\n      ]\n    },\n    {\n      \"id\": \"job-search-abroad\",\n      \"title\": \"Пошук роботи за кордоном і вимоги\",\n      \"claims\": [\n        {\n          \"text\": \"Для пошуку роботи за кордоном радять використовувати LinkedIn\",\n          \"evidence\": [18]\n        },\n        {\n          \"text\": \"Вакансії часто вимагають знання місцевої мови (95% вакансій)\",\n          \"evidence\": [26]\n        },\n        {\n          \"text\": \"Більшість компаній вказують вимоги до мови в описі вакансії\",\n          \"evidence\": [25]\n        },\n        {\n          \"text\": \"У автора 3 роки досвіду, і він отримав 3 співбесіди з близько 100 відправлених заявок\",\n          \"evidence\": [21, 23]\n        },\n        {\n          \"text\": \"Вища освіта рідко впливає на прийом на роботу\",\n          \"evidence\": [32]\n        },\n        {\n          \"text\": \"Мовний рівень B1‑B2 часто достатній, сертифікат не обов’язковий\",\n          \"evidence\": [46]\n        }\n      ]\n    },\n    {\n      \"id\": \"language-barrier\",\n      \"title\": \"Мовний бар’єр і адаптація\",\n      \"claims\": [\n        {\n          \"text\": \"Більшість спілкування на роботі проходить англійською, а в повсякденному житті — українською та слофакською\",\n          \"evidence\": [44, 45]\n        },\n        {\n          \"text\": \"Автор відчуває незручність через мовний бар’єр у повсякденному житті\",\n          \"evidence\": [52]\n        },\n        {\n          \"text\": \"Вивчення місцевої мови допомагає в комфортному переміщенні по місту\",\n          \"evidence\": [47]\n        },\n        {\n          \"text\": \"Рекомендовано практикувати англійську розмовну на Discord‑каналах\",\n          \"evidence\": [56, 57]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": [\n    {\n      \"text\": \"Чи варто залишатися в Австрії на довгострокову перспективу?\",\n      \"evidence\": [58]\n    }\n  ]\n}",
+  "thinking": "We need JSON with title, topics, decisions, openQuestions. Identify claims. No decisions maybe. Open question? There's question at 58 about staying in Austria. Not answered yet. So openQuestion. Topics like \"living abroad in Slovakia/Slovakia\", \"job search abroad\", \"language requirements\". We'll create multiple topics.\n\nProvide evidence IDs.\n\nLet's craft.",
+  "parsed": {
+    "title": "Обговорення роботи та життя за кордоном у Словаччині, Австрії та інших країнах",
+    "topics": [
+      {
+        "id": "people-abroad",
+        "title": "Хто живе чи працює за кордоном",
+        "claims": [
+          {
+            "text": "У учасників є знайомі в Австрії та Польщі",
+            "evidence": [3]
+          },
+          {
+            "text": "У одного учасника є мінімум два знайомих в Австрії",
+            "evidence": [12]
+          },
+          {
+            "text": "Один з знайомих нещодавно приїхав, інший живе там кілька років",
+            "evidence": [13]
+          },
+          {
+            "text": "У автора повідомлення є знайомий, який живе в Австрії більше 10 років",
+            "evidence": [60]
+          },
+          {
+            "text": "Автор повідомлення живе в Словакії майже рік",
+            "evidence": [43]
+          }
+        ]
+      },
+      {
+        "id": "job-search-abroad",
+        "title": "Пошук роботи за кордоном і вимоги",
+        "claims": [
+          {
+            "text": "Для пошуку роботи за кордоном радять використовувати LinkedIn",
+            "evidence": [18]
+          },
+          {
+            "text": "Вакансії часто вимагають знання місцевої мови (95% вакансій)",
+            "evidence": [26]
+          },
+          {
+            "text": "Більшість компаній вказують вимоги до мови в описі вакансії",
+            "evidence": [25]
+          },
+          {
+            "text": "У автора 3 роки досвіду, і він отримав 3 співбесіди з близько 100 відправлених заявок",
+            "evidence": [21, 23]
+          },
+          {
+            "text": "Вища освіта рідко впливає на прийом на роботу",
+            "evidence": [32]
+          },
+          {
+            "text": "Мовний рівень B1‑B2 часто достатній, сертифікат не обов’язковий",
+            "evidence": [46]
+          }
+        ]
+      },
+      {
+        "id": "language-barrier",
+        "title": "Мовний бар’єр і адаптація",
+        "claims": [
+          {
+            "text": "Більшість спілкування на роботі проходить англійською, а в повсякденному житті — українською та слофакською",
+            "evidence": [44, 45]
+          },
+          {
+            "text": "Автор відчуває незручність через мовний бар’єр у повсякденному житті",
+            "evidence": [52]
+          },
+          {
+            "text": "Вивчення місцевої мови допомагає в комфортному переміщенні по місту",
+            "evidence": [47]
+          },
+          {
+            "text": "Рекомендовано практикувати англійську розмовну на Discord‑каналах",
+            "evidence": [56, 57]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": [
+      {
+        "text": "Чи варто залишатися в Австрії на довгострокову перспективу?",
+        "evidence": [58]
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 10288.535600000003,
+    "ollamaTotalMs": 10122.438698,
+    "promptEvalCount": 2995,
+    "evalCount": 882,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 3,
+    "claimCount": 15,
+    "decisionCount": 0,
+    "openQuestionCount": 1,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.9,
+    "goldClaimPrecision": 0.5333333333333333,
+    "evidencePrecision": 0.47368421052631576,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 1,
+    "noiseRetention": 0.06666666666666667,
+    "matchedClaimIds": [
+      "job-search.conversion",
+      "job-search.two-months",
+      "job-search.local-language-filter",
+      "job-search.education-observation",
+      "networking.participants-abroad",
+      "austria.outlook",
+      "language.work-vs-daily-life",
+      "language.learning-motivation"
+    ],
+    "retainedThreadIds": [
+      "job-search-abroad",
+      "networking-abroad",
+      "life-in-austria",
+      "language-integration"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

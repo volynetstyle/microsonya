@@ -1,0 +1,130 @@
+{
+  "case": "question-vs-assertion",
+  "model": "gpt-oss:120b",
+  "pipeline": "deterministic-shell",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 1,
+  "transformation": "identity",
+  "inputHash": "9c0ac954634b92b6bb6ded0b18dd6f04ef6894289c9c828ea886acc3f3d7592a",
+  "promptHash": "a84d10e2886a96215377d8dc69d1c5ea8c597571988d55a05e66e16d6219c817",
+  "promptVersion": "v4",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Inquiry about website content\",\n  \"events\": [\n    {\n      \"id\": \"m1\",\n      \"topicId\": \"website\",\n      \"topicTitle\": \"Website content check\",\n      \"speaker\": \"A\",\n      \"statement\": \"Is this not on the website?\",\n      \"speechAct\": \"question\",\n      \"literalness\": \"literal\",\n      \"commitment\": \"none\",\n      \"epistemicStatus\": \"claimed\",\n      \"settled\": false,\n      \"action\": null,\n      \"refersTo\": [],\n      \"stance\": \"neutral\",\n      \"semanticImportance\": 0.5,\n      \"confidence\": 1.0,\n      \"evidence\": [\n        1\n      ]\n    }\n  ]\n}",
+  "thinking": "We need to produce events from the conversation but only have one message shown. Probably more missing? Only one message provided. So just one event. It's a question. Identify topic? \"hiring\"? Not clear. Use generic? maybe \"website\". We'll set topicId \"website\". speechAct question. literal. commitment none. epistemicStatus claimed. settled false. action null. stance neutral. importance maybe 0.5. confidence 1. evidence [1].",
+  "parsed": {
+    "title": "Inquiry about website content",
+    "topics": [],
+    "decisions": [],
+    "openQuestions": [
+      {
+        "text": "A: Is this not on the website?",
+        "evidence": [1]
+      }
+    ]
+  },
+  "reconstruction": {
+    "title": "Inquiry about website content",
+    "events": [
+      {
+        "id": "m1",
+        "topicId": "website",
+        "topicTitle": "Website content check",
+        "speaker": "A",
+        "statement": "Is this not on the website?",
+        "speechAct": "question",
+        "literalness": "literal",
+        "commitment": "none",
+        "epistemicStatus": "claimed",
+        "settled": false,
+        "action": null,
+        "refersTo": [],
+        "stance": "neutral",
+        "semanticImportance": 0.5,
+        "confidence": 1,
+        "evidence": [1]
+      }
+    ]
+  },
+  "state": {
+    "title": "Inquiry about website content",
+    "events": [
+      {
+        "id": "m1",
+        "topicId": "website",
+        "topicTitle": "Website content check",
+        "speaker": "A",
+        "statement": "Is this not on the website?",
+        "speechAct": "question",
+        "literalness": "literal",
+        "commitment": "none",
+        "epistemicStatus": "claimed",
+        "settled": false,
+        "action": null,
+        "refersTo": [],
+        "stance": "neutral",
+        "semanticImportance": 0.5,
+        "confidence": 1,
+        "evidence": [1]
+      }
+    ],
+    "resolvedQuestionIds": [],
+    "supersededEventIds": []
+  },
+  "extractorMetrics": {
+    "eventCount": 1,
+    "eventRecall": 1,
+    "eventPrecision": 1,
+    "attributionAccuracy": 1,
+    "evidenceCorrectness": 1,
+    "relationIntegrity": 1
+  },
+  "reducerMetrics": {
+    "deterministic": true,
+    "lifecycleInvariantViolations": 0,
+    "resolvedQuestions": 0,
+    "supersededEvents": 0
+  },
+  "operationalMetrics": {
+    "modelCalls": 1,
+    "sourceMessageWindows": 1,
+    "semanticInterpretations": 1,
+    "semanticAmplification": 1
+  },
+  "projectionDiagnostics": {
+    "decisionCandidates": 0,
+    "decisionsRejectedByInvariant": 0,
+    "questionsResolvedByAnswerEdge": 0
+  },
+  "usage": {
+    "durationMs": 3973.62630000012,
+    "ollamaTotalMs": 3741.784964,
+    "promptEvalCount": 715,
+    "evalCount": 265,
+    "doneReason": "stop",
+    "thinkingTextTokenCount": 95,
+    "finalTextTokenCount": 160
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 0,
+    "claimCount": 0,
+    "decisionCount": 0,
+    "openQuestionCount": 1,
+    "majorThreadRecall": 0,
+    "weightedClaimRecall": null,
+    "goldClaimPrecision": null,
+    "evidencePrecision": 1,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0,
+    "matchedClaimIds": [],
+    "matchedDecisionIds": [],
+    "matchedOpenQuestionIds": ["website-availability.question"],
+    "retainedThreadIds": [],
+    "triggeredForbiddenIds": []
+  }
+}

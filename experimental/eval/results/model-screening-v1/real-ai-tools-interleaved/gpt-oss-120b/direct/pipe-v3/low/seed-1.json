@@ -1,0 +1,112 @@
+{
+  "case": "real-ai-tools-interleaved",
+  "model": "gpt-oss:120b",
+  "pipeline": "direct",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 1,
+  "transformation": "identity",
+  "inputHash": "3e5fb5efeccd172ee2f1e8a3ef61dfdf2ed0fd33f2162906991e5f91c1a0d9ba",
+  "promptHash": "30f37e73b18d156c5b76a5c837f23851d30f215fa15a006cd17ed981ceaf0f4c",
+  "promptVersion": "v4",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"AI capabilities, bus incident, and diploma cover costs\",\n  \"topics\": [\n    {\n      \"id\": \"ai-capabilities\",\n      \"title\": \"Discussion on AI intelligence and toolkits\",\n      \"claims\": [\n        {\n          \"text\": \"AI models are not inherently smart; their advanced abilities come from toolkits and ready-made examples.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"InstinctGPT comparison shows that toolkits give a large boost but cannot compensate for a model's basic ability shortcomings.\",\n          \"evidence\": [8]\n        },\n        {\n          \"text\": \"Older models were trained on massive data without understanding purpose, while modern models aim to extract maximum performance from fewer parameters and may be fine‑tuned for specific tasks.\",\n          \"evidence\": [14]\n        }\n      ]\n    },\n    {\n      \"id\": \"bus-anecdote\",\n      \"title\": \"Strange encounter on public transport\",\n      \"claims\": [\n        {\n          \"text\": \"The speaker experienced a disruptive passenger who repeatedly emitted gas in the bus.\",\n          \"evidence\": [7]\n        },\n        {\n          \"text\": \"The speaker describes the passenger's erratic behavior (playing piano loudly, listening to metro announcements, making micro‑sounds).\",\n          \"evidence\": [9]\n        }\n      ]\n    },\n    {\n      \"id\": \"diploma-cover-costs\",\n      \"title\": \"Cost of diploma cover and related opinions\",\n      \"claims\": [\n        {\n          \"text\": \"Some people charge around 650 UAH for a diploma cover, others as low as 30 UAH.\",\n          \"evidence\": [23, 25]\n        },\n        {\n          \"text\": \"The cover is seen as largely unnecessary because it is rarely used.\",\n          \"evidence\": [28, 29]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": []\n}",
+  "thinking": "We need summary. Identify topics. Probably AI discussion, bus anecdote, weather, diploma cover cost. Decisions? None. Open questions? None. But need fill structures. Might have no decisions/open. Provide empty arrays. Topics: AI capabilities (claims). Topic bus incident (claims). Topic diploma cover cost (claims). Provide claims with evidence ids.\n\nLet's craft.",
+  "parsed": {
+    "title": "AI capabilities, bus incident, and diploma cover costs",
+    "topics": [
+      {
+        "id": "ai-capabilities",
+        "title": "Discussion on AI intelligence and toolkits",
+        "claims": [
+          {
+            "text": "AI models are not inherently smart; their advanced abilities come from toolkits and ready-made examples.",
+            "evidence": [1]
+          },
+          {
+            "text": "InstinctGPT comparison shows that toolkits give a large boost but cannot compensate for a model's basic ability shortcomings.",
+            "evidence": [8]
+          },
+          {
+            "text": "Older models were trained on massive data without understanding purpose, while modern models aim to extract maximum performance from fewer parameters and may be fine‑tuned for specific tasks.",
+            "evidence": [14]
+          }
+        ]
+      },
+      {
+        "id": "bus-anecdote",
+        "title": "Strange encounter on public transport",
+        "claims": [
+          {
+            "text": "The speaker experienced a disruptive passenger who repeatedly emitted gas in the bus.",
+            "evidence": [7]
+          },
+          {
+            "text": "The speaker describes the passenger's erratic behavior (playing piano loudly, listening to metro announcements, making micro‑sounds).",
+            "evidence": [9]
+          }
+        ]
+      },
+      {
+        "id": "diploma-cover-costs",
+        "title": "Cost of diploma cover and related opinions",
+        "claims": [
+          {
+            "text": "Some people charge around 650 UAH for a diploma cover, others as low as 30 UAH.",
+            "evidence": [23, 25]
+          },
+          {
+            "text": "The cover is seen as largely unnecessary because it is rarely used.",
+            "evidence": [28, 29]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": []
+  },
+  "usage": {
+    "durationMs": 8403.018699999899,
+    "ollamaTotalMs": 7865.064576,
+    "promptEvalCount": 1962,
+    "evalCount": 498,
+    "doneReason": "stop",
+    "thinkingTextTokenCount": 74,
+    "finalTextTokenCount": 414
+  },
+  "operationalMetrics": {
+    "modelCalls": 1,
+    "sourceMessageWindows": 1,
+    "semanticInterpretations": 1,
+    "semanticAmplification": 1
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 3,
+    "claimCount": 7,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.7647058823529411,
+    "goldClaimPrecision": 0.8571428571428571,
+    "evidencePrecision": 0.8888888888888888,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0,
+    "matchedClaimIds": [
+      "diploma-cover.prices",
+      "diploma-cover.low-value",
+      "ai-tooling.capability-view",
+      "ai-tooling.instinctgpt-result",
+      "ai-tooling.model-comparison",
+      "bus-passenger.repeated-encounter"
+    ],
+    "matchedDecisionIds": [],
+    "matchedOpenQuestionIds": [],
+    "retainedThreadIds": ["diploma-cover", "ai-tooling", "bus-passenger"],
+    "triggeredForbiddenIds": []
+  }
+}

@@ -1,0 +1,180 @@
+{
+  "case": "real-ai-tools-interleaved",
+  "sourceExperiment": "pipe-language-v3",
+  "sourceModel": "gpt-oss:120b-cloud",
+  "sourceRepresentation": "pipe-v3",
+  "sourceReasoning": "low",
+  "sourceSeed": 1,
+  "variant": "rotated-evidence",
+  "judgeModel": "gpt-oss:120b-cloud",
+  "judgeReasoning": "low",
+  "promptVersion": "qa-factuality-v1",
+  "sourceRunHash": "e5471d06aa014a38a039f8514e2a2cbf50a77029b196d2328464a193e5fcc31d",
+  "promptHash": "556b8532b1b40ec0431c6b255a4e7eecfc53861d58246fc1a83817d54bba636e",
+  "status": "ok",
+  "raw": "{\n  \"checks\": [\n    {\n      \"itemIndex\": 0,\n      \"question\": \"Are AI models themselves inherently intelligent, or do complex abilities come from toolkits and ready‑made solutions?\",\n      \"candidateAnswer\": \"AI models themselves are not inherently intelligent; complex abilities come from toolkits and ready‑made solutions.\",\n      \"sourceAnswer\": null,\n      \"answerRelation\": \"different\",\n      \"verdict\": \"source-insufficient\",\n      \"explanation\": \"The cited source is a personal remark about testing AI with a toolkit and does not address whether models are inherently intelligent.\"\n    },\n    {\n      \"itemIndex\": 1,\n      \"question\": \"May testing AI with modern toolkits like opencode in 2022‑2023 be limited by small context windows of older models?\",\n      \"candidateAnswer\": \"Testing AI with modern toolkits like opencode in 2022‑2023 may be limited by small context windows of older models.\",\n      \"sourceAnswer\": null,\n      \"answerRelation\": \"different\",\n      \"verdict\": \"source-insufficient\",\n      \"explanation\": \"The cited source discusses InstinctGPT and toolkit gains but does not mention context‑window limits.\"\n    },\n    {\n      \"itemIndex\": 2,\n      \"question\": \"Does the InstinctGPT comparison show that toolkits boost performance but cannot fully compensate for lacking base model abilities?\",\n      \"candidateAnswer\": \"InstinctGPT comparison shows that toolkits can boost performance but cannot fully compensate for lacking base model abilities.\",\n      \"sourceAnswer\": null,\n      \"answerRelation\": \"different\",\n      \"verdict\": \"source-insufficient\",\n      \"explanation\": \"The cited source talks about model sizes and training practices, not the InstinctGPT comparison.\"\n    },\n    {\n      \"itemIndex\": 3,\n      \"question\": \"Did older models train on large data without understanding while modern models aim to extract ability from fewer parameters and may be fine‑tuned?\",\n      \"candidateAnswer\": \"Older models were trained on large data without understanding, whereas modern models try to extract maximal ability from fewer parameters and may be fine‑tuned for specific tasks.\",\n      \"sourceAnswer\": null,\n      \"answerRelation\": \"different\",\n      \"verdict\": \"source-insufficient\",\n      \"explanation\": \"The cited source is an unrelated anecdote about a person’s behavior on a bus.\"\n    },\n    {\n      \"itemIndex\": 4,\n      \"question\": \"Does the author observe a person on a bus playing piano loudly and later making micro‑sounds that disturb his mother?\",\n      \"candidateAnswer\": \"The author observes odd behavior from a person on a bus, including playing piano loudly and later making micro‑sounds that disturb his mother.\",\n      \"sourceAnswer\": null,\n      \"answerRelation\": \"different\",\n      \"verdict\": \"source-insufficient\",\n      \"explanation\": \"The cited source only mentions encountering a person in a bus and gas emission, not piano playing or micro‑sounds.\"\n    },\n    {\n      \"itemIndex\": 5,\n      \"question\": \"Did the same person emit gas on a second encounter?\",\n      \"candidateAnswer\": \"The same person allegedly emitted gas on a second encounter.\",\n      \"sourceAnswer\": null,\n      \"answerRelation\": \"different\",\n      \"verdict\": \"source-insufficient\",\n      \"explanation\": \"The cited sources are vague statements about strange people on public transport and sitting in a bus; they do not confirm gas emission.\"\n    },\n    {\n      \"itemIndex\": 6,\n      \"question\": \"Does the author note that generally strange people appear on public transport?\",\n      \"candidateAnswer\": \"The author notes generally strange people on public transport.\",\n      \"sourceAnswer\": null,\n      \"answerRelation\": \"different\",\n      \"verdict\": \"source-insufficient\",\n      \"explanation\": \"The cited sources discuss payments for diploma covers, not observations about public‑transport passengers.\"\n    },\n    {\n      \"itemIndex\": 7,\n      \"question\": \"Is someone asking how much is paid for diploma covers, with a response mentioning 650 UAH from Bogdan?\",\n      \"candidateAnswer\": \"Someone is asking how much is paid for diploma covers; one response mentions 650 UAH from Bogdan.\",\n      \"sourceAnswer\": null,\n      \"answerRelation\": \"different\",\n      \"verdict\": \"source-insufficient\",\n      \"explanation\": \"The cited source only says the speaker paid 47 (currency unspecified); it does not contain the question or the 650 UAH reply.\"\n    },\n    {\n      \"itemIndex\": 8,\n      \"question\": \"Did another user state they paid 47 UAH?\",\n      \"candidateAnswer\": \"Another user states they paid 47 UAH.\",\n      \"sourceAnswer\": null,\n      \"answerRelation\": \"different\",\n      \"verdict\": \"source-insufficient\",\n      \"explanation\": \"The cited source is a comment saying \\\"гривень 30\\\", not 47 UAH.\"\n    },\n    {\n      \"itemIndex\": 9,\n      \"question\": \"Does a later comment say 30 UAH?\",\n      \"candidateAnswer\": \"A later comment says 30 UAH.\",\n      \"sourceAnswer\": null,\n      \"answerRelation\": \"different\",\n      \"verdict\": \"source-insufficient\",\n      \"explanation\": \"The cited source is a remark about not needing the cover; it does not mention any price.\"\n    },\n    {\n      \"itemIndex\": 10,\n      \"question\": \"Does a participant suggest they don’t care about the cover because it’s just paper?\",\n      \"candidateAnswer\": \"One participant suggests they don’t care about the cover because it’s just paper.\",\n      \"sourceAnswer\": null,\n      \"answerRelation\": \"different\",\n      \"verdict\": \"source-insufficient\",\n      \"explanation\": \"The cited source mentions a university emblem on the cover, not a dismissal of its value.\"\n    },\n    {\n      \"itemIndex\": 11,\n      \"question\": \"Does another note that the cover bears the university emblem, making it unique?\",\n      \"candidateAnswer\": \"Another notes the cover bears the university emblem, making it unique.\",\n      \"sourceAnswer\": null,\n      \"answerRelation\": \"different\",\n      \"verdict\": \"source-insufficient\",\n      \"explanation\": \"The cited source says no one will take the cover, not that it has an emblem.\"\n    },\n    {\n      \"itemIndex\": 12,\n      \"question\": \"Is there a comment arguing the cover is useless because nobody will keep it?\",\n      \"candidateAnswer\": \"A comment argues nobody will keep the cover; it's useless.\",\n      \"sourceAnswer\": null,\n      \"answerRelation\": \"different\",\n      \"verdict\": \"source-insufficient\",\n      \"explanation\": \"The cited source describes how often one will look at the cover, not that it is useless.\"\n    },\n    {\n      \"itemIndex\": 13,\n      \"question\": \"Does someone remark the cover will be looked at only three times: receiving the diploma, photographing it, and later translating documents?\",\n      \"candidateAnswer\": \"Someone remarks the cover will be looked at only three times in life: receiving the diploma, photographing it, and later translating documents.\",\n      \"sourceAnswer\": null,\n      \"answerRelation\": \"different\",\n      \"verdict\": \"source-insufficient\",\n      \"explanation\": \"The cited source is a poetic description of weather, unrelated to diploma covers.\"\n    },\n    {\n      \"itemIndex\": 14,\n      \"question\": \"Does a participant feel the air suggests imminent rain, though temperature hints at lava‑like rain?\",\n      \"candidateAnswer\": \"A participant feels the air suggests imminent rain, though temperature hints at a lava‑like rain.\",\n      \"sourceAnswer\": null,\n      \"answerRelation\": \"different\",\n      \"verdict\": \"source-insufficient\",\n      \"explanation\": \"The cited source describes fitting three GPUs into a small case, not weather sensations.\"\n    },\n    {\n      \"itemIndex\": 15,\n      \"question\": \"In a small PC case that officially fits only one small GPU, did the author manage to fit three GPUs using straps and force?\",\n      \"candidateAnswer\": \"In a small PC case that officially fits only one small GPU, the author managed to fit three GPUs using straps and force.\",\n      \"sourceAnswer\": null,\n      \"answerRelation\": \"different\",\n      \"verdict\": \"source-insufficient\",\n      \"explanation\": \"The cited source discusses AI models and toolkits, not PC cases or GPUs.\"\n    }\n  ]\n}",
+  "thinking": "We need produce checks for each itemIndex 0-15. For each, craft diagnostic question, get candidate answer (from text), source answer (from citedSource), compare.\n\nMany sources unrelated, likely sourceAnswer null -> source-insufficient.\n\nWe must output answerRelation and verdict accordingly. If source cannot answer, use not-enough-evidence/source-insufficient.\n\nWill do for each.\n\nWe'll just set sourceAnswer null when not relevant.\n\nLet's craft.\n\n",
+  "parsed": {
+    "checks": [
+      {
+        "itemIndex": 0,
+        "question": "Are AI models themselves inherently intelligent, or do complex abilities come from toolkits and ready‑made solutions?",
+        "candidateAnswer": "AI models themselves are not inherently intelligent; complex abilities come from toolkits and ready‑made solutions.",
+        "sourceAnswer": null,
+        "answerRelation": "different",
+        "verdict": "source-insufficient",
+        "explanation": "The cited source is a personal remark about testing AI with a toolkit and does not address whether models are inherently intelligent."
+      },
+      {
+        "itemIndex": 1,
+        "question": "May testing AI with modern toolkits like opencode in 2022‑2023 be limited by small context windows of older models?",
+        "candidateAnswer": "Testing AI with modern toolkits like opencode in 2022‑2023 may be limited by small context windows of older models.",
+        "sourceAnswer": null,
+        "answerRelation": "different",
+        "verdict": "source-insufficient",
+        "explanation": "The cited source discusses InstinctGPT and toolkit gains but does not mention context‑window limits."
+      },
+      {
+        "itemIndex": 2,
+        "question": "Does the InstinctGPT comparison show that toolkits boost performance but cannot fully compensate for lacking base model abilities?",
+        "candidateAnswer": "InstinctGPT comparison shows that toolkits can boost performance but cannot fully compensate for lacking base model abilities.",
+        "sourceAnswer": null,
+        "answerRelation": "different",
+        "verdict": "source-insufficient",
+        "explanation": "The cited source talks about model sizes and training practices, not the InstinctGPT comparison."
+      },
+      {
+        "itemIndex": 3,
+        "question": "Did older models train on large data without understanding while modern models aim to extract ability from fewer parameters and may be fine‑tuned?",
+        "candidateAnswer": "Older models were trained on large data without understanding, whereas modern models try to extract maximal ability from fewer parameters and may be fine‑tuned for specific tasks.",
+        "sourceAnswer": null,
+        "answerRelation": "different",
+        "verdict": "source-insufficient",
+        "explanation": "The cited source is an unrelated anecdote about a person’s behavior on a bus."
+      },
+      {
+        "itemIndex": 4,
+        "question": "Does the author observe a person on a bus playing piano loudly and later making micro‑sounds that disturb his mother?",
+        "candidateAnswer": "The author observes odd behavior from a person on a bus, including playing piano loudly and later making micro‑sounds that disturb his mother.",
+        "sourceAnswer": null,
+        "answerRelation": "different",
+        "verdict": "source-insufficient",
+        "explanation": "The cited source only mentions encountering a person in a bus and gas emission, not piano playing or micro‑sounds."
+      },
+      {
+        "itemIndex": 5,
+        "question": "Did the same person emit gas on a second encounter?",
+        "candidateAnswer": "The same person allegedly emitted gas on a second encounter.",
+        "sourceAnswer": null,
+        "answerRelation": "different",
+        "verdict": "source-insufficient",
+        "explanation": "The cited sources are vague statements about strange people on public transport and sitting in a bus; they do not confirm gas emission."
+      },
+      {
+        "itemIndex": 6,
+        "question": "Does the author note that generally strange people appear on public transport?",
+        "candidateAnswer": "The author notes generally strange people on public transport.",
+        "sourceAnswer": null,
+        "answerRelation": "different",
+        "verdict": "source-insufficient",
+        "explanation": "The cited sources discuss payments for diploma covers, not observations about public‑transport passengers."
+      },
+      {
+        "itemIndex": 7,
+        "question": "Is someone asking how much is paid for diploma covers, with a response mentioning 650 UAH from Bogdan?",
+        "candidateAnswer": "Someone is asking how much is paid for diploma covers; one response mentions 650 UAH from Bogdan.",
+        "sourceAnswer": null,
+        "answerRelation": "different",
+        "verdict": "source-insufficient",
+        "explanation": "The cited source only says the speaker paid 47 (currency unspecified); it does not contain the question or the 650 UAH reply."
+      },
+      {
+        "itemIndex": 8,
+        "question": "Did another user state they paid 47 UAH?",
+        "candidateAnswer": "Another user states they paid 47 UAH.",
+        "sourceAnswer": null,
+        "answerRelation": "different",
+        "verdict": "source-insufficient",
+        "explanation": "The cited source is a comment saying \"гривень 30\", not 47 UAH."
+      },
+      {
+        "itemIndex": 9,
+        "question": "Does a later comment say 30 UAH?",
+        "candidateAnswer": "A later comment says 30 UAH.",
+        "sourceAnswer": null,
+        "answerRelation": "different",
+        "verdict": "source-insufficient",
+        "explanation": "The cited source is a remark about not needing the cover; it does not mention any price."
+      },
+      {
+        "itemIndex": 10,
+        "question": "Does a participant suggest they don’t care about the cover because it’s just paper?",
+        "candidateAnswer": "One participant suggests they don’t care about the cover because it’s just paper.",
+        "sourceAnswer": null,
+        "answerRelation": "different",
+        "verdict": "source-insufficient",
+        "explanation": "The cited source mentions a university emblem on the cover, not a dismissal of its value."
+      },
+      {
+        "itemIndex": 11,
+        "question": "Does another note that the cover bears the university emblem, making it unique?",
+        "candidateAnswer": "Another notes the cover bears the university emblem, making it unique.",
+        "sourceAnswer": null,
+        "answerRelation": "different",
+        "verdict": "source-insufficient",
+        "explanation": "The cited source says no one will take the cover, not that it has an emblem."
+      },
+      {
+        "itemIndex": 12,
+        "question": "Is there a comment arguing the cover is useless because nobody will keep it?",
+        "candidateAnswer": "A comment argues nobody will keep the cover; it's useless.",
+        "sourceAnswer": null,
+        "answerRelation": "different",
+        "verdict": "source-insufficient",
+        "explanation": "The cited source describes how often one will look at the cover, not that it is useless."
+      },
+      {
+        "itemIndex": 13,
+        "question": "Does someone remark the cover will be looked at only three times: receiving the diploma, photographing it, and later translating documents?",
+        "candidateAnswer": "Someone remarks the cover will be looked at only three times in life: receiving the diploma, photographing it, and later translating documents.",
+        "sourceAnswer": null,
+        "answerRelation": "different",
+        "verdict": "source-insufficient",
+        "explanation": "The cited source is a poetic description of weather, unrelated to diploma covers."
+      },
+      {
+        "itemIndex": 14,
+        "question": "Does a participant feel the air suggests imminent rain, though temperature hints at lava‑like rain?",
+        "candidateAnswer": "A participant feels the air suggests imminent rain, though temperature hints at a lava‑like rain.",
+        "sourceAnswer": null,
+        "answerRelation": "different",
+        "verdict": "source-insufficient",
+        "explanation": "The cited source describes fitting three GPUs into a small case, not weather sensations."
+      },
+      {
+        "itemIndex": 15,
+        "question": "In a small PC case that officially fits only one small GPU, did the author manage to fit three GPUs using straps and force?",
+        "candidateAnswer": "In a small PC case that officially fits only one small GPU, the author managed to fit three GPUs using straps and force.",
+        "sourceAnswer": null,
+        "answerRelation": "different",
+        "verdict": "source-insufficient",
+        "explanation": "The cited source discusses AI models and toolkits, not PC cases or GPUs."
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 31120.025999999998,
+    "ollamaTotalMs": 30819.620193,
+    "promptEvalCount": 2443,
+    "evalCount": 1898,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "nItems": 16,
+    "supportedRate": 0,
+    "qaAgreementRate": 0,
+    "contradictedRate": 0,
+    "insufficientRate": 1,
+    "labelValidRate": 1
+  }
+}

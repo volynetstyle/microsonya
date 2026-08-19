@@ -1,0 +1,140 @@
+{
+  "case": "real-ai-development",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "natural",
+  "reasoning": "low",
+  "seed": 1,
+  "inputHash": "c44e2d8f381898078b12b50a1dbf1501e5970203c0d4ef386b86fd514114c47c",
+  "promptHash": "6f6a93a1a7c17bdd442d22544b6808e07d5479865ebaeb3a171a61b9e72ad468",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion on AI in Job Search, Development, and Code Generation\",\n  \"topics\": [\n    {\n      \"id\": \"job-search-automation\",\n      \"title\": \"Automation of job search and resume generation\",\n      \"claims\": [\n        {\n          \"text\": \"User is preparing for full‑time job search and wants to set up cloud automation for finding vacancies, generating PDFs of resumes, and writing cover letters.\",\n          \"evidence\": [1, 5, 30]\n        },\n        {\n          \"text\": \"OpenClaw is planned to be configured for vacancy search, resume generation and cover‑letter drafting.\",\n          \"evidence\": [5, 30]\n        },\n        {\n          \"text\": \"Automation may lower the entry barrier for programming.\",\n          \"evidence\": [30]\n        }\n      ]\n    },\n    {\n      \"id\": \"ai-skill-requirements\",\n      \"title\": \"Necessary AI‑related skills for 2026 job market\",\n      \"claims\": [\n        {\n          \"text\": \"In 2026 job seekers need to add many AI‑related skills (Cursor, Claude Code, LLM, RAG, embeddings, etc.) to avoid being filtered out by recruiters.\",\n          \"evidence\": [6, 7, 8]\n        },\n        {\n          \"text\": \"Lack of AI knowledge makes job search for JS/Python positions very hard.\",\n          \"evidence\": [8]\n        }\n      ]\n    },\n    {\n      \"id\": \"development-acceleration\",\n      \"title\": \"AI accelerating software development\",\n      \"claims\": [\n        {\n          \"text\": \"Since 2025, AI tools have become sufficiently good to significantly speed up development.\",\n          \"evidence\": [9]\n        },\n        {\n          \"text\": \"Using GPT to generate SQL joins and other code reduces routine work and speeds up development.\",\n          \"evidence\": [19]\n        },\n        {\n          \"text\": \"The author still does not use cloud infrastructure on their projects.\",\n          \"evidence\": [19]\n        }\n      ]\n    },\n    {\n      \"id\": \"code-generation-risks\",\n      \"title\": \"Risks of AI‑generated code\",\n      \"claims\": [\n        {\n          \"text\": \"AI‑generated code can be overly large and inefficient (e.g., 450 lines of raw SQL for a few joins).\",\n          \"evidence\": [30]\n        },\n        {\n          \"text\": \"Such code may breach security policies by pulling excessive data and cause long production queries (10‑20 min).\",\n          \"evidence\": [30]\n        },\n        {\n          \"text\": \"In some teams, AI‑generated code that breaks the project is dropped after review.\",\n          \"evidence\": [35]\n        },\n        {\n          \"text\": \"Automatic DB schema recreation on changes adds further instability.\",\n          \"evidence\": [37]\n        }\n      ]\n    },\n    {\n      \"id\": \"candidate-search-quality\",\n      \"title\": \"Quality of AI‑driven candidate search\",\n      \"claims\": [\n        {\n          \"text\": \"Keyword‑based candidate search is increasingly detached from reality.\",\n          \"evidence\": [13, 14]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": []\n}",
+  "thinking": "Need to produce JSON summarizing. Identify topics: job search automation, AI skill requirements, development acceleration, code generation risks, candidate search quality, AI impact on programming entry barrier, car choice? maybe separate.\n\nDecisions none. Open questions? maybe none.\n\nCreate claims with evidence ids.\n\nLet's craft topics:\n\n- job-search-automation: claims about preparing automation, OpenClaw, resume generation. Evidence #1, #5, #6, #30.\n\n- ai-skill-requirements: need skills like Cursor, Claude Code, etc. Evidence #6, #7, #8.\n\n- development-acceleration: AI accelerates dev, GPT generating joins etc. Evidence #9, #19, #20.\n\n- code-generation-risks: AI-generated code can be inefficient, security issues. Evidence #30, #35, #37.\n\n- candidate-search-quality: keywords search detached from reality. Evidence #13, #14.\n\n- car-choice: Mustang vs Miata, but maybe ignore as off-topic.\n\nOpen questions? none explicit.\n\nReturn JSON.",
+  "parsed": {
+    "title": "Discussion on AI in Job Search, Development, and Code Generation",
+    "topics": [
+      {
+        "id": "job-search-automation",
+        "title": "Automation of job search and resume generation",
+        "claims": [
+          {
+            "text": "User is preparing for full‑time job search and wants to set up cloud automation for finding vacancies, generating PDFs of resumes, and writing cover letters.",
+            "evidence": [1, 5, 30]
+          },
+          {
+            "text": "OpenClaw is planned to be configured for vacancy search, resume generation and cover‑letter drafting.",
+            "evidence": [5, 30]
+          },
+          {
+            "text": "Automation may lower the entry barrier for programming.",
+            "evidence": [30]
+          }
+        ]
+      },
+      {
+        "id": "ai-skill-requirements",
+        "title": "Necessary AI‑related skills for 2026 job market",
+        "claims": [
+          {
+            "text": "In 2026 job seekers need to add many AI‑related skills (Cursor, Claude Code, LLM, RAG, embeddings, etc.) to avoid being filtered out by recruiters.",
+            "evidence": [6, 7, 8]
+          },
+          {
+            "text": "Lack of AI knowledge makes job search for JS/Python positions very hard.",
+            "evidence": [8]
+          }
+        ]
+      },
+      {
+        "id": "development-acceleration",
+        "title": "AI accelerating software development",
+        "claims": [
+          {
+            "text": "Since 2025, AI tools have become sufficiently good to significantly speed up development.",
+            "evidence": [9]
+          },
+          {
+            "text": "Using GPT to generate SQL joins and other code reduces routine work and speeds up development.",
+            "evidence": [19]
+          },
+          {
+            "text": "The author still does not use cloud infrastructure on their projects.",
+            "evidence": [19]
+          }
+        ]
+      },
+      {
+        "id": "code-generation-risks",
+        "title": "Risks of AI‑generated code",
+        "claims": [
+          {
+            "text": "AI‑generated code can be overly large and inefficient (e.g., 450 lines of raw SQL for a few joins).",
+            "evidence": [30]
+          },
+          {
+            "text": "Such code may breach security policies by pulling excessive data and cause long production queries (10‑20 min).",
+            "evidence": [30]
+          },
+          {
+            "text": "In some teams, AI‑generated code that breaks the project is dropped after review.",
+            "evidence": [35]
+          },
+          {
+            "text": "Automatic DB schema recreation on changes adds further instability.",
+            "evidence": [37]
+          }
+        ]
+      },
+      {
+        "id": "candidate-search-quality",
+        "title": "Quality of AI‑driven candidate search",
+        "claims": [
+          {
+            "text": "Keyword‑based candidate search is increasingly detached from reality.",
+            "evidence": [13, 14]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": []
+  },
+  "usage": {
+    "durationMs": 8399.595499999996,
+    "ollamaTotalMs": 8174.120869,
+    "promptEvalCount": 2990,
+    "evalCount": 925,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 5,
+    "claimCount": 13,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.7619047619047619,
+    "goldClaimPrecision": 0.46153846153846156,
+    "evidencePrecision": 0.47368421052631576,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0.07692307692307693,
+    "matchedClaimIds": [
+      "job-search.automation-idea",
+      "job-search.ai-skills",
+      "job-search.keyword-filtering",
+      "vibe-coding.bad-backend",
+      "development.routine-speedup",
+      "vibe-coding.review-failure"
+    ],
+    "retainedThreadIds": [
+      "ai-job-search",
+      "vibe-coding-risks",
+      "ai-assisted-development"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

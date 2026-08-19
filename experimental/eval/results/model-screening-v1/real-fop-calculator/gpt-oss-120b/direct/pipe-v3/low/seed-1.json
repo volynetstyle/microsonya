@@ -1,0 +1,143 @@
+{
+  "case": "real-fop-calculator",
+  "model": "gpt-oss:120b",
+  "pipeline": "direct",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 1,
+  "transformation": "identity",
+  "inputHash": "d3179cdb8e49a27f55b8dcbb42c5b7b95590527ad18ad16afb38bc499073e8af",
+  "promptHash": "2eebd1bb4c46d9d16df97d533d7b45490d5b8778ba7d61fe33fe478b1265bb13",
+  "promptVersion": "v4",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion on tax filing, domain purchase, and app viability\",\n  \"topics\": [\n    {\n      \"id\": \"tax-filing\",\n      \"title\": \"Tax filing workaround\",\n      \"claims\": [\n        {\n          \"text\": \"Giving 500 UAH to aunt Sveta to correct declarations can avoid large penalties, costing about 1000 UAH total.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"The inspector previously approved declarations without review and was later reprimanded, prompting a re‑audit of all years.\",\n          \"evidence\": [1]\n        }\n      ]\n    },\n    {\n      \"id\": \"domain-calculator\",\n      \"title\": \"Domain purchase and calculator need\",\n      \"claims\": [\n        {\n          \"text\": \"If someone buys the calculator, there will be money for a domain.\",\n          \"evidence\": [4]\n        },\n        {\n          \"text\": \"The whole tax‑declaration procedure takes about an hour of Excel work per day, at most a day per month.\",\n          \"evidence\": [5, 6, 7]\n        }\n      ]\n    },\n    {\n      \"id\": \"web-app-profitability\",\n      \"title\": \"Viability of a web‑based product\",\n      \"claims\": [\n        {\n          \"text\": \"Web platforms are the simplest but far less profitable than Android/iOS; SEO is poor, no external traffic, and paywalls deter users, leading to near‑zero conversion.\",\n          \"evidence\": [11]\n        },\n        {\n          \"text\": \"Successful rapid delivery (under a week) using a cross‑platform stack like Flutter and copying popular ideas can work.\",\n          \"evidence\": [12]\n        },\n        {\n          \"text\": \"Igor's attempt to earn money with this approach seems unlikely to attract buyers.\",\n          \"evidence\": [17]\n        },\n        {\n          \"text\": \"LinkedIn audience for technical/managerial posts has dropped below 50 %.\",\n          \"evidence\": [18]\n        }\n      ]\n    },\n    {\n      \"id\": \"app-security\",\n      \"title\": \"Security concerns of the proposed app\",\n      \"claims\": [\n        {\n          \"text\": \"The calculator works only with UAH‑registered FOP; conversions must be done per day’s exchange rate.\",\n          \"evidence\": [19]\n        },\n        {\n          \"text\": \"The app’s bundle contains a hard‑coded promo‑code password offering 100 % discount.\",\n          \"evidence\": [20, 23]\n        },\n        {\n          \"text\": \"The source code likely contains the password, making it easy to hack.\",\n          \"evidence\": [21]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": [\n    {\n      \"text\": \"What is the source code of the app, and can the password be found by searching it?\",\n      \"evidence\": [21]\n    }\n  ]\n}",
+  "thinking": "We need summarize. Identify topics, claims, decisions, open questions. Likely no decisions. Open questions: maybe about source code? Let's extract.\n\nTopic: Tax filing hack with aunt Sveta. Claim: give 500grn etc. Evidence #1.\n\nAnother topic: buying domain, calculator. Claims about needing calculator for domain money. Evidence #4 etc.\n\nAnother topic: viability of web app earnings. Claims #11-13.\n\nAnother topic: security of app, password in bundle. Claims #20-23 etc. Open question about source code password (#21). Also about whether app is scam.\n\nOpen question: \"А який там сорс код? Можна сам пароль пошуком знайти?\" evidence 21.\n\nAlso maybe \"Чи є хоча б десяток людей готових заплатити 299 грн?\" but that's rhetorical.\n\nDecisions none.\n\nLet's craft JSON.\n\n",
+  "parsed": {
+    "title": "Discussion on tax filing, domain purchase, and app viability",
+    "topics": [
+      {
+        "id": "tax-filing",
+        "title": "Tax filing workaround",
+        "claims": [
+          {
+            "text": "Giving 500 UAH to aunt Sveta to correct declarations can avoid large penalties, costing about 1000 UAH total.",
+            "evidence": [1]
+          },
+          {
+            "text": "The inspector previously approved declarations without review and was later reprimanded, prompting a re‑audit of all years.",
+            "evidence": [1]
+          }
+        ]
+      },
+      {
+        "id": "domain-calculator",
+        "title": "Domain purchase and calculator need",
+        "claims": [
+          {
+            "text": "If someone buys the calculator, there will be money for a domain.",
+            "evidence": [4]
+          },
+          {
+            "text": "The whole tax‑declaration procedure takes about an hour of Excel work per day, at most a day per month.",
+            "evidence": [5, 6, 7]
+          }
+        ]
+      },
+      {
+        "id": "web-app-profitability",
+        "title": "Viability of a web‑based product",
+        "claims": [
+          {
+            "text": "Web platforms are the simplest but far less profitable than Android/iOS; SEO is poor, no external traffic, and paywalls deter users, leading to near‑zero conversion.",
+            "evidence": [11]
+          },
+          {
+            "text": "Successful rapid delivery (under a week) using a cross‑platform stack like Flutter and copying popular ideas can work.",
+            "evidence": [12]
+          },
+          {
+            "text": "Igor's attempt to earn money with this approach seems unlikely to attract buyers.",
+            "evidence": [17]
+          },
+          {
+            "text": "LinkedIn audience for technical/managerial posts has dropped below 50 %.",
+            "evidence": [18]
+          }
+        ]
+      },
+      {
+        "id": "app-security",
+        "title": "Security concerns of the proposed app",
+        "claims": [
+          {
+            "text": "The calculator works only with UAH‑registered FOP; conversions must be done per day’s exchange rate.",
+            "evidence": [19]
+          },
+          {
+            "text": "The app’s bundle contains a hard‑coded promo‑code password offering 100 % discount.",
+            "evidence": [20, 23]
+          },
+          {
+            "text": "The source code likely contains the password, making it easy to hack.",
+            "evidence": [21]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": [
+      {
+        "text": "What is the source code of the app, and can the password be found by searching it?",
+        "evidence": [21]
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 8734.15609999979,
+    "ollamaTotalMs": 8164.97917,
+    "promptEvalCount": 2596,
+    "evalCount": 824,
+    "doneReason": "stop",
+    "thinkingTextTokenCount": 181,
+    "finalTextTokenCount": 633
+  },
+  "operationalMetrics": {
+    "modelCalls": 1,
+    "sourceMessageWindows": 1,
+    "semanticInterpretations": 1,
+    "semanticAmplification": 1
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 4,
+    "claimCount": 11,
+    "decisionCount": 0,
+    "openQuestionCount": 1,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.7222222222222222,
+    "goldClaimPrecision": 0.5454545454545454,
+    "evidencePrecision": 0.6,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 1,
+    "noiseRetention": 0,
+    "matchedClaimIds": [
+      "tax-reporting.form-risk",
+      "security.password-in-bundle",
+      "tax-reporting.paid-help",
+      "product.web-limitations",
+      "product.fast-delivery-strategy",
+      "product.uah-only"
+    ],
+    "matchedDecisionIds": [],
+    "matchedOpenQuestionIds": [],
+    "retainedThreadIds": [
+      "tax-reporting",
+      "calculator-security",
+      "calculator-product"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

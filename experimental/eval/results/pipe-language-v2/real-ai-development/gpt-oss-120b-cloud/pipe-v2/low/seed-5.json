@@ -1,0 +1,168 @@
+{
+  "case": "real-ai-development",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v2",
+  "reasoning": "low",
+  "seed": 5,
+  "inputHash": "c44e2d8f381898078b12b50a1dbf1501e5970203c0d4ef386b86fd514114c47c",
+  "promptHash": "ba14e8eefae73c91c07e64c22ec7c9251a29f2b6b2646f91d6be6875755a361d",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion on AI tools, job search, and code quality\",\n  \"topics\": [\n    {\n      \"id\": \"job-search-automation\",\n      \"title\": \"Automation of job search and resume generation\",\n      \"claims\": [\n        {\n          \"text\": \"P1 is preparing for a full‑time job search and plans to set up cloud automation for generating PDF resumes tailored to specific vacancies.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"P5 plans to wait for their startup to close to have free time to configure OpenClaw for finding vacancies, generating resumes, and writing cover letters.\",\n          \"evidence\": [5]\n        },\n        {\n          \"text\": \"P6 states that in 2026 job seekers need many AI‑related skills (Cursor, Claude Code, LLM, RAG, Embeddings, etc.) to avoid being filtered out by recruiters.\",\n          \"evidence\": [6]\n        },\n        {\n          \"text\": \"P8 claims that lack of AI knowledge makes job searching for JS/Python positions very difficult in the current market.\",\n          \"evidence\": [8]\n        },\n        {\n          \"text\": \"P14 expects the recruiter profession to become extinct.\",\n          \"evidence\": [14]\n        },\n        {\n          \"text\": \"P15 describes passing an Angular interview despite the HR not reading the resume and the vacancy missing the resume requirement.\",\n          \"evidence\": [15]\n        }\n      ]\n    },\n    {\n      \"id\": \"ai-tools-2026\",\n      \"title\": \"Perception and usage of AI tools in 2024‑2026\",\n      \"claims\": [\n        {\n          \"text\": \"P7 humorously contrasts attitudes toward AI in 2024 and 2026.\",\n          \"evidence\": [7]\n        },\n        {\n          \"text\": \"P9 says the acceleration of development by AI started in 2025, with tools becoming sufficiently good but increasingly expensive.\",\n          \"evidence\": [9]\n        },\n        {\n          \"text\": \"P10 likens current AI tooling to the evolution of REST, JSON, Microservices, Docker after React.\",\n          \"evidence\": [10]\n        },\n        {\n          \"text\": \"P11 notes that despite the passage of time, nothing has fundamentally changed.\",\n          \"evidence\": [11]\n        },\n        {\n          \"text\": \"P13 observes that candidate‑search keywords are more detached from reality than before.\",\n          \"evidence\": [13]\n        }\n      ]\n    },\n    {\n      \"id\": \"ai-impact-dev\",\n      \"title\": \"AI’s effect on software development speed and quality\",\n      \"claims\": [\n        {\n          \"text\": \"P19 reports that using GPT to generate SQL joins and other code drastically speeds up development, eliminating routine tasks.\",\n          \"evidence\": [19]\n        },\n        {\n          \"text\": \"P20 suggests exporting logs to JUnit to catch recurring issues earlier.\",\n          \"evidence\": [20]\n        },\n        {\n          \"text\": \"P21 claims that people are unable to improve because they are “stupid” and incapable of learning.\",\n          \"evidence\": [21]\n        },\n        {\n          \"text\": \"P22 states that answer quality is often proportional to question quality and the amount of additional knowledge available to the system.\",\n          \"evidence\": [22]\n        },\n        {\n          \"text\": \"P24 echoes that the quality of a response depends on the quality of the question and the system’s knowledge.\",\n          \"evidence\": [24]\n        },\n        {\n          \"text\": \"P30 argues that AI lowers the entry barrier to programming, leading to poorly optimized code (e.g., massive generated SQL queries).\",\n          \"evidence\": [30]\n        },\n        {\n          \"text\": \"P34 mentions that incremental computations have been buried and replaced with a “view” memorial.\",\n          \"evidence\": [34]\n        },\n        {\n          \"text\": \"P35 describes a case where AI‑generated code (SELECT *) was pushed to production without review, causing problems.\",\n          \"evidence\": [35]\n        }\n      ]\n    },\n    {\n      \"id\": \"code-quality-concerns\",\n      \"title\": \"Issues with AI‑generated code and code review\",\n      \"claims\": [\n        {\n          \"text\": \"P35 recounts a situation where an AI‑generated feature broke the project and was ultimately discarded after code review.\",\n          \"evidence\": [35]\n        },\n        {\n          \"text\": \"P30 provides an example of an AI‑generated 450‑line raw SQL query that retrieves excessive data and creates non‑optimal queries in production.\",\n          \"evidence\": [30]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": []\n}",
+  "thinking": "Need to extract topics, claims, decisions, open questions. Identify decisions? none. Open questions? maybe none. Provide topics like job-search-automation, ai-tools, code-generation, etc. Compile claims with evidence IDs.\n\nLet's list claims:\n\n- P1 preparing job search, wants cloud automation for PDF resumes (1)\n- P2 reacts \"Вааата...\" (2) maybe not claim.\n- P3 says AI controls people not people AI (3) claim about AI control.\n- P4 reverse engineering AI is fun (4)\n- P5 waiting for startup to close to have time for OpenClaw job search automation (5)\n- P6 need AI skills like Cursor, Claude Code, LLM, RAG etc in 2026 (6)\n- P7 sarcasm about AI perception in 2024 vs 2026 (7)\n- P8 AI startup market mainstream, lacking AI knowledge makes job search hard (8)\n- P9 acceleration of development started 2025, tools improving but costly (9)\n- P10 compares to REST, JSON, Microservices, Docker (10)\n- P11 times go, nothing changed (11)\n- P13 candidate search keywords detached from reality (13)\n- P14 expects recruiters profession to die (14)\n- P15 passed Angular interview despite resume missing (15)\n- P19 AI accelerates dev by generating SQL etc (19)\n- P20 suggestion to export logs in JUnit (20)\n- P21 says they won't improve, people stupid (21)\n- P22 quality of answer depends on question quality (22)\n- P23 logs not helpful (23)\n- P24 quality of answer proportional to question and knowledge (24)\n- P26 if you suffer long you get result (26)\n- P30 AI reduces entry barrier, leads to bad code (30)\n- P31 \"Смакота\" not claim.\n- P34 incremental calculations buried, memorial view (34)\n- P35 code push with SELECT * etc due to AI-generated code (35)\n\nOpen questions? None explicit. Maybe P20 suggestion but not question. No.\n\nDecisions none.\n\nCreate topics grouping similar: job-search-automation, ai-skills-2026, ai-impact-dev, recruiter-future, code-quality-issues.\n\nProvide JSON.",
+  "parsed": {
+    "title": "Discussion on AI tools, job search, and code quality",
+    "topics": [
+      {
+        "id": "job-search-automation",
+        "title": "Automation of job search and resume generation",
+        "claims": [
+          {
+            "text": "P1 is preparing for a full‑time job search and plans to set up cloud automation for generating PDF resumes tailored to specific vacancies.",
+            "evidence": [1]
+          },
+          {
+            "text": "P5 plans to wait for their startup to close to have free time to configure OpenClaw for finding vacancies, generating resumes, and writing cover letters.",
+            "evidence": [5]
+          },
+          {
+            "text": "P6 states that in 2026 job seekers need many AI‑related skills (Cursor, Claude Code, LLM, RAG, Embeddings, etc.) to avoid being filtered out by recruiters.",
+            "evidence": [6]
+          },
+          {
+            "text": "P8 claims that lack of AI knowledge makes job searching for JS/Python positions very difficult in the current market.",
+            "evidence": [8]
+          },
+          {
+            "text": "P14 expects the recruiter profession to become extinct.",
+            "evidence": [14]
+          },
+          {
+            "text": "P15 describes passing an Angular interview despite the HR not reading the resume and the vacancy missing the resume requirement.",
+            "evidence": [15]
+          }
+        ]
+      },
+      {
+        "id": "ai-tools-2026",
+        "title": "Perception and usage of AI tools in 2024‑2026",
+        "claims": [
+          {
+            "text": "P7 humorously contrasts attitudes toward AI in 2024 and 2026.",
+            "evidence": [7]
+          },
+          {
+            "text": "P9 says the acceleration of development by AI started in 2025, with tools becoming sufficiently good but increasingly expensive.",
+            "evidence": [9]
+          },
+          {
+            "text": "P10 likens current AI tooling to the evolution of REST, JSON, Microservices, Docker after React.",
+            "evidence": [10]
+          },
+          {
+            "text": "P11 notes that despite the passage of time, nothing has fundamentally changed.",
+            "evidence": [11]
+          },
+          {
+            "text": "P13 observes that candidate‑search keywords are more detached from reality than before.",
+            "evidence": [13]
+          }
+        ]
+      },
+      {
+        "id": "ai-impact-dev",
+        "title": "AI’s effect on software development speed and quality",
+        "claims": [
+          {
+            "text": "P19 reports that using GPT to generate SQL joins and other code drastically speeds up development, eliminating routine tasks.",
+            "evidence": [19]
+          },
+          {
+            "text": "P20 suggests exporting logs to JUnit to catch recurring issues earlier.",
+            "evidence": [20]
+          },
+          {
+            "text": "P21 claims that people are unable to improve because they are “stupid” and incapable of learning.",
+            "evidence": [21]
+          },
+          {
+            "text": "P22 states that answer quality is often proportional to question quality and the amount of additional knowledge available to the system.",
+            "evidence": [22]
+          },
+          {
+            "text": "P24 echoes that the quality of a response depends on the quality of the question and the system’s knowledge.",
+            "evidence": [24]
+          },
+          {
+            "text": "P30 argues that AI lowers the entry barrier to programming, leading to poorly optimized code (e.g., massive generated SQL queries).",
+            "evidence": [30]
+          },
+          {
+            "text": "P34 mentions that incremental computations have been buried and replaced with a “view” memorial.",
+            "evidence": [34]
+          },
+          {
+            "text": "P35 describes a case where AI‑generated code (SELECT *) was pushed to production without review, causing problems.",
+            "evidence": [35]
+          }
+        ]
+      },
+      {
+        "id": "code-quality-concerns",
+        "title": "Issues with AI‑generated code and code review",
+        "claims": [
+          {
+            "text": "P35 recounts a situation where an AI‑generated feature broke the project and was ultimately discarded after code review.",
+            "evidence": [35]
+          },
+          {
+            "text": "P30 provides an example of an AI‑generated 450‑line raw SQL query that retrieves excessive data and creates non‑optimal queries in production.",
+            "evidence": [30]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": []
+  },
+  "usage": {
+    "durationMs": 17494.9035,
+    "ollamaTotalMs": 17290.749892,
+    "promptEvalCount": 3530,
+    "evalCount": 1495,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 4,
+    "claimCount": 21,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.9523809523809523,
+    "goldClaimPrecision": 0.38095238095238093,
+    "evidencePrecision": 0.38095238095238093,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0.14285714285714285,
+    "matchedClaimIds": [
+      "job-search.automation-idea",
+      "job-search.ai-skills",
+      "job-search.keyword-filtering",
+      "job-search.angular-anecdote",
+      "development.routine-speedup",
+      "development.context-quality",
+      "vibe-coding.bad-backend",
+      "vibe-coding.review-failure"
+    ],
+    "retainedThreadIds": [
+      "ai-job-search",
+      "ai-assisted-development",
+      "vibe-coding-risks"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

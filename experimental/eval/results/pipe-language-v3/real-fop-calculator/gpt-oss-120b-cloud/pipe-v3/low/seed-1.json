@@ -1,0 +1,161 @@
+{
+  "case": "real-fop-calculator",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 1,
+  "inputHash": "d3179cdb8e49a27f55b8dcbb42c5b7b95590527ad18ad16afb38bc499073e8af",
+  "promptHash": "150d78ee667732e96b9a2fcd5fe5354e59b5fd2af6c1920571e8c0ae3bfc95d6",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion on taxes, domain purchase, app profitability and security concerns\",\n  \"topics\": [\n    {\n      \"id\": \"tax-avoidance\",\n      \"title\": \"Avoiding large tax penalties with aunt Sveta's help\",\n      \"claims\": [\n        {\n          \"text\": \"Paying aunt Sveta 500 UAH helps avoid a huge main penalty caused by a mis‑marked column in the declaration\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"The inspector was corrupt, approving declarations without review for a year and later reprimanded, prompting a full re‑check\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"With Sveta’s assistance the author correctly re‑filed and paid about 1000 UAH instead of all fines\",\n          \"evidence\": [1]\n        }\n      ]\n    },\n    {\n      \"id\": \"domain-calculator\",\n      \"title\": \"Domain purchase and need for a FOP calculator\",\n      \"claims\": [\n        {\n          \"text\": \"The author has not bought a domain yet\",\n          \"evidence\": [2]\n        },\n        {\n          \"text\": \"A FOP calculator is needed; once someone buys it, there will be money for the domain\",\n          \"evidence\": [3,4]\n        },\n        {\n          \"text\": \"The tax calculation procedure takes about an hour with Excel, at most a day\",\n          \"evidence\": [5,6]\n        },\n        {\n          \"text\": \"Quarterly reports must be filed and taxes paid correctly\",\n          \"evidence\": [7]\n        },\n        {\n          \"text\": \"The main difficulty is not the calculation itself but correctly matching each column and subtraction\",\n          \"evidence\": [8]\n        }\n      ]\n    },\n    {\n      \"id\": \"app-profitability\",\n      \"title\": \"Profitability of a web/Flutter app idea\",\n      \"claims\": [\n        {\n          \"text\": \"Web platforms are the simplest but far less profitable than Android/iOS apps\",\n          \"evidence\": [11]\n        },\n        {\n          \"text\": \"SEO is poor, no external traffic from social media, no ad revenue, and user retention is almost zero due to paywalls\",\n          \"evidence\": [11]\n        },\n        {\n          \"text\": \"Successful projects use fast delivery (< 1 week) and a cross‑platform stack like Flutter, copying popular ideas with minor tweaks\",\n          \"evidence\": [12]\n        },\n        {\n          \"text\": \"The author doubts anyone will buy the product, betting on low sales\",\n          \"evidence\": [17]\n        },\n        {\n          \"text\": \"LinkedIn audience for technical/managerial posts has dropped below 50%\",\n          \"evidence\": [18]\n        },\n        {\n          \"text\": \"The calculator works only with a UAH‑based FOP, requiring conversion at the day‑rate of each transaction\",\n          \"evidence\": [19]\n        },\n        {\n          \"text\": \"Before proceeding, at least ten people should be willing to pay 299 UAH; otherwise the analysis is pointless\",\n          \"evidence\": [20]\n        }\n      ]\n    },\n    {\n      \"id\": \"security-password\",\n      \"title\": \"Potential password leak in bundled app\",\n      \"claims\": [\n        {\n          \"text\": \"The source code may contain a hard‑coded password stored in local storage\",\n          \"evidence\": [21]\n        },\n        {\n          \"text\": \"The author jokes about many LinkedIn users being able to hack it\",\n          \"evidence\": [28]\n        },\n        {\n          \"text\": \"The app is positioned as a local‑first bundle with a password that unlocks full features\",\n          \"evidence\": [29,30]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": [\n    {\n      \"text\": \"Can the hard‑coded password be found by searching the source code?\",\n      \"evidence\": [21]\n    }\n  ]\n}",
+  "thinking": "We need produce JSON with title, topics, decisions, openQuestions. Identify claims.\n\nTopics: maybe \"tax-declaration\", \"domain purchase\", \"app profitability\", \"password leak\". We'll create few.\n\nExtract claims and evidence IDs.\n\nClaims:\n\n- Paying aunt Sveta 500 UAH helps avoid large main penalty from mis-marked column. (ID1)\n- Inspector was corrupt, approved without review. (1)\n- Using aunt's help they repaid correctly, paying ~1000 UAH instead of all fines. (1)\n- Domain not bought. (2)\n- Need calculator for FOP, otherwise no money for domain. (4 replies 2,4)\n- Procedure takes about an hour with Excel max a day. (5)\n- Quarterly reports, pay correctly. (7)\n- Main issue is not calculation but correct column placement. (8)\n- Web platform less profitable than mobile. (11)\n- SEO poor, no traffic, no ads, etc. (11)\n- Fast delivery (< week) and Flutter stack recommended. (12)\n- Igor trying to earn something. (14)\n- Author doubts profitability, bets nobody will buy. (17)\n- Audience on LinkedIn reduced technical posts <50%. (18)\n- Calculator works only with UAH FOP, had to convert using daily rate. (19)\n- Need at least ten people willing to pay 299 UAH, otherwise no sense. (20)\n- Question: what is source code, can password be found? (21)\n- Someone asks if they paid 299 UAH. (22)\n- \"In bundle\" (23) etc.\n\nOpen questions: ID21 is a question about source code/password. No answer later? No clear answer; later discussion about password but not answer. So remains open.\n\nDecisions: none explicit decisions.\n\nOutput JSON.\n\nWe'll make topics: tax-avoidance, domain-calculator, app-profitability, password-bundle.\n\nProvide claims per topic.\n\nLet's craft.",
+  "parsed": {
+    "title": "Discussion on taxes, domain purchase, app profitability and security concerns",
+    "topics": [
+      {
+        "id": "tax-avoidance",
+        "title": "Avoiding large tax penalties with aunt Sveta's help",
+        "claims": [
+          {
+            "text": "Paying aunt Sveta 500 UAH helps avoid a huge main penalty caused by a mis‑marked column in the declaration",
+            "evidence": [1]
+          },
+          {
+            "text": "The inspector was corrupt, approving declarations without review for a year and later reprimanded, prompting a full re‑check",
+            "evidence": [1]
+          },
+          {
+            "text": "With Sveta’s assistance the author correctly re‑filed and paid about 1000 UAH instead of all fines",
+            "evidence": [1]
+          }
+        ]
+      },
+      {
+        "id": "domain-calculator",
+        "title": "Domain purchase and need for a FOP calculator",
+        "claims": [
+          {
+            "text": "The author has not bought a domain yet",
+            "evidence": [2]
+          },
+          {
+            "text": "A FOP calculator is needed; once someone buys it, there will be money for the domain",
+            "evidence": [3, 4]
+          },
+          {
+            "text": "The tax calculation procedure takes about an hour with Excel, at most a day",
+            "evidence": [5, 6]
+          },
+          {
+            "text": "Quarterly reports must be filed and taxes paid correctly",
+            "evidence": [7]
+          },
+          {
+            "text": "The main difficulty is not the calculation itself but correctly matching each column and subtraction",
+            "evidence": [8]
+          }
+        ]
+      },
+      {
+        "id": "app-profitability",
+        "title": "Profitability of a web/Flutter app idea",
+        "claims": [
+          {
+            "text": "Web platforms are the simplest but far less profitable than Android/iOS apps",
+            "evidence": [11]
+          },
+          {
+            "text": "SEO is poor, no external traffic from social media, no ad revenue, and user retention is almost zero due to paywalls",
+            "evidence": [11]
+          },
+          {
+            "text": "Successful projects use fast delivery (< 1 week) and a cross‑platform stack like Flutter, copying popular ideas with minor tweaks",
+            "evidence": [12]
+          },
+          {
+            "text": "The author doubts anyone will buy the product, betting on low sales",
+            "evidence": [17]
+          },
+          {
+            "text": "LinkedIn audience for technical/managerial posts has dropped below 50%",
+            "evidence": [18]
+          },
+          {
+            "text": "The calculator works only with a UAH‑based FOP, requiring conversion at the day‑rate of each transaction",
+            "evidence": [19]
+          },
+          {
+            "text": "Before proceeding, at least ten people should be willing to pay 299 UAH; otherwise the analysis is pointless",
+            "evidence": [20]
+          }
+        ]
+      },
+      {
+        "id": "security-password",
+        "title": "Potential password leak in bundled app",
+        "claims": [
+          {
+            "text": "The source code may contain a hard‑coded password stored in local storage",
+            "evidence": [21]
+          },
+          {
+            "text": "The author jokes about many LinkedIn users being able to hack it",
+            "evidence": [28]
+          },
+          {
+            "text": "The app is positioned as a local‑first bundle with a password that unlocks full features",
+            "evidence": [29, 30]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": [
+      {
+        "text": "Can the hard‑coded password be found by searching the source code?",
+        "evidence": [21]
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 15797.814500000008,
+    "ollamaTotalMs": 15413.636577,
+    "promptEvalCount": 2799,
+    "evalCount": 1282,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 4,
+    "claimCount": 18,
+    "decisionCount": 0,
+    "openQuestionCount": 1,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 1,
+    "goldClaimPrecision": 0.4444444444444444,
+    "evidencePrecision": 0.4090909090909091,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 1,
+    "noiseRetention": 0,
+    "matchedClaimIds": [
+      "tax-reporting.form-risk",
+      "tax-reporting.paid-help",
+      "product.web-limitations",
+      "product.fast-delivery-strategy",
+      "product.uah-only",
+      "product.validate-demand-first",
+      "security.password-in-bundle",
+      "product.creator-response"
+    ],
+    "retainedThreadIds": [
+      "tax-reporting",
+      "calculator-product",
+      "calculator-security"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

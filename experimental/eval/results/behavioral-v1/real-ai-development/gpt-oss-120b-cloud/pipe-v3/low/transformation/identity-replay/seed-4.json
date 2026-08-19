@@ -1,0 +1,134 @@
+{
+  "case": "real-ai-development",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 4,
+  "transformation": "identity-replay",
+  "inputHash": "c44e2d8f381898078b12b50a1dbf1501e5970203c0d4ef386b86fd514114c47c",
+  "promptHash": "926769814c3c5c8a23a92b4aa3f016579ab9ed97ce364dc887976527a86b02a8",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion on AI‑driven job search, development tools and recruiting\",\n  \"topics\": [\n    {\n      \"id\": \"job-search-automation\",\n      \"title\": \"AI‑assisted job search and résumé generation\",\n      \"claims\": [\n        {\n          \"text\": \"The author plans to set up a cloud system that automates searching for vacancies, generating PDF résumés tailored to each job, and writing cover letters.\",\n          \"evidence\": [1, 5]\n        },\n        {\n          \"text\": \"The author expects that recruiters will filter out candidates who lack AI‑related skills such as Cursor, Claude Code, LLM, RAG, and embeddings.\",\n          \"evidence\": [6, 8]\n        },\n        {\n          \"text\": \"The author believes that once AI tools become mainstream, lack of AI knowledge will make a job search for JS/Python roles much harder.\",\n          \"evidence\": [8]\n        },\n        {\n          \"text\": \"The author predicts that the recruiting profession will become obsolete.\",\n          \"evidence\": [14]\n        }\n      ]\n    },\n    {\n      \"id\": \"ai-tools-speed-development\",\n      \"title\": \"Impact of AI code generation on development speed\",\n      \"claims\": [\n        {\n          \"text\": \"Using GPT to generate join queries and other code accelerates development, handling routine tasks and allowing developers to focus on higher‑level problems.\",\n          \"evidence\": [19]\n        },\n        {\n          \"text\": \"In one case, AI‑generated raw SQL (450 lines) caused an unoptimized query that would take 10‑20 minutes in production.\",\n          \"evidence\": [30]\n        },\n        {\n          \"text\": \"Some teams reject AI‑generated code after code review because it can break projects.\",\n          \"evidence\": [35]\n        }\n      ]\n    },\n    {\n      \"id\": \"cloud-entry-barrier\",\n      \"title\": \"Cloud lowers programming entry threshold\",\n      \"claims\": [\n        {\n          \"text\": \"The author argues that cloud tools dramatically lower the barrier to entry for programming, leading to low‑quality code and security issues.\",\n          \"evidence\": [30]\n        }\n      ]\n    },\n    {\n      \"id\": \"recruiting-and-logs\",\n      \"title\": \"Effectiveness of logs and recruiter analysis\",\n      \"claims\": [\n        {\n          \"text\": \"One participant thinks logs would not help much in debugging because the real issue is understanding requirements.\",\n          \"evidence\": [23]\n        },\n        {\n          \"text\": \"Another participant claims that recruiters cannot analyze or learn from new information effectively.\",\n          \"evidence\": [21]\n        }\n      ]\n    },\n    {\n      \"id\": \"quality-of-answers\",\n      \"title\": \"Quality of AI answers depends on question quality\",\n      \"claims\": [\n        {\n          \"text\": \"The quality of AI responses is often proportional to the quality of the question and the amount of additional knowledge available to the system.\",\n          \"evidence\": [24, 25]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": []\n}",
+  "thinking": "We need to extract topics, claims, decisions, open questions. Identify main themes: job search automation, AI impact on dev, cloud lowers entry, AI tools speed dev, recruiting issues, logs usefulness, quality of answers.\n\nDecisions none maybe. Open questions? none resolved.\n\nWe'll create topics with ids.\n\nLet's craft.\n\n",
+  "parsed": {
+    "title": "Discussion on AI‑driven job search, development tools and recruiting",
+    "topics": [
+      {
+        "id": "job-search-automation",
+        "title": "AI‑assisted job search and résumé generation",
+        "claims": [
+          {
+            "text": "The author plans to set up a cloud system that automates searching for vacancies, generating PDF résumés tailored to each job, and writing cover letters.",
+            "evidence": [1, 5]
+          },
+          {
+            "text": "The author expects that recruiters will filter out candidates who lack AI‑related skills such as Cursor, Claude Code, LLM, RAG, and embeddings.",
+            "evidence": [6, 8]
+          },
+          {
+            "text": "The author believes that once AI tools become mainstream, lack of AI knowledge will make a job search for JS/Python roles much harder.",
+            "evidence": [8]
+          },
+          {
+            "text": "The author predicts that the recruiting profession will become obsolete.",
+            "evidence": [14]
+          }
+        ]
+      },
+      {
+        "id": "ai-tools-speed-development",
+        "title": "Impact of AI code generation on development speed",
+        "claims": [
+          {
+            "text": "Using GPT to generate join queries and other code accelerates development, handling routine tasks and allowing developers to focus on higher‑level problems.",
+            "evidence": [19]
+          },
+          {
+            "text": "In one case, AI‑generated raw SQL (450 lines) caused an unoptimized query that would take 10‑20 minutes in production.",
+            "evidence": [30]
+          },
+          {
+            "text": "Some teams reject AI‑generated code after code review because it can break projects.",
+            "evidence": [35]
+          }
+        ]
+      },
+      {
+        "id": "cloud-entry-barrier",
+        "title": "Cloud lowers programming entry threshold",
+        "claims": [
+          {
+            "text": "The author argues that cloud tools dramatically lower the barrier to entry for programming, leading to low‑quality code and security issues.",
+            "evidence": [30]
+          }
+        ]
+      },
+      {
+        "id": "recruiting-and-logs",
+        "title": "Effectiveness of logs and recruiter analysis",
+        "claims": [
+          {
+            "text": "One participant thinks logs would not help much in debugging because the real issue is understanding requirements.",
+            "evidence": [23]
+          },
+          {
+            "text": "Another participant claims that recruiters cannot analyze or learn from new information effectively.",
+            "evidence": [21]
+          }
+        ]
+      },
+      {
+        "id": "quality-of-answers",
+        "title": "Quality of AI answers depends on question quality",
+        "claims": [
+          {
+            "text": "The quality of AI responses is often proportional to the quality of the question and the amount of additional knowledge available to the system.",
+            "evidence": [24, 25]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": []
+  },
+  "usage": {
+    "durationMs": 11333.563299999994,
+    "ollamaTotalMs": 11168.522765,
+    "promptEvalCount": 3260,
+    "evalCount": 739,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 5,
+    "claimCount": 11,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.9047619047619048,
+    "goldClaimPrecision": 0.6363636363636364,
+    "evidencePrecision": 0.7142857142857143,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0.09090909090909091,
+    "matchedClaimIds": [
+      "job-search.automation-idea",
+      "job-search.ai-skills",
+      "development.context-quality",
+      "job-search.keyword-filtering",
+      "development.routine-speedup",
+      "vibe-coding.bad-backend",
+      "vibe-coding.review-failure"
+    ],
+    "retainedThreadIds": [
+      "ai-job-search",
+      "ai-assisted-development",
+      "vibe-coding-risks"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

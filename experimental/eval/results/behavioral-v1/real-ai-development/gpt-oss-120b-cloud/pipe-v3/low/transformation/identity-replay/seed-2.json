@@ -1,0 +1,160 @@
+{
+  "case": "real-ai-development",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 2,
+  "transformation": "identity-replay",
+  "inputHash": "c44e2d8f381898078b12b50a1dbf1501e5970203c0d4ef386b86fd514114c47c",
+  "promptHash": "926769814c3c5c8a23a92b4aa3f016579ab9ed97ce364dc887976527a86b02a8",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"AI impact on job search, development, and recruitment\",\n  \"topics\": [\n    {\n      \"id\": \"job-search-automation\",\n      \"title\": \"Automation of job search with AI\",\n      \"claims\": [\n        {\n          \"text\": \"P1 is preparing to automate job search, including PDF resume generation for specific vacancies.\",\n          \"evidence\": [1, 5]\n        },\n        {\n          \"text\": \"P1 plans to set up OpenClaw for vacancy search, resume generation, and cover letters once free time is available.\",\n          \"evidence\": [5]\n        }\n      ]\n    },\n    {\n      \"id\": \"ai-skills-resume\",\n      \"title\": \"Need for AI-related skills on resumes\",\n      \"claims\": [\n        {\n          \"text\": \"P1 emphasizes adding AI skills (Cursor, Claude Code, LLM, RAG, Embeddings) to avoid being filtered out by recruiters.\",\n          \"evidence\": [6]\n        },\n        {\n          \"text\": \"P2 humorously notes the shift in attitude toward AI from 2024 to 2026.\",\n          \"evidence\": [7]\n        }\n      ]\n    },\n    {\n      \"id\": \"ai-mainstream-job-market\",\n      \"title\": \"AI as a market mainstream affecting job search\",\n      \"claims\": [\n        {\n          \"text\": \"P1 states that lack of AI knowledge now makes searching for JS/Python jobs very difficult.\",\n          \"evidence\": [8, 9]\n        }\n      ]\n    },\n    {\n      \"id\": \"development-acceleration\",\n      \"title\": \"AI accelerates development\",\n      \"claims\": [\n        {\n          \"text\": \"P2 describes using GPT to generate SQL joins, reducing routine work and speeding up development.\",\n          \"evidence\": [19]\n        }\n      ]\n    },\n    {\n      \"id\": \"code-generation-risks\",\n      \"title\": \"Risks of AI-generated code\",\n      \"claims\": [\n        {\n          \"text\": \"P1 reports an example where AI-generated raw SQL produced a massive, insecure query leading to performance issues.\",\n          \"evidence\": [30]\n        },\n        {\n          \"text\": \"P1 recounts a teammate who pushed unreviewed SELECT * queries to production after AI generation, causing project failure.\",\n          \"evidence\": [35]\n        }\n      ]\n    },\n    {\n      \"id\": \"recruiter-obsolescence\",\n      \"title\": \"Potential extinction of recruiter roles\",\n      \"claims\": [\n        {\n          \"text\": \"P1 expects the recruiting profession to disappear permanently.\",\n          \"evidence\": [14]\n        }\n      ]\n    },\n    {\n      \"id\": \"logging-with-ai\",\n      \"title\": \"Effectiveness of logs for AI debugging\",\n      \"claims\": [\n        {\n          \"text\": \"P2 suggests extracting logs could help AI detect recurring issues earlier.\",\n          \"evidence\": [20]\n        },\n        {\n          \"text\": \"P4 counters that only a well‑configured environment and accumulated context can improve AI assistance, implying logs alone are insufficient.\",\n          \"evidence\": [22]\n        }\n      ]\n    },\n    {\n      \"id\": \"answer-quality-depends-on-question\",\n      \"title\": \"Quality of AI answers depends on question quality\",\n      \"claims\": [\n        {\n          \"text\": \"P4 notes that answer quality is often proportional to question quality and available knowledge.\",\n          \"evidence\": [24]\n        },\n        {\n          \"text\": \"P2 agrees with the statement.\",\n          \"evidence\": [25]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": []\n}",
+  "thinking": "Need to produce JSON. Identify topics.\n\nPossible topics: job search automation, AI tools impact, code generation risks, recruiters fading, logging usefulness, quality of answers, etc.\n\nWe'll extract claims with evidence IDs.\n\nClaims:\n- P1 plans to automate job search with AI (IDs 1,5,6)\n- AI tools becoming mainstream making JS/Python jobs harder (8,9)\n- AI code generation can produce inefficient/unsafe code (30,35)\n- Logging not helpful per P2 (23) and P4 response (22) indicating environment matters.\n- Recruiter profession may become obsolete (14)\n- Development acceleration via AI true (19)\n- Need to add AI skills to resume (6,7)\n\nDecisions none.\n\nOpen questions: any unresolved? maybe question about logs usefulness? No answer. So open question: \"Should logs be used to aid debugging with AI?\" from 20? Not answered. Keep.\n\nAlso maybe question about which car to choose (32) unresolved. It's a joke but open. Might count.\n\nWe'll list open questions IDs 20,32? Actually 20 is suggestion, not question. 29 is joke, not question. 32 is statement. No explicit question.\n\nThus maybe no open questions.\n\nWe'll output.\n\n",
+  "parsed": {
+    "title": "AI impact on job search, development, and recruitment",
+    "topics": [
+      {
+        "id": "job-search-automation",
+        "title": "Automation of job search with AI",
+        "claims": [
+          {
+            "text": "P1 is preparing to automate job search, including PDF resume generation for specific vacancies.",
+            "evidence": [1, 5]
+          },
+          {
+            "text": "P1 plans to set up OpenClaw for vacancy search, resume generation, and cover letters once free time is available.",
+            "evidence": [5]
+          }
+        ]
+      },
+      {
+        "id": "ai-skills-resume",
+        "title": "Need for AI-related skills on resumes",
+        "claims": [
+          {
+            "text": "P1 emphasizes adding AI skills (Cursor, Claude Code, LLM, RAG, Embeddings) to avoid being filtered out by recruiters.",
+            "evidence": [6]
+          },
+          {
+            "text": "P2 humorously notes the shift in attitude toward AI from 2024 to 2026.",
+            "evidence": [7]
+          }
+        ]
+      },
+      {
+        "id": "ai-mainstream-job-market",
+        "title": "AI as a market mainstream affecting job search",
+        "claims": [
+          {
+            "text": "P1 states that lack of AI knowledge now makes searching for JS/Python jobs very difficult.",
+            "evidence": [8, 9]
+          }
+        ]
+      },
+      {
+        "id": "development-acceleration",
+        "title": "AI accelerates development",
+        "claims": [
+          {
+            "text": "P2 describes using GPT to generate SQL joins, reducing routine work and speeding up development.",
+            "evidence": [19]
+          }
+        ]
+      },
+      {
+        "id": "code-generation-risks",
+        "title": "Risks of AI-generated code",
+        "claims": [
+          {
+            "text": "P1 reports an example where AI-generated raw SQL produced a massive, insecure query leading to performance issues.",
+            "evidence": [30]
+          },
+          {
+            "text": "P1 recounts a teammate who pushed unreviewed SELECT * queries to production after AI generation, causing project failure.",
+            "evidence": [35]
+          }
+        ]
+      },
+      {
+        "id": "recruiter-obsolescence",
+        "title": "Potential extinction of recruiter roles",
+        "claims": [
+          {
+            "text": "P1 expects the recruiting profession to disappear permanently.",
+            "evidence": [14]
+          }
+        ]
+      },
+      {
+        "id": "logging-with-ai",
+        "title": "Effectiveness of logs for AI debugging",
+        "claims": [
+          {
+            "text": "P2 suggests extracting logs could help AI detect recurring issues earlier.",
+            "evidence": [20]
+          },
+          {
+            "text": "P4 counters that only a well‑configured environment and accumulated context can improve AI assistance, implying logs alone are insufficient.",
+            "evidence": [22]
+          }
+        ]
+      },
+      {
+        "id": "answer-quality-depends-on-question",
+        "title": "Quality of AI answers depends on question quality",
+        "claims": [
+          {
+            "text": "P4 notes that answer quality is often proportional to question quality and available knowledge.",
+            "evidence": [24]
+          },
+          {
+            "text": "P2 agrees with the statement.",
+            "evidence": [25]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": []
+  },
+  "usage": {
+    "durationMs": 18617.415899999993,
+    "ollamaTotalMs": 18452.436488,
+    "promptEvalCount": 3260,
+    "evalCount": 1048,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 8,
+    "claimCount": 13,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.9047619047619048,
+    "goldClaimPrecision": 0.5384615384615384,
+    "evidencePrecision": 0.5333333333333333,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0.07692307692307693,
+    "matchedClaimIds": [
+      "job-search.automation-idea",
+      "job-search.ai-skills",
+      "development.routine-speedup",
+      "vibe-coding.bad-backend",
+      "vibe-coding.review-failure",
+      "job-search.keyword-filtering",
+      "development.context-quality"
+    ],
+    "retainedThreadIds": [
+      "ai-job-search",
+      "ai-assisted-development",
+      "vibe-coding-risks"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

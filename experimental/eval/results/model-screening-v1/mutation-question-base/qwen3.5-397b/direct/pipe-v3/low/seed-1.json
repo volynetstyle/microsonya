@@ -1,0 +1,74 @@
+{
+  "case": "mutation-question-base",
+  "model": "qwen3.5:397b",
+  "pipeline": "direct",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 1,
+  "transformation": "identity",
+  "inputHash": "6a360808f9f41ef21cd7e5b790a3c23313edde24c137222e2804680966a61a1f",
+  "promptHash": "9196f52818cac880b148b3c632c14ff84d5c3775b41e307142bb0bf9981f7a46",
+  "promptVersion": "v4",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Website Availability Inquiry\",\n  \"topics\": [\n    {\n      \"id\": \"website-availability\",\n      \"title\": \"Website Availability\",\n      \"claims\": [\n        {\n          \"text\": \"A asks if an item is unavailable on the website\",\n          \"evidence\": [\n            1\n          ]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": [\n    {\n      \"text\": \"A asks: \\\"Is this unavailable on the website?\\\"\",\n      \"evidence\": [\n        1\n      ]\n    }\n  ]\n}",
+  "thinking": "Thinking Process:\n\n1.  **Analyze the Request:**\n    *   Task: Summarize a Telegram conversation.\n    *   Constraints:\n        *   Preserve attribution.\n        *   Cite only source message IDs.\n        *   Do not invent decisions.\n        *   Do not leave answered questions open.\n        *   Return JSON only.\n        *   Specific JSON schema (title, topics, decisions, openQuestions).\n        *   Input format: pipe-v3 (Messages provided).\n    *   Input Data:\n        *   Message #1: User \"A\", Time \"10:00\", Reply to ^0 (likely none/start), Type \"text\", Content \"Is this unavailable on the website?\"\n\n2.  **Analyze the Input Data:**\n    *   There is only one message (#1).\n    *   Content: \"Is this unavailable on the website?\"\n    *   Sender: \"A\"\n    *   Context: It's a question.\n    *   Status: Unanswered (no subsequent messages).\n\n3.  **Drafting the Summary:**\n    *   **Title:** Needs to be short. \"Website Availability Question\" seems appropriate.\n    *   **Topics:** The main topic is about website availability.\n        *   Claim: User A asks if something is unavailable on the website.\n        *   Evidence: [1]\n    *   **Decisions:** There are no decisions made in a single-message thread.\n    *   **Open Questions:** The message itself is a question that remains unanswered.\n        *   Text: \"Is this unavailable on the website?\" (Attributed to A).\n        *   Evidence: [1]\n\n4.  **Refining Attribution:**\n    *   The prompt says \"Preserve attribution\".\n    *   Claim text should reflect who said it. \"A asks...\" or \"A: ...\".\n    *   Open question text should reflect who asked it.\n\n5.  **Constructing JSON:**\n    *   `title`: \"Website Availability Inquiry\"\n    *   `topics`:\n        *   `id`: \"website-availability\"\n        *   `title`: \"Website Availability\"\n        *   `claims`:\n            *   `text`: \"A asks if something is unavailable on the website\"\n            *   `evidence`: [1]\n    *   `decisions`: [] (None)\n    *   `openQuestions`:\n        *   `text`: \"A asks: 'Is this unavailable on the website?'\"\n        *   `evidence`: [1]\n\n6.  **Review against Constraints:**\n    *   JSON only? Yes.\n    *   Exact shape? Yes.\n    *   Preserve attribution? Yes (included \"A\").\n    *   Cite only source message IDs? Yes ([1]).\n    *   Do not invent decisions? Yes (empty list).\n    *   Do not leave answered questions open? Yes (it is unanswered, so it goes in openQuestions).\n\n7.  **Final Polish:**\n    *   Ensure valid JSON syntax.\n    *   Check kebab-case for IDs.\n\n    *Self-Correction on Claims vs Open Questions:*\n    The message is a question. In summary structures, usually, factual statements go into claims/topics, and unresolved inquiries go into openQuestions. Since the entire conversation is just this question, it fits best as an open question. However, the topic section usually captures the subject matter. I will include the act of asking as a claim in the topic, and the specific question in openQuestions.\n\n    *Attribution Format:* \"A asks...\" is clear attribution.\n\n    *JSON Structure Check:*\n    ```json\n    {\n      \"title\": \"...\",\n      \"topics\": [...],\n      \"decisions\": [...],\n      \"openQuestions\": [...]\n    }\n    ```\n\n    Let's assemble.\n\n    ```json\n    {\n      \"title\": \"Website Availability Inquiry\",\n      \"topics\": [\n        {\n          \"id\": \"website-availability\",\n          \"title\": \"Website Availability\",\n          \"claims\": [\n            {\n              \"text\": \"A asks if an item is unavailable on the website\",\n              \"evidence\": [\n                1\n              ]\n            }\n          ]\n        }\n      ],\n      \"decisions\": [],\n      \"openQuestions\": [\n        {\n          \"text\": \"A asks: \\\"Is this unavailable on the website?\\\"\",\n          \"evidence\": [\n            1\n          ]\n        }\n      ]\n    }\n    ```\n\n    Wait, checking the constraint \"Do not leave answered questions open\". Since there is no answer, it *must* be open.\n    Checking \"Preserve attribution\". \"A asks\" covers this.\n    Checking \"Cite only source message IDs\". Using [1].\n\n    One detail: The input shows `PIPECHAT/3` then `#1|...`. The ID is clearly `1`.\n\n    Let's finalize the JSON.\n\n    Wait, I should check if there are any other interpretations.\n    Input:\n    `PIPECHAT/3`\n    `#1|\"A\"|\"10:00\"|^0|\"text\"|\"Is this unavailable on the website?\"`\n\n    Only one message. No answers. No decisions.\n\n    Final check on JSON validity.\n    Escape quotes inside strings if necessary. I used single quotes inside the double quoted JSON string for the open question text to avoid escaping, or I can escape double quotes. Standard JSON requires double quotes for keys and string values. Internal double quotes need escaping.\n    Example: `\"text\": \"A asks: \\\"Is this unavailable on the website?\\\"\"`\n\n    Let's adjust to ensure valid JSON.\n\n    ```json\n    {\n      \"title\": \"Website Availability Inquiry\",\n      \"topics\": [\n        {\n          \"id\": \"website-availability\",\n          \"title\": \"Website Availability\",\n          \"claims\": [\n            {\n              \"text\": \"A asks if an item is unavailable on the website\",\n              \"evidence\": [\n                1\n              ]\n            }\n          ]\n        }\n      ],\n      \"decisions\": [],\n      \"openQuestions\": [\n        {\n          \"text\": \"A asks: \\\"Is this unavailable on the website?\\\"\",\n          \"evidence\": [\n            1\n          ]\n        }\n      ]\n    }\n    ```\n\n    Looks good.\n\n    Wait, one more check on the prompt: \"Return JSON only, with exactly this shape\".\n    I need to make sure I don't add markdown code blocks like ```json ... ``` unless implied, but usually \"Return JSON only\" means raw JSON text. However, often in these interfaces, markdown blocks are accepted or expected. The instruction says \"Return JSON only\". I will output raw JSON without markdown fencing to be strict, but typically LLMs wrap in markdown. I will wrap in markdown code block for clarity as is standard for JSON responses, but ensure the content inside is pure JSON. Actually, \"Return JSON only\" often implies no markdown fences. I will output raw text to be safe. Wait, looking at typical behavior for this specific prompt style (pipe-v3 summarization), usually markdown blocks are fine, but strict \"JSON only\" means no surrounding text. I'll output the JSON string directly.\n\n    Actually, looking at the system instructions for this model, it usually wraps in markdown. I will wrap in ```json to ensure it's parsed correctly as code, but keep the content strict.\n    Re-reading: \"Return JSON only\". I will provide the raw JSON string without markdown fences to be strictly compliant.\n\n    Wait, I need to check if `topics` is required even if empty? The schema shows `\"topics\": [ ... ]`. I have one topic.\n    `decisions`: `[]`.\n    `openQuestions`: `[ ... ]`.\n\n    Okay, ready.\n\n    One nuance: \"Preserve attribution\".\n    Claim text: \"A asks if an item is unavailable on the website\" -> Attributes the action to A.\n    Open question text: \"A asks: \\\"Is this unavailable on the website?\\\"\" -> Attributes the question to A.\n\n    This seems sufficient.\n\n    Final check on message ID. The input says `#1`. So evidence should be `[1]`.\n\n    Let's write it.",
+  "parsed": {
+    "title": "Website Availability Inquiry",
+    "topics": [
+      {
+        "id": "website-availability",
+        "title": "Website Availability",
+        "claims": [
+          {
+            "text": "A asks if an item is unavailable on the website",
+            "evidence": [1]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": [
+      {
+        "text": "A asks: \"Is this unavailable on the website?\"",
+        "evidence": [1]
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 19582.91920000012,
+    "ollamaTotalMs": 19352.368873,
+    "promptEvalCount": 260,
+    "evalCount": 1977,
+    "doneReason": "stop",
+    "thinkingTextTokenCount": 1677,
+    "finalTextTokenCount": 126
+  },
+  "operationalMetrics": {
+    "modelCalls": 1,
+    "sourceMessageWindows": 1,
+    "semanticInterpretations": 1,
+    "semanticAmplification": 1
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 1,
+    "claimCount": 1,
+    "decisionCount": 0,
+    "openQuestionCount": 1,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": null,
+    "goldClaimPrecision": 0,
+    "evidencePrecision": 0.5,
+    "forbiddenRate": 1,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0,
+    "matchedClaimIds": [],
+    "matchedDecisionIds": [],
+    "matchedOpenQuestionIds": ["website-availability.question"],
+    "retainedThreadIds": ["website-availability"],
+    "triggeredForbiddenIds": ["website-unavailable.assertion"]
+  }
+}

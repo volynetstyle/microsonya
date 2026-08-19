@@ -1,0 +1,182 @@
+{
+  "case": "real-job-search-abroad",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 1,
+  "transformation": "identity-replay",
+  "inputHash": "aac555f3427e2195f145b4a5e3a6d9644961170a8ccc181b8832ae83202b036f",
+  "promptHash": "4bb2c538d807f29994b2ea2ea18e6a6ffaf5d4c95f4f15c7ac0e8801257acb05",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion about working abroad, language and job search\",\n  \"topics\": [\n    {\n      \"id\": \"working-abroad\",\n      \"title\": \"Living and working abroad\",\n      \"claims\": [\n        {\n          \"text\": \"Some participants know people living abroad: @AndriiRaccoon in Austria and walternet134 in Poland\",\n          \"evidence\": [3]\n        },\n        {\n          \"text\": \"P3 has at least two acquaintances in Austria, one recently arrived and another has been there for several years\",\n          \"evidence\": [12, 13]\n        },\n        {\n          \"text\": \"P3 has been living in Austria since 17.11.2025\",\n          \"evidence\": [49]\n        },\n        {\n          \"text\": \"P1 has been in Slovakia since around 03.09.2025\",\n          \"evidence\": [54]\n        }\n      ]\n    },\n    {\n      \"id\": \"language-requirements\",\n      \"title\": \"Language requirements for jobs\",\n      \"claims\": [\n        {\n          \"text\": \"German is the primary language spoken in Austria\",\n          \"evidence\": [14]\n        },\n        {\n          \"text\": \"Communication with Austrian contacts often happens in English\",\n          \"evidence\": [15]\n        },\n        {\n          \"text\": \"95% of vacancies require local language proficiency\",\n          \"evidence\": [26]\n        },\n        {\n          \"text\": \"Many candidates are filtered out because they lack language skills\",\n          \"evidence\": [27]\n        },\n        {\n          \"text\": \"Some hires occur even when candidates have limited local language knowledge\",\n          \"evidence\": [29]\n        },\n        {\n          \"text\": \"Typical language level requested is B2, B1 may suffice, certificates are rarely required\",\n          \"evidence\": [46]\n        },\n        {\n          \"text\": \"P3 is learning the local language because of daily life difficulties\",\n          \"evidence\": [47]\n        }\n      ]\n    },\n    {\n      \"id\": \"job-search-process\",\n      \"title\": \"Job search experiences\",\n      \"claims\": [\n        {\n          \"text\": \"Finding a job abroad was hard and took about 2 months\",\n          \"evidence\": [17]\n        },\n        {\n          \"text\": \"Advice to search for jobs on LinkedIn\",\n          \"evidence\": [18]\n        },\n        {\n          \"text\": \"Vacancy conversion rate is low: about 3 interviews out of ~100 applications\",\n          \"evidence\": [20, 21]\n        },\n        {\n          \"text\": \"Applications were sent regardless of language requirement mentions\",\n          \"evidence\": [36]\n        },\n        {\n          \"text\": \"Higher education rarely influences hiring decisions\",\n          \"evidence\": [32]\n        }\n      ]\n    },\n    {\n      \"id\": \"salary\",\n      \"title\": \"Salary expectations\",\n      \"claims\": [\n        {\n          \"text\": \"Salaries in Europe are generally higher than in Ukraine but still modest\",\n          \"evidence\": [35]\n        },\n        {\n          \"text\": \"P3 received a salary higher than a fast‑food minimum wage but still low\",\n          \"evidence\": [37]\n        }\n      ]\n    },\n    {\n      \"id\": \"personal-experience\",\n      \"title\": \"Personal reflections and plans\",\n      \"claims\": [\n        {\n          \"text\": \"P3 considers moving to Warsaw for an event\",\n          \"evidence\": [59]\n        },\n        {\n          \"text\": \"P3 lives with a boyfriend who has been in Austria >10 years, he is pessimistic about the country's future but personally prefers Austria over other European options\",\n          \"evidence\": [60]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": [\n    {\n      \"text\": \"Who lives in Bratislava or elsewhere in Slovakia, and who has moved abroad?\",\n      \"evidence\": [1]\n    },\n    {\n      \"text\": \"Do you personally feel like staying in Austria?\",\n      \"evidence\": [58]\n    }\n  ]\n}",
+  "thinking": "We need to produce JSON. Identify topics. Main theme: working abroad, language requirements, job search. Create topics like \"working-abroad\", \"language-requirements\", \"salary-expectations\". Extract claims with evidence IDs.\n\nDecisions? None clearly decided. Open questions: maybe \"А ти як особисто відчуваєш, думаєш лишатись в Австрії?\" not answered? No later answer. So open.\n\nAlso initial question about who lives in Bratislava. No answer. That's open.\n\nLet's list.\n\nOpen question IDs: #1 (who lives in Bratislava), #58? Actually #58 is question \"А ти як особисто відчуваєш, думаєш лишатись в Австрії?\" not answered later. So include #58.\n\nNow claims:\n\n- P2 mentions people living abroad: @AndriiRaccoon in Austria and walternet134 in Poland. Claim. evidence #3.\n\n- P1 says Austria is nice. claim #7.\n\n- P3 says they have at least 2 acquaintances there. #12.\n\n- P3 says one recently arrived, another lived several years. #13.\n\n- Language spoken in Austria is German. #14.\n\n- P3 says they communicate with them in English. #15.\n\n- Finding job abroad took 2 months, was hard. #17.\n\n- Advice to search on LinkedIn. #18.\n\n- Vacancy conversion is interview. #20.\n\n- Sent ~100 applications, got 3 interviews. #21.\n\n- 95% vacancies require local language. #26.\n\n- Many get filtered out due to language. #27.\n\n- Even without language some are hired. #29.\n\n- Higher education rarely matters. #32.\n\n- Salary higher than Ukraine but low attention. #35.\n\n- Sent applications regardless of language requirement. #36.\n\n- Salary was higher than minimum (McDonalds) but low. #37.\n\n- Need to find job by 04.03. #39.\n\n- Language level B2 often requested, B1 okay, certificate not needed. #46.\n\n- Personal language learning experience. #47.\n\n- P3 living in Austria since 17.11.2025. #49.\n\n- P1's dates living in Slovakia from 03.09.2025+. #54.\n\n- P3 mentions event Warsaw. #59.\n\n- P3 lives with boyfriend in Austria >10 years, negative view of country future, but he likes Austria best. #60.\n\nOk create topics.\n\nTopic ids: working-abroad, language-requirements, job-search-process, salary, personal-experience.\n\nNow build JSON.\n\nDecisions none.\n\nOpen questions list IDs #1 and #58.\n\nLet's craft.",
+  "parsed": {
+    "title": "Discussion about working abroad, language and job search",
+    "topics": [
+      {
+        "id": "working-abroad",
+        "title": "Living and working abroad",
+        "claims": [
+          {
+            "text": "Some participants know people living abroad: @AndriiRaccoon in Austria and walternet134 in Poland",
+            "evidence": [3]
+          },
+          {
+            "text": "P3 has at least two acquaintances in Austria, one recently arrived and another has been there for several years",
+            "evidence": [12, 13]
+          },
+          {
+            "text": "P3 has been living in Austria since 17.11.2025",
+            "evidence": [49]
+          },
+          {
+            "text": "P1 has been in Slovakia since around 03.09.2025",
+            "evidence": [54]
+          }
+        ]
+      },
+      {
+        "id": "language-requirements",
+        "title": "Language requirements for jobs",
+        "claims": [
+          {
+            "text": "German is the primary language spoken in Austria",
+            "evidence": [14]
+          },
+          {
+            "text": "Communication with Austrian contacts often happens in English",
+            "evidence": [15]
+          },
+          {
+            "text": "95% of vacancies require local language proficiency",
+            "evidence": [26]
+          },
+          {
+            "text": "Many candidates are filtered out because they lack language skills",
+            "evidence": [27]
+          },
+          {
+            "text": "Some hires occur even when candidates have limited local language knowledge",
+            "evidence": [29]
+          },
+          {
+            "text": "Typical language level requested is B2, B1 may suffice, certificates are rarely required",
+            "evidence": [46]
+          },
+          {
+            "text": "P3 is learning the local language because of daily life difficulties",
+            "evidence": [47]
+          }
+        ]
+      },
+      {
+        "id": "job-search-process",
+        "title": "Job search experiences",
+        "claims": [
+          {
+            "text": "Finding a job abroad was hard and took about 2 months",
+            "evidence": [17]
+          },
+          {
+            "text": "Advice to search for jobs on LinkedIn",
+            "evidence": [18]
+          },
+          {
+            "text": "Vacancy conversion rate is low: about 3 interviews out of ~100 applications",
+            "evidence": [20, 21]
+          },
+          {
+            "text": "Applications were sent regardless of language requirement mentions",
+            "evidence": [36]
+          },
+          {
+            "text": "Higher education rarely influences hiring decisions",
+            "evidence": [32]
+          }
+        ]
+      },
+      {
+        "id": "salary",
+        "title": "Salary expectations",
+        "claims": [
+          {
+            "text": "Salaries in Europe are generally higher than in Ukraine but still modest",
+            "evidence": [35]
+          },
+          {
+            "text": "P3 received a salary higher than a fast‑food minimum wage but still low",
+            "evidence": [37]
+          }
+        ]
+      },
+      {
+        "id": "personal-experience",
+        "title": "Personal reflections and plans",
+        "claims": [
+          {
+            "text": "P3 considers moving to Warsaw for an event",
+            "evidence": [59]
+          },
+          {
+            "text": "P3 lives with a boyfriend who has been in Austria >10 years, he is pessimistic about the country's future but personally prefers Austria over other European options",
+            "evidence": [60]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": [
+      {
+        "text": "Who lives in Bratislava or elsewhere in Slovakia, and who has moved abroad?",
+        "evidence": [1]
+      },
+      {
+        "text": "Do you personally feel like staying in Austria?",
+        "evidence": [58]
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 20476.502,
+    "ollamaTotalMs": 20140.453253,
+    "promptEvalCount": 3531,
+    "evalCount": 1447,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 5,
+    "claimCount": 20,
+    "decisionCount": 0,
+    "openQuestionCount": 2,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 1,
+    "goldClaimPrecision": 0.45,
+    "evidencePrecision": 0.4166666666666667,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 1,
+    "noiseRetention": 0,
+    "matchedClaimIds": [
+      "networking.participants-abroad",
+      "language.learning-motivation",
+      "language.work-vs-daily-life",
+      "job-search.local-language-filter",
+      "job-search.two-months",
+      "job-search.conversion",
+      "job-search.salary-compromise",
+      "job-search.education-observation",
+      "austria.outlook"
+    ],
+    "retainedThreadIds": [
+      "networking-abroad",
+      "language-integration",
+      "job-search-abroad",
+      "life-in-austria"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

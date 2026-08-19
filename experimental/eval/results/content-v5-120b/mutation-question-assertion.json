@@ -1,0 +1,32 @@
+{
+  "case": "mutation-question-assertion",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Unavailable info\",\n  \"summary\": \"A повідомив, що певна інформація недоступна на вебсайті.\",\n  \"topics\": []\n}",
+  "thinking": "We need to produce summary JSON. Only one message. No topics? Probably none. Might return empty topics. Include title maybe from content? We'll set title \"Unavailable info\". summary from message. topics empty.",
+  "parsed": {
+    "title": "Unavailable info",
+    "summary": "A повідомив, що певна інформація недоступна на вебсайті.",
+    "topics": []
+  },
+  "usage": {
+    "durationMs": 1514.4449999999997,
+    "ollamaTotalMs": 1227.508079,
+    "promptEvalCount": 534,
+    "evalCount": 90,
+    "doneReason": "stop",
+    "thinkingTextTokenCount": 42,
+    "finalTextTokenCount": 38
+  },
+  "metrics": {
+    "contentRecall": 0,
+    "claimRecall": 0,
+    "decisionRecall": null,
+    "openQuestionRecall": null,
+    "evidenceSelectionPrecision": null,
+    "noiseSelectionRate": 0,
+    "forbiddenRate": 0,
+    "unitCount": 0,
+    "selectedEvidenceCount": 0,
+    "unknownEvidenceCount": 0
+  }
+}

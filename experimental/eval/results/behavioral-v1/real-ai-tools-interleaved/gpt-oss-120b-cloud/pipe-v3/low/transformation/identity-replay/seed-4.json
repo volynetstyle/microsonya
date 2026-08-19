@@ -1,0 +1,112 @@
+{
+  "case": "real-ai-tools-interleaved",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 4,
+  "transformation": "identity-replay",
+  "inputHash": "3e5fb5efeccd172ee2f1e8a3ef61dfdf2ed0fd33f2162906991e5f91c1a0d9ba",
+  "promptHash": "37cf3f4e79d184fd2b0f7efef7545a92b54b985f38a2a5b261ece3d444236cdf",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Chat Summary\",\n  \"topics\": [\n    {\n      \"id\": \"ai-capabilities\",\n      \"title\": \"AI capabilities and toolkits\",\n      \"claims\": [\n        {\n          \"text\": \"AI models are not inherently intelligent; their advanced abilities come from toolkits and ready-made solutions.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"Toolkits can provide a large performance boost but cannot compensate for the lack of basic model abilities.\",\n          \"evidence\": [8]\n        },\n        {\n          \"text\": \"Older models have small context windows and may not handle modern tasks well.\",\n          \"evidence\": [3]\n        },\n        {\n          \"text\": \"Modern models aim to extract maximal performance from fewer parameters and may be fine‑tuned for specific tasks.\",\n          \"evidence\": [14]\n        }\n      ]\n    },\n    {\n      \"id\": \"bus-anecdote\",\n      \"title\": \"Weird people in public transport\",\n      \"claims\": [\n        {\n          \"text\": \"Weird behavior from a passenger was observed in a bus.\",\n          \"evidence\": [4, 5, 7]\n        }\n      ]\n    },\n    {\n      \"id\": \"weather-feeling\",\n      \"title\": \"Atmospheric feeling of rain vs temperature\",\n      \"claims\": [\n        {\n          \"text\": \"There is a feeling of impending rain, but the temperature feels like lava.\",\n          \"evidence\": [20]\n        }\n      ]\n    },\n    {\n      \"id\": \"diploma-cover-cost\",\n      \"title\": \"Cost of diploma cover\",\n      \"claims\": [\n        {\n          \"text\": \"Requests for diploma cover fees range from 30 to 650 Ukrainian hryvnias.\",\n          \"evidence\": [22, 23, 24, 25]\n        },\n        {\n          \"text\": \"Some participants consider the cover unnecessary because it is rarely used.\",\n          \"evidence\": [26, 28, 29]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": []\n}",
+  "thinking": "We need JSON summary. Identify topics: AI capabilities, bus anecdote, weather, diploma cover price. Claims:\n\nAI: #1 says AI can't be intelligent apriori, tools provide capabilities. #3 wants to test AI 2022-23 with toolkits. #8 mentions InstinctGPT comparison, toolkits give boost but not replace base model. #14 discusses active parameters etc. So claim about AI toolkits boost but not replace base model evidence #8. Also claim about old models trained without understanding evidence #1, #14.\n\nTopic id maybe ai-capabilities.\n\nBus anecdote: #4,#5,#7 about weird people in bus. Claim weird people in public transport evidence #4,#5,#7.\n\nWeather: #20 about feeling rain but lava temperature. Claim atmospheric feeling of rain but temperature like lava evidence #20.\n\nDiploma cover cost: #22,#23,#24,#25,#26,#27,#28,#29. Open question maybe how to get diploma without cover? Actually question about price is answered. No unresolved.\n\nDecisions none.\n\nOpen questions? Perhaps none.\n\nConstruct JSON.\n\n",
+  "parsed": {
+    "title": "Chat Summary",
+    "topics": [
+      {
+        "id": "ai-capabilities",
+        "title": "AI capabilities and toolkits",
+        "claims": [
+          {
+            "text": "AI models are not inherently intelligent; their advanced abilities come from toolkits and ready-made solutions.",
+            "evidence": [1]
+          },
+          {
+            "text": "Toolkits can provide a large performance boost but cannot compensate for the lack of basic model abilities.",
+            "evidence": [8]
+          },
+          {
+            "text": "Older models have small context windows and may not handle modern tasks well.",
+            "evidence": [3]
+          },
+          {
+            "text": "Modern models aim to extract maximal performance from fewer parameters and may be fine‑tuned for specific tasks.",
+            "evidence": [14]
+          }
+        ]
+      },
+      {
+        "id": "bus-anecdote",
+        "title": "Weird people in public transport",
+        "claims": [
+          {
+            "text": "Weird behavior from a passenger was observed in a bus.",
+            "evidence": [4, 5, 7]
+          }
+        ]
+      },
+      {
+        "id": "weather-feeling",
+        "title": "Atmospheric feeling of rain vs temperature",
+        "claims": [
+          {
+            "text": "There is a feeling of impending rain, but the temperature feels like lava.",
+            "evidence": [20]
+          }
+        ]
+      },
+      {
+        "id": "diploma-cover-cost",
+        "title": "Cost of diploma cover",
+        "claims": [
+          {
+            "text": "Requests for diploma cover fees range from 30 to 650 Ukrainian hryvnias.",
+            "evidence": [22, 23, 24, 25]
+          },
+          {
+            "text": "Some participants consider the cover unnecessary because it is rarely used.",
+            "evidence": [26, 28, 29]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": []
+  },
+  "usage": {
+    "durationMs": 9021.848399999988,
+    "ollamaTotalMs": 8859.864772,
+    "promptEvalCount": 2165,
+    "evalCount": 680,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 4,
+    "claimCount": 8,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.9411764705882353,
+    "goldClaimPrecision": 0.875,
+    "evidencePrecision": 0.9333333333333333,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0.125,
+    "matchedClaimIds": [
+      "diploma-cover.prices",
+      "bus-passenger.repeated-encounter",
+      "diploma-cover.low-value",
+      "ai-tooling.capability-view",
+      "ai-tooling.instinctgpt-result",
+      "ai-tooling.old-model-experiment",
+      "ai-tooling.model-comparison"
+    ],
+    "retainedThreadIds": ["diploma-cover", "bus-passenger", "ai-tooling"],
+    "triggeredForbiddenIds": []
+  }
+}

@@ -1,0 +1,141 @@
+{
+  "case": "real-fop-calculator",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe",
+  "reasoning": "low",
+  "seed": 4,
+  "inputHash": "d3179cdb8e49a27f55b8dcbb42c5b7b95590527ad18ad16afb38bc499073e8af",
+  "promptHash": "669e6d2beeabb2d67c39f324594f945bfec2e42e38c44a69ae401bc77e4e1c35",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Обговорення податкових калькуляторів, домену та монетизації продукту\",\n  \"topics\": [\n    {\n      \"id\": \"tax-filing\",\n      \"title\": \"Податкова декларація та допомога тьоті Свєти\",\n      \"claims\": [\n        {\n          \"text\": \"Тьота Свєта допомогла правильно переподати декларації за ~1000 грн замість сплати всіх штрафів\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"Процедура перевірки декларації займає приблизно годину з Excel, максимум один день\",\n          \"evidence\": [5, 6, 7]\n        },\n        {\n          \"text\": \"Помилка в колонці декларації може призвести до великих штрафів\",\n          \"evidence\": [8]\n        },\n        {\n          \"text\": \"Калькулятор працює лише з гривневим ФОП; для інших валют треба конвертувати по курсі дня зарахування\",\n          \"evidence\": [19]\n        }\n      ]\n    },\n    {\n      \"id\": \"domain-purchase\",\n      \"title\": \"Покупка домену для проекту\",\n      \"claims\": [\n        {\n          \"text\": \"Пользователь P2 повідомив, що домен ще не куплений\",\n          \"evidence\": [2]\n        },\n        {\n          \"text\": \"Інший користувач вважає, що без домену ніякого прогресу не буде\",\n          \"evidence\": [9, 10]\n        },\n        {\n          \"text\": \"Немає плану купувати домен, доки не буде доходу\",\n          \"evidence\": [30, 31]\n        }\n      ]\n    },\n    {\n      \"id\": \"calc-app-idea\",\n      \"title\": \"Ідея створення калькулятора/аплікації\",\n      \"claims\": [\n        {\n          \"text\": \"Ідея швидкого кросплатформенного продукту (Flutter) з мінімальним delivery time\",\n          \"evidence\": [12]\n        },\n        {\n          \"text\": \"Сумніви щодо прибутковості: веб‑платформа вважається найменш прибутковою, конверсія нульова, користувачі відмовляються після paywall\",\n          \"evidence\": [11, 17]\n        },\n        {\n          \"text\": \"Для успішного запуску потрібна хоча б десятка платоспроможних людей, готових заплатити 299 грн\",\n          \"evidence\": [20]\n        }\n      ]\n    },\n    {\n      \"id\": \"security-scam\",\n      \"title\": \"Безпека, скепсис та можливий скем\",\n      \"claims\": [\n        {\n          \"text\": \"У проекті використовується один пароль, збережений у локальному сховищі, який може бути знайдений пошуком\",\n          \"evidence\": [21, 22]\n        },\n        {\n          \"text\": \"Користувачі вважають, що продукт може бути скемом або піратським\",\n          \"evidence\": [23, 24, 32, 33, 34]\n        },\n        {\n          \"text\": \"Автор вважає, що більшість людей з LinkedIn зможуть зламати цей продукт\",\n          \"evidence\": [28]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": [\n    {\n      \"text\": \"Чи підтримує калькулятор валютний ФОП, чи потрібна додаткова підтримка конвертації курсів?\",\n      \"evidence\": [20]\n    }\n  ]\n}",
+  "thinking": "We need JSON summarizing topics etc. Identify main topics: tax filing hassle, domain purchase, calculator tool, monetization of web vs apps, product idea skepticism, password leakage, scam accusations.\n\nCreate topics with ids.\n\nClaims with evidence IDs.\n\nDecisions none. Open questions maybe about whether domain needed? but unresolved? maybe question about currency support (msg20). That's open.\n\nLet's craft.\n\n",
+  "parsed": {
+    "title": "Обговорення податкових калькуляторів, домену та монетизації продукту",
+    "topics": [
+      {
+        "id": "tax-filing",
+        "title": "Податкова декларація та допомога тьоті Свєти",
+        "claims": [
+          {
+            "text": "Тьота Свєта допомогла правильно переподати декларації за ~1000 грн замість сплати всіх штрафів",
+            "evidence": [1]
+          },
+          {
+            "text": "Процедура перевірки декларації займає приблизно годину з Excel, максимум один день",
+            "evidence": [5, 6, 7]
+          },
+          {
+            "text": "Помилка в колонці декларації може призвести до великих штрафів",
+            "evidence": [8]
+          },
+          {
+            "text": "Калькулятор працює лише з гривневим ФОП; для інших валют треба конвертувати по курсі дня зарахування",
+            "evidence": [19]
+          }
+        ]
+      },
+      {
+        "id": "domain-purchase",
+        "title": "Покупка домену для проекту",
+        "claims": [
+          {
+            "text": "Пользователь P2 повідомив, що домен ще не куплений",
+            "evidence": [2]
+          },
+          {
+            "text": "Інший користувач вважає, що без домену ніякого прогресу не буде",
+            "evidence": [9, 10]
+          },
+          {
+            "text": "Немає плану купувати домен, доки не буде доходу",
+            "evidence": [30, 31]
+          }
+        ]
+      },
+      {
+        "id": "calc-app-idea",
+        "title": "Ідея створення калькулятора/аплікації",
+        "claims": [
+          {
+            "text": "Ідея швидкого кросплатформенного продукту (Flutter) з мінімальним delivery time",
+            "evidence": [12]
+          },
+          {
+            "text": "Сумніви щодо прибутковості: веб‑платформа вважається найменш прибутковою, конверсія нульова, користувачі відмовляються після paywall",
+            "evidence": [11, 17]
+          },
+          {
+            "text": "Для успішного запуску потрібна хоча б десятка платоспроможних людей, готових заплатити 299 грн",
+            "evidence": [20]
+          }
+        ]
+      },
+      {
+        "id": "security-scam",
+        "title": "Безпека, скепсис та можливий скем",
+        "claims": [
+          {
+            "text": "У проекті використовується один пароль, збережений у локальному сховищі, який може бути знайдений пошуком",
+            "evidence": [21, 22]
+          },
+          {
+            "text": "Користувачі вважають, що продукт може бути скемом або піратським",
+            "evidence": [23, 24, 32, 33, 34]
+          },
+          {
+            "text": "Автор вважає, що більшість людей з LinkedIn зможуть зламати цей продукт",
+            "evidence": [28]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": [
+      {
+        "text": "Чи підтримує калькулятор валютний ФОП, чи потрібна додаткова підтримка конвертації курсів?",
+        "evidence": [20]
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 9477.860400000005,
+    "ollamaTotalMs": 9307.429489,
+    "promptEvalCount": 2453,
+    "evalCount": 919,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 4,
+    "claimCount": 13,
+    "decisionCount": 0,
+    "openQuestionCount": 1,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 1,
+    "goldClaimPrecision": 0.6153846153846154,
+    "evidencePrecision": 0.5,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 1,
+    "noiseRetention": 0.07692307692307693,
+    "matchedClaimIds": [
+      "tax-reporting.form-risk",
+      "product.creator-response",
+      "security.password-in-bundle",
+      "tax-reporting.paid-help",
+      "product.uah-only",
+      "product.fast-delivery-strategy",
+      "product.web-limitations",
+      "product.validate-demand-first"
+    ],
+    "retainedThreadIds": [
+      "tax-reporting",
+      "calculator-product",
+      "calculator-security"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

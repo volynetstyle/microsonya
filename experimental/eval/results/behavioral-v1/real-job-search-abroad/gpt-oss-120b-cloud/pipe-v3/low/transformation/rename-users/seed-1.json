@@ -1,0 +1,180 @@
+{
+  "case": "real-job-search-abroad",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 1,
+  "transformation": "rename-users",
+  "inputHash": "36093e7976dba493889a933ed10b1a3c991862af89b13afae30dd423eda8af86",
+  "promptHash": "3bc94b06a2808b41728e0eda5fc3a1bbe358d37d06c646cb13d3da3225c6f939",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion about living and working in Slovakia and Austria\",\n  \"topics\": [\n    {\n      \"id\": \"living-abroad\",\n      \"title\": \"People living or wanting to live abroad\",\n      \"claims\": [\n        {\n          \"text\": \"Some members live in Bratislava or elsewhere in Slovakia\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"U2 mentions acquaintances abroad: @AndriiRaccoon in Austria and walternet134 in Poland\",\n          \"evidence\": [3]\n        },\n        {\n          \"text\": \"U3 says they have at least two acquaintances in Austria\",\n          \"evidence\": [12]\n        },\n        {\n          \"text\": \"U3 notes one acquaintance recently arrived in Austria and another has been there for several years\",\n          \"evidence\": [13]\n        },\n        {\n          \"text\": \"U3 has been in Austria since 17.11.2025\",\n          \"evidence\": [49]\n        },\n        {\n          \"text\": \"U1 has been in Slovakia for almost a year and does not speak the language\",\n          \"evidence\": [43]\n        }\n      ]\n    },\n    {\n      \"id\": \"job-search\",\n      \"title\": \"Finding work abroad\",\n      \"claims\": [\n        {\n          \"text\": \"U3 found a job in Austria within two months after sending about 100 applications, resulting in three interviews\",\n          \"evidence\": [21, 17]\n        },\n        {\n          \"text\": \"LinkedIn is recommended for job searching\",\n          \"evidence\": [18]\n        },\n        {\n          \"text\": \"Most vacancies (95%) require local language proficiency\",\n          \"evidence\": [26]\n        },\n        {\n          \"text\": \"Lack of local language can lead to being filtered out\",\n          \"evidence\": [27]\n        },\n        {\n          \"text\": \"There are cases where candidates with little language skill are still hired\",\n          \"evidence\": [29]\n        },\n        {\n          \"text\": \"Higher education rarely matters for hiring decisions\",\n          \"evidence\": [32]\n        }\n      ]\n    },\n    {\n      \"id\": \"language-requirements\",\n      \"title\": \"Language needs for work and daily life\",\n      \"claims\": [\n        {\n          \"text\": \"German is the primary language spoken in Austria; English is also used\",\n          \"evidence\": [14, 15]\n        },\n        {\n          \"text\": \"Employers often request B2 level language, sometimes B1, but certificates are usually not required\",\n          \"evidence\": [46]\n        },\n        {\n          \"text\": \"U1 feels uncomfortable with the language barrier outside of work\",\n          \"evidence\": [51, 52]\n        },\n        {\n          \"text\": \"U3 started learning Slovak recently to feel more comfortable in the city\",\n          \"evidence\": [47]\n        }\n      ]\n    },\n    {\n      \"id\": \"salary-expectations\",\n      \"title\": \"Salary expectations abroad\",\n      \"claims\": [\n        {\n          \"text\": \"U3 says salaries in Europe are generally higher than in Ukraine but few notice\",\n          \"evidence\": [35]\n        },\n        {\n          \"text\": \"U3 accepted a minimal salary after stating they needed any job\",\n          \"evidence\": [37]\n        },\n        {\n          \"text\": \"U3 mentions having 3 years of experience but still received low offers\",\n          \"evidence\": [23]\n        }\n      ]\n    },\n    {\n      \"id\": \"events-and-networking\",\n      \"title\": \"Events and community building\",\n      \"claims\": [\n        {\n          \"text\": \"U1 attended an anime festival to meet people but faced language barrier\",\n          \"evidence\": [50, 51]\n        },\n        {\n          \"text\": \"U3 proposes attending a tech event in Warsaw (wawtech.io/summer)\",\n          \"evidence\": [59]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": [\n    {\n      \"text\": \"U1 asks U3 whether they plan to stay in Austria\",\n      \"evidence\": [58]\n    }\n  ]\n}",
+  "thinking": "We need summarize. Identify topics: living abroad, language requirements, job search experience, salary expectations, events.\n\nCreate claims with evidence IDs.\n\nDecisions none. Open questions: maybe #58 asking about staying in Austria answered? not answered. So open.\n\nLet's craft JSON.",
+  "parsed": {
+    "title": "Discussion about living and working in Slovakia and Austria",
+    "topics": [
+      {
+        "id": "living-abroad",
+        "title": "People living or wanting to live abroad",
+        "claims": [
+          {
+            "text": "Some members live in Bratislava or elsewhere in Slovakia",
+            "evidence": [1]
+          },
+          {
+            "text": "U2 mentions acquaintances abroad: @AndriiRaccoon in Austria and walternet134 in Poland",
+            "evidence": [3]
+          },
+          {
+            "text": "U3 says they have at least two acquaintances in Austria",
+            "evidence": [12]
+          },
+          {
+            "text": "U3 notes one acquaintance recently arrived in Austria and another has been there for several years",
+            "evidence": [13]
+          },
+          {
+            "text": "U3 has been in Austria since 17.11.2025",
+            "evidence": [49]
+          },
+          {
+            "text": "U1 has been in Slovakia for almost a year and does not speak the language",
+            "evidence": [43]
+          }
+        ]
+      },
+      {
+        "id": "job-search",
+        "title": "Finding work abroad",
+        "claims": [
+          {
+            "text": "U3 found a job in Austria within two months after sending about 100 applications, resulting in three interviews",
+            "evidence": [21, 17]
+          },
+          {
+            "text": "LinkedIn is recommended for job searching",
+            "evidence": [18]
+          },
+          {
+            "text": "Most vacancies (95%) require local language proficiency",
+            "evidence": [26]
+          },
+          {
+            "text": "Lack of local language can lead to being filtered out",
+            "evidence": [27]
+          },
+          {
+            "text": "There are cases where candidates with little language skill are still hired",
+            "evidence": [29]
+          },
+          {
+            "text": "Higher education rarely matters for hiring decisions",
+            "evidence": [32]
+          }
+        ]
+      },
+      {
+        "id": "language-requirements",
+        "title": "Language needs for work and daily life",
+        "claims": [
+          {
+            "text": "German is the primary language spoken in Austria; English is also used",
+            "evidence": [14, 15]
+          },
+          {
+            "text": "Employers often request B2 level language, sometimes B1, but certificates are usually not required",
+            "evidence": [46]
+          },
+          {
+            "text": "U1 feels uncomfortable with the language barrier outside of work",
+            "evidence": [51, 52]
+          },
+          {
+            "text": "U3 started learning Slovak recently to feel more comfortable in the city",
+            "evidence": [47]
+          }
+        ]
+      },
+      {
+        "id": "salary-expectations",
+        "title": "Salary expectations abroad",
+        "claims": [
+          {
+            "text": "U3 says salaries in Europe are generally higher than in Ukraine but few notice",
+            "evidence": [35]
+          },
+          {
+            "text": "U3 accepted a minimal salary after stating they needed any job",
+            "evidence": [37]
+          },
+          {
+            "text": "U3 mentions having 3 years of experience but still received low offers",
+            "evidence": [23]
+          }
+        ]
+      },
+      {
+        "id": "events-and-networking",
+        "title": "Events and community building",
+        "claims": [
+          {
+            "text": "U1 attended an anime festival to meet people but faced language barrier",
+            "evidence": [50, 51]
+          },
+          {
+            "text": "U3 proposes attending a tech event in Warsaw (wawtech.io/summer)",
+            "evidence": [59]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": [
+      {
+        "text": "U1 asks U3 whether they plan to stay in Austria",
+        "evidence": [58]
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 11383.9452,
+    "ollamaTotalMs": 11051.497756,
+    "promptEvalCount": 3531,
+    "evalCount": 961,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 5,
+    "claimCount": 21,
+    "decisionCount": 0,
+    "openQuestionCount": 1,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.9,
+    "goldClaimPrecision": 0.38095238095238093,
+    "evidencePrecision": 0.34615384615384615,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 1,
+    "noiseRetention": 0,
+    "matchedClaimIds": [
+      "language.work-vs-daily-life",
+      "networking.participants-abroad",
+      "language.learning-motivation",
+      "job-search.two-months",
+      "job-search.local-language-filter",
+      "job-search.education-observation",
+      "job-search.salary-compromise",
+      "job-search.conversion"
+    ],
+    "retainedThreadIds": [
+      "language-integration",
+      "networking-abroad",
+      "job-search-abroad"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

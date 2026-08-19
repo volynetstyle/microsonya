@@ -1,0 +1,127 @@
+{
+  "case": "real-ai-tools-interleaved",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "natural",
+  "reasoning": "low",
+  "seed": 2,
+  "inputHash": "3e5fb5efeccd172ee2f1e8a3ef61dfdf2ed0fd33f2162906991e5f91c1a0d9ba",
+  "promptHash": "d90ce190ca55dfb2d030b0980b2ee1e4fd80003d73bb0e3a93840ab0f6f9ca65",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"AI toolkit discussion and unrelated chat\",\n  \"topics\": [\n    {\n      \"id\": \"ai-toolkit-capabilities\",\n      \"title\": \"AI toolkit and model capabilities\",\n      \"claims\": [\n        {\n          \"text\": \"AI models are not inherently intelligent; their complex abilities come from toolkits and ready-made examples.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"InstinctGPT comparison showed that a toolkit can give a large performance boost but cannot fully compensate for a model's basic ability gaps.\",\n          \"evidence\": [8]\n        },\n        {\n          \"text\": \"Older models have smaller context windows and may struggle with modern toolkits.\",\n          \"evidence\": [3]\n        },\n        {\n          \"text\": \"Modern models aim to achieve more with fewer parameters and are sometimes fine‑tuned for specific tasks.\",\n          \"evidence\": [14]\n        }\n      ]\n    },\n    {\n      \"id\": \"public-transport-anecdote\",\n      \"title\": \"Bus anecdote\",\n      \"claims\": [\n        {\n          \"text\": \"The speaker observed a strange person on the bus who repeatedly emitted gas.\",\n          \"evidence\": [7]\n        },\n        {\n          \"text\": \"The speaker also noted a separate incident where the same person played piano loudly, listened to a metro announcement, and made micro‑sounds during a call.\",\n          \"evidence\": [9]\n        }\n      ]\n    },\n    {\n      \"id\": \"diploma-cover-pricing\",\n      \"title\": \"Diploma cover pricing discussion\",\n      \"claims\": [\n        {\n          \"text\": \"Someone is being asked to pay 650 UAH for a diploma cover.\",\n          \"evidence\": [23]\n        },\n        {\n          \"text\": \"Another person reports paying 47 UAH for a cover.\",\n          \"evidence\": [24]\n        },\n        {\n          \"text\": \"A third person mentions a price of 30 UAH for a cover.\",\n          \"evidence\": [25]\n        },\n        {\n          \"text\": \"One participant suggests the cover is unnecessary because it is just paper.\",\n          \"evidence\": [26]\n        },\n        {\n          \"text\": \"Another participant argues the cover is rarely used, citing only three occasions it would be seen.\",\n          \"evidence\": [29]\n        }\n      ]\n    },\n    {\n      \"id\": \"shared-image\",\n      \"title\": \"Shared image link\",\n      \"claims\": [\n        {\n          \"text\": \"A user shared a Pinterest link and another user credited the source.\",\n          \"evidence\": [16, 17]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": []\n}",
+  "thinking": "We need JSON. Identify topics: AI toolkit claim, bus anecdote, image link, diploma cover price. Create claims.\n\nLet's craft.\n\n",
+  "parsed": {
+    "title": "AI toolkit discussion and unrelated chat",
+    "topics": [
+      {
+        "id": "ai-toolkit-capabilities",
+        "title": "AI toolkit and model capabilities",
+        "claims": [
+          {
+            "text": "AI models are not inherently intelligent; their complex abilities come from toolkits and ready-made examples.",
+            "evidence": [1]
+          },
+          {
+            "text": "InstinctGPT comparison showed that a toolkit can give a large performance boost but cannot fully compensate for a model's basic ability gaps.",
+            "evidence": [8]
+          },
+          {
+            "text": "Older models have smaller context windows and may struggle with modern toolkits.",
+            "evidence": [3]
+          },
+          {
+            "text": "Modern models aim to achieve more with fewer parameters and are sometimes fine‑tuned for specific tasks.",
+            "evidence": [14]
+          }
+        ]
+      },
+      {
+        "id": "public-transport-anecdote",
+        "title": "Bus anecdote",
+        "claims": [
+          {
+            "text": "The speaker observed a strange person on the bus who repeatedly emitted gas.",
+            "evidence": [7]
+          },
+          {
+            "text": "The speaker also noted a separate incident where the same person played piano loudly, listened to a metro announcement, and made micro‑sounds during a call.",
+            "evidence": [9]
+          }
+        ]
+      },
+      {
+        "id": "diploma-cover-pricing",
+        "title": "Diploma cover pricing discussion",
+        "claims": [
+          {
+            "text": "Someone is being asked to pay 650 UAH for a diploma cover.",
+            "evidence": [23]
+          },
+          {
+            "text": "Another person reports paying 47 UAH for a cover.",
+            "evidence": [24]
+          },
+          {
+            "text": "A third person mentions a price of 30 UAH for a cover.",
+            "evidence": [25]
+          },
+          {
+            "text": "One participant suggests the cover is unnecessary because it is just paper.",
+            "evidence": [26]
+          },
+          {
+            "text": "Another participant argues the cover is rarely used, citing only three occasions it would be seen.",
+            "evidence": [29]
+          }
+        ]
+      },
+      {
+        "id": "shared-image",
+        "title": "Shared image link",
+        "claims": [
+          {
+            "text": "A user shared a Pinterest link and another user credited the source.",
+            "evidence": [16, 17]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": []
+  },
+  "usage": {
+    "durationMs": 6525.108400000026,
+    "ollamaTotalMs": 6240.929419,
+    "promptEvalCount": 1887,
+    "evalCount": 614,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 4,
+    "claimCount": 12,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.9411764705882353,
+    "goldClaimPrecision": 0.5833333333333334,
+    "evidencePrecision": 0.5384615384615384,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0.08333333333333333,
+    "matchedClaimIds": [
+      "ai-tooling.capability-view",
+      "ai-tooling.instinctgpt-result",
+      "ai-tooling.old-model-experiment",
+      "ai-tooling.model-comparison",
+      "bus-passenger.repeated-encounter",
+      "diploma-cover.prices",
+      "diploma-cover.low-value"
+    ],
+    "retainedThreadIds": ["ai-tooling", "bus-passenger", "diploma-cover"],
+    "triggeredForbiddenIds": []
+  }
+}

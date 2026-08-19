@@ -1,0 +1,148 @@
+{
+  "case": "real-ai-development",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 2,
+  "transformation": "rename-users",
+  "inputHash": "4dd58602882282739faa5356f91372432810f3ed50978ee7285c40fdb16e3f37",
+  "promptHash": "0c45b657a36f50d977da1c5f62dcc9d149d452f6a46ff61fc9da22dbe95ada52",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion on AI in Job Search and Development\",\n  \"topics\": [\n    {\n      \"id\": \"ai-job-search\",\n      \"title\": \"AI tools for job searching and resume generation\",\n      \"claims\": [\n        {\n          \"text\": \"The author plans to set up a cloud (OpenClaw) to automate job search, PDF resume generation for specific vacancies, and cover letter writing.\",\n          \"evidence\": [5, 6]\n        },\n        {\n          \"text\": \"AI-generated resumes can be analyzed by humans during technical interviews, unlike plain white text.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"Lack of AI skills (e.g., Cursor, Claude Code, LLM, RAG, Embeddings) makes job hunting for JS/Python positions very difficult in 2026.\",\n          \"evidence\": [8, 6]\n        },\n        {\n          \"text\": \"The acceleration of development claims started becoming real only in 2025, with tools becoming both better and more expensive.\",\n          \"evidence\": [9]\n        },\n        {\n          \"text\": \"The author expects the recruiting profession to become obsolete, envisioning HR as purely personnel management.\",\n          \"evidence\": [14]\n        }\n      ]\n    },\n    {\n      \"id\": \"ai-code-generation\",\n      \"title\": \"AI-assisted code generation and its pitfalls\",\n      \"claims\": [\n        {\n          \"text\": \"Using LLMs (e.g., GPT) to generate join queries and other code significantly accelerates development by handling routine tasks.\",\n          \"evidence\": [19]\n        },\n        {\n          \"text\": \"Generated code can be unsafe, producing overly large raw SQL queries that risk security and performance (e.g., a 450-line query pulling all user data).\",\n          \"evidence\": [30]\n        },\n        {\n          \"text\": \"Incremental computation ideas were replaced by views, indicating a shift in optimization strategies.\",\n          \"evidence\": [34]\n        },\n        {\n          \"text\": \"Some engineers push unreviewed, low‑quality code (e.g., SELECT *) to production, sometimes after AI‑generated code that breaks the project.\",\n          \"evidence\": [35]\n        },\n        {\n          \"text\": \"Automatic database schema recreation on changes caused additional confusion in a company.\",\n          \"evidence\": [37]\n        }\n      ]\n    },\n    {\n      \"id\": \"recruiter-future\",\n      \"title\": \"Future of recruiters and candidate sourcing\",\n      \"claims\": [\n        {\n          \"text\": \"Candidate search using keyword filters is becoming detached from reality.\",\n          \"evidence\": [13]\n        },\n        {\n          \"text\": \"The author anticipates the recruiter profession will die out, with HR handling only personnel management.\",\n          \"evidence\": [14]\n        }\n      ]\n    },\n    {\n      \"id\": \"debug-logs\",\n      \"title\": \"Using logs for debugging and knowledge limits of models\",\n      \"claims\": [\n        {\n          \"text\": \"The author suggests logging (e.g., in JUnit) could help AI identify recurring issues earlier.\",\n          \"evidence\": [20]\n        },\n        {\n          \"text\": \"Simple models cannot capture the accumulated context and nuanced decisions present in a developer's mind.\",\n          \"evidence\": [22]\n        },\n        {\n          \"text\": \"Long debugging sessions may become futile if logs are not helpful for understanding requirements.\",\n          \"evidence\": [23]\n        },\n        {\n          \"text\": \"If one struggles too long, the outcome may be suboptimal.\",\n          \"evidence\": [26]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": []\n}",
+  "thinking": "We need to produce JSON. Identify topics. Likely themes: AI for job search, AI impact on dev, code generation issues, hiring/recruiter future, code quality, logs, etc. We'll create few topics.\n\nExtract claims with evidence IDs.\n\nLet's pick:\n\ntopic-id: ai-job-search (claims about automating resume generation, OpenClaw etc)\nids 1,5,6,8,9,14 maybe.\n\ntopic-id: ai-code-generation (claims about LLM speeding dev, issues) ids 19,30,34,35,37.\n\ntopic-id: recruiter-future (ids 13,14)\n\ntopic-id: logs-debugging (ids 20,22,23,26)\n\nDecisions none. Open questions? maybe none. No explicit question answered. There are jokes etc. No unresolved question.\n\nCheck if any open question: maybe \"який інструмент?\" none.\n\nThus openQuestions empty.\n\nProvide claims list per topic.\n\nNow craft JSON.\n\n",
+  "parsed": {
+    "title": "Discussion on AI in Job Search and Development",
+    "topics": [
+      {
+        "id": "ai-job-search",
+        "title": "AI tools for job searching and resume generation",
+        "claims": [
+          {
+            "text": "The author plans to set up a cloud (OpenClaw) to automate job search, PDF resume generation for specific vacancies, and cover letter writing.",
+            "evidence": [5, 6]
+          },
+          {
+            "text": "AI-generated resumes can be analyzed by humans during technical interviews, unlike plain white text.",
+            "evidence": [1]
+          },
+          {
+            "text": "Lack of AI skills (e.g., Cursor, Claude Code, LLM, RAG, Embeddings) makes job hunting for JS/Python positions very difficult in 2026.",
+            "evidence": [8, 6]
+          },
+          {
+            "text": "The acceleration of development claims started becoming real only in 2025, with tools becoming both better and more expensive.",
+            "evidence": [9]
+          },
+          {
+            "text": "The author expects the recruiting profession to become obsolete, envisioning HR as purely personnel management.",
+            "evidence": [14]
+          }
+        ]
+      },
+      {
+        "id": "ai-code-generation",
+        "title": "AI-assisted code generation and its pitfalls",
+        "claims": [
+          {
+            "text": "Using LLMs (e.g., GPT) to generate join queries and other code significantly accelerates development by handling routine tasks.",
+            "evidence": [19]
+          },
+          {
+            "text": "Generated code can be unsafe, producing overly large raw SQL queries that risk security and performance (e.g., a 450-line query pulling all user data).",
+            "evidence": [30]
+          },
+          {
+            "text": "Incremental computation ideas were replaced by views, indicating a shift in optimization strategies.",
+            "evidence": [34]
+          },
+          {
+            "text": "Some engineers push unreviewed, low‑quality code (e.g., SELECT *) to production, sometimes after AI‑generated code that breaks the project.",
+            "evidence": [35]
+          },
+          {
+            "text": "Automatic database schema recreation on changes caused additional confusion in a company.",
+            "evidence": [37]
+          }
+        ]
+      },
+      {
+        "id": "recruiter-future",
+        "title": "Future of recruiters and candidate sourcing",
+        "claims": [
+          {
+            "text": "Candidate search using keyword filters is becoming detached from reality.",
+            "evidence": [13]
+          },
+          {
+            "text": "The author anticipates the recruiter profession will die out, with HR handling only personnel management.",
+            "evidence": [14]
+          }
+        ]
+      },
+      {
+        "id": "debug-logs",
+        "title": "Using logs for debugging and knowledge limits of models",
+        "claims": [
+          {
+            "text": "The author suggests logging (e.g., in JUnit) could help AI identify recurring issues earlier.",
+            "evidence": [20]
+          },
+          {
+            "text": "Simple models cannot capture the accumulated context and nuanced decisions present in a developer's mind.",
+            "evidence": [22]
+          },
+          {
+            "text": "Long debugging sessions may become futile if logs are not helpful for understanding requirements.",
+            "evidence": [23]
+          },
+          {
+            "text": "If one struggles too long, the outcome may be suboptimal.",
+            "evidence": [26]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": []
+  },
+  "usage": {
+    "durationMs": 10871.499299999996,
+    "ollamaTotalMs": 10693.21188,
+    "promptEvalCount": 3260,
+    "evalCount": 998,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 4,
+    "claimCount": 16,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.9047619047619048,
+    "goldClaimPrecision": 0.4375,
+    "evidencePrecision": 0.4444444444444444,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0.0625,
+    "matchedClaimIds": [
+      "job-search.ai-skills",
+      "job-search.automation-idea",
+      "job-search.keyword-filtering",
+      "development.routine-speedup",
+      "vibe-coding.bad-backend",
+      "vibe-coding.review-failure",
+      "development.context-quality"
+    ],
+    "retainedThreadIds": [
+      "ai-job-search",
+      "ai-assisted-development",
+      "vibe-coding-risks"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

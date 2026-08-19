@@ -1,0 +1,144 @@
+{
+  "case": "real-ai-development",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 5,
+  "transformation": "identity-replay",
+  "inputHash": "c44e2d8f381898078b12b50a1dbf1501e5970203c0d4ef386b86fd514114c47c",
+  "promptHash": "926769814c3c5c8a23a92b4aa3f016579ab9ed97ce364dc887976527a86b02a8",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Discussion on AI tools, job search automation, and code quality\",\n  \"topics\": [\n    {\n      \"id\": \"job-search-automation\",\n      \"title\": \"Automation of job search and resume generation\",\n      \"claims\": [\n        {\n          \"text\": \"P1 is preparing for a full‑time job search and is considering cloud automation to generate PDF resumes tailored to each vacancy.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"P1 plans to set up OpenClaw for vacancy search, resume generation and cover‑letter writing once the startup shuts down.\",\n          \"evidence\": [5]\n        },\n        {\n          \"text\": \"P1 believes that extensive AI‑related skills (Cursor, Claude Code, LLM, RAG, Embeddings, etc.) are necessary in 2026 to avoid being filtered out by recruiters.\",\n          \"evidence\": [6]\n        },\n        {\n          \"text\": \"P1 expects the recruiter profession to disappear, leaving HR as internal personnel management.\",\n          \"evidence\": [14]\n        }\n      ]\n    },\n    {\n      \"id\": \"ai-skills-recruiters\",\n      \"title\": \"Importance of AI skills for job market\",\n      \"claims\": [\n        {\n          \"text\": \"In 2026 AI has become a market mainstream, making lack of AI knowledge a significant obstacle for job seekers using JS/Python.\",\n          \"evidence\": [8, 9]\n        }\n      ]\n    },\n    {\n      \"id\": \"ai-development-acceleration\",\n      \"title\": \"AI accelerating software development\",\n      \"claims\": [\n        {\n          \"text\": \"P2 states that using GPT to generate SQL joins and other code substantially speeds up development.\",\n          \"evidence\": [19]\n        },\n        {\n          \"text\": \"P2 notes that their projects have no cloud infrastructure and likely will not get any.\",\n          \"evidence\": [19]\n        },\n        {\n          \"text\": \"P2 suggests extracting logs in JUnit could help earlier detection of recurring issues, but no later response addresses this.\",\n          \"evidence\": [20]\n        }\n      ]\n    },\n    {\n      \"id\": \"candidate-search-keywords\",\n      \"title\": \"Keyword‑based candidate search realism\",\n      \"claims\": [\n        {\n          \"text\": \"P4 comments that searching for candidates using such keywords is even more detached from reality than before.\",\n          \"evidence\": [13]\n        }\n      ]\n    },\n    {\n      \"id\": \"code-quality-issues\",\n      \"title\": \"Negative side effects of AI‑generated code\",\n      \"claims\": [\n        {\n          \"text\": \"P1 reports that a colleague generated 450 lines of raw SQL via AI, producing an inefficient query that would take 10‑20 minutes in production.\",\n          \"evidence\": [30]\n        },\n        {\n          \"text\": \"P1 describes a situation where an engineer pushes unreviewed SELECT * code to production after AI‑generated code broke the project.\",\n          \"evidence\": [35]\n        }\n      ]\n    },\n    {\n      \"id\": \"incremental-computation\",\n      \"title\": \"Discussion of incremental computation and views\",\n      \"claims\": [\n        {\n          \"text\": \"P4 remarks that incremental computations have been buried and replaced by a view memorial.\",\n          \"evidence\": [34]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": []\n}",
+  "thinking": "We need to produce JSON with title, topics, decisions, openQuestions. Identify main topics. Probably \"job-search-automation\", \"ai-tools-impact\", \"code-quality-issues\". Gather claims.\n\nLet's extract claims with evidence IDs.\n\nClaim1: P1 preparing for job search, wants cloud setup for automated PDF resume generation. IDs 1.\n\nClaim2: Reverse engineering AI is fun. ID4.\n\nClaim3: Wants to set up OpenClaw for job search after startup closes. ID5.\n\nClaim4: Need AI skills (Cursor, Claude Code, LLM, RAG, Embeddings) to avoid being filtered by recruiters. ID6.\n\nClaim5: Market mainstream of AI in 2026 makes lack of AI knowledge make job search hard. IDs8,9.\n\nClaim6: Tools acceleration started 2025, expensive. ID9.\n\nClaim7: P4 compares to REST, JSON, etc. ID10.\n\nClaim8: Search for candidates by keywords is disconnected from reality. ID13.\n\nClaim9: P1 expects recruiter profession to die. ID14.\n\nClaim10: P2 says AI accelerates development, uses GPT to generate joins etc. ID19.\n\nClaim11: P2 notes no cloud in projects. ID19.\n\nClaim12: P2 complains about logs not helping. IDs20,22,23.\n\nClaim13: P1 says cloud lowers entry threshold, leads to bad code (index.py 5500 lines, generated SQL 450 lines, inefficient query). ID30.\n\nClaim14: P4 says incremental computations buried, view memorial. ID34.\n\nOpen questions: any unresolved? Perhaps P1 waiting for startup to close? That's a future condition but not asked. There is no direct question unresolved. Maybe \"should we try to extract logs in JUnit?\" was suggestion but not answered. That's an open question? It's a suggestion not question. No explicit question.\n\nThus openQuestions empty.\n\nDecisions none.\n\nNow structure topics.\n\nTopic ids: job-search-automation, ai-skills-recruiters, ai-development-acceleration, candidate-search-keywords, code-quality-issues, incremental-computation.\n\nCreate JSON.\n\n",
+  "parsed": {
+    "title": "Discussion on AI tools, job search automation, and code quality",
+    "topics": [
+      {
+        "id": "job-search-automation",
+        "title": "Automation of job search and resume generation",
+        "claims": [
+          {
+            "text": "P1 is preparing for a full‑time job search and is considering cloud automation to generate PDF resumes tailored to each vacancy.",
+            "evidence": [1]
+          },
+          {
+            "text": "P1 plans to set up OpenClaw for vacancy search, resume generation and cover‑letter writing once the startup shuts down.",
+            "evidence": [5]
+          },
+          {
+            "text": "P1 believes that extensive AI‑related skills (Cursor, Claude Code, LLM, RAG, Embeddings, etc.) are necessary in 2026 to avoid being filtered out by recruiters.",
+            "evidence": [6]
+          },
+          {
+            "text": "P1 expects the recruiter profession to disappear, leaving HR as internal personnel management.",
+            "evidence": [14]
+          }
+        ]
+      },
+      {
+        "id": "ai-skills-recruiters",
+        "title": "Importance of AI skills for job market",
+        "claims": [
+          {
+            "text": "In 2026 AI has become a market mainstream, making lack of AI knowledge a significant obstacle for job seekers using JS/Python.",
+            "evidence": [8, 9]
+          }
+        ]
+      },
+      {
+        "id": "ai-development-acceleration",
+        "title": "AI accelerating software development",
+        "claims": [
+          {
+            "text": "P2 states that using GPT to generate SQL joins and other code substantially speeds up development.",
+            "evidence": [19]
+          },
+          {
+            "text": "P2 notes that their projects have no cloud infrastructure and likely will not get any.",
+            "evidence": [19]
+          },
+          {
+            "text": "P2 suggests extracting logs in JUnit could help earlier detection of recurring issues, but no later response addresses this.",
+            "evidence": [20]
+          }
+        ]
+      },
+      {
+        "id": "candidate-search-keywords",
+        "title": "Keyword‑based candidate search realism",
+        "claims": [
+          {
+            "text": "P4 comments that searching for candidates using such keywords is even more detached from reality than before.",
+            "evidence": [13]
+          }
+        ]
+      },
+      {
+        "id": "code-quality-issues",
+        "title": "Negative side effects of AI‑generated code",
+        "claims": [
+          {
+            "text": "P1 reports that a colleague generated 450 lines of raw SQL via AI, producing an inefficient query that would take 10‑20 minutes in production.",
+            "evidence": [30]
+          },
+          {
+            "text": "P1 describes a situation where an engineer pushes unreviewed SELECT * code to production after AI‑generated code broke the project.",
+            "evidence": [35]
+          }
+        ]
+      },
+      {
+        "id": "incremental-computation",
+        "title": "Discussion of incremental computation and views",
+        "claims": [
+          {
+            "text": "P4 remarks that incremental computations have been buried and replaced by a view memorial.",
+            "evidence": [34]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": []
+  },
+  "usage": {
+    "durationMs": 18383.435799999992,
+    "ollamaTotalMs": 18211.560171,
+    "promptEvalCount": 3260,
+    "evalCount": 1181,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 6,
+    "claimCount": 12,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.9047619047619048,
+    "goldClaimPrecision": 0.5833333333333334,
+    "evidencePrecision": 0.5384615384615384,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0,
+    "matchedClaimIds": [
+      "job-search.automation-idea",
+      "job-search.ai-skills",
+      "job-search.keyword-filtering",
+      "development.routine-speedup",
+      "development.context-quality",
+      "vibe-coding.bad-backend",
+      "vibe-coding.review-failure"
+    ],
+    "retainedThreadIds": [
+      "ai-job-search",
+      "ai-assisted-development",
+      "vibe-coding-risks"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

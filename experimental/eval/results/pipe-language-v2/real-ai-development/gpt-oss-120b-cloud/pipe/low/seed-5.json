@@ -1,0 +1,128 @@
+{
+  "case": "real-ai-development",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe",
+  "reasoning": "low",
+  "seed": 5,
+  "inputHash": "c44e2d8f381898078b12b50a1dbf1501e5970203c0d4ef386b86fd514114c47c",
+  "promptHash": "ca466985a1b24e688c02f542402eed97a24851c840c6eaa17fc4ea625c145538",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Обговорення автоматизації пошуку роботи та впливу AI на розробку\",\n  \"topics\": [\n    {\n      \"id\": \"job-search-automation\",\n      \"title\": \"Автоматизація пошуку роботи та генерація резюме\",\n      \"claims\": [\n        {\n          \"text\": \"Автор планує налаштувати OpenClaw для пошуку вакансій, генерації PDF‑резюме та написання cover letter.\",\n          \"evidence\": [5]\n        },\n        {\n          \"text\": \"Повна автоматизація під конкретну вакансію краща, бо резюме можна аналізувати під час інтерв'ю.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"Інструменти AI (Cursor, Claude Code, LLM, RAG, Embeddings) вже стали необхідністю на 2026 рік для успішного працевлаштування.\",\n          \"evidence\": [6, 7, 8]\n        },\n        {\n          \"text\": \"Відсутність знань в AI робить пошук роботи на JavaScript/Python дуже складним.\",\n          \"evidence\": [8]\n        },\n        {\n          \"text\": \"AI‑генерація коду може знизити поріг входу в програмування, але створює проблеми з неоптимальними запитами та безпекою.\",\n          \"evidence\": [30]\n        }\n      ]\n    },\n    {\n      \"id\": \"ai-code-generation\",\n      \"title\": \"Використання AI для генерації коду та його наслідки\",\n      \"claims\": [\n        {\n          \"text\": \"GPT генерує великі об’єми SQL коду, який може бути не оптимальним і призводити до довгих запитів у продакшн.\",\n          \"evidence\": [30]\n        },\n        {\n          \"text\": \"Інженери іноді довіряють AI написанню коду, що призводить до необхідності ручного виправлення та ризику впровадження багів.\",\n          \"evidence\": [35]\n        },\n        {\n          \"text\": \"AI допомагає прискорювати рутину розробки, наприклад, генеруючи джоїни таблиць, що зменшує час розробки.\",\n          \"evidence\": [19]\n        },\n        {\n          \"text\": \"В деяких проектах AI не використовується через відсутність cloud‑інфраструктури.\",\n          \"evidence\": [19]\n        }\n      ]\n    },\n    {\n      \"id\": \"recruiter-market\",\n      \"title\": \"Перспектива професії рекрутера і роль HR\",\n      \"claims\": [\n        {\n          \"text\": \"Автор очікує, що професія рекрутера зникне, і HR перейде в управління персоналом компанії.\",\n          \"evidence\": [14]\n        }\n      ]\n    },\n    {\n      \"id\": \"misc-humor\",\n      \"title\": \"Жарти, меми і випадкові реплики\",\n      \"claims\": [\n        {\n          \"text\": \"У чаті присутні жартівливі репліки про AI, машинну інфраструктуру та випадкові медіа‑повідомлення.\",\n          \"evidence\": [2, 3, 4, 11, 12, 16, 18, 29, 32, 33, 34, 36]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": []\n}",
+  "thinking": "Need construct JSON. Identify topics: job search automation, AI tools in hiring, code generation issues, etc. Claims with evidence ids.\n\nDecisions none. Open questions maybe none.\n\nCreate topics.\n\nLet's craft.\n\n",
+  "parsed": {
+    "title": "Обговорення автоматизації пошуку роботи та впливу AI на розробку",
+    "topics": [
+      {
+        "id": "job-search-automation",
+        "title": "Автоматизація пошуку роботи та генерація резюме",
+        "claims": [
+          {
+            "text": "Автор планує налаштувати OpenClaw для пошуку вакансій, генерації PDF‑резюме та написання cover letter.",
+            "evidence": [5]
+          },
+          {
+            "text": "Повна автоматизація під конкретну вакансію краща, бо резюме можна аналізувати під час інтерв'ю.",
+            "evidence": [1]
+          },
+          {
+            "text": "Інструменти AI (Cursor, Claude Code, LLM, RAG, Embeddings) вже стали необхідністю на 2026 рік для успішного працевлаштування.",
+            "evidence": [6, 7, 8]
+          },
+          {
+            "text": "Відсутність знань в AI робить пошук роботи на JavaScript/Python дуже складним.",
+            "evidence": [8]
+          },
+          {
+            "text": "AI‑генерація коду може знизити поріг входу в програмування, але створює проблеми з неоптимальними запитами та безпекою.",
+            "evidence": [30]
+          }
+        ]
+      },
+      {
+        "id": "ai-code-generation",
+        "title": "Використання AI для генерації коду та його наслідки",
+        "claims": [
+          {
+            "text": "GPT генерує великі об’єми SQL коду, який може бути не оптимальним і призводити до довгих запитів у продакшн.",
+            "evidence": [30]
+          },
+          {
+            "text": "Інженери іноді довіряють AI написанню коду, що призводить до необхідності ручного виправлення та ризику впровадження багів.",
+            "evidence": [35]
+          },
+          {
+            "text": "AI допомагає прискорювати рутину розробки, наприклад, генеруючи джоїни таблиць, що зменшує час розробки.",
+            "evidence": [19]
+          },
+          {
+            "text": "В деяких проектах AI не використовується через відсутність cloud‑інфраструктури.",
+            "evidence": [19]
+          }
+        ]
+      },
+      {
+        "id": "recruiter-market",
+        "title": "Перспектива професії рекрутера і роль HR",
+        "claims": [
+          {
+            "text": "Автор очікує, що професія рекрутера зникне, і HR перейде в управління персоналом компанії.",
+            "evidence": [14]
+          }
+        ]
+      },
+      {
+        "id": "misc-humor",
+        "title": "Жарти, меми і випадкові реплики",
+        "claims": [
+          {
+            "text": "У чаті присутні жартівливі репліки про AI, машинну інфраструктуру та випадкові медіа‑повідомлення.",
+            "evidence": [2, 3, 4, 11, 12, 16, 18, 29, 32, 33, 34, 36]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": []
+  },
+  "usage": {
+    "durationMs": 7160.375599999999,
+    "ollamaTotalMs": 6961.274855,
+    "promptEvalCount": 2911,
+    "evalCount": 843,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 4,
+    "claimCount": 11,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.8095238095238095,
+    "goldClaimPrecision": 0.6363636363636364,
+    "evidencePrecision": 0.4166666666666667,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0.18181818181818182,
+    "matchedClaimIds": [
+      "cars.miata-preference",
+      "job-search.ai-skills",
+      "job-search.automation-idea",
+      "vibe-coding.bad-backend",
+      "vibe-coding.review-failure",
+      "development.routine-speedup",
+      "job-search.keyword-filtering"
+    ],
+    "retainedThreadIds": [
+      "cars",
+      "ai-job-search",
+      "vibe-coding-risks",
+      "ai-assisted-development"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

@@ -1,0 +1,118 @@
+{
+  "case": "real-ai-tools-interleaved",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v3",
+  "reasoning": "medium",
+  "seed": 2,
+  "transformation": "identity",
+  "inputHash": "3e5fb5efeccd172ee2f1e8a3ef61dfdf2ed0fd33f2162906991e5f91c1a0d9ba",
+  "promptHash": "a6ffe648bb3949d8bb95ca60c96c400c0048e9f158cdc944fa4876927129aaec",
+  "promptVersion": "v2",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Chat Summary\",\n  \"topics\": [\n    {\n      \"id\": \"ai-capabilities\",\n      \"title\": \"AI capabilities and toolkits\",\n      \"claims\": [\n        {\n          \"text\": \"AI systems are not inherently intelligent; their abilities stem from toolkits and ready-made examples.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"No one needs AI to be intelligent; people themselves do not know how.\",\n          \"evidence\": [2]\n        },\n        {\n          \"text\": \"InstinctGPT showed that a toolkit can give a large boost but cannot compensate for a model's lack of base abilities.\",\n          \"evidence\": [8]\n        },\n        {\n          \"text\": \"Modern models aim to extract more from fewer parameters and are sometimes trained for specific tasks; coder models are an obvious example but are overloaded.\",\n          \"evidence\": [14]\n        }\n      ]\n    },\n    {\n      \"id\": \"diploma-cover-fees\",\n      \"title\": \"Diploma cover fees\",\n      \"claims\": [\n        {\n          \"text\": \"Some people were charged 650 UAH for a diploma cover.\",\n          \"evidence\": [23]\n        },\n        {\n          \"text\": \"Someone paid 47 UAH for a diploma cover.\",\n          \"evidence\": [24]\n        },\n        {\n          \"text\": \"Another source mentions a cost of 30 UAH for a diploma cover.\",\n          \"evidence\": [25]\n        },\n        {\n          \"text\": \"One user suggests they don’t care about the cover because it is just paper.\",\n          \"evidence\": [26]\n        }\n      ]\n    },\n    {\n      \"id\": \"hardware-modification\",\n      \"title\": \"Fitting multiple GPUs in a small PC case\",\n      \"claims\": [\n        {\n          \"text\": \"A small PC case normally fits only one small GPU, but using straps and brute force three GPUs can be installed.\",\n          \"evidence\": [30]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [\n    {\n      \"text\": \"Use straps and brute force to install three small video cards into a small PC case.\",\n      \"evidence\": [30]\n    }\n  ],\n  \"openQuestions\": []\n}",
+  "thinking": "We need to parse messages and extract topics, claims, decisions, open questions.\n\nFirst examine content.\n\nMessages are a mix of random chat. Need to identify any technical or architectural decisions etc. There's little. The relevant possibly: message 14 about model sizes and \"custom models trained for specific tasks\". That's a claim.\n\nMessage 8 about InstinctGPT comparing 3B vs GPT-3 175B with external runtime and tools, stating toolkit gives big boost but does not compensate for lack of base abilities. That's a claim.\n\nMessage 16 is a link - likely not relevant.\n\nMessage 27 about diploma cover with herald etc, not technical.\n\nMessage 30 about fitting three small video cards into a small PC case using straps and brute force. That's a claim about hardware hack.\n\nPotential decisions: maybe no explicit decisions identified. If there is an implicit decision like \"fit three small video cards into case using straps\" (they did it), that could be a decision to modify hardware. But it's more a claim of fact.\n\nOpen questions: None obvious; maybe no unanswered question.\n\nWe must create topics. Could have topics: ai-models, diploma-cover-fees, hardware-modification.\n\nWe need IDs of messages that support each claim.\n\nLet's list claims:\n\n1. AI tools cannot be inherently intelligent; AI capabilities are due to toolkits and ready-made examples. Support: #1 (P1 says). Also maybe #3 adds context but claim. #1 enough.\n\n2. No one needs AI to be intelligent; people don't know how. Support: #2.\n\n3. InstinctGPT comparison: toolkit boosts but cannot compensate for model base ability deficit. Support: #8.\n\n4. Modern models try to squeeze more from fewer parameters; some are trained for specific tasks, and coder models are obvious but are overloaded. Support: #14.\n\n5. Small PC case can hold only one small GPU, but using straps and brute force you can fit three. Support: #30.\n\n6. Diploma cover costs: various amounts (650, 47, 30). Claims: #23 (650), #24 (47), #25 (30). Also #26 says \"no cover gives same, still paper\".\n\nWe can include a claim about average cost maybe not needed.\n\nOpen question: maybe \"How to get diploma cover without paying?\" Not resolved; but no direct question asked. There's a question about \"А скільки з нас брали грошей за обкладинки диплому?\" but answer given (650). So resolved. No open.\n\nDecisions: maybe no explicit decisions. However they \"fit three GPUs\" could be considered a decision to modify case. But that's more an action; not a decision necessarily. However a decision could be \"use straps and brute force to fit three GPUs\". I think we could include as decision.\n\nNo other decisions.\n\nNow topics:\n\ntopic id \"ai-capabilities\" for claims about AI intelligence/toolkits.\n\ntopic id \"model-comparison\" maybe same as above.\n\ntopic id \"diploma-cover-fees\".\n\ntopic id \"hardware-mod\" for GPU case.\n\nNow format JSON.\n\nStructure: title (short). maybe \"Chat Summary\".\n\nWe'll list topics array.\n\nEach topic with id, title, claims array.\n\nDecisions array separate (not inside topics). The prompts say decisions top-level separate, not per topic. So we list the decision about GPU hack.\n\nOpenQuestions empty array.\n\nNow compile.\n\nNeed evidence arrays with IDs numeric as per messages (IDs). Use numbers.\n\nTopic \"ai-capabilities\" claims:\n\n- Claim text: AI systems are not inherently intelligent; their abilities stem from toolkits and ready-made examples. Evidence: [1].\n\n- Claim text: No one needs AI to be intelligent; people themselves don't know how. Evidence: [2].\n\n- Claim text: InstinctGPT showed that toolkits can boost performance but cannot make up for a model's lacking base abilities. Evidence: [8].\n\n- Claim text: Modern models aim to extract more from fewer parameters and are sometimes trained for specific tasks; coder models are a clear example but are overloaded. Evidence: [14].\n\nTopic \"diploma-cover-fees\"\n\n- Claim: Some people were charged 650 UAH for diploma cover. Evidence [23].\n\n- Claim: Someone paid 47 UAH. Evidence [24].\n\n- Claim: Another source mentions 30 UAH. Evidence [25].\n\n- Claim: One user suggests they don't care about cover as it's just paper. Evidence [26].\n\nTopic \"hardware-modification\"\n\n- Claim: A small PC case normally fits only one small GPU, but using straps and brute force, three GPUs can be installed. Evidence [30].\n\nNow decisions:\n\n- Decision: Use straps and brute force to install three small video cards into a small PC case. Evidence [30] (same as claim). That's fine.\n\nOpenQuestions none.\n\nMake sure JSON arrays.\n\nLet's craft final JSON.",
+  "parsed": {
+    "title": "Chat Summary",
+    "topics": [
+      {
+        "id": "ai-capabilities",
+        "title": "AI capabilities and toolkits",
+        "claims": [
+          {
+            "text": "AI systems are not inherently intelligent; their abilities stem from toolkits and ready-made examples.",
+            "evidence": [1]
+          },
+          {
+            "text": "No one needs AI to be intelligent; people themselves do not know how.",
+            "evidence": [2]
+          },
+          {
+            "text": "InstinctGPT showed that a toolkit can give a large boost but cannot compensate for a model's lack of base abilities.",
+            "evidence": [8]
+          },
+          {
+            "text": "Modern models aim to extract more from fewer parameters and are sometimes trained for specific tasks; coder models are an obvious example but are overloaded.",
+            "evidence": [14]
+          }
+        ]
+      },
+      {
+        "id": "diploma-cover-fees",
+        "title": "Diploma cover fees",
+        "claims": [
+          {
+            "text": "Some people were charged 650 UAH for a diploma cover.",
+            "evidence": [23]
+          },
+          {
+            "text": "Someone paid 47 UAH for a diploma cover.",
+            "evidence": [24]
+          },
+          {
+            "text": "Another source mentions a cost of 30 UAH for a diploma cover.",
+            "evidence": [25]
+          },
+          {
+            "text": "One user suggests they don’t care about the cover because it is just paper.",
+            "evidence": [26]
+          }
+        ]
+      },
+      {
+        "id": "hardware-modification",
+        "title": "Fitting multiple GPUs in a small PC case",
+        "claims": [
+          {
+            "text": "A small PC case normally fits only one small GPU, but using straps and brute force three GPUs can be installed.",
+            "evidence": [30]
+          }
+        ]
+      }
+    ],
+    "decisions": [
+      {
+        "text": "Use straps and brute force to install three small video cards into a small PC case.",
+        "evidence": [30]
+      }
+    ],
+    "openQuestions": []
+  },
+  "usage": {
+    "durationMs": 14952.958500000066,
+    "ollamaTotalMs": 14764.502508,
+    "promptEvalCount": 2310,
+    "evalCount": 1495,
+    "doneReason": "stop",
+    "thinkingTextTokenCount": 1002,
+    "finalTextTokenCount": 482
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 3,
+    "claimCount": 9,
+    "decisionCount": 1,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.7058823529411765,
+    "goldClaimPrecision": 0.6666666666666666,
+    "evidencePrecision": 0.6,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0,
+    "matchedClaimIds": [
+      "ai-tooling.capability-view",
+      "ai-tooling.instinctgpt-result",
+      "ai-tooling.model-comparison",
+      "diploma-cover.prices",
+      "diploma-cover.low-value",
+      "pc-case.three-gpus"
+    ],
+    "matchedDecisionIds": [],
+    "matchedOpenQuestionIds": [],
+    "retainedThreadIds": ["ai-tooling", "diploma-cover", "pc-case"],
+    "triggeredForbiddenIds": []
+  }
+}

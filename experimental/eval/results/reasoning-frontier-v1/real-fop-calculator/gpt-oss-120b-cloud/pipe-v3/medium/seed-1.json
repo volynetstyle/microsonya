@@ -1,0 +1,201 @@
+{
+  "case": "real-fop-calculator",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v3",
+  "reasoning": "medium",
+  "seed": 1,
+  "transformation": "identity",
+  "inputHash": "d3179cdb8e49a27f55b8dcbb42c5b7b95590527ad18ad16afb38bc499073e8af",
+  "promptHash": "5060e45df53bd39d6e132ad1a9e4bbcf2ae1de44805740c2d1c480e9b25e240f",
+  "promptVersion": "v2",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Tax filing workaround, product ideas and app design discussion\",\n  \"topics\": [\n    {\n      \"id\": \"tax-filing-workaround\",\n      \"title\": \"Tax filing workaround via aunt Sveta\",\n      \"claims\": [\n        {\n          \"text\": \"Paying 500 UAH to aunt Sveta allowed correction of declaration errors and avoided larger penalties.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"The inspector previously approved declarations without review for 1.5 years and was later reprimanded.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"Re‑filing after the aunt's help cost about 1 000 UAH instead of the full fines.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"Mistakes often stem from mixing up columns and subtraction signs rather than tax calculation formulas.\",\n          \"evidence\": [8]\n        },\n        {\n          \"text\": \"The calculator they use works only with a Ukrainian‑currency (UAH) FOP; other currencies require manual conversion based on the day‑of‑deposit rate.\",\n          \"evidence\": [19]\n        }\n      ]\n    },\n    {\n      \"id\": \"domain-purchase\",\n      \"title\": \"Domain purchase considerations\",\n      \"claims\": [\n        {\n          \"text\": \"No domain has been bought yet.\",\n          \"evidence\": [2]\n        },\n        {\n          \"text\": \"Someone suggested buying a calculator first, then using the money for a domain.\",\n          \"evidence\": [4]\n        },\n        {\n          \"text\": \"One participant opposes buying a domain, calling it an unnecessary expense.\",\n          \"evidence\": [9]\n        },\n        {\n          \"text\": \"Another participant describes the domain as a “raw thing” that won’t evaporate even in heat.\",\n          \"evidence\": [10]\n        }\n      ]\n    },\n    {\n      \"id\": \"product-viability-web\",\n      \"title\": \"Viability of a web‑based product\",\n      \"claims\": [\n        {\n          \"text\": \"Web platforms are the simplest but significantly less profitable than Android/iOS.\",\n          \"evidence\": [11]\n        },\n        {\n          \"text\": \"SEO performance is poor; a site on the 10th Google page gets virtually no traffic.\",\n          \"evidence\": [11]\n        },\n        {\n          \"text\": \"There is no external traffic from Instagram/Threads and no contextual ads.\",\n          \"evidence\": [11]\n        },\n        {\n          \"text\": \"User retention is near zero because a paywall appears within the first 10 seconds, before the product can demonstrate value.\",\n          \"evidence\": [11]\n        },\n        {\n          \"text\": \"Conversion is assumed to be zero; the product does not simplify anything or integrate with banks or tax cabinets.\",\n          \"evidence\": [11]\n        }\n      ]\n    },\n    {\n      \"id\": \"cross-platform-development\",\n      \"title\": \"Cross‑platform development approach\",\n      \"claims\": [\n        {\n          \"text\": \"A fast delivery schedule (< 1 week from zero to release) is desirable.\",\n          \"evidence\": [12]\n        },\n        {\n          \"text\": \"Flutter was used as the cross‑platform stack in the referenced successful case.\",\n          \"evidence\": [12]\n        }\n      ]\n    },\n    {\n      \"id\": \"bundle-password-scam\",\n      \"title\": \"Bundle with password stored in local storage and security concerns\",\n      \"claims\": [\n        {\n          \"text\": \"The only password is stored in local storage as a 100 % discount promo code.\",\n          \"evidence\": [20]\n        },\n        {\n          \"text\": \"There is speculation that the password can be found by searching the source code.\",\n          \"evidence\": [21]\n        },\n        {\n          \"text\": \"Responses suggest the price of 299 UAH was not actually paid, implying the bundle may be a scam.\",\n          \"evidence\": [22, 24, 26, 32, 33, 34]\n        },\n        {\n          \"text\": \"The product is positioned as a “local‑first” app where USD/UAH rates refresh every 5 minutes and calculations happen instantly in the browser.\",\n          \"evidence\": [29]\n        },\n        {\n          \"text\": \"A “free vibe‑code” project description emphasizes that the bundle’s value is limited to the password stored locally.\",\n          \"evidence\": [30]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [\n    {\n      \"text\": \"Adopt Flutter as the cross‑platform development stack to achieve sub‑week delivery.\",\n      \"evidence\": [12]\n    },\n    {\n      \"text\": \"Design the app as a local‑first web application with client‑side calculations and a USD/UAH exchange rate that updates every 5 minutes.\",\n      \"evidence\": [29]\n    },\n    {\n      \"text\": \"Choose not to purchase a domain at this stage, citing it as an unnecessary expense.\",\n      \"evidence\": [9]\n    }\n  ],\n  \"openQuestions\": [\n    {\n      \"text\": \"Is the source code publicly accessible enough to locate the stored password?\",\n      \"evidence\": [21]\n    },\n    {\n      \"text\": \"Is there a market of at least ten users willing to pay 299 UAH for the product?\",\n      \"evidence\": [20]\n    }\n  ]\n}",
+  "thinking": "We need to produce JSON with title, topics, claims, decisions, openQuestions.\n\nWe must analyze conversation.\n\nThe chat appears about tax issues, domain purchase, FOP calculator, making money via web vs mobile, product ideas, a \"bundle\" with password, possible scam.\n\nWe need to extract topics with claims.\n\nWe must cite message IDs.\n\nIdentify open questions (unanswered). For example, \"А який там сорс код? Можна сам пароль пошуком знайти?\" (msg21) got reply 22 (joke). Not resolved. Might be open? Not answered seriously. Could be open question.\n\nAlso earlier: \"навіть домен не купив\" (msg2) not resolved.\n\nBut decide which are open.\n\nAlso decisions: any technical or architectural decision made. There's mention of \"швидкий кросплатформений стек (в тому випадку був флаттер)\" (msg12) which is a decision to use Flutter for quick cross-platform.\n\nAlso maybe decision: \"Він позиціонує його типу як local-first апку ... курс USD/UAH підтягується раз на 5 хвилин. розрахунки у браузері\". That's description of product design, maybe decision to do local-first with periodic exchange rate fetch.\n\nAlso earlier: \"Калькулятор працює тільки з гривневим ФОП\" (msg19) is a claim about limitation.\n\nWe need topics: Could be \"Tax filing workaround\", \"Domain purchase discussion\", \"Product viability discussion\", \"App design choices\", \"Security / password bundle issue\".\n\nMake short kebab ids.\n\nLet's craft:\n\ntitle: \"Discussion on tax filing, product ideas, and app design\"\n\ntopics list.\n\nTopic 1 id \"tax-filing-workaround\". title \"Tax filing workaround via aunt Sveta\". Claims: about paying 500grn to aunt to fix declarations (#1); inspector rare etc (#1); success with 1000grn payment (#1); complexity of column checking (#8); calculation issues with currency (#19). Evidence IDs accordingly.\n\nTopic 2 id \"domain-purchase\". title \"Domain purchase considerations\". Claims: not bought domain (#2); need calculator purchase to afford domain (#4); others think domain not worth buying (#9); comment about domain being 'sira shtuka' (#10). Also maybe decision? Not really.\n\nTopic 3 id \"product-viability-web\". title \"Viability of web product\". Claims from msg11 about web being less profitable, SEO low, lack of traffic, low conversion etc. Evidence #11.\n\nTopic 4 id \"cross-platform-development\". title \"Cross‑platform development approach\". Claim: fast delivery < week using Flutter (#12). Also perhaps decision to use Flutter as stack. Evidence #12.\n\nTopic 5 id \"bundle-password-scam\". title \"Bundle with password and security concerns\". Claims: password stored as promo code in local storage (#20); question about source code / finding password (#21); reply joke (#22); claim that it's in bundle (#23); others call it piracy (#24); comment about wanting rum (#26); claim about local‑first app with USD/UAH rate update (#29); description of \"free vibe code project\" (#30). Also decision: product positioned as local‑first app that calculates in browser with rate refresh every 5 min (design decision). Evidence #29.\n\nOpen questions: Which may be unanswered: \"А який там сорс код? Можна сам пароль пошуком знайти?\" not answered definitively. Also \"можна сам пароль пошуком знайти?\" maybe answered jokingly, not resolved. Also \"чи є хоча б десяток людей, готових віддати 299 грн?\" from #20 is rhetorical, not answered. Could be considered open question about market demand.\n\nAlso earlier \"навіть домен не купив\" is a statement not a question.\n\nTherefore openQuestions: one about source code/password search (#21). Another about market demand for paying 299 грн (#20). Another about currency support for calculator? Actually claim about only UAH (#19) not a question.\n\nDecisions: Use Flutter (#12). Use local‑first app with client‑side calculations & rate refresh (#29). Also perhaps decision to not buy domain (implied by #9 \"Я б під це не став домен куплять\") is a decision not to purchase domain. Could count as decision. Provide evidence.\n\nLet's prepare JSON.\n\nNeed arrays.\n\nWe must ensure correct IDs referencing. Use integer IDs as given.\n\nNow construct.\n\n",
+  "parsed": {
+    "title": "Tax filing workaround, product ideas and app design discussion",
+    "topics": [
+      {
+        "id": "tax-filing-workaround",
+        "title": "Tax filing workaround via aunt Sveta",
+        "claims": [
+          {
+            "text": "Paying 500 UAH to aunt Sveta allowed correction of declaration errors and avoided larger penalties.",
+            "evidence": [1]
+          },
+          {
+            "text": "The inspector previously approved declarations without review for 1.5 years and was later reprimanded.",
+            "evidence": [1]
+          },
+          {
+            "text": "Re‑filing after the aunt's help cost about 1 000 UAH instead of the full fines.",
+            "evidence": [1]
+          },
+          {
+            "text": "Mistakes often stem from mixing up columns and subtraction signs rather than tax calculation formulas.",
+            "evidence": [8]
+          },
+          {
+            "text": "The calculator they use works only with a Ukrainian‑currency (UAH) FOP; other currencies require manual conversion based on the day‑of‑deposit rate.",
+            "evidence": [19]
+          }
+        ]
+      },
+      {
+        "id": "domain-purchase",
+        "title": "Domain purchase considerations",
+        "claims": [
+          {
+            "text": "No domain has been bought yet.",
+            "evidence": [2]
+          },
+          {
+            "text": "Someone suggested buying a calculator first, then using the money for a domain.",
+            "evidence": [4]
+          },
+          {
+            "text": "One participant opposes buying a domain, calling it an unnecessary expense.",
+            "evidence": [9]
+          },
+          {
+            "text": "Another participant describes the domain as a “raw thing” that won’t evaporate even in heat.",
+            "evidence": [10]
+          }
+        ]
+      },
+      {
+        "id": "product-viability-web",
+        "title": "Viability of a web‑based product",
+        "claims": [
+          {
+            "text": "Web platforms are the simplest but significantly less profitable than Android/iOS.",
+            "evidence": [11]
+          },
+          {
+            "text": "SEO performance is poor; a site on the 10th Google page gets virtually no traffic.",
+            "evidence": [11]
+          },
+          {
+            "text": "There is no external traffic from Instagram/Threads and no contextual ads.",
+            "evidence": [11]
+          },
+          {
+            "text": "User retention is near zero because a paywall appears within the first 10 seconds, before the product can demonstrate value.",
+            "evidence": [11]
+          },
+          {
+            "text": "Conversion is assumed to be zero; the product does not simplify anything or integrate with banks or tax cabinets.",
+            "evidence": [11]
+          }
+        ]
+      },
+      {
+        "id": "cross-platform-development",
+        "title": "Cross‑platform development approach",
+        "claims": [
+          {
+            "text": "A fast delivery schedule (< 1 week from zero to release) is desirable.",
+            "evidence": [12]
+          },
+          {
+            "text": "Flutter was used as the cross‑platform stack in the referenced successful case.",
+            "evidence": [12]
+          }
+        ]
+      },
+      {
+        "id": "bundle-password-scam",
+        "title": "Bundle with password stored in local storage and security concerns",
+        "claims": [
+          {
+            "text": "The only password is stored in local storage as a 100 % discount promo code.",
+            "evidence": [20]
+          },
+          {
+            "text": "There is speculation that the password can be found by searching the source code.",
+            "evidence": [21]
+          },
+          {
+            "text": "Responses suggest the price of 299 UAH was not actually paid, implying the bundle may be a scam.",
+            "evidence": [22, 24, 26, 32, 33, 34]
+          },
+          {
+            "text": "The product is positioned as a “local‑first” app where USD/UAH rates refresh every 5 minutes and calculations happen instantly in the browser.",
+            "evidence": [29]
+          },
+          {
+            "text": "A “free vibe‑code” project description emphasizes that the bundle’s value is limited to the password stored locally.",
+            "evidence": [30]
+          }
+        ]
+      }
+    ],
+    "decisions": [
+      {
+        "text": "Adopt Flutter as the cross‑platform development stack to achieve sub‑week delivery.",
+        "evidence": [12]
+      },
+      {
+        "text": "Design the app as a local‑first web application with client‑side calculations and a USD/UAH exchange rate that updates every 5 minutes.",
+        "evidence": [29]
+      },
+      {
+        "text": "Choose not to purchase a domain at this stage, citing it as an unnecessary expense.",
+        "evidence": [9]
+      }
+    ],
+    "openQuestions": [
+      {
+        "text": "Is the source code publicly accessible enough to locate the stored password?",
+        "evidence": [21]
+      },
+      {
+        "text": "Is there a market of at least ten users willing to pay 299 UAH for the product?",
+        "evidence": [20]
+      }
+    ]
+  },
+  "usage": {
+    "durationMs": 20998.277300000074,
+    "ollamaTotalMs": 20779.40049,
+    "promptEvalCount": 2944,
+    "evalCount": 2119,
+    "doneReason": "stop",
+    "thinkingTextTokenCount": 938,
+    "finalTextTokenCount": 1171
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 5,
+    "claimCount": 21,
+    "decisionCount": 3,
+    "openQuestionCount": 2,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 1,
+    "goldClaimPrecision": 0.38095238095238093,
+    "evidencePrecision": 0.25806451612903225,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 1,
+    "noiseRetention": 0.047619047619047616,
+    "matchedClaimIds": [
+      "tax-reporting.paid-help",
+      "tax-reporting.form-risk",
+      "product.uah-only",
+      "product.web-limitations",
+      "product.fast-delivery-strategy",
+      "product.validate-demand-first",
+      "security.password-in-bundle",
+      "product.creator-response"
+    ],
+    "matchedDecisionIds": [],
+    "matchedOpenQuestionIds": [],
+    "retainedThreadIds": [
+      "tax-reporting",
+      "calculator-product",
+      "calculator-security"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}

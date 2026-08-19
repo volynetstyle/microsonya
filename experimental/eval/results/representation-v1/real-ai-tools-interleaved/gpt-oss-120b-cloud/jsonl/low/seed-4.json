@@ -1,0 +1,42 @@
+{
+  "case": "real-ai-tools-interleaved",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "jsonl",
+  "reasoning": "low",
+  "seed": 4,
+  "inputHash": "3e5fb5efeccd172ee2f1e8a3ef61dfdf2ed0fd33f2162906991e5f91c1a0d9ba",
+  "promptHash": "fd2f5f3cb9ea89d88080a5bc3208c4cd11f653489ff26dc3ae28bacb13e5d025",
+  "promptVersion": "v1",
+  "status": "parse_failure",
+  "raw": "{\n  \"title\": \"Discussion summary\",\n  \"topics\": [\n    {\n      \"id\": \"ai-capabilities\",\n      \"title\": \"AI capabilities and toolkits\",\n      \"claims\": [\n        {\n          \"text\": \"AI systems are not intrinsically intelligent; complex abilities come from toolkits and ready-made solutions.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"No one needs AI to be truly intelligent because people themselves do not understand it.\",\n          \"evidence\": [2]\n        },\n        {\n          \"text\": \"InstinctGPT comparison shows that toolkits can provide a large boost but cannot compensate for lacking basic model abilities.\",\n          \"evidence\": [8]\n        },\n        {\n          \"text\": \"Modern models try to achieve more with fewer parameters and are sometimes trained for specific tasks.\",\n          \"evidence\": [14]\n        }\n      ]\n    },\n    {\n      \"id\": \"bus-anecdote\",\n      \"title\": \"Strange bus incident\",\n      \"claims\": [\n        {\n          \"text\": \"The user experienced a person in a bus emitting gas on a second encounter.\",\n          \"evidence\": [7]\n        }\n      ]\n    },\n    {\n      \"id\": \"diploma-cover-price\",\n      \"title\": \"Diploma cover pricing\",\n      \"claims\": [\n        {\n          \"text\": \"Someone claims they were asked 650 UAH for a diploma cover.\",\n          \"evidence\": [23]\n        },\n        {\n          \"text\": \"Another user reports being charged 30 UAH.\",\n          \"evidence\": [25]\n        },\n        {\n          \"text\": \"One participant paid 47 UAH.\",\n          \"evidence\": [24]\n        }\n      ],\n      \"openQuestions\": [\n        {\n          \"text\": \"How many people were charged for diploma covers?\",\n          \"evidence\": [22]\n        }\n      ]\n    },\n    {\n      \"id\": \"pc-case-mod\",\n      \"title\": \"PC case modification\",\n      \"claims\": [\n        {\n          \"text\": \"A small PC case that fits only one small graphics card can be forced to hold three cards using straps and force.\",\n          \"evidence\": [30]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": [\n    {\n      \"text\": \"How many of us were charged for diploma covers?\",\n      \"evidence\": [22]\n    }\n  ]\n}",
+  "thinking": "Need to extract claims, decisions, open questions. Identify topics.\n\nPossible topics: AI model capabilities, bus anecdote, image link, weather, diploma cover price, PC case mod.\n\nCreate topics with ids.\n\nClaims:\n\n- AI cannot be inherently intelligent; complex tasks rely on toolkits (msg1) (claim)\n- No one needs AI to be smart (msg2)\n- InstinctGPT comparison shows toolkit boost but doesn't compensate model base abilities (msg8)\n- Modern models aim to do more with fewer parameters, sometimes trained for specific tasks (msg14)\n- Bus incident: second time person emits gas (msg7) maybe claim of strange behavior.\n- Price for diploma cover varies (msg22-25 etc)\n\nOpen questions: \"А скільки з нас брали грошей за обкладинки диплому?\" (msg22) is a question.\n\nDecisions none.\n\nConstruct JSON.\n\n",
+  "parsed": null,
+  "parseError": "topics.2: Unrecognized key(s) in object: 'openQuestions'",
+  "usage": {
+    "durationMs": 7781.574800000002,
+    "ollamaTotalMs": 7228.836935,
+    "promptEvalCount": 2136,
+    "evalCount": 706,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": false,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 0,
+    "claimCount": 0,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": null,
+    "weightedClaimRecall": null,
+    "goldClaimPrecision": null,
+    "evidencePrecision": null,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": null,
+    "noiseRetention": null,
+    "matchedClaimIds": [],
+    "retainedThreadIds": [],
+    "triggeredForbiddenIds": []
+  }
+}

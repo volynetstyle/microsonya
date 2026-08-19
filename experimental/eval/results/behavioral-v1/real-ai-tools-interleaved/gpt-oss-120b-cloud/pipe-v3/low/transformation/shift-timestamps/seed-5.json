@@ -1,0 +1,162 @@
+{
+  "case": "real-ai-tools-interleaved",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 5,
+  "transformation": "shift-timestamps",
+  "inputHash": "ba1292dd4e9d1ce414e04535e3d43a6a22960c45452a84697af6010bdbca6d40",
+  "promptHash": "01112655c93f3072cfdc3335f0588b9774e872ed0c481f4412205097e7bc4204",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Chat summary\",\n  \"topics\": [\n    {\n      \"id\": \"ai-toolkit\",\n      \"title\": \"AI capabilities and toolkits\",\n      \"claims\": [\n        {\n          \"text\": \"AI models are not intrinsically intelligent; their complex abilities come from toolkits and ready-made solutions.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"Testing older AI models from 2022‑2023 with modern toolkits like opencode may be limited by small context windows.\",\n          \"evidence\": [3]\n        },\n        {\n          \"text\": \"InstinctGPT comparison showed that a 3 B model with external runtime/tools can outperform a larger model in some tasks, but tools cannot fully compensate for missing core model abilities.\",\n          \"evidence\": [8]\n        },\n        {\n          \"text\": \"Older models were trained on vast data without clear purpose, while newer models try to extract more from fewer parameters and are sometimes fine‑tuned for specific tasks.\",\n          \"evidence\": [14]\n        }\n      ]\n    },\n    {\n      \"id\": \"bus-anecdote\",\n      \"title\": \"Observations in public transport\",\n      \"claims\": [\n        {\n          \"text\": \"The author observed strange behavior of people in a bus, including a person repeatedly blowing gas.\",\n          \"evidence\": [4,5,7]\n        },\n        {\n          \"text\": \"The author describes a person playing piano loudly, listening to metro announcements, then making micro‑sounds toward his mother.\",\n          \"evidence\": [9]\n        }\n      ]\n    },\n    {\n      \"id\": \"weather-poetry\",\n      \"title\": \"Weather impressions\",\n      \"claims\": [\n        {\n          \"text\": \"A participant felt it was especially hot that day.\",\n          \"evidence\": [21]\n        },\n        {\n          \"text\": \"Another described the air feeling like it might rain, but temperature suggesting \\\"rain of lava\\\".\",\n          \"evidence\": [20]\n        },\n        {\n          \"text\": \"A comment about part of the city being under clouds.\",\n          \"evidence\": [15]\n        }\n      ]\n    },\n    {\n      \"id\": \"diploma-cover-price\",\n      \"title\": \"Cost of diploma cover\",\n      \"claims\": [\n        {\n          \"text\": \"Someone claimed to be asked for 650 UAH for the diploma cover.\",\n          \"evidence\": [23]\n        },\n        {\n          \"text\": \"Another mentioned paying 47 UAH.\",\n          \"evidence\": [24]\n        },\n        {\n          \"text\": \"A further reply said 30 UAH.\",\n          \"evidence\": [25]\n        },\n        {\n          \"text\": \"One message suggested skipping the cover because it is just waste paper.\",\n          \"evidence\": [26]\n        },\n        {\n          \"text\": \"Another noted the cover bears the university seal, which is unique.\",\n          \"evidence\": [27]\n        },\n        {\n          \"text\": \"It was argued that nobody will actually take the cover.\",\n          \"evidence\": [28]\n        },\n        {\n          \"text\": \"The cover will be seen only three times: receiving the diploma, photographing it, and later when translating documents.\",\n          \"evidence\": [29]\n        }\n      ]\n    },\n    {\n      \"id\": \"pin-link\",\n      \"title\": \"Shared external link\",\n      \"claims\": [\n        {\n          \"text\": \"A user shared a Pinterest link.\",\n          \"evidence\": [16]\n        },\n        {\n          \"text\": \"Another provided the source attribution.\",\n          \"evidence\": [17]\n        },\n        {\n          \"text\": \"A follow‑up comment hoped the link was still current.\",\n          \"evidence\": [18]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": []\n}",
+  "thinking": "We need JSON. Identify topics. Main substantive: AI toolkits discussion (messages 1,2,3,8,14). Another: bus anecdote (4,5,7). Another: weather poetic (15,20). Another: diploma cover price (22-30). Another: pin link (16-18). Create topics.\n\nClaims with evidence IDs.\n\nDecisions none. Open questions? maybe none. No questions asked.\n\nSo openQuestions empty.\n\nConstruct.\n\n",
+  "parsed": {
+    "title": "Chat summary",
+    "topics": [
+      {
+        "id": "ai-toolkit",
+        "title": "AI capabilities and toolkits",
+        "claims": [
+          {
+            "text": "AI models are not intrinsically intelligent; their complex abilities come from toolkits and ready-made solutions.",
+            "evidence": [1]
+          },
+          {
+            "text": "Testing older AI models from 2022‑2023 with modern toolkits like opencode may be limited by small context windows.",
+            "evidence": [3]
+          },
+          {
+            "text": "InstinctGPT comparison showed that a 3 B model with external runtime/tools can outperform a larger model in some tasks, but tools cannot fully compensate for missing core model abilities.",
+            "evidence": [8]
+          },
+          {
+            "text": "Older models were trained on vast data without clear purpose, while newer models try to extract more from fewer parameters and are sometimes fine‑tuned for specific tasks.",
+            "evidence": [14]
+          }
+        ]
+      },
+      {
+        "id": "bus-anecdote",
+        "title": "Observations in public transport",
+        "claims": [
+          {
+            "text": "The author observed strange behavior of people in a bus, including a person repeatedly blowing gas.",
+            "evidence": [4, 5, 7]
+          },
+          {
+            "text": "The author describes a person playing piano loudly, listening to metro announcements, then making micro‑sounds toward his mother.",
+            "evidence": [9]
+          }
+        ]
+      },
+      {
+        "id": "weather-poetry",
+        "title": "Weather impressions",
+        "claims": [
+          {
+            "text": "A participant felt it was especially hot that day.",
+            "evidence": [21]
+          },
+          {
+            "text": "Another described the air feeling like it might rain, but temperature suggesting \"rain of lava\".",
+            "evidence": [20]
+          },
+          {
+            "text": "A comment about part of the city being under clouds.",
+            "evidence": [15]
+          }
+        ]
+      },
+      {
+        "id": "diploma-cover-price",
+        "title": "Cost of diploma cover",
+        "claims": [
+          {
+            "text": "Someone claimed to be asked for 650 UAH for the diploma cover.",
+            "evidence": [23]
+          },
+          {
+            "text": "Another mentioned paying 47 UAH.",
+            "evidence": [24]
+          },
+          {
+            "text": "A further reply said 30 UAH.",
+            "evidence": [25]
+          },
+          {
+            "text": "One message suggested skipping the cover because it is just waste paper.",
+            "evidence": [26]
+          },
+          {
+            "text": "Another noted the cover bears the university seal, which is unique.",
+            "evidence": [27]
+          },
+          {
+            "text": "It was argued that nobody will actually take the cover.",
+            "evidence": [28]
+          },
+          {
+            "text": "The cover will be seen only three times: receiving the diploma, photographing it, and later when translating documents.",
+            "evidence": [29]
+          }
+        ]
+      },
+      {
+        "id": "pin-link",
+        "title": "Shared external link",
+        "claims": [
+          {
+            "text": "A user shared a Pinterest link.",
+            "evidence": [16]
+          },
+          {
+            "text": "Another provided the source attribution.",
+            "evidence": [17]
+          },
+          {
+            "text": "A follow‑up comment hoped the link was still current.",
+            "evidence": [18]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": []
+  },
+  "usage": {
+    "durationMs": 11231.872299999988,
+    "ollamaTotalMs": 11032.343863,
+    "promptEvalCount": 2165,
+    "evalCount": 927,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 5,
+    "claimCount": 19,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 0.9411764705882353,
+    "goldClaimPrecision": 0.3684210526315789,
+    "evidencePrecision": 0.42857142857142855,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0.3157894736842105,
+    "matchedClaimIds": [
+      "bus-passenger.repeated-encounter",
+      "ai-tooling.capability-view",
+      "ai-tooling.old-model-experiment",
+      "ai-tooling.instinctgpt-result",
+      "ai-tooling.model-comparison",
+      "diploma-cover.prices",
+      "diploma-cover.low-value"
+    ],
+    "retainedThreadIds": ["bus-passenger", "ai-tooling", "diploma-cover"],
+    "triggeredForbiddenIds": []
+  }
+}

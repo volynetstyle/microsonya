@@ -1,0 +1,148 @@
+{
+  "case": "real-ai-tools-interleaved",
+  "model": "gpt-oss:120b-cloud",
+  "representation": "pipe-v3",
+  "reasoning": "low",
+  "seed": 1,
+  "transformation": "identity-replay",
+  "inputHash": "3e5fb5efeccd172ee2f1e8a3ef61dfdf2ed0fd33f2162906991e5f91c1a0d9ba",
+  "promptHash": "37cf3f4e79d184fd2b0f7efef7545a92b54b985f38a2a5b261ece3d444236cdf",
+  "promptVersion": "v1",
+  "status": "ok",
+  "raw": "{\n  \"title\": \"Telegram chat summary\",\n  \"topics\": [\n    {\n      \"id\": \"ai-capabilities\",\n      \"title\": \"AI capabilities and toolkits\",\n      \"claims\": [\n        {\n          \"text\": \"AI models are not inherently intelligent; complex abilities come from toolkits and example solutions.\",\n          \"evidence\": [1]\n        },\n        {\n          \"text\": \"Testing older AI models from 2022‑2023 with modern toolkits like opencode may be limited by small context windows.\",\n          \"evidence\": [3]\n        },\n        {\n          \"text\": \"InstinctGPT comparison shows that toolkits can boost performance but cannot compensate for fundamental model limitations.\",\n          \"evidence\": [8]\n        },\n        {\n          \"text\": \"Modern models focus on extracting more from fewer parameters and may be fine‑tuned for specific tasks.\",\n          \"evidence\": [14]\n        }\n      ]\n    },\n    {\n      \"id\": \"bus-oddities\",\n      \"title\": \"Strange behavior in public transport\",\n      \"claims\": [\n        {\n          \"text\": \"People sometimes behave oddly on public transport.\",\n          \"evidence\": [4]\n        },\n        {\n          \"text\": \"User observed a person playing piano at full volume, then listening to a metro announcement, then making micro‑sounds toward a mother.\",\n          \"evidence\": [7,9]\n        }\n      ]\n    },\n    {\n      \"id\": \"weather-feeling\",\n      \"title\": \"Current weather impressions\",\n      \"claims\": [\n        {\n          \"text\": \"It was especially hot today.\",\n          \"evidence\": [21]\n        },\n        {\n          \"text\": \"There is a feeling of impending rain, possibly like lava based on temperature perception.\",\n          \"evidence\": [20]\n        }\n      ]\n    },\n    {\n      \"id\": \"diploma-cover-pricing\",\n      \"title\": \"Costs of diploma cover\",\n      \"claims\": [\n        {\n          \"text\": \"Bogdan charges 650 UAH for a diploma cover.\",\n          \"evidence\": [23]\n        },\n        {\n          \"text\": \"Another source mentions a price of 30 UAH.\",\n          \"evidence\": [25]\n        },\n        {\n          \"text\": \"Someone suggests skipping the cover because it's just paper.\",\n          \"evidence\": [26]\n        },\n        {\n          \"text\": \"A comment states that no one will take the cover.\",\n          \"evidence\": [28]\n        },\n        {\n          \"text\": \"The cover is only viewed a few times: receiving the diploma, photographing it, and later when translating documents.\",\n          \"evidence\": [29]\n        }\n      ]\n    },\n    {\n      \"id\": \"pc-case-modification\",\n      \"title\": \"Fitting multiple GPUs in a small PC case\",\n      \"claims\": [\n        {\n          \"text\": \"A small PC case that normally fits one small GPU can be forced to hold three using straps and force.\",\n          \"evidence\": [30]\n        }\n      ]\n    }\n  ],\n  \"decisions\": [],\n  \"openQuestions\": []\n}",
+  "thinking": "We need to produce JSON summary. Identify topics: AI capabilities, bus anecdote, weather, diploma cover price, small PC case hack. Claims with evidence IDs.\n\nDecisions none. Open questions? None obvious. Perhaps no unresolved question. So empty decisions and openQuestions.\n\nCreate topics:\n\ntopic ai-capabilities: claim about AI not being smart apriori and toolkits provide abilities. evidence #1. Also claim about old models limited context #3. Also InstinctGPT comparison #8. Also metric active parameters #14.\n\ntopic bus-oddities: claim weird people in public transport #4, #5, #7 describing person playing piano etc. evidence.\n\ntopic weather: claim it's hot #21, feeling rain of lava #20.\n\ntopic diploma-cover: claim price 650 from Bogdan #23, 30 UAH #25, suggestion to skip cover #26, comment nobody takes cover #28, comment about usefulness #29.\n\ntopic pc-case: claim can fit 3 small GPUs using straps #30.\n\nNow format.",
+  "parsed": {
+    "title": "Telegram chat summary",
+    "topics": [
+      {
+        "id": "ai-capabilities",
+        "title": "AI capabilities and toolkits",
+        "claims": [
+          {
+            "text": "AI models are not inherently intelligent; complex abilities come from toolkits and example solutions.",
+            "evidence": [1]
+          },
+          {
+            "text": "Testing older AI models from 2022‑2023 with modern toolkits like opencode may be limited by small context windows.",
+            "evidence": [3]
+          },
+          {
+            "text": "InstinctGPT comparison shows that toolkits can boost performance but cannot compensate for fundamental model limitations.",
+            "evidence": [8]
+          },
+          {
+            "text": "Modern models focus on extracting more from fewer parameters and may be fine‑tuned for specific tasks.",
+            "evidence": [14]
+          }
+        ]
+      },
+      {
+        "id": "bus-oddities",
+        "title": "Strange behavior in public transport",
+        "claims": [
+          {
+            "text": "People sometimes behave oddly on public transport.",
+            "evidence": [4]
+          },
+          {
+            "text": "User observed a person playing piano at full volume, then listening to a metro announcement, then making micro‑sounds toward a mother.",
+            "evidence": [7, 9]
+          }
+        ]
+      },
+      {
+        "id": "weather-feeling",
+        "title": "Current weather impressions",
+        "claims": [
+          {
+            "text": "It was especially hot today.",
+            "evidence": [21]
+          },
+          {
+            "text": "There is a feeling of impending rain, possibly like lava based on temperature perception.",
+            "evidence": [20]
+          }
+        ]
+      },
+      {
+        "id": "diploma-cover-pricing",
+        "title": "Costs of diploma cover",
+        "claims": [
+          {
+            "text": "Bogdan charges 650 UAH for a diploma cover.",
+            "evidence": [23]
+          },
+          {
+            "text": "Another source mentions a price of 30 UAH.",
+            "evidence": [25]
+          },
+          {
+            "text": "Someone suggests skipping the cover because it's just paper.",
+            "evidence": [26]
+          },
+          {
+            "text": "A comment states that no one will take the cover.",
+            "evidence": [28]
+          },
+          {
+            "text": "The cover is only viewed a few times: receiving the diploma, photographing it, and later when translating documents.",
+            "evidence": [29]
+          }
+        ]
+      },
+      {
+        "id": "pc-case-modification",
+        "title": "Fitting multiple GPUs in a small PC case",
+        "claims": [
+          {
+            "text": "A small PC case that normally fits one small GPU can be forced to hold three using straps and force.",
+            "evidence": [30]
+          }
+        ]
+      }
+    ],
+    "decisions": [],
+    "openQuestions": []
+  },
+  "usage": {
+    "durationMs": 12687.2604,
+    "ollamaTotalMs": 12467.228605,
+    "promptEvalCount": 2165,
+    "evalCount": 877,
+    "doneReason": "stop"
+  },
+  "metrics": {
+    "validJson": true,
+    "schemaValid": true,
+    "unknownEvidenceIds": 0,
+    "duplicateEvidenceIds": 0,
+    "topicCount": 5,
+    "claimCount": 14,
+    "decisionCount": 0,
+    "openQuestionCount": 0,
+    "majorThreadRecall": 1,
+    "weightedClaimRecall": 1,
+    "goldClaimPrecision": 0.5714285714285714,
+    "evidencePrecision": 0.6,
+    "forbiddenRate": 0,
+    "falseOpenQuestionRate": 0,
+    "noiseRetention": 0.14285714285714285,
+    "matchedClaimIds": [
+      "bus-passenger.repeated-encounter",
+      "ai-tooling.capability-view",
+      "ai-tooling.old-model-experiment",
+      "ai-tooling.instinctgpt-result",
+      "ai-tooling.model-comparison",
+      "diploma-cover.prices",
+      "diploma-cover.low-value",
+      "pc-case.three-gpus"
+    ],
+    "retainedThreadIds": [
+      "bus-passenger",
+      "ai-tooling",
+      "diploma-cover",
+      "pc-case"
+    ],
+    "triggeredForbiddenIds": []
+  }
+}
