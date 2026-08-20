@@ -4,138 +4,92 @@ export type {
   TelegramThemeParams,
   TelegramWebApp,
 } from "./types";
-import type {
-  TelegramSafeAreaInset,
-  TelegramThemeParams,
-  TelegramWebApp,
-} from "./types";
+import type { TelegramWebApp } from "./types";
 
 import { observeClientEnvironment } from "./environment";
 
-// Telegram theme param -> our CSS custom property. Anything not sent by the
-// current client (older apps omit newer keys) just keeps its CSS fallback.
-const THEME_PARAM_TO_CSS_VAR: Partial<
-  Record<keyof TelegramThemeParams, string>
-> = {
-  bg_color: "--tg-bg",
-  secondary_bg_color: "--tg-secondary-bg",
-  section_bg_color: "--tg-section-bg",
-  text_color: "--tg-text",
-  hint_color: "--tg-hint",
-  subtitle_text_color: "--tg-subtitle",
-  link_color: "--tg-link",
-  button_color: "--tg-button",
-  button_text_color: "--tg-button-text",
-  accent_text_color: "--tg-accent",
-  destructive_text_color: "--tg-destructive",
-};
-
-function applyThemeParams(
-  root: HTMLElement,
-  themeParams: TelegramThemeParams,
-): void {
-  for (const param of Object.keys(THEME_PARAM_TO_CSS_VAR) as Array<
-    keyof TelegramThemeParams
-  >) {
-    const cssVar = THEME_PARAM_TO_CSS_VAR[param];
-    const value = themeParams[param];
-    if (value && cssVar) root.style.setProperty(cssVar, value);
-  }
-}
-
-function applySafeArea(root: HTMLElement, webApp: TelegramWebApp): void {
-  // safeAreaInset: the raw device notch/home-indicator/rounded-corner area
-  // (matters most on iOS; Android/Desktop are usually all zeros).
-  // contentSafeAreaInset: additionally excludes Telegram's own chrome
-  // (its header bar, the expand handle) — what content padding should
-  // actually use, per Telegram's Mini Apps docs.
-  const sets: Array<[string, TelegramSafeAreaInset]> = [
-    ["--tg-safe-area", webApp.safeAreaInset],
-    ["--tg-content-safe-area", webApp.contentSafeAreaInset],
-  ];
-  for (const [prefix, inset] of sets) {
-    root.style.setProperty(`${prefix}-top`, `${inset.top}px`);
-    root.style.setProperty(`${prefix}-bottom`, `${inset.bottom}px`);
-    root.style.setProperty(`${prefix}-left`, `${inset.left}px`);
-    root.style.setProperty(`${prefix}-right`, `${inset.right}px`);
-  }
-}
-
-function applyViewport(root: HTMLElement, webApp: TelegramWebApp): void {
-  // Telegram's WebView doesn't always agree with the browser's own 100vh
-  // (older Android in particular); these give the real usable height.
-  // viewportStableHeight ignores the on-screen keyboard, so layout doesn't
-  // jump for the (currently keyboard-less) screens in this app.
-  root.style.setProperty("--tg-viewport-height", `${webApp.viewportHeight}px`);
-  root.style.setProperty(
-    "--tg-viewport-stable-height",
-    `${webApp.viewportStableHeight}px`,
-  );
-}
-
 /**
- * Wires the app's CSS variables to the host Telegram client's *live* theme,
- * safe area, and viewport height changes (the user flips their Telegram
- * theme, rotates, the keyboard opens), and normalizes a few behaviors that
- * otherwise differ across iOS/Android/Desktop/macOS.
+ * Connects Telegram host state and native chrome to the web UI.
  *
- * The *initial* sync — needed before first paint to avoid a flash of the
- * wrong theme, so it can't wait for this module to load and run — already
- * happened synchronously in <head>; see theme-sync.inline.js. This call
- * re-applies the same values (cheap, and correct either way if the two
- * ever raced) and adds the ongoing event listeners that file can't own
- * (it's plain inlined JS, gone once this module takes over). ready() and
- * expand() are likewise already called there — calling them again here
- * would be redundant, not incorrect, so this intentionally doesn't repeat
- * them.
+ * Theme, viewport and safe-area values are consumed through the official CSS
+ * variables installed and updated by `telegram-web-app.js`. Mirroring those
+ * values into inline styles would duplicate SDK state and create a second
+ * synchronization path.
  *
- * A no-op outside Telegram (window.Telegram.WebApp is only injected by its
- * in-app browser) — the CSS fallbacks in App.css (prefers-color-scheme,
- * env(safe-area-*), 100dvh) cover that case instead.
+ * The synchronous head script applies theme and platform before first paint;
+ * see `prepaint.inline.js`. The complete deferred SDK owns runtime updates
+ * and native APIs. Outside Telegram this only applies the browser profile.
+ *
+ * @see https://core.telegram.org/bots/webapps#initializing-mini-apps
  */
 export function initTelegram(): () => void {
-  const webApp = window.Telegram?.WebApp;
   const root = document.documentElement;
+  let stopRuntime: (() => void) | undefined;
+
+  // telegram-web-app.js also creates an API object in an ordinary browser.
+  // The prepaint launch params, not object existence, identify the real host.
+  if (root.dataset.host !== "telegram") {
+    return observeClientEnvironment(root, undefined);
+  }
+
+  const connect = () => {
+    const webApp = window.Telegram?.WebApp;
+    if (!webApp || stopRuntime) return;
+    stopRuntime = connectTelegramRuntime(root, webApp);
+  };
+
+  connect();
+
+  // A cached local module may execute before the deferred network SDK. The
+  // defer script is guaranteed to finish before window.load, so retry there.
+  if (!stopRuntime) window.addEventListener("load", connect, { once: true });
+
+  return () => {
+    window.removeEventListener("load", connect);
+    stopRuntime?.();
+  };
+}
+
+function connectTelegramRuntime(
+  root: HTMLElement,
+  webApp: TelegramWebApp,
+): () => void {
   const stopEnvironment = observeClientEnvironment(root, webApp);
 
-  if (!webApp) return stopEnvironment;
+  // These host events do not participate in constructing the initial CSS
+  // theme, so they can wait for the deferred official SDK.
+  webApp.ready();
+  webApp.expand();
 
-  const syncTheme = () => {
+  const syncHost = () => {
     root.dataset.tgColorScheme = webApp.colorScheme;
     root.style.colorScheme = webApp.colorScheme;
-    applyThemeParams(root, webApp.themeParams);
-    // Keeps Telegram's own header/background chrome the same color as ours
-    // so there's no visible seam between native UI and app content — every
-    // platform that implements these applies it identically.
+
     const bg = webApp.themeParams.bg_color;
-    const sectionBg = webApp.themeParams.section_bg_color ?? bg;
-    if (sectionBg) webApp.setHeaderColor?.(sectionBg);
-    if (bg) webApp.setBackgroundColor?.(bg);
+    const header =
+      webApp.themeParams.header_bg_color ??
+      webApp.themeParams.section_bg_color ??
+      bg;
+    const bottom = webApp.themeParams.bottom_bar_bg_color ?? bg;
+
+    if (header) webApp.setHeaderColor(header);
+    if (bg) webApp.setBackgroundColor(bg);
+    if (bottom && webApp.isVersionAtLeast("7.10")) {
+      webApp.setBottomBarColor(bottom);
+    }
   };
-  const syncSafeArea = () => applySafeArea(root, webApp);
-  const syncViewport = () => applyViewport(root, webApp);
 
-  syncTheme();
-  syncSafeArea();
-  syncViewport();
+  syncHost();
+  webApp.onEvent("themeChanged", syncHost);
 
-  webApp.onEvent("themeChanged", syncTheme);
-  webApp.onEvent("safeAreaChanged", syncSafeArea);
-  webApp.onEvent("contentSafeAreaChanged", syncSafeArea);
-  webApp.onEvent("viewportChanged", syncViewport);
-
-  // A long scrollable list (this app's main content) fighting Telegram's
-  // own swipe-to-close gesture is an iOS/Android-specific papercut this
-  // avoids; desktop/web clients simply don't have the gesture.
+  // The long scrollable summary list conflicts with Telegram's own
+  // swipe-to-close gesture on mobile clients.
   if (webApp.isVersionAtLeast("7.7")) {
-    webApp.disableVerticalSwipes?.();
+    webApp.disableVerticalSwipes();
   }
 
   return () => {
     stopEnvironment();
-    webApp.offEvent("themeChanged", syncTheme);
-    webApp.offEvent("safeAreaChanged", syncSafeArea);
-    webApp.offEvent("contentSafeAreaChanged", syncSafeArea);
-    webApp.offEvent("viewportChanged", syncViewport);
+    webApp.offEvent("themeChanged", syncHost);
   };
 }

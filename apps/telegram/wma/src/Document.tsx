@@ -1,6 +1,6 @@
-import type { ParentProps } from 'solid-js';
-import { HydrationScript } from '@solidjs/web';
-import themeSyncScript from './telegram/theme-sync.inline.js?raw';
+import type { ParentProps } from "solid-js";
+import { HydrationScript } from "@solidjs/web";
+import prepaintScript from "./telegram/prepaint.inline.js?raw";
 
 // The document shell — the new index.html: picked up by the src/Document.*
 // convention, it wraps the app in the plugin's generated entries and must
@@ -17,19 +17,14 @@ export default function Document(props: ParentProps) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
         <title>Microsonya</title>
+        {/* Establish theme and platform directly from Telegram launch params;
+            no network request is allowed to block the first paint. */}
+        <script>{prepaintScript}</script>
         <link rel="preconnect" href="https://telegram.org" />
-        {/* Telegram Mini Apps SDK: exposes window.Telegram.WebApp. Loaded
-            blocking (no async/defer) — this and the inline script right
-            after it must both run, in order, before anything paints, or
-            the skeleton below flashes the CSS fallback theme before
-            snapping to Telegram's real colors. */}
-        <script src="https://telegram.org/js/telegram-web-app.js" />
-        {/* Applies theme/safe-area/viewport synchronously and calls
-            ready()/expand() as early as physically possible — see
-            src/telegram/theme-sync.inline.js. Ongoing updates (the app is
-            already open and the user flips a theme) are handled later by
-            initTelegram() in src/telegram/webapp.ts. */}
-        <script>{themeSyncScript}</script>
+        {/* The complete official API remains intact for runtime, but is no
+            longer parser-blocking. This defer script precedes the generated
+            application entry and therefore runs before initTelegram(). */}
+        <script defer src="https://telegram.org/js/telegram-web-app.js" />
         <HydrationScript />
       </head>
       <body>
@@ -51,8 +46,14 @@ export default function Document(props: ParentProps) {
               <div class="skeleton-card">
                 <div class="skeleton-line" style="width: 70%; height: 1rem" />
                 <div class="skeleton-line" style="width: 45%; height: 0.8rem" />
-                <div class="skeleton-line" style="width: 90%; height: 0.85rem" />
-                <div class="skeleton-line" style="width: 60%; height: 0.85rem" />
+                <div
+                  class="skeleton-line"
+                  style="width: 90%; height: 0.85rem"
+                />
+                <div
+                  class="skeleton-line"
+                  style="width: 60%; height: 0.85rem"
+                />
               </div>
               <div class="skeleton-card">
                 <div class="skeleton-line" style="width: 40%; height: 1rem" />

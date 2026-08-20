@@ -9,6 +9,7 @@ const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const isWindows = process.platform === "win32";
 
 const config = {
+  wmaHost: "127.0.0.1",
   wmaPort: 3000,
   wmaTimeout: 30_000,
   tunnelTimeout: 30_000,
@@ -33,11 +34,7 @@ function spawnProcess(command, args, options = {}) {
   };
 
   const child = isWindows
-    ? spawn(
-        "cmd.exe",
-        ["/d", "/s", "/c", command, ...args],
-        spawnOptions,
-      )
+    ? spawn("cmd.exe", ["/d", "/s", "/c", command, ...args], spawnOptions)
     : spawn(command, args, spawnOptions);
 
   children.add(child);
@@ -59,11 +56,9 @@ function killProcess(child) {
 
   try {
     if (isWindows) {
-      spawnSync(
-        "taskkill",
-        ["/pid", String(child.pid), "/t", "/f"],
-        { stdio: "ignore" },
-      );
+      spawnSync("taskkill", ["/pid", String(child.pid), "/t", "/f"], {
+        stdio: "ignore",
+      });
     } else {
       // Negative PID = kill the whole process group.
       process.kill(-child.pid, "SIGTERM");
@@ -235,6 +230,8 @@ function startWma() {
       "--",
       "--port",
       String(config.wmaPort),
+      "--host",
+      config.wmaHost,
       "--strictPort",
     ],
     {
@@ -246,11 +243,7 @@ function startWma() {
 function startTunnel() {
   return spawnProcess(
     "cloudflared",
-    [
-      "tunnel",
-      "--url",
-      `http://localhost:${config.wmaPort}`,
-    ],
+    ["tunnel", "--url", `http://${config.wmaHost}:${config.wmaPort}`],
     {
       stdio: ["ignore", "pipe", "pipe"],
     },
@@ -258,19 +251,15 @@ function startTunnel() {
 }
 
 function startBot(wmaUrl) {
-  return spawnProcess(
-    "pnpm",
-    ["--filter", "@microsonya/telegram-bot", "dev"],
-    {
-      stdio: "inherit",
-      env: {
-        ...process.env,
-        STORAGE_MODE: "memory",
-        MODELS_MODE: "disabled",
-        WMA_URL: wmaUrl,
-      },
+  return spawnProcess("pnpm", ["--filter", "@microsonya/telegram-bot", "dev"], {
+    stdio: "inherit",
+    env: {
+      ...process.env,
+      STORAGE_MODE: "memory",
+      MODELS_MODE: "disabled",
+      WMA_URL: wmaUrl,
     },
-  );
+  });
 }
 
 // -----------------------------------------------------------------------------
@@ -324,12 +313,13 @@ macOS:
   await waitForProcessOr(
     wma,
     waitForPort(config.wmaPort, {
+      host: config.wmaHost,
       timeout: config.wmaTimeout,
     }),
     "WMA",
   );
 
-  console.log(`    WMA ready on :${config.wmaPort}`);
+  console.log(`    WMA ready on ${config.wmaHost}:${config.wmaPort}`);
 
   // From this point onward, unexpected WMA exit is fatal.
   supervise(wma, "WMA");
@@ -370,11 +360,7 @@ try {
     shutdown(exitCode);
   }
 } catch (error) {
-  console.error(
-    error instanceof Error
-      ? error.message
-      : String(error),
-  );
+  console.error(error instanceof Error ? error.message : String(error));
 
   shutdown(1);
 }

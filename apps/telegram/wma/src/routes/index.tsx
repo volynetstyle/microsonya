@@ -3,11 +3,18 @@ import { Title } from "@solidjs/meta";
 import { mockChat } from "../mock/chat";
 import TopicCard from "../components/TopicCard";
 import * as Accordion from "../shared/accordion";
+import { getTelegramChatTitle } from "../telegram/chat-context";
 
 export default function Home() {
   const [expandedTopicId, setExpandedTopicId] = createSignal<string | null>(
     mockChat.topics[0]?.id ?? null,
   );
+  const telegramChatTitle = () =>
+    getTelegramChatTitle(
+      typeof window === "undefined" ? undefined : window.Telegram?.WebApp,
+    );
+  const pageTitle = () => telegramChatTitle() ?? "Microsonya";
+  const visibleChatTitle = () => telegramChatTitle() ?? mockChat.chatName;
 
   // Dismiss Document.tsx's static pre-hydration skeleton now that this
   // route's real content has actually rendered — one rAF late, so the
@@ -25,10 +32,10 @@ export default function Home() {
 
   return (
     <main class="screen">
-      <Title>Microsonya</Title>
+      <Title>{pageTitle()}</Title>
       <header class="chat-header">
         <span class="chat-title">
-          {mockChat.chatName} · {mockChat.date}
+          {visibleChatTitle()} · {mockChat.date}
         </span>
         <span class="chat-total">{mockChat.totalMessages} повідомлень</span>
       </header>
