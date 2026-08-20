@@ -1,27 +1,32 @@
-import { createEffect, Loading } from 'solid-js';
-import { Router } from './router';
-import { initTelegram } from './telegram/webapp';
-import './App.css';
+import { onSettled } from "solid-js";
+import Home from "./routes";
+import "./App.css";
 
-// The app root: the router lives here. A single screen for now (see
-// src/routes/index.tsx) — more routes come back once there's a reason to
-// navigate away from it.
 export default function App() {
-  // solid-js 2.0 dropped onMount as a separate export in favor of
-  // createEffect's compute/effect split — an empty (non-tracking) compute
-  // phase makes the effect phase run exactly once, same as onMount did.
-  createEffect(
-    () => {},
-    () => initTelegram(),
-  );
+  /**
+   * Solid 2 runs `onSettled` after initial reactive activity completes. The
+   * real screen is then in the DOM, so the prepaint skeleton can be removed
+   * without waiting another frame. Telegram integration is loaded afterwards
+   * and cannot delay the first useful content.
+   *
+   * @see https://github.com/solidjs/solid/discussions/2596
+   */
+  onSettled(() => {
+    document.getElementById("app-skeleton")?.remove();
 
-  return (
-    <Router>
-      {/* No visible fallback: the static #app-skeleton in Document.tsx
-          already covers this gap (and started covering it before this
-          bundle even loaded), so a second loading state here would just
-          flash behind/after it. */}
-      {(props) => <Loading fallback={null}>{props.children}</Loading>}
-    </Router>
-  );
+    let disposed = false;
+    let stopTelegram: (() => void) | undefined;
+
+    void import("./api/webapp").then(({ initTelegram }) => {
+      if (disposed) return;
+      stopTelegram = initTelegram();
+    });
+
+    return () => {
+      disposed = true;
+      stopTelegram?.();
+    };
+  });
+
+  return <Home />;
 }

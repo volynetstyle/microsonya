@@ -6,6 +6,7 @@ export type {
 } from "./types";
 import type { TelegramWebApp } from "./types";
 
+import { getTelegramChatTitle } from "./chat-context";
 import { observeClientEnvironment } from "./environment";
 
 /**
@@ -55,6 +56,9 @@ function connectTelegramRuntime(
   webApp: TelegramWebApp,
 ): () => void {
   const stopEnvironment = observeClientEnvironment(root, webApp);
+  const chatTitle = getTelegramChatTitle(webApp);
+
+  if (chatTitle) document.title = chatTitle;
 
   // These host events do not participate in constructing the initial CSS
   // theme, so they can wait for the deferred official SDK.

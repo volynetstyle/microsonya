@@ -119,11 +119,6 @@ function hasValue(source: AccordionRootProps["value"], value: string): boolean {
   return false;
 }
 
-function toValues(value: AccordionRootProps["value"]): readonly string[] {
-  if (Array.isArray(value)) return value;
-  return typeof value === "string" ? [value] : [];
-}
-
 function appendValue(
   values: readonly string[],
   value: string,

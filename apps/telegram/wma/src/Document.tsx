@@ -1,6 +1,6 @@
 import type { ParentProps } from "solid-js";
 import { HydrationScript } from "@solidjs/web";
-import prepaintScript from "./telegram/prepaint.inline.js?raw";
+import prepaintScript from "./api/prepaint.inline.js?raw";
 
 // The document shell — the new index.html: picked up by the src/Document.*
 // convention, it wraps the app in the plugin's generated entries and must
@@ -12,6 +12,19 @@ import prepaintScript from "./telegram/prepaint.inline.js?raw";
 export default function Document(props: ParentProps) {
   return (
     <html lang="uk">
+      {/* HTML download ->
+          parse <head> ->
+          prepaint inline executes ->
+          Telegram SDK starts downloading (defer, non-blocking) ->
+          parse <body> + skeleton ->
+          first paint ->
+          HTML parsing complete ->
+          Telegram SDK executes ->
+          app entry executes ->
+          hydrate/mount ->
+          initTelegram() ->
+          remove skeleton
+      */}
       <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />

@@ -1,4 +1,3 @@
-import { For } from "solid-js";
 import type { Topic } from "../mock/chat";
 import * as Accordion from "../shared/accordion";
 import MomentItem from "./MomentItem";
@@ -28,9 +27,9 @@ export default function TopicCard(props: { topic: Topic }) {
 
       <Accordion.Content>
         <ul class="moment-list">
-          <For each={props.topic.moments}>
-            {(moment) => <MomentItem moment={moment} />}
-          </For>
+          {props.topic.moments.map((moment) => (
+            <MomentItem moment={moment} />
+          ))}
         </ul>
       </Accordion.Content>
     </Accordion.Item>
