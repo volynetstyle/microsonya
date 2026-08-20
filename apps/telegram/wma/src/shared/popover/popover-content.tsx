@@ -2,6 +2,7 @@ import { createEffect, omit, onSettled } from "solid-js";
 import type { ParentProps } from "solid-js";
 import type { JSX } from "@solidjs/web";
 import { usePopover } from "./popover-context";
+import { placementAxes, resolvePopoverPosition } from "./popover-position";
 
 export type PopoverContentProps = ParentProps<
   Omit<
@@ -87,10 +88,14 @@ function installPositionFallback(
   if (
     typeof CSS !== "undefined" &&
     typeof CSS.supports === "function" &&
-    CSS.supports("position-area: bottom")
+    CSS.supports("position-area: bottom") &&
+    CSS.supports("container-type: anchored")
   ) {
+    positioner.dataset.positioning = "anchor";
     return () => {};
   }
+
+  positioner.dataset.positioning = "fallback";
 
   const place = () => {
     if (positioner.hidden || !positioner.matches(":popover-open")) return;
@@ -102,20 +107,21 @@ function installPositionFallback(
     const gap = 7;
     const margin = 6;
     const placement = positioner.dataset.placement ?? "bottom-end";
-    const above = placement.startsWith("top");
-    const start = placement.endsWith("start");
+    const preferred = placementAxes(
+      placement as Parameters<typeof placementAxes>[0],
+    );
+    const resolved = resolvePopoverPosition(
+      anchor,
+      panel,
+      preferred,
+      { width: innerWidth, height: innerHeight },
+      gap,
+      margin,
+    );
 
-    let top = above ? anchor.top - panel.height - gap : anchor.bottom + gap;
-    let left = start ? anchor.left : anchor.right - panel.width;
+    positioner.dataset.resolvedPlacement = `${resolved.axes.above ? "top" : "bottom"}-${resolved.axes.inlineEnd ? "end" : "start"}`;
 
-    if (top + panel.height > innerHeight - margin) {
-      top = anchor.top - panel.height - gap;
-    }
-    if (top < margin) top = anchor.bottom + gap;
-
-    left = Math.min(innerWidth - panel.width - margin, Math.max(margin, left));
-
-    positioner.style.inset = `${Math.max(margin, top)}px auto auto ${left}px`;
+    positioner.style.inset = `${resolved.top}px auto auto ${resolved.left}px`;
   };
 
   const onToggle = () => requestAnimationFrame(place);

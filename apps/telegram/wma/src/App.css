@@ -321,6 +321,7 @@ body {
 .topic-summary {
   display: block;
   width: 100%;
+  box-sizing: border-box;
   background: none;
   border: none;
   border-top: 1px solid var(--separator);
@@ -331,8 +332,36 @@ body {
   cursor: pointer;
 }
 
-.topic-card[open] .topic-summary {
-  display: none;
+/* TopicCard-specific collapse. `display: none` used to remove the preview in
+   the native toggle tick, before Accordion's 200ms content transition began;
+   that split the layout change into two phases and made the summary/card jump.
+   Unsupported engines keep the summary visible instead of falling back to a
+   discontinuous reflow. */
+@supports (interpolate-size: allow-keywords) {
+  .topic-trigger {
+    interpolate-size: allow-keywords;
+  }
+
+  .topic-summary {
+    height: auto;
+    overflow: clip;
+    opacity: 1;
+    transition:
+      height var(--accordion-duration) var(--accordion-easing),
+      opacity var(--accordion-opacity-in-duration) linear,
+      border-color var(--accordion-opacity-in-duration) linear;
+  }
+
+  .topic-card[open] .topic-summary {
+    height: 0;
+    opacity: 0;
+    border-color: transparent;
+    pointer-events: none;
+    transition:
+      height var(--accordion-duration) var(--accordion-easing),
+      opacity var(--accordion-opacity-out-duration) linear,
+      border-color var(--accordion-opacity-out-duration) linear;
+  }
 }
 
 .topic-preview {

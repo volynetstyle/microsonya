@@ -13,20 +13,23 @@ export interface AccordionRootProps extends ParentProps {
 export function AccordionRoot(props: AccordionRootProps) {
   const groupName = `accordion-${createUniqueId()}`;
 
-  const [nativeSingle, setNativeSingle] = createSignal<string | null>(
-    typeof props.defaultValue === "string"
-      ? props.defaultValue
-      : Array.isArray(props.defaultValue)
-        ? (props.defaultValue[0] ?? null)
-        : null,
-  );
-
-  const [nativeMultiple, setNativeMultiple] = createSignal<readonly string[]>(
-    Array.isArray(props.defaultValue)
-      ? props.defaultValue
+  // X is the only logical state. Single mode stores one value (or none),
+  // while multiple mode stores its exact subset. Creating one signal instead
+  // of parallel single/multiple signals keeps the runtime model minimal.
+  const [nativeValue, setNativeValue] = createSignal<
+    string | readonly string[] | null
+  >(
+    props.multiple
+      ? Array.isArray(props.defaultValue)
+        ? props.defaultValue
+        : typeof props.defaultValue === "string"
+          ? [props.defaultValue]
+          : EMPTY_VALUES
       : typeof props.defaultValue === "string"
-        ? [props.defaultValue]
-        : EMPTY_VALUES,
+        ? props.defaultValue
+        : Array.isArray(props.defaultValue)
+          ? (props.defaultValue[0] ?? null)
+          : null,
   );
 
   const isControlled = () => props.value !== undefined;
@@ -46,7 +49,8 @@ export function AccordionRoot(props: AccordionRootProps) {
       }
 
       if (props.multiple) {
-        const values = nativeMultiple();
+        const value = nativeValue();
+        const values = Array.isArray(value) ? value : EMPTY_VALUES;
 
         for (let i = 0; i < values.length; i++) {
           if (values[i] === value) return true;
@@ -55,7 +59,7 @@ export function AccordionRoot(props: AccordionRootProps) {
         return false;
       }
 
-      return nativeSingle() === value;
+      return nativeValue() === value;
     },
 
     onToggle(value: string, open: boolean) {
@@ -63,7 +67,7 @@ export function AccordionRoot(props: AccordionRootProps) {
         const next = open ? value : null;
 
         if (!isControlled()) {
-          setNativeSingle(next);
+          setNativeValue(next);
         }
 
         props.onValueChange?.(next);
@@ -76,14 +80,16 @@ export function AccordionRoot(props: AccordionRootProps) {
           : typeof props.value === "string"
             ? [props.value]
             : EMPTY_VALUES
-        : nativeMultiple();
+        : Array.isArray(nativeValue())
+          ? (nativeValue() as readonly string[])
+          : EMPTY_VALUES;
 
       const next = open
         ? appendValue(current, value)
         : removeValue(current, value);
 
       if (!isControlled() && next !== current) {
-        setNativeMultiple(next);
+        setNativeValue(next);
       }
 
       props.onValueChange?.(next);

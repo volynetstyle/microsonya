@@ -16,13 +16,23 @@ export function AccordionItem(props: AccordionItemProps) {
   return (
     <AccordionItemContext value={{ contentMounted }}>
       <details
-        class={props.class}
+        class={`accordion-item${props.class ? ` ${props.class}` : ""}`}
         name={accordion.controlled ? undefined : accordion.groupName}
         open={open()}
         onToggle={(event) => {
-          const next = event.currentTarget.open;
+          const details = event.currentTarget;
+          const next = details.open;
           if (next) setContentWasMounted(true);
-          if (next !== open()) accordion.onToggle(props.value, next);
+          if (next !== open()) {
+            accordion.onToggle(props.value, next);
+
+            // Native <details> toggles itself before firing this event. A
+            // controlled owner may reject that proposal, in which case DOM
+            // must be restored to the authoritative Solid value.
+            if (accordion.controlled && details.open !== open()) {
+              details.open = open();
+            }
+          }
         }}
       >
         {props.children}

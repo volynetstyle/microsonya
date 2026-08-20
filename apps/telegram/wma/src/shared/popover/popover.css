@@ -25,10 +25,22 @@
 
   position-try-fallbacks: flip-block, flip-inline;
   position-visibility: anchors-visible;
+  container-type: anchored;
 
   transition:
     display var(--popover-duration) allow-discrete,
     overlay var(--popover-duration) allow-discrete;
+}
+
+/* Anchor Positioning without anchored queries cannot reveal its resolved
+   fallback to motion styling. Those engines use the deterministic JS vector
+   resolver instead, so position and transform-origin stay coupled. */
+.popover-positioner[data-positioning="fallback"] {
+  position-anchor: auto;
+  position-area: none;
+  position-try-fallbacks: none;
+  position-visibility: always;
+  margin: 0;
 }
 
 .popover-positioner[data-placement="bottom-start"] {
@@ -95,6 +107,63 @@
   transform-origin: bottom right;
 }
 
+/* Level 2 progressive enhancement: the query targets the surface descendant
+   because a query container cannot style itself. */
+@container anchored(fallback: flip-block) {
+  .popover-positioner[data-placement="bottom-start"] > .popover-surface {
+    transform-origin: bottom left;
+  }
+
+  .popover-positioner[data-placement="bottom-end"] > .popover-surface {
+    transform-origin: bottom right;
+  }
+
+  .popover-positioner[data-placement="top-start"] > .popover-surface {
+    transform-origin: top left;
+  }
+
+  .popover-positioner[data-placement="top-end"] > .popover-surface {
+    transform-origin: top right;
+  }
+}
+
+@container anchored(fallback: flip-inline) {
+  .popover-positioner[data-placement="bottom-start"] > .popover-surface {
+    transform-origin: top right;
+  }
+
+  .popover-positioner[data-placement="bottom-end"] > .popover-surface {
+    transform-origin: top left;
+  }
+
+  .popover-positioner[data-placement="top-start"] > .popover-surface {
+    transform-origin: bottom right;
+  }
+
+  .popover-positioner[data-placement="top-end"] > .popover-surface {
+    transform-origin: bottom left;
+  }
+}
+
+/* The JS fallback records the resolved axes after viewport flips. These
+   selectors come later than preferred placement so motion grows from the
+   real anchor corner rather than the requested but unavailable corner. */
+.popover-positioner[data-resolved-placement="bottom-start"] > .popover-surface {
+  transform-origin: top left;
+}
+
+.popover-positioner[data-resolved-placement="bottom-end"] > .popover-surface {
+  transform-origin: top right;
+}
+
+.popover-positioner[data-resolved-placement="top-start"] > .popover-surface {
+  transform-origin: bottom left;
+}
+
+.popover-positioner[data-resolved-placement="top-end"] > .popover-surface {
+  transform-origin: bottom right;
+}
+
 .popover-positioner:popover-open > .popover-surface {
   opacity: 1;
   scale: 1;
@@ -132,6 +201,20 @@
       opacity: 0;
     }
   }
+}
+
+/* Runtime policy is stronger than the OS preference: environment profiling
+   may disable all transition work on low-end Telegram WebViews. */
+[data-motion="reduced"] .popover-positioner,
+[data-device-performance="low"] .popover-positioner {
+  --popover-duration: 0ms;
+  --popover-scale-from: 1;
+}
+
+[data-motion="reduced"] .popover-surface,
+[data-device-performance="low"] .popover-surface {
+  scale: 1;
+  will-change: auto;
 }
 
 @supports not (backdrop-filter: blur(1rem)) {

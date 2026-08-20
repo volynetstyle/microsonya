@@ -1,6 +1,8 @@
 .accordion {
   --accordion-gap: 0.5rem;
-  --accordion-radius: var(--section-radius, 0.5rem);
+  /* Legacy AccordionSwift preset. Consumers may opt into Microsonya's
+     platform morphology by overriding this with var(--section-radius). */
+  --accordion-radius: 0.5rem;
   --accordion-padding-x: 12px;
   --accordion-padding-y: 6px;
   --accordion-duration: var(--motion-duration-standard, 200ms);
@@ -18,7 +20,9 @@
   --accordion-accent: var(--accent, #4991e5);
   --accordion-touch-target: 44px;
   --accordion-pressed-opacity: 0.72;
-  --accordion-content-offset: -0.25rem;
+  /* Strict legacy motion has no translate channel. A product-specific polish
+     may override this token without changing the primitive's base contract. */
+  --accordion-content-offset: 0px;
   overscroll-behavior: contain;
 }
 
@@ -33,40 +37,32 @@
   isolation: isolate;
   transition:
     margin-block-start var(--accordion-duration) var(--accordion-easing),
-    margin-block-end var(--accordion-duration) var(--accordion-easing),
     border-radius var(--accordion-duration) var(--accordion-easing);
 }
 
-.accordion > .accordion-item:first-child {
-  border-start-start-radius: var(--accordion-radius);
-  border-start-end-radius: var(--accordion-radius);
-}
-
-.accordion > .accordion-item:last-child {
-  border-end-start-radius: var(--accordion-radius);
-  border-end-end-radius: var(--accordion-radius);
-}
-
-.accordion > .accordion-item[open] {
-  border-radius: var(--accordion-radius);
-}
-
-.accordion > .accordion-item[open]:not(:first-child) {
+/* Geometry is derived from boundaries, not neighbour flags. For the boundary
+   e(i - 1) before an item, c = open(i - 1) || open(i). The lower item owns
+   that boundary's single gap, so adjacent open items still produce 8px, not
+   two opposing 8px margins. Browser :has() invalidation stays local. */
+.accordion > .accordion-item:not(:first-child)[open],
+.accordion > .accordion-item[open] + .accordion-item {
   margin-block-start: var(--accordion-gap);
 }
 
-.accordion > .accordion-item[open]:not(:last-child) {
-  margin-block-end: var(--accordion-gap);
-}
-
-.accordion > .accordion-item:not([open]):has(+ .accordion-item[open]) {
-  border-end-start-radius: var(--accordion-radius);
-  border-end-end-radius: var(--accordion-radius);
-}
-
-.accordion > .accordion-item[open] + .accordion-item:not([open]) {
+/* topCap(i) = outerStart || c(i - 1) */
+.accordion > .accordion-item:first-child,
+.accordion > .accordion-item[open],
+.accordion > .accordion-item[open] + .accordion-item {
   border-start-start-radius: var(--accordion-radius);
   border-start-end-radius: var(--accordion-radius);
+}
+
+/* bottomCap(i) = outerEnd || c(i) */
+.accordion > .accordion-item:last-child,
+.accordion > .accordion-item[open],
+.accordion > .accordion-item:has(+ .accordion-item[open]) {
+  border-end-start-radius: var(--accordion-radius);
+  border-end-end-radius: var(--accordion-radius);
 }
 
 .accordion > .accordion-item > summary {
