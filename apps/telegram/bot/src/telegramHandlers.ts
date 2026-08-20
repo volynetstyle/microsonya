@@ -21,6 +21,7 @@ import {
   LatencyAwareDisclosure,
   type DisclosureTransport,
 } from "./summaryDisclosure.js";
+import { runStreamTest } from "./commands/streamTest.js";
 
 const activeSummaries = new Map<
   string,
@@ -70,6 +71,11 @@ export function createMessageHandler(services: BotServices) {
             : `Відкрий міні-застосунок у браузері (не https, тому без кнопки): ${services.wmaUrl}`,
           reply_markup ? { reply_markup } : undefined,
         );
+        return;
+      }
+
+      if (invocation.name === "stream_test") {
+        await runStreamTest(ctx);
         return;
       }
 
