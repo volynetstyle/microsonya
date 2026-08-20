@@ -1,144 +1,380 @@
 #!/usr/bin/env node
-// Runs the WMA dev server + a cloudflared tunnel + the bot together,
-// wiring the tunnel's https URL into the bot as WMA_URL automatically.
-// No manual copy-pasting into .env, no restart needed.
 
 import { spawn, spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
+import net from "node:net";
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const isWindows = process.platform === "win32";
-const pnpmCmd = "pnpm";
 
-// On Windows, pnpm/cloudflared resolve to .cmd shims or need PATH lookup that
-// spawn() only does through a shell — but shell:true with an args array
-// triggers Node's DEP0190 warning. Route through cmd.exe /c ourselves
-// instead: same effect, no warning, and all our args are static (no
-// untrusted input reaches the command line).
-function spawnCommand(command, args, options) {
-  if (isWindows) {
-    return spawn("cmd.exe", ["/d", "/s", "/c", command, ...args], options);
+const config = {
+  wmaPort: 3000,
+  wmaTimeout: 30_000,
+  tunnelTimeout: 30_000,
+};
+
+const TUNNEL_URL_RE = /https:\/\/[\w.-]+\.trycloudflare\.com/;
+
+const children = new Set();
+let shuttingDown = false;
+
+// -----------------------------------------------------------------------------
+// Processes
+// -----------------------------------------------------------------------------
+
+function spawnProcess(command, args, options = {}) {
+  const spawnOptions = {
+    cwd: repoRoot,
+    ...options,
+    // On Unix this gives us a process group, so cleanup can kill pnpm + Vite,
+    // not just the immediate pnpm process.
+    detached: !isWindows,
+  };
+
+  const child = isWindows
+    ? spawn(
+        "cmd.exe",
+        ["/d", "/s", "/c", command, ...args],
+        spawnOptions,
+      )
+    : spawn(command, args, spawnOptions);
+
+  children.add(child);
+  child.once("exit", () => children.delete(child));
+
+  return child;
+}
+
+function commandExists(command) {
+  return (
+    spawnSync(isWindows ? "where" : "which", [command], {
+      stdio: "ignore",
+    }).status === 0
+  );
+}
+
+function killProcess(child) {
+  if (!child.pid || child.killed) return;
+
+  try {
+    if (isWindows) {
+      spawnSync(
+        "taskkill",
+        ["/pid", String(child.pid), "/t", "/f"],
+        { stdio: "ignore" },
+      );
+    } else {
+      // Negative PID = kill the whole process group.
+      process.kill(-child.pid, "SIGTERM");
+    }
+  } catch {
+    // Process may already be gone. Humanity survives.
   }
-  return spawn(command, args, options);
 }
-
-function findCloudflared() {
-  const probe = spawnSync(isWindows ? "where" : "which", ["cloudflared"], {
-    stdio: "ignore",
-  });
-  return probe.status === 0;
-}
-
-if (!findCloudflared()) {
-  console.error("cloudflared not found. Install it first:");
-  console.error("  winget install --id Cloudflare.cloudflared   (Windows)");
-  console.error("  brew install cloudflared                     (macOS)");
-  process.exit(1);
-}
-
-const children = [];
 
 function cleanup() {
-  // On Windows, spawn() with shell:true wraps the real process tree (pnpm ->
-  // node -> vite/tsx) in a cmd.exe shell; killing just that shell leaves the
-  // rest running, so tear down the whole tree via taskkill instead.
+  if (shuttingDown) return;
+  shuttingDown = true;
+
   for (const child of children) {
-    if (child.killed || child.pid === undefined) continue;
-    if (isWindows) {
-      spawnSync("taskkill", ["/pid", String(child.pid), "/t", "/f"], {
-        stdio: "ignore",
-      });
-    } else {
-      child.kill();
-    }
+    killProcess(child);
   }
+
+  children.clear();
 }
 
-process.once("SIGINT", () => {
+function shutdown(code = 0) {
   cleanup();
-  process.exit(0);
-});
-process.once("SIGTERM", () => {
-  cleanup();
-  process.exit(0);
-});
+  process.exit(code);
+}
 
-console.log("Starting Vite dev server for apps/telegram/wma...");
-const wma = spawnCommand(
-  pnpmCmd,
-  ["--filter", "@microsonya/telegram-wma", "dev"],
-  { cwd: repoRoot, stdio: "ignore" },
-);
-children.push(wma);
+// -----------------------------------------------------------------------------
+// Waiting
+// -----------------------------------------------------------------------------
 
-console.log("Starting cloudflared tunnel...");
-const tunnel = spawnCommand(
-  "cloudflared",
-  ["tunnel", "--url", "http://localhost:3000"],
-  { cwd: repoRoot },
-);
-children.push(tunnel);
+function waitForPort(port, { host = "127.0.0.1", timeout = 30_000 } = {}) {
+  return new Promise((resolvePort, reject) => {
+    const startedAt = Date.now();
 
-let tunnelOutput = "";
-let wmaUrl;
-const wmaUrlPromise = new Promise((resolveUrl, rejectUrl) => {
-  const timeout = setTimeout(() => {
-    rejectUrl(
-      new Error(
-        `Could not detect the tunnel URL after 30s. cloudflared output:\n${tunnelOutput}`,
-      ),
-    );
-  }, 30_000);
+    function probe() {
+      const socket = net.createConnection({ host, port });
 
-  function onData(chunk) {
-    tunnelOutput += chunk.toString();
-    const match = tunnelOutput.match(
-      /https:\/\/[a-zA-Z0-9.-]+\.trycloudflare\.com/,
-    );
-    if (match) {
-      clearTimeout(timeout);
-      tunnel.stdout.off("data", onData);
-      tunnel.stderr.off("data", onData);
-      resolveUrl(match[0]);
+      socket.once("connect", () => {
+        socket.destroy();
+        resolvePort();
+      });
+
+      socket.once("error", () => {
+        socket.destroy();
+
+        if (Date.now() - startedAt >= timeout) {
+          reject(
+            new Error(
+              `Port ${host}:${port} did not become ready within ${timeout / 1000}s.`,
+            ),
+          );
+          return;
+        }
+
+        setTimeout(probe, 100);
+      });
     }
+
+    probe();
+  });
+}
+
+function waitForTunnelUrl(tunnel, timeout = 30_000) {
+  return new Promise((resolveUrl, reject) => {
+    let output = "";
+    let settled = false;
+
+    const timer = setTimeout(() => {
+      finish(
+        reject,
+        new Error(
+          `Could not detect tunnel URL within ${timeout / 1000}s.\n\n${output}`,
+        ),
+      );
+    }, timeout);
+
+    function cleanupListeners() {
+      clearTimeout(timer);
+
+      tunnel.stdout?.off("data", onData);
+      tunnel.stderr?.off("data", onData);
+      tunnel.off("exit", onExit);
+      tunnel.off("error", onError);
+    }
+
+    function finish(callback, value) {
+      if (settled) return;
+      settled = true;
+
+      cleanupListeners();
+      callback(value);
+    }
+
+    function onData(chunk) {
+      output += chunk.toString();
+
+      // Enough for diagnostics without accumulating arbitrary log output.
+      if (output.length > 16_384) {
+        output = output.slice(-16_384);
+      }
+
+      const url = output.match(TUNNEL_URL_RE)?.[0];
+
+      if (url) {
+        finish(resolveUrl, url);
+      }
+    }
+
+    function onExit(code) {
+      finish(
+        reject,
+        new Error(
+          `cloudflared exited before creating a tunnel (code ${code ?? "unknown"}).`,
+        ),
+      );
+    }
+
+    function onError(error) {
+      finish(reject, error);
+    }
+
+    tunnel.stdout?.on("data", onData);
+    tunnel.stderr?.on("data", onData);
+    tunnel.once("exit", onExit);
+    tunnel.once("error", onError);
+  });
+}
+
+function waitForProcessOr(process, promise, name) {
+  return new Promise((resolveValue, reject) => {
+    let settled = false;
+
+    function finish(callback, value) {
+      if (settled) return;
+      settled = true;
+
+      process.off("exit", onExit);
+      callback(value);
+    }
+
+    function onExit(code) {
+      finish(
+        reject,
+        new Error(
+          `${name} exited before becoming ready (code ${code ?? "unknown"}).`,
+        ),
+      );
+    }
+
+    process.once("exit", onExit);
+
+    promise.then(
+      (value) => finish(resolveValue, value),
+      (error) => finish(reject, error),
+    );
+  });
+}
+
+// -----------------------------------------------------------------------------
+// Services
+// -----------------------------------------------------------------------------
+
+function startWma() {
+  return spawnProcess(
+    "pnpm",
+    [
+      "--filter",
+      "@microsonya/telegram-wma",
+      "dev",
+      "--",
+      "--port",
+      String(config.wmaPort),
+      "--strictPort",
+    ],
+    {
+      stdio: "inherit",
+    },
+  );
+}
+
+function startTunnel() {
+  return spawnProcess(
+    "cloudflared",
+    [
+      "tunnel",
+      "--url",
+      `http://localhost:${config.wmaPort}`,
+    ],
+    {
+      stdio: ["ignore", "pipe", "pipe"],
+    },
+  );
+}
+
+function startBot(wmaUrl) {
+  return spawnProcess(
+    "pnpm",
+    ["--filter", "@microsonya/telegram-bot", "dev"],
+    {
+      stdio: "inherit",
+      env: {
+        ...process.env,
+        STORAGE_MODE: "memory",
+        MODELS_MODE: "disabled",
+        WMA_URL: wmaUrl,
+      },
+    },
+  );
+}
+
+// -----------------------------------------------------------------------------
+// Supervisor
+// -----------------------------------------------------------------------------
+
+function supervise(child, name) {
+  child.once("exit", (code, signal) => {
+    if (shuttingDown) return;
+
+    if (signal) {
+      console.error(`${name} terminated by ${signal}.`);
+    } else {
+      console.error(`${name} exited with code ${code ?? "unknown"}.`);
+    }
+
+    shutdown(code ?? 1);
+  });
+
+  child.once("error", (error) => {
+    if (shuttingDown) return;
+
+    console.error(`${name} failed:`, error);
+    shutdown(1);
+  });
+}
+
+// -----------------------------------------------------------------------------
+// Main
+// -----------------------------------------------------------------------------
+
+async function main() {
+  if (!commandExists("cloudflared")) {
+    console.error(`
+cloudflared not found.
+
+Windows:
+  winget install --id Cloudflare.cloudflared
+
+macOS:
+  brew install cloudflared
+`);
+
+    return 1;
   }
 
-  tunnel.stdout.on("data", onData);
-  tunnel.stderr.on("data", onData);
-});
+  console.log("1/3 Starting WMA...");
+
+  const wma = startWma();
+
+  await waitForProcessOr(
+    wma,
+    waitForPort(config.wmaPort, {
+      timeout: config.wmaTimeout,
+    }),
+    "WMA",
+  );
+
+  console.log(`    WMA ready on :${config.wmaPort}`);
+
+  // From this point onward, unexpected WMA exit is fatal.
+  supervise(wma, "WMA");
+
+  console.log("2/3 Starting tunnel...");
+
+  const tunnel = startTunnel();
+
+  const wmaUrl = await waitForProcessOr(
+    tunnel,
+    waitForTunnelUrl(tunnel, config.tunnelTimeout),
+    "cloudflared",
+  );
+
+  console.log(`    Tunnel ready: ${wmaUrl}`);
+
+  supervise(tunnel, "cloudflared");
+
+  console.log("3/3 Starting bot...");
+
+  const bot = startBot(wmaUrl);
+
+  supervise(bot, "Bot");
+
+  console.log("");
+  console.log("Development environment ready.");
+  console.log(`WMA_URL=${wmaUrl}`);
+  console.log("Send /app to the bot.");
+}
+
+process.once("SIGINT", () => shutdown(0));
+process.once("SIGTERM", () => shutdown(0));
 
 try {
-  wmaUrl = await wmaUrlPromise;
+  const exitCode = await main();
+
+  if (typeof exitCode === "number") {
+    shutdown(exitCode);
+  }
 } catch (error) {
-  console.error(error.message);
-  cleanup();
-  process.exit(1);
+  console.error(
+    error instanceof Error
+      ? error.message
+      : String(error),
+  );
+
+  shutdown(1);
 }
-
-console.log(`Tunnel ready: ${wmaUrl}`);
-console.log(
-  `Starting the bot (STORAGE_MODE=memory, MODELS_MODE=disabled, WMA_URL=${wmaUrl})...`,
-);
-console.log("Send /app to the bot once it's up.");
-
-const bot = spawnCommand(
-  pnpmCmd,
-  ["--filter", "@microsonya/telegram-bot", "dev"],
-  {
-    cwd: repoRoot,
-    stdio: "inherit",
-    env: {
-      ...process.env,
-      STORAGE_MODE: "memory",
-      MODELS_MODE: "disabled",
-      WMA_URL: wmaUrl,
-    },
-  },
-);
-children.push(bot);
-
-bot.on("exit", (code) => {
-  cleanup();
-  process.exit(code ?? 0);
-});

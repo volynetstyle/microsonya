@@ -3,9 +3,13 @@
   --accordion-radius: 0.5rem;
   --accordion-padding-x: 12px;
   --accordion-padding-y: 6px;
-  --accordion-duration: 200ms;
-  --accordion-opacity-in-duration: 150ms;
-  --accordion-opacity-out-duration: 100ms;
+  --accordion-duration: var(--motion-duration-standard, 200ms);
+  --accordion-opacity-in-duration: calc(
+    var(--motion-duration-standard, 200ms) * 0.75
+  );
+  --accordion-opacity-out-duration: calc(
+    var(--motion-duration-standard, 200ms) * 0.5
+  );
   --accordion-easing: cubic-bezier(0.4, 0, 0.2, 1);
   --accordion-bg: var(--tg-section-bg, rgba(255, 255, 255, 0.275));
   --accordion-fg: var(--tg-text, #fff);
@@ -110,12 +114,5 @@
       height var(--accordion-duration) var(--accordion-easing),
       opacity var(--accordion-opacity-in-duration) linear,
       content-visibility var(--accordion-duration) allow-discrete;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .accordion > .accordion-item,
-  .accordion > .accordion-item::details-content {
-    transition-duration: 0s;
   }
 }

@@ -28,6 +28,20 @@
   );
   --tg-accent-border: color-mix(in srgb, var(--tg-accent) 30%, transparent);
   --tg-scrollbar: color-mix(in srgb, var(--tg-text) 20%, transparent);
+  --motion-duration-fast: 160ms;
+  --motion-duration-standard: 200ms;
+}
+
+[data-motion="reduced"] {
+  --motion-duration-fast: 0ms;
+  --motion-duration-standard: 0ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-duration-fast: 0ms;
+    --motion-duration-standard: 0ms;
+  }
 }
 
 @media (prefers-color-scheme: dark) {
@@ -57,10 +71,8 @@ html {
 }
 
 @supports not (scrollbar-gutter: stable) {
-  @media (hover: hover) and (pointer: fine) {
-    html {
-      overflow-y: scroll;
-    }
+  [data-hover="available"] {
+    overflow-y: scroll;
   }
 }
 
@@ -87,23 +99,25 @@ html::-webkit-scrollbar-track {
   background-color: transparent;
 }
 
-@media (hover: hover) and (pointer: fine) {
-  html {
-    scrollbar-color: transparent transparent;
-  }
+[data-hover="available"] {
+  scrollbar-color: transparent transparent;
+}
 
-  html:hover {
-    scrollbar-color: var(--tg-scrollbar) transparent;
-  }
+[data-hover="available"]:hover {
+  scrollbar-color: var(--tg-scrollbar) transparent;
+}
 
-  html::-webkit-scrollbar-thumb {
-    background-color: transparent;
-    transition: background-color 200ms ease-in-out;
-  }
+[data-hover="available"]::-webkit-scrollbar-thumb {
+  background-color: transparent;
+  transition: background-color var(--motion-duration-standard) ease-in-out;
+}
 
-  html:hover::-webkit-scrollbar-thumb {
-    background-color: var(--tg-scrollbar);
-  }
+[data-hover="available"]:hover::-webkit-scrollbar-thumb {
+  background-color: var(--tg-scrollbar);
+}
+
+[data-input="touch"] .accordion-trigger {
+  min-block-size: 44px;
 }
 
 body {
@@ -208,7 +222,7 @@ body {
   font-size: 0.75rem;
   line-height: 1.6;
   flex-shrink: 0;
-  transition: transform 160ms ease;
+  transition: transform var(--motion-duration-fast) ease;
 }
 
 .topic-card[open] .topic-chevron {
@@ -422,6 +436,11 @@ body {
   100% {
     background-position: -200% 0;
   }
+}
+
+[data-motion="reduced"] .skeleton-line,
+[data-device-performance="low"] .skeleton-line {
+  animation: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

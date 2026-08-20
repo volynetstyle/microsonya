@@ -1,81 +1,45 @@
-// Minimal surface of the Telegram Mini Apps JS SDK (telegram-web-app.js,
-// loaded in Document.tsx) that we actually use — theme + cross-platform
-// layout sync, not the full API (haptics, main button, etc. can be added
-// when something needs them).
-export type TelegramThemeParams = Record<string, string | undefined>;
+export type {
+  TelegramPlatform,
+  TelegramSafeAreaInset,
+  TelegramThemeParams,
+  TelegramWebApp,
+} from "./types";
+import type {
+  TelegramSafeAreaInset,
+  TelegramThemeParams,
+  TelegramWebApp,
+} from "./types";
 
-export type TelegramSafeAreaInset = {
-  top: number;
-  bottom: number;
-  left: number;
-  right: number;
-};
-
-// iOS/Android/Desktop/macOS/tdesktop/web-facing values Telegram sends —
-// each client renders the WebView differently, which is exactly what the
-// rest of this module normalizes away.
-export type TelegramPlatform =
-  | 'ios'
-  | 'android'
-  | 'android_x'
-  | 'macos'
-  | 'tdesktop'
-  | 'web'
-  | 'weba'
-  | 'webk'
-  | 'unigram'
-  | 'unknown';
-
-export type TelegramWebApp = {
-  ready(): void;
-  expand(): void;
-  colorScheme: 'light' | 'dark';
-  themeParams: TelegramThemeParams;
-  platform: TelegramPlatform;
-  viewportHeight: number;
-  viewportStableHeight: number;
-  safeAreaInset: TelegramSafeAreaInset;
-  contentSafeAreaInset: TelegramSafeAreaInset;
-  isVersionAtLeast(version: string): boolean;
-  setHeaderColor?(color: string): void;
-  setBackgroundColor?(color: string): void;
-  disableVerticalSwipes?(): void;
-  onEvent(
-    event: 'themeChanged' | 'viewportChanged' | 'safeAreaChanged' | 'contentSafeAreaChanged',
-    handler: () => void,
-  ): void;
-  offEvent(
-    event: 'themeChanged' | 'viewportChanged' | 'safeAreaChanged' | 'contentSafeAreaChanged',
-    handler: () => void,
-  ): void;
-};
-
-declare global {
-  interface Window {
-    Telegram?: { WebApp?: TelegramWebApp };
-  }
-}
+import { observeClientEnvironment } from "./environment";
 
 // Telegram theme param -> our CSS custom property. Anything not sent by the
 // current client (older apps omit newer keys) just keeps its CSS fallback.
-const THEME_PARAM_TO_CSS_VAR: Record<string, string> = {
-  bg_color: '--tg-bg',
-  secondary_bg_color: '--tg-secondary-bg',
-  section_bg_color: '--tg-section-bg',
-  text_color: '--tg-text',
-  hint_color: '--tg-hint',
-  subtitle_text_color: '--tg-subtitle',
-  link_color: '--tg-link',
-  button_color: '--tg-button',
-  button_text_color: '--tg-button-text',
-  accent_text_color: '--tg-accent',
-  destructive_text_color: '--tg-destructive',
+const THEME_PARAM_TO_CSS_VAR: Partial<
+  Record<keyof TelegramThemeParams, string>
+> = {
+  bg_color: "--tg-bg",
+  secondary_bg_color: "--tg-secondary-bg",
+  section_bg_color: "--tg-section-bg",
+  text_color: "--tg-text",
+  hint_color: "--tg-hint",
+  subtitle_text_color: "--tg-subtitle",
+  link_color: "--tg-link",
+  button_color: "--tg-button",
+  button_text_color: "--tg-button-text",
+  accent_text_color: "--tg-accent",
+  destructive_text_color: "--tg-destructive",
 };
 
-function applyThemeParams(root: HTMLElement, themeParams: TelegramThemeParams): void {
-  for (const [param, cssVar] of Object.entries(THEME_PARAM_TO_CSS_VAR)) {
+function applyThemeParams(
+  root: HTMLElement,
+  themeParams: TelegramThemeParams,
+): void {
+  for (const param of Object.keys(THEME_PARAM_TO_CSS_VAR) as Array<
+    keyof TelegramThemeParams
+  >) {
+    const cssVar = THEME_PARAM_TO_CSS_VAR[param];
     const value = themeParams[param];
-    if (value) root.style.setProperty(cssVar, value);
+    if (value && cssVar) root.style.setProperty(cssVar, value);
   }
 }
 
@@ -86,8 +50,8 @@ function applySafeArea(root: HTMLElement, webApp: TelegramWebApp): void {
   // (its header bar, the expand handle) — what content padding should
   // actually use, per Telegram's Mini Apps docs.
   const sets: Array<[string, TelegramSafeAreaInset]> = [
-    ['--tg-safe-area', webApp.safeAreaInset],
-    ['--tg-content-safe-area', webApp.contentSafeAreaInset],
+    ["--tg-safe-area", webApp.safeAreaInset],
+    ["--tg-content-safe-area", webApp.contentSafeAreaInset],
   ];
   for (const [prefix, inset] of sets) {
     root.style.setProperty(`${prefix}-top`, `${inset.top}px`);
@@ -102,8 +66,11 @@ function applyViewport(root: HTMLElement, webApp: TelegramWebApp): void {
   // (older Android in particular); these give the real usable height.
   // viewportStableHeight ignores the on-screen keyboard, so layout doesn't
   // jump for the (currently keyboard-less) screens in this app.
-  root.style.setProperty('--tg-viewport-height', `${webApp.viewportHeight}px`);
-  root.style.setProperty('--tg-viewport-stable-height', `${webApp.viewportStableHeight}px`);
+  root.style.setProperty("--tg-viewport-height", `${webApp.viewportHeight}px`);
+  root.style.setProperty(
+    "--tg-viewport-stable-height",
+    `${webApp.viewportStableHeight}px`,
+  );
 }
 
 /**
@@ -126,12 +93,12 @@ function applyViewport(root: HTMLElement, webApp: TelegramWebApp): void {
  * in-app browser) — the CSS fallbacks in App.css (prefers-color-scheme,
  * env(safe-area-*), 100dvh) cover that case instead.
  */
-export function initTelegram(): void {
+export function initTelegram(): () => void {
   const webApp = window.Telegram?.WebApp;
-  if (!webApp) return;
-
   const root = document.documentElement;
-  root.dataset.tgPlatform = webApp.platform;
+  const stopEnvironment = observeClientEnvironment(root, webApp);
+
+  if (!webApp) return stopEnvironment;
 
   const syncTheme = () => {
     root.dataset.tgColorScheme = webApp.colorScheme;
@@ -152,15 +119,23 @@ export function initTelegram(): void {
   syncSafeArea();
   syncViewport();
 
-  webApp.onEvent('themeChanged', syncTheme);
-  webApp.onEvent('safeAreaChanged', syncSafeArea);
-  webApp.onEvent('contentSafeAreaChanged', syncSafeArea);
-  webApp.onEvent('viewportChanged', syncViewport);
+  webApp.onEvent("themeChanged", syncTheme);
+  webApp.onEvent("safeAreaChanged", syncSafeArea);
+  webApp.onEvent("contentSafeAreaChanged", syncSafeArea);
+  webApp.onEvent("viewportChanged", syncViewport);
 
   // A long scrollable list (this app's main content) fighting Telegram's
   // own swipe-to-close gesture is an iOS/Android-specific papercut this
   // avoids; desktop/web clients simply don't have the gesture.
-  if (webApp.isVersionAtLeast('7.7')) {
+  if (webApp.isVersionAtLeast("7.7")) {
     webApp.disableVerticalSwipes?.();
   }
+
+  return () => {
+    stopEnvironment();
+    webApp.offEvent("themeChanged", syncTheme);
+    webApp.offEvent("safeAreaChanged", syncSafeArea);
+    webApp.offEvent("contentSafeAreaChanged", syncSafeArea);
+    webApp.offEvent("viewportChanged", syncViewport);
+  };
 }
