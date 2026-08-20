@@ -2,6 +2,7 @@ import TopicCard from "../components/TopicCard";
 import { mockChat } from "../mock/chat";
 import * as Accordion from "../shared/accordion";
 import { getTelegramChatTitle } from "../api/chat-context";
+import "./Home.css";
 
 export default function Home() {
   // Telegram launch data is immutable during a Mini App session. A plain

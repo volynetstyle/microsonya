@@ -1,6 +1,7 @@
 import type { ParentProps } from "solid-js";
 import { HydrationScript } from "@solidjs/web";
 import prepaintScript from "./api/prepaint.inline.js?raw";
+import "./Document.css";
 
 // The document shell — the new index.html: picked up by the src/Document.*
 // convention, it wraps the app in the plugin's generated entries and must

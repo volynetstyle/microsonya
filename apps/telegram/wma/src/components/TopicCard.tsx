@@ -1,6 +1,7 @@
 import type { Topic } from "../mock/chat";
 import * as Accordion from "../shared/accordion";
 import MomentItem from "./MomentItem";
+import "./TopicCard.css";
 
 export default function TopicCard(props: { topic: Topic }) {
   return (

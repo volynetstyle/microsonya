@@ -1,5 +1,6 @@
 import { createSignal, onCleanup } from "solid-js";
 import type { Moment } from "../mock/chat";
+import "./MomentItem.css";
 
 const QUOTE_PREVIEW_LENGTH = 60;
 
