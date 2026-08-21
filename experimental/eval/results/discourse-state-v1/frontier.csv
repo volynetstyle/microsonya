@@ -1,2 +1,0 @@
-model,representation,transformation,reasoning,n,okRuns,qualityMean,qualityStd,recallMean,evidencePrecisionMean,falseOpenQuestionRateMean,noiseRetentionMean,promptTokensMean,thinkingTokensMean,finalTokensMean,generatedTokensMean,reasoningShareMean,latencyMsMean
-gpt-oss:120b-cloud,pipe-v3,identity,low,1,1,0.756250,0,1,0.375000,0,0.250000,1182,363,1898,2271,0.160548,32522.282400

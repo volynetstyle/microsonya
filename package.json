@@ -16,14 +16,8 @@
     "format:check": "prettier --check .",
     "format:json": "prettier --write \"**/*.{json,jsonc}\"",
     "format:json:check": "prettier --check \"**/*.{json,jsonc}\"",
-    "eval": "pnpm --filter @microsonya/eval eval",
-    "eval:reconstruct": "pnpm --filter @microsonya/eval reconstruct",
-    "eval:factuality": "pnpm --filter @microsonya/eval factuality",
     "start": "pnpm bot:start",
     "bot:start": "pnpm --filter @microsonya/telegram-bot start",
-    "dev:webapp": "cross-env STORAGE_MODE=memory MODELS_MODE=disabled WMA_URL=http://localhost:3000 pnpm --parallel --filter @microsonya/telegram-bot --filter @microsonya/telegram-wma dev",
-    "dev:webapp:tunnel": "node scripts/dev-webapp-tunnel.mjs",
-    "tunnel:wma": "cloudflared tunnel --url http://localhost:3000",
     "test": "vitest run"
   },
   "devDependencies": {

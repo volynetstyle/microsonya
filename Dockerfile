@@ -14,7 +14,7 @@ RUN apt-get update \
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/telegram/bot/package.json apps/telegram/bot/package.json
 COPY packages/db/package.json packages/db/package.json
-COPY packages/model-gateway/package.json packages/model-gateway/package.json
+COPY packages/model/package.json packages/model/package.json
 COPY packages/shared/package.json packages/shared/package.json
 COPY packages/summarize/package.json packages/summarize/package.json
 
@@ -32,9 +32,7 @@ FROM node:22-bookworm-slim AS runtime
 ENV NODE_ENV="production"
 WORKDIR /app
 
-RUN useradd --create-home --shell /usr/sbin/nologin microsonya \
-  && mkdir -p /app/data \
-  && chown microsonya:microsonya /app/data
+RUN useradd --create-home --shell /usr/sbin/nologin microsonya
 
 COPY --from=deploy --chown=microsonya:microsonya /prod ./
 

@@ -1,4 +1,3 @@
 packages:
-  - "apps/**/*"
+  - "apps/telegram/bot"
   - "packages/*"
-  - "experimental/*"

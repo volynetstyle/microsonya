@@ -16,7 +16,6 @@
     "migrate": "drizzle-kit migrate"
   },
   "dependencies": {
-    "@microsonya/discourse": "workspace:*",
     "@microsonya/shared": "workspace:*",
     "drizzle-orm": "^0.44.7",
     "pg": "^8.22.0"

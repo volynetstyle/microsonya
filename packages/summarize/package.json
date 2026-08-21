@@ -15,8 +15,8 @@
   },
   "dependencies": {
     "@microsonya/db": "workspace:*",
-    "@microsonya/discourse": "workspace:*",
-    "@microsonya/model-gateway": "workspace:*",
-    "@microsonya/shared": "workspace:*"
+    "@microsonya/model": "workspace:*",
+    "@microsonya/shared": "workspace:*",
+    "zod": "^3.25.76"
   }
 }

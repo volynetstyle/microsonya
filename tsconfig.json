@@ -7,7 +7,6 @@
   "include": [
     "test/**/*.ts",
     "packages/*/src/**/*.ts",
-    "experimental/*/src/**/*.ts",
-    "apps/*/src/**/*.ts"
+    "apps/telegram/bot/src/**/*.ts"
   ]
 }

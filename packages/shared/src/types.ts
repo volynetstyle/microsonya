@@ -33,22 +33,3 @@ export type SummaryRun = {
   status: "ok" | "empty" | "too_much" | "error";
   finalText: string;
 };
-
-export type SegmentReason =
-  | "time_gap"
-  | "reply_cluster"
-  | "topic_shift"
-  | "size_limit";
-
-export type DiscussionSegment = {
-  id: string;
-  chatId: string;
-  fromMessageId: number;
-  toMessageId: number;
-  startDate: number;
-  endDate: number;
-  participants: string[];
-  messageCount: number;
-  reason: SegmentReason;
-  messages: ChatMessage[];
-};

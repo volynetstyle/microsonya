@@ -1,9 +1,0 @@
-{
-  "cases": ["interleaving-relation"],
-  "models": ["gpt-oss:120b-cloud"],
-  "representations": ["pipe-v3"],
-  "transformations": ["identity", "identity-replay", "interleave-threads"],
-  "reasoning": ["low"],
-  "seeds": [1, 2, 3, 4, 5],
-  "promptVersion": "v1"
-}

@@ -1,4 +1,0 @@
-transformation,n,ok,pairwiseThreadPrecision,pairwiseThreadRecall,majorThreadRecall,messageCoverage
-identity,5,5,1,1,1,1
-identity-replay,5,5,1,1,1,1
-interleave-threads,5,5,1,1,1,1

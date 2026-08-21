@@ -3,33 +3,31 @@ import {
   launchWithRetry,
   isRetryableTelegramError,
 } from "./launchWithRetry.js";
-import { createModels } from "./models.js";
+import { OllamaModel, withTelemetry } from "@microsonya/model";
 import { createStorage } from "./storage.js";
 import { telegramCommands as summarizeCommands } from "./commands/summarize.js";
-import { telegramCommands as webappCommands } from "./commands/webapp.js";
 import { createTelegramBot } from "./telegramBot.js";
 import {
   createSummarizer,
   SummarizationTelemetryService,
 } from "@microsonya/summarize";
 
-const telegramCommands = [...summarizeCommands, ...webappCommands];
+const telegramCommands = summarizeCommands;
 
 const config = readConfig();
 const storage = createStorage(config);
-const models = createModels(config);
-const summarizer = models
-  ? createSummarizer({
-      messages: storage.messages,
-      summaries: storage.summaries,
-      models,
-      telemetry: new SummarizationTelemetryService(),
-    })
-  : undefined;
+const model = withTelemetry(new OllamaModel(config.model), (event) =>
+  console.info("Model telemetry", JSON.stringify(event)),
+);
+const summarizer = createSummarizer({
+  messages: storage.messages,
+  summaries: storage.summaries,
+  model,
+  telemetry: new SummarizationTelemetryService(),
+});
 const bot = createTelegramBot(config, {
   storage,
   summarizer,
-  wmaUrl: config.wmaUrl,
 });
 const shutdown = new AbortController();
 

@@ -1,8 +1,7 @@
-import type { SummarizationEvent, Summarizer } from "@microsonya/summarize";
+import type { Summarizer } from "@microsonya/summarize";
 import type { Context } from "telegraf";
 import { toCommandInvocation } from "./commands/telegram.js";
 import { parseSummarizeArgs, toSummaryCommand } from "./commands/summarize.js";
-import { buildWebAppMarkup } from "./commands/webapp.js";
 import type { Storage } from "./storage.js";
 import { ingestMessage } from "./telegram/ingest.js";
 import {
@@ -16,14 +15,12 @@ import {
   isModelRateLimitError,
   safeStringify,
 } from "./errors.js";
-import { runStreamTest } from "./commands/streamTest.js";
 import { createNativeDraftTransport } from "./telegram/nativeDraftTransport.js";
 import { SummaryPresentationSession } from "./summaryPresentation.js";
 
 export type BotServices = {
   storage: Storage;
-  summarizer?: Summarizer;
-  wmaUrl?: string;
+  summarizer: Summarizer;
 };
 
 export function createMessageHandler(services: BotServices) {
@@ -50,26 +47,6 @@ export function createMessageHandler(services: BotServices) {
       const invocation = toCommandInvocation(telegramMessage, ctx.me);
       if (!invocation) return;
 
-      if (invocation.name === "app") {
-        if (!services.wmaUrl) {
-          await ctx.reply("Міні-застосунок вимкнено, бо WMA_URL не задано.");
-          return;
-        }
-        const reply_markup = buildWebAppMarkup(services.wmaUrl);
-        await ctx.reply(
-          reply_markup
-            ? "Тисни, щоб відкрити міні-застосунок:"
-            : `Відкрий міні-застосунок у браузері (не https, тому без кнопки): ${services.wmaUrl}`,
-          reply_markup ? { reply_markup } : undefined,
-        );
-        return;
-      }
-
-      if (invocation.name === "stream_test") {
-        await runStreamTest(ctx);
-        return;
-      }
-
       if (invocation.name !== "summarize") {
         return;
       }
@@ -83,11 +60,6 @@ export function createMessageHandler(services: BotServices) {
       };
       const commandParseMs = Date.now() - commandParseStartedAt;
 
-      if (!services.summarizer) {
-        await ctx.reply("Підсумки вимкнені, бо MODELS_MODE=disabled.");
-        return;
-      }
-
       const output = new SummaryPresentationSession(
         ctx.chat?.type === "private"
           ? createNativeDraftTransport(ctx)
@@ -100,16 +72,15 @@ export function createMessageHandler(services: BotServices) {
 
       const startedAt = Date.now();
 
-      const summaryText = await services.summarizer.summarize(command, {
-        observer: {
-          emit: (event) => presentSummaryProgress(output, event),
-        },
-      });
+      await output.status("Аналізую…");
+      const summaryText = await services.summarizer.summarize(command);
 
       const summarizeMs = Date.now() - startedAt;
 
       const replyStartedAt = Date.now();
-      await output.complete(summaryText);
+      await output.complete(
+        summaryText ?? "Немає нових повідомлень для підсумку.",
+      );
 
       console.log(
         "Summary command completed",
@@ -147,22 +118,6 @@ export function createMessageHandler(services: BotServices) {
       else await ctx.reply(message);
     }
   };
-}
-
-function presentSummaryProgress(
-  output: SummaryPresentationSession,
-  event: SummarizationEvent,
-): Promise<void> | void {
-  switch (event.type) {
-    case "segment-started":
-      return output.status(`Аналізую… 0/${event.total}`);
-    case "segment-completed":
-      return output.status(`Аналізую… ${event.completed}/${event.total}`);
-    case "render-started":
-      return output.status("Формую підсумок…");
-    case "summary-completed":
-      return;
-  }
 }
 
 function isAbortError(error: unknown): boolean {

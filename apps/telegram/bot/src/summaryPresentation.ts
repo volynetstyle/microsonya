@@ -40,7 +40,7 @@ export class SummaryPresentationSession {
         .catch(() => {
           this.transportAvailable = false;
         });
-    }, this.options.thinkingDelayMs ??  50);
+    }, this.options.thinkingDelayMs ?? 50);
   }
 
   async status(text: string): Promise<void> {
