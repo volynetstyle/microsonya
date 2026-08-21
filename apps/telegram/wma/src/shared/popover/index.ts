@@ -9,3 +9,4 @@ export type { PopoverContentProps as ContentProps } from "./popover-content";
 export { PopoverSurface as Surface } from "./popover-surface";
 export type { PopoverSurfaceProps as SurfaceProps } from "./popover-surface";
 export type { PopoverPlacement as Placement } from "./popover-context";
+export type { FloatingAnchor } from "./popover-context";

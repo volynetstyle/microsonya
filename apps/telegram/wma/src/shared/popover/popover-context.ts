@@ -6,14 +6,19 @@ export type PopoverPlacement =
   | "bottom-start"
   | "bottom-end";
 
+export type FloatingAnchor =
+  | { type: "element"; element: HTMLElement }
+  | { type: "point"; x: number; y: number };
+
 export interface PopoverContextValue {
   contentId: string;
   anchorName: string;
   placement: PopoverPlacement;
   open(): boolean;
-  setOpen(next: boolean): void;
+  setOpen(next: boolean): boolean;
   trigger(): HTMLButtonElement | undefined;
   setTrigger(element: HTMLButtonElement): void;
+  anchor(): FloatingAnchor | undefined;
 }
 
 export const PopoverContext = createContext<PopoverContextValue>();

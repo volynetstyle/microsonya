@@ -1,3 +1,4 @@
+import { createSignal } from "solid-js";
 import { render } from "@solidjs/testing-library";
 import { describe, expect, it, vi } from "vitest";
 import * as Popover from ".";
@@ -41,5 +42,65 @@ describe("Popover", () => {
 
     expect(onOpenChange).toHaveBeenCalledWith(true);
     expect(event.defaultPrevented).toBe(true);
+  });
+
+  it("does not re-enter showPopover from its synchronous beforetoggle", async () => {
+    const { getByText } = render(() => (
+      <Popover.Root>
+        <Popover.Trigger>Open</Popover.Trigger>
+        <Popover.Content>
+          <Popover.Surface>Reentrant contents</Popover.Surface>
+        </Popover.Content>
+      </Popover.Root>
+    ));
+
+    const positioner = getByText("Reentrant contents").parentElement!;
+    const showPopover = vi.fn();
+    Object.defineProperty(positioner, "showPopover", {
+      configurable: true,
+      value: showPopover,
+    });
+
+    const beforeToggle = new Event("beforetoggle", { cancelable: true });
+    Object.defineProperty(beforeToggle, "newState", { value: "open" });
+    positioner.dispatchEvent(beforeToggle);
+    await Promise.resolve();
+
+    expect(beforeToggle.defaultPrevented).toBe(false);
+    expect(showPopover).not.toHaveBeenCalled();
+  });
+
+  it("repositions an open point anchor without another toggle", async () => {
+    let movePoint!: (point: { x: number; y: number }) => void;
+    const { getByText } = render(() => {
+      const [point, setPoint] = createSignal({ x: 40, y: 50 });
+      movePoint = setPoint;
+
+      return (
+        <Popover.Root
+          anchor={() => ({ type: "point", ...point() })}
+        >
+          <Popover.Content>
+            <Popover.Surface>Moving point contents</Popover.Surface>
+          </Popover.Content>
+        </Popover.Root>
+      );
+    });
+
+    const positioner = getByText("Moving point contents").parentElement!;
+    Object.defineProperty(positioner, "matches", {
+      configurable: true,
+      value: (selector: string) => selector === ":popover-open",
+    });
+    vi.spyOn(positioner, "getBoundingClientRect").mockReturnValue({
+      width: 100,
+      height: 80,
+    } as DOMRect);
+
+    movePoint({ x: 120, y: 90 });
+    await Promise.resolve();
+    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+
+    expect(positioner.style.inset).toBe("90px auto auto 123px");
   });
 });

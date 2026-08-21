@@ -15,6 +15,7 @@ export default function Home() {
   return (
     <main class="screen">
       <header class="chat-header">
+        <a class="demo-link" href="/demo">Primitive demo</a>
         <span class="chat-title">
           {visibleChatTitle} · {mockChat.date}
         </span>

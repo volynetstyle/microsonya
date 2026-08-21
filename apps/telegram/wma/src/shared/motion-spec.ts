@@ -27,6 +27,11 @@ export const LEGACY_MOTION = {
     easing: [0.42, 0, 0.58, 1] as CubicBezier,
     scaleFrom: 0.85,
   },
+  contextMenu: {
+    durationMs: 125,
+    easing: [0, 0, 0.58, 1] as CubicBezier,
+    scaleFrom: 0.85,
+  },
 } as const;
 
 /** Reference oracle for tests; production animation remains native CSS. */

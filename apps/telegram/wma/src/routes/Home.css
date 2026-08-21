@@ -28,6 +28,7 @@
 }
 
 .chat-title {
+  flex: 1;
   min-width: 0;
   overflow: hidden;
   font-weight: var(--font-weight-semibold);
@@ -38,12 +39,25 @@
 }
 
 .chat-total {
+  order: 2;
   flex: none;
   color: var(--text-hint);
   font-size: 0.8125rem;
   line-height: 1.25;
   white-space: nowrap;
 }
+
+.demo-link {
+  order: 3;
+  flex: none;
+  color: var(--accent);
+  font-size: 0.8125rem;
+  line-height: 1.25;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.demo-link:hover { text-decoration: underline; }
 
 .topic-list {
   list-style: none;

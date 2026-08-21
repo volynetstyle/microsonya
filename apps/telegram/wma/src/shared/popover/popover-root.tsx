@@ -1,6 +1,10 @@
-import { createSignal, createUniqueId } from "solid-js";
+import { createSignal, createUniqueId, untrack } from "solid-js";
 import type { ParentProps } from "solid-js";
-import { PopoverContext, type PopoverPlacement } from "./popover-context";
+import {
+  PopoverContext,
+  type FloatingAnchor,
+  type PopoverPlacement,
+} from "./popover-context";
 
 export interface PopoverRootProps extends ParentProps {
   /** Preferred placement. CSS flips it when the preferred side has no room. */
@@ -12,6 +16,7 @@ export interface PopoverRootProps extends ParentProps {
   /** Runs for native trigger, light-dismiss and Escape state changes. */
   onOpenChange?: (open: boolean) => void;
   class?: string;
+  anchor?: FloatingAnchor | (() => FloatingAnchor | undefined);
 }
 
 /**
@@ -40,13 +45,24 @@ export function PopoverRoot(props: PopoverRootProps) {
     },
     open,
     setOpen(next: boolean) {
-      if (!isControlled()) setNativeOpen(next);
-      if (next !== open()) props.onOpenChange?.(next);
-      else if (!isControlled()) props.onOpenChange?.(next);
+      if (!untrack(isControlled)) {
+        setNativeOpen(next);
+        props.onOpenChange?.(next);
+        return true;
+      }
+
+      if (next !== untrack(open)) props.onOpenChange?.(next);
+      return untrack(open) === next;
     },
     trigger: () => trigger,
     setTrigger(element: HTMLButtonElement) {
       trigger = element;
+    },
+    anchor: () => {
+      const configured =
+        typeof props.anchor === "function" ? props.anchor() : props.anchor;
+      if (configured) return configured;
+      return trigger ? { type: "element" as const, element: trigger } : undefined;
     },
   };
 

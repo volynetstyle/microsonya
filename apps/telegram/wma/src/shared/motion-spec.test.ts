@@ -30,6 +30,16 @@ describe("legacy motion reference oracle", () => {
   });
 
   it.each([
+    [0.25, 0.3781381308],
+    [0.5, 0.6846431874],
+    [0.75, 0.9065353493],
+  ])("matches the legacy context-menu curve at %f", (time, expected) => {
+    expect(
+      cubicBezierProgress(time, LEGACY_MOTION.contextMenu.easing),
+    ).toBeCloseTo(expected, 8);
+  });
+
+  it.each([
     [false, false, false],
     [false, true, true],
     [true, false, true],
