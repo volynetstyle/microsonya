@@ -27,7 +27,12 @@ export function createSummarizationModelService(
   }
 
   return new SummarizationModelService(
-    buildDefaultModelClient(config, primaryModel, config.mergeModel ?? primaryModel, options),
+    buildDefaultModelClient(
+      config,
+      primaryModel,
+      config.mergeModel ?? primaryModel,
+      options,
+    ),
   );
 }
 
@@ -39,7 +44,12 @@ export function createMemorySummarizationModelService(
   if (config.mode === "disabled") return undefined;
 
   return new SummarizationModelService(
-    buildDefaultModelClient(config, config.memoryModel, config.memoryModel, options),
+    buildDefaultModelClient(
+      config,
+      config.memoryModel,
+      config.memoryModel,
+      options,
+    ),
   );
 }
 
@@ -57,7 +67,10 @@ function buildDefaultModelClient(
     fetch: options.fetch,
   };
 
-  const primaryModel = createAiSdkModel({ ...modelOptions, modelId: primaryModelId });
+  const primaryModel = createAiSdkModel({
+    ...modelOptions,
+    modelId: primaryModelId,
+  });
   const primaryGenerator = new AiSdkGenerator({
     model: primaryModel,
     modelId: primaryModelId,

@@ -1,4 +1,4 @@
-import type {
+﻿import type {
   AppliedMemoryOp,
   MemoryItem,
   MemoryOp,
@@ -11,7 +11,7 @@ import {
   removeActiveIndexes,
   snapshotMemoryTable,
   type MemoryTable,
-} from "./memoryTable.js";
+} from "./table.js";
 
 export type ApplyMemoryMetadata = {
   chatId: string;

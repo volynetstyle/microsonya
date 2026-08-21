@@ -28,8 +28,8 @@ export type AiSdkGeneratorOptions = {
 };
 
 const DEFAULT_TIMEOUT_MS = 60_000;
-const DEFAULT_TEMPERATURE = 1;
-const DEFAULT_MAX_TOKENS = 2048;
+const DEFAULT_TEMPERATURE = 0.1;
+const DEFAULT_MAX_TOKENS = 2_500;
 const DEFAULT_MAX_RETRIES = 2;
 
 /** Generates text and schema-constrained objects through one AI SDK language model. */
@@ -49,7 +49,12 @@ export class AiSdkGenerator implements TextGenerator, StructuredGenerator {
         abortSignal: signal,
         ...this.callSettings(context),
       });
-      this.emitTelemetry(context, startedAt, "ok", normalizeAiSdkUsage(result.usage));
+      this.emitTelemetry(
+        context,
+        startedAt,
+        "ok",
+        normalizeAiSdkUsage(result.usage),
+      );
       return result.text;
     } catch (error) {
       this.emitTelemetry(context, startedAt, "error", undefined, error);
@@ -73,7 +78,12 @@ export class AiSdkGenerator implements TextGenerator, StructuredGenerator {
         ...this.callSettings(context),
       });
 
-      this.emitTelemetry(context, startedAt, "ok", normalizeAiSdkUsage(result.usage));
+      this.emitTelemetry(
+        context,
+        startedAt,
+        "ok",
+        normalizeAiSdkUsage(result.usage),
+      );
       return result.output;
     } catch (error) {
       this.emitTelemetry(context, startedAt, "error", undefined, error);

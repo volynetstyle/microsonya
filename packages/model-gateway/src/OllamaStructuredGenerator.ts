@@ -17,14 +17,16 @@ export type OllamaStructuredGeneratorOptions = {
   model: string;
   timeoutMs?: number;
   temperature?: number;
+  contextWindow?: number;
   maxTokens?: number;
   fetch?: typeof globalThis.fetch;
   onTelemetry?: (event: ModelCallTelemetry) => void;
 };
 
 const DEFAULT_TIMEOUT_MS = 60_000;
-const DEFAULT_TEMPERATURE = 1;
-const DEFAULT_MAX_TOKENS = 2048;
+const DEFAULT_TEMPERATURE = 0.1;
+const DEFAULT_CONTEXT_WINDOW = 32_768;
+const DEFAULT_MAX_TOKENS = 2_500;
 
 /**
  * Structured generation through Ollama's own `/api/chat` JSON mode instead
@@ -68,20 +70,22 @@ export class OllamaStructuredGenerator implements StructuredGenerator {
             messages: [{ role: "user", content: prompt }],
             options: {
               temperature,
-              num_predict: context.maxOutputTokens ?? maxTokens,
+              num_ctx: this.options.contextWindow ?? DEFAULT_CONTEXT_WINDOW,
+              num_predict: maxTokens,
             },
           }),
           signal: combineAbortSignals(signal, AbortSignal.timeout(timeoutMs)),
         },
       );
-      body = await response.text();
       responseReceived = true;
       if (!response.ok) {
+        body = await response.text();
         throw new OllamaRequestError(
           `Ollama JSON request failed (${response.status}): ${body}`,
         );
       }
 
+      body = await response.text();
       const envelope = JSON.parse(body) as Record<string, unknown> & {
         message?: { content?: unknown; thinking?: unknown };
       };

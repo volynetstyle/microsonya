@@ -1,4 +1,4 @@
-import type { ChatMessage, MemoryItem, MemoryKind } from "@microsonya/shared";
+﻿import type { ChatMessage, MemoryItem, MemoryKind } from "@microsonya/shared";
 
 export const MEMORY_PROMPT_VERSION = "memory-ops-v1";
 

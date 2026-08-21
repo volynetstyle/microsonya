@@ -4,7 +4,7 @@ import {
   claimsReconstructionSchema,
   renderedSummarySchema,
 } from "../packages/discourse/src/index.js";
-import { buildFinalRenderPrompt } from "../packages/summarize/src/finalRender.js";
+import { buildFinalRenderPrompt } from "../packages/summarize/src/rendering/final-render.js";
 
 describe("two-stage summary contracts", () => {
   it("keeps extraction independent from user-facing rendering", () => {

@@ -85,8 +85,8 @@ describe("AiSdkGenerator", () => {
     ).toMatchObject({
       model: "first-model",
       response_format: { type: "json_schema" },
-      temperature: 1,
-      max_tokens: 2048,
+      temperature: 0.1,
+      max_tokens: 2500,
     });
   });
 });
@@ -134,7 +134,11 @@ describe("OllamaStructuredGenerator", () => {
       stream: false,
       think: "low",
       format: "json",
-      options: expect.objectContaining({ num_predict: 4_672 }),
+      options: {
+        temperature: 0.1,
+        num_ctx: 32_768,
+        num_predict: 2_500,
+      },
     });
     expect(onTelemetry).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -194,20 +198,24 @@ describe("OllamaStructuredGenerator", () => {
   });
 
   it("defaults the call context so an unqualified call does not crash", async () => {
-    const fetchMock = mockFetch({ message: { role: "assistant", content: "{}" } });
+    const fetchMock = mockFetch({
+      message: { role: "assistant", content: "{}" },
+    });
     const generator = new OllamaStructuredGenerator({
       baseUrl: "http://localhost:11434",
       model: "model",
       fetch: fetchMock,
     });
 
-    await expect(generator.generateObject("hello", z.object({}))).resolves.toEqual(
-      {},
-    );
+    await expect(
+      generator.generateObject("hello", z.object({})),
+    ).resolves.toEqual({});
   });
 
   it("strips a /v1 suffix since Ollama's native API is always at the origin", async () => {
-    const fetchMock = mockFetch({ message: { role: "assistant", content: "{}" } });
+    const fetchMock = mockFetch({
+      message: { role: "assistant", content: "{}" },
+    });
     const generator = new OllamaStructuredGenerator({
       baseUrl: "http://localhost:11434/v1",
       model: "model",
@@ -236,7 +244,10 @@ describe("createSummarizationModelService", () => {
       return new Response(
         JSON.stringify({
           choices: [
-            { message: { role: "assistant", content: "{}" }, finish_reason: "stop" },
+            {
+              message: { role: "assistant", content: "{}" },
+              finish_reason: "stop",
+            },
           ],
         }),
         { status: 200, headers: { "content-type": "application/json" } },
@@ -262,9 +273,12 @@ describe("createSummarizationModelService", () => {
       LLM_API_KEY: "token",
       LLM_STRUCTURED_TRANSPORT: "openai-compatible",
     } as NodeJS.ProcessEnv);
-    const compatibleService = createSummarizationModelService(compatibleConfig, {
-      fetch: fetchMock,
-    })!;
+    const compatibleService = createSummarizationModelService(
+      compatibleConfig,
+      {
+        fetch: fetchMock,
+      },
+    )!;
     await compatibleService.extractMemoryOps("prompt");
     expect(requestedUrls.at(-1)).toBe(
       "https://models.example.test/v1/chat/completions",

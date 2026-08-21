@@ -8,6 +8,7 @@ import { createStorage } from "./storage.js";
 import { telegramCommands as summarizeCommands } from "./commands/summarize.js";
 import { telegramCommands as webappCommands } from "./commands/webapp.js";
 import { createTelegramBot } from "./telegramBot.js";
+import { SummarizationTelemetryService } from "@microsonya/summarize";
 
 const telegramCommands = [...summarizeCommands, ...webappCommands];
 
@@ -16,6 +17,7 @@ const bot = createTelegramBot(config, {
   storage: createStorage(config),
   models: createModels(config),
   memoryModels: createMemoryModels(config),
+  telemetry: new SummarizationTelemetryService(),
   wmaUrl: config.wmaUrl,
 });
 const shutdown = new AbortController();

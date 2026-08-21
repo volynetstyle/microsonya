@@ -1,20 +1,19 @@
-import { randomUUID } from "node:crypto";
+﻿import { randomUUID } from "node:crypto";
 import type { MessagesRepo, SummariesRepo } from "@microsonya/db";
 import type { SummarizationModelService } from "@microsonya/model-gateway";
-import type {
-  MemoryState,
-  MemoryUpdate,
-  SummaryCommand,
-  SummaryRun,
-} from "@microsonya/shared";
-import { hashMessages } from "./hashMessages.js";
-import { processChatDelta } from "./memoryRuntime.js";
-import { createMemoryState } from "./memoryState.js";
+import type { MemoryState, MemoryUpdate, SummaryCommand, SummaryRun } from "@microsonya/shared";
+import { hashMessages } from "./infrastructure/hash-messages.js";
+import { scheduleMemoryPersistence, waitForMemoryIdle } from "./memory/persistence.js";
 import { buildSegmentPrompt } from "./prompts.js";
-import { buildFinalRenderPrompt, buildSummaryEpisodes } from "./finalRender.js";
-import { segmentMessages } from "./segmentMessages.js";
-import { selectSummaryWindow } from "./selectWindow.js";
-import { SummaryWaterfall, type SummaryWaterfallSink } from "./waterfall.js";
+import { buildFinalRenderPrompt, buildSummaryEpisodes } from "./rendering/final-render.js";
+import { segmentMessages } from "./pipeline/segment-messages.js";
+import { selectSummaryWindow } from "./pipeline/window-selection.js";
+import {
+  SummaryWaterfall,
+  type SummaryObserver,
+  type SummaryWaterfallSink,
+} from "./observability/waterfall.js";
+import type { SummarizationTelemetryService } from "./observability/telemetry.js";
 
 export type SummaryMessagesRepo = Pick<
   MessagesRepo,
@@ -48,16 +47,13 @@ export type SummarizeRuntimeDeps = {
   models: SummaryModels;
   memoryModels?: MemoryModels;
   onTrace?: SummaryWaterfallSink;
+  observer?: SummaryObserver;
+  telemetry?: SummarizationTelemetryService;
   segmentConcurrency?: number;
   signal?: AbortSignal;
 };
 
 const pendingReconstructions = new Map<string, Promise<unknown>>();
-const pendingMemoryUpdates = new Map<string, Promise<void>>();
-
-const MEMORY_DELTA_BATCH_SIZE = 100;
-const MAX_MEMORY_SAVE_CONFLICTS = 3;
-
 const RECONSTRUCTION_SCHEMA_VERSION = 8;
 const MIN_RECONSTRUCTION_OUTPUT_TOKENS = 2_048;
 const MAX_RECONSTRUCTION_OUTPUT_TOKENS = 8_192;
@@ -65,7 +61,7 @@ const RECONSTRUCTION_OUTPUT_TOKENS_PER_MESSAGE = 320;
 
 export const DEFAULT_SEGMENT_CONCURRENCY = 3;
 
-const NO_NEW_MESSAGES = "Немає нових повідомлень для підсумку.";
+const NO_NEW_MESSAGES = "No new messages to summarize.";
 
 type Segment = ReturnType<typeof segmentMessages>[number];
 
@@ -76,13 +72,14 @@ export async function summarize(
   const trace = new SummaryWaterfall(
     command.chatId,
     command.commandMessageId,
-    deps.onTrace,
+    deps.onTrace ?? deps.telemetry?.record.bind(deps.telemetry),
+    deps.observer,
   );
 
   try {
     return await summarizeCriticalPath(deps, command, trace);
   } finally {
-    schedulePersistentMemoryUpdate(deps, command, trace);
+    scheduleMemoryPersistence(deps, command, trace);
   }
 }
 
@@ -129,8 +126,14 @@ async function summarizeCriticalPath(
   const reconstructions = await mapWithConcurrency(
     segments,
     deps.segmentConcurrency ?? DEFAULT_SEGMENT_CONCURRENCY,
-    async (segment) => {
+    async (segment, index) => {
       deps.signal?.throwIfAborted();
+
+      trace.event("segment.started", {
+        segmentId: segment.id,
+        segmentIndex: index + 1,
+        segmentCount: segments.length,
+      });
 
       const { reconstruction, cacheHit } = await loadSegmentReconstruction(
         deps,
@@ -282,127 +285,6 @@ export function reconstructionOutputTokenBudget(messageCount: number): number {
   );
 }
 
-function schedulePersistentMemoryUpdate(
-  deps: SummarizeRuntimeDeps,
-  command: SummaryCommand,
-  trace: SummaryWaterfall,
-): void {
-  const model = deps.memoryModels ?? deps.models;
-  if (typeof model.extractMemoryOps !== "function") {
-    trace.event("memory.skipped", { error: "No memory model configured" });
-    return;
-  }
-
-  const previous =
-    pendingMemoryUpdates.get(command.chatId) ?? Promise.resolve();
-  const current = previous
-    .catch(() => undefined)
-    .then(waitForNextEventLoopTurn)
-    .then(() =>
-      processAndSaveMemoryDeltas(deps, model as MemoryModels, command, trace),
-    )
-    .catch((error) => {
-      trace.event("memory.background", { error: errorMessage(error) });
-    });
-
-  pendingMemoryUpdates.set(command.chatId, current);
-
-  void current.finally(() => {
-    if (pendingMemoryUpdates.get(command.chatId) === current) {
-      pendingMemoryUpdates.delete(command.chatId);
-    }
-  });
-}
-
-export async function waitForMemoryIdle(chatId: string): Promise<void> {
-  await pendingMemoryUpdates.get(chatId);
-}
-
-function waitForNextEventLoopTurn(): Promise<void> {
-  return new Promise((resolve) => setImmediate(resolve));
-}
-
-async function processAndSaveMemoryDeltas(
-  deps: SummarizeRuntimeDeps,
-  model: MemoryModels,
-  command: Pick<SummaryCommand, "chatId" | "commandMessageId">,
-  trace: SummaryWaterfall,
-): Promise<void> {
-  let saveConflicts = 0;
-  let memoryBatch = 0;
-
-  while (true) {
-    memoryBatch += 1;
-
-    const previousState =
-      (await trace.span("memory.state.load", { memoryBatch }, () =>
-        deps.memory.findState(command.chatId),
-      )) ?? createMemoryState(command.chatId);
-
-    const watermark = previousState.processedThroughMessageId ?? -1;
-    const delta = await trace.span("memory.delta.load", { memoryBatch }, () =>
-      deps.messages.listAfterByChat(
-        command.chatId,
-        watermark,
-        MEMORY_DELTA_BATCH_SIZE,
-      ),
-    );
-
-    if (delta.length === 0) {
-      trace.event("memory.complete", {
-        memoryBatch,
-        watermarkBefore: previousState.processedThroughMessageId,
-      });
-      return;
-    }
-
-    const meta = {
-      memoryBatch,
-      messageCount: delta.length,
-      fromMessageId: delta[0]!.id,
-      toMessageId: delta.at(-1)!.id,
-      watermarkBefore: previousState.processedThroughMessageId,
-    };
-
-    const update = await trace.span("memory.process", meta, () =>
-      processChatDelta(previousState, delta, {
-        model: {
-          extractMemoryOps: (prompt) =>
-            trace.span(
-              "memory.model",
-              { memoryBatch, promptChars: prompt.length },
-              () =>
-                model.extractMemoryOps(prompt, {
-                  operation: "memory-extraction",
-                  chatId: command.chatId,
-                  commandMessageId: command.commandMessageId,
-                  ...meta,
-                }),
-            ),
-        },
-      }),
-    );
-
-    if (update.state === previousState) return;
-
-    const saved = await trace.span("memory.persist", { memoryBatch }, () =>
-      deps.memory.saveState(update, previousState.version),
-    );
-
-    if (saved) {
-      saveConflicts = 0;
-      continue;
-    }
-
-    saveConflicts += 1;
-    if (saveConflicts >= MAX_MEMORY_SAVE_CONFLICTS) {
-      throw new Error(
-        `Could not persist memory for chat ${command.chatId} after ${saveConflicts} version conflicts`,
-      );
-    }
-  }
-}
-
 async function mapWithConcurrency<T, R>(
   items: readonly T[],
   concurrency: number,
@@ -442,3 +324,4 @@ async function summarizeOnce<T>(
 function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
+

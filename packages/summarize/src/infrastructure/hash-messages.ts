@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+﻿import { createHash } from "node:crypto";
 import type { ChatMessage } from "@microsonya/shared";
 
 const ENCD = "utf8";

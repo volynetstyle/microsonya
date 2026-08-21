@@ -1,6 +1,6 @@
-import type { ChatMessage, MemoryItem, MemoryState } from "@microsonya/shared";
-import type { NormalizedMemoryMessage } from "./memoryPrompt.js";
-import { tokenizeMemoryText, type MemoryTable } from "./memoryTable.js";
+﻿import type { ChatMessage, MemoryItem, MemoryState } from "@microsonya/shared";
+import type { NormalizedMemoryMessage } from "./prompts.js";
+import { tokenizeMemoryText, type MemoryTable } from "./table.js";
 
 export const DEFAULT_MAX_RELEVANT_MEMORY = 50;
 

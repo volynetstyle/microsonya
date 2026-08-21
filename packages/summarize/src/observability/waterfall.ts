@@ -1,4 +1,4 @@
-export type SummaryWaterfallEvent = {
+﻿export type SummaryWaterfallEvent = {
   traceId: string;
   chatId: string;
   commandMessageId: number;
@@ -13,6 +13,7 @@ export type SummaryWaterfallEvent = {
   segmentCount?: number;
   episodeCount?: number;
   completedSegments?: number;
+  segmentIndex?: number;
   promptChars?: number;
   fromMessageId?: number;
   toMessageId?: number;
@@ -22,6 +23,26 @@ export type SummaryWaterfallEvent = {
 
 export type SummaryWaterfallSink = (event: SummaryWaterfallEvent) => void;
 
+export type SummarizationEvent =
+  | {
+      type: "segment-started";
+      segmentId: string;
+      index: number;
+      total: number;
+    }
+  | {
+      type: "segment-completed";
+      segmentId: string;
+      completed: number;
+      total: number;
+    }
+  | { type: "render-started" }
+  | { type: "summary-completed" };
+
+export interface SummaryObserver {
+  emit(event: SummarizationEvent): void | Promise<void>;
+}
+
 export class SummaryWaterfall {
   private readonly startedAt = performance.now();
   readonly traceId: string;
@@ -30,6 +51,7 @@ export class SummaryWaterfall {
     private readonly chatId: string,
     private readonly commandMessageId: number,
     private readonly sink: SummaryWaterfallSink = defaultSink,
+    private readonly observer?: SummaryObserver,
   ) {
     this.traceId = `${chatId}:${commandMessageId}`;
   }
@@ -51,6 +73,9 @@ export class SummaryWaterfall {
   ): Promise<T> {
     const offsetMs = performance.now() - this.startedAt;
     const startedAt = performance.now();
+    if (stage === "summary.model") {
+      this.emitObserved({ type: "render-started" });
+    }
     try {
       const result = await run();
       this.emit({
@@ -102,13 +127,68 @@ export class SummaryWaterfall {
       "traceId" | "chatId" | "commandMessageId"
     >,
   ): void {
-    this.sink({
+    const completeEvent = {
       traceId: this.traceId,
       chatId: this.chatId,
       commandMessageId: this.commandMessageId,
       ...event,
-    });
+    };
+    this.sink(completeEvent);
+
+    const observed = toSummarizationEvent(completeEvent);
+    if (observed) this.emitObserved(observed);
   }
+
+  private emitObserved(event: SummarizationEvent): void {
+    try {
+      const result = this.observer?.emit(event);
+      if (result) void result.catch(reportObserverError);
+    } catch (error) {
+      reportObserverError(error);
+    }
+  }
+}
+
+function toSummarizationEvent(
+  event: SummaryWaterfallEvent,
+): SummarizationEvent | undefined {
+  if (
+    event.stage === "segment.started" &&
+    event.segmentId !== undefined &&
+    event.segmentIndex !== undefined &&
+    event.segmentCount !== undefined
+  ) {
+    return {
+      type: "segment-started",
+      segmentId: event.segmentId,
+      index: event.segmentIndex,
+      total: event.segmentCount,
+    };
+  }
+  if (
+    event.stage === "segment.complete" &&
+    event.segmentId !== undefined &&
+    event.completedSegments !== undefined &&
+    event.segmentCount !== undefined
+  ) {
+    return {
+      type: "segment-completed",
+      segmentId: event.segmentId,
+      completed: event.completedSegments,
+      total: event.segmentCount,
+    };
+  }
+  if (event.stage === "summary.complete") {
+    return { type: "summary-completed" };
+  }
+  return undefined;
+}
+
+function reportObserverError(error: unknown): void {
+  console.warn(
+    "Summary observer failed",
+    error instanceof Error ? error.message : String(error),
+  );
 }
 
 function defaultSink(event: SummaryWaterfallEvent): void {

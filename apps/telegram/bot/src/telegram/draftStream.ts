@@ -2,7 +2,7 @@ export const DEFAULT_DRAFT_FLUSH_INTERVAL_MS = 800;
 export const DEFAULT_DRAFT_MIN_NEW_CHARS = 12;
 
 export type DraftState =
-  | { type: "thinking" }
+  | { type: "thinking"; text?: string }
   | { type: "streaming"; text: string }
   | { type: "complete"; text: string };
 

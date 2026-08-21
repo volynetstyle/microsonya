@@ -28,6 +28,11 @@ export class DefaultModelClient implements ModelClient {
     context?: ModelCallContext,
     signal?: AbortSignal,
   ): Promise<T> {
-    return this.structuredGenerator.generateObject(prompt, schema, context, signal);
+    return this.structuredGenerator.generateObject(
+      prompt,
+      schema,
+      context,
+      signal,
+    );
   }
 }

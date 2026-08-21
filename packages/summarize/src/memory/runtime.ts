@@ -1,19 +1,19 @@
-import type {
+﻿import type {
   ChatMessage,
   MemoryOp,
   MemoryState,
   MemoryUpdate,
 } from "@microsonya/shared";
-import { hashMessages } from "./hashMessages.js";
+import { hashMessages } from "../infrastructure/hash-messages.js";
 import {
   DEFAULT_MAX_RELEVANT_MEMORY,
   normalizeMessages,
   retrieveRelevantMemory,
-} from "./memoryInput.js";
-import { reconcileMemoryOps, validateMemoryOps } from "./memoryOps.js";
-import { buildMemoryOpsPrompt, MEMORY_PROMPT_VERSION } from "./memoryPrompt.js";
-import { advanceMemoryWatermark, applyMemoryOps } from "./memoryState.js";
-import { createMemoryTable } from "./memoryTable.js";
+} from "./input.js";
+import { reconcileMemoryOps, validateMemoryOps } from "./operations.js";
+import { buildMemoryOpsPrompt, MEMORY_PROMPT_VERSION } from "./prompts.js";
+import { advanceMemoryWatermark, applyMemoryOps } from "./state.js";
+import { createMemoryTable } from "./table.js";
 
 export type MemoryOpsModel = {
   extractMemoryOps(prompt: string): Promise<MemoryOp[]>;

@@ -1,5 +1,5 @@
-import type { MemoryItem, MemoryKind, MemoryState } from "@microsonya/shared";
-import { normalizeMemoryText } from "./memoryInput.js";
+﻿import type { MemoryItem, MemoryKind, MemoryState } from "@microsonya/shared";
+import { normalizeMemoryText } from "./input.js";
 
 export type MemoryTable = {
   byId: Map<string, MemoryItem>;

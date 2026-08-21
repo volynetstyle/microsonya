@@ -1,10 +1,10 @@
-import type { MemoryItem, MemoryOp } from "@microsonya/shared";
-import { normalizeMemoryText } from "./memoryInput.js";
+﻿import type { MemoryItem, MemoryOp } from "@microsonya/shared";
+import { normalizeMemoryText } from "./input.js";
 import {
   findActiveMemory,
   memoryIdentity,
   type MemoryTable,
-} from "./memoryTable.js";
+} from "./table.js";
 
 const MAX_MEMORY_TEXT_LENGTH = 2_000;
 

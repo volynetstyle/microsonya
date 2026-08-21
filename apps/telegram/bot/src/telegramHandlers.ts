@@ -1,4 +1,8 @@
-import { summarize } from "@microsonya/summarize";
+import {
+  summarize,
+  type SummarizationEvent,
+  type SummarizationTelemetryService,
+} from "@microsonya/summarize";
 import type { Context } from "telegraf";
 import { toCommandInvocation } from "./commands/telegram.js";
 import { parseSummarizeArgs, toSummaryCommand } from "./commands/summarize.js";
@@ -17,21 +21,15 @@ import {
   isModelRateLimitError,
   safeStringify,
 } from "./errors.js";
-import {
-  LatencyAwareDisclosure,
-  type DisclosureTransport,
-} from "./summaryDisclosure.js";
 import { runStreamTest } from "./commands/streamTest.js";
-
-const activeSummaries = new Map<
-  string,
-  { controller: AbortController; disclosure: LatencyAwareDisclosure }
->();
+import { createNativeDraftTransport } from "./telegram/nativeDraftTransport.js";
+import { SummaryPresentationSession } from "./summaryPresentation.js";
 
 export type BotServices = {
   storage: Storage;
   models?: SummarizationModelService;
   memoryModels?: SummarizationModelService;
+  telemetry?: SummarizationTelemetryService;
   wmaUrl?: string;
 };
 
@@ -41,8 +39,8 @@ export function createMessageHandler(services: BotServices) {
     let commandContext:
       | { chatId: string; commandMessageId: number }
       | undefined;
-    let activeSummaryKey: string | undefined;
-    let disclosure: LatencyAwareDisclosure | undefined;
+    let summaryOutput: SummaryPresentationSession | undefined;
+
     try {
       const telegramMessage = ctx.message as TelegramMessageLike;
       const chatMessage = toChatMessage(telegramMessage);
@@ -97,13 +95,15 @@ export function createMessageHandler(services: BotServices) {
         return;
       }
 
-      const controller = new AbortController();
-      disclosure = new LatencyAwareDisclosure(
-        toDisclosureTransport(ctx, command.commandMessageId),
+      const output = new SummaryPresentationSession(
+        ctx.chat?.type === "private"
+          ? createNativeDraftTransport(ctx)
+          : undefined,
+        async (text) => {
+          await ctx.reply(text);
+        },
       );
-      disclosure.start();
-      activeSummaryKey = summaryKey(command.chatId, command.commandMessageId);
-      activeSummaries.set(activeSummaryKey, { controller, disclosure });
+      summaryOutput = output;
 
       const startedAt = Date.now();
 
@@ -113,9 +113,11 @@ export function createMessageHandler(services: BotServices) {
           messages: services.storage.messages,
           summaries: services.storage.summaries,
           models: services.models,
-          memoryModels: services.memoryModels,
-          onTrace: (event) => disclosure?.onTrace(event),
-          signal: controller.signal,
+            memoryModels: services.memoryModels,
+            telemetry: services.telemetry,
+          observer: {
+            emit: (event) => presentSummaryProgress(output, event),
+          },
         },
         command,
       );
@@ -123,7 +125,7 @@ export function createMessageHandler(services: BotServices) {
       const summarizeMs = Date.now() - startedAt;
 
       const replyStartedAt = Date.now();
-      await disclosure.finish(summaryText);
+      await output.complete(summaryText);
 
       console.log(
         "Summary command completed",
@@ -149,94 +151,34 @@ export function createMessageHandler(services: BotServices) {
       );
 
       if (isAbortError(error)) {
-        const handled = (await disclosure?.fail("Скасовано.")) ?? false;
-        if (!handled) await ctx.reply("Скасовано.");
+        if (summaryOutput) await summaryOutput.fail("Скасовано.");
+        else await ctx.reply("Скасовано.");
         return;
       }
 
       const message = isModelRateLimitError(error)
         ? formatRateLimitMessage(error)
         : "Не вдалося підготувати підсумок. Я вже зафіксував помилку. Спробуй ще раз трохи пізніше.";
-      const handled = (await disclosure?.fail(message)) ?? false;
-      if (!handled) await ctx.reply(message);
-    } finally {
-      if (activeSummaryKey) activeSummaries.delete(activeSummaryKey);
+      if (summaryOutput) await summaryOutput.fail(message);
+      else await ctx.reply(message);
     }
   };
 }
 
-export function createCancelSummaryHandler() {
-  return async function handleCancelSummary(ctx: Context): Promise<void> {
-    const callback = ctx.callbackQuery;
-    const data =
-      callback && "data" in callback && typeof callback.data === "string"
-        ? callback.data
-        : "";
-    const match = /^cancel_summary:(\d+)$/u.exec(data);
-    const chatId = ctx.chat?.id;
-    if (!match || chatId === undefined) return;
-
-    const entry = activeSummaries.get(
-      summaryKey(String(chatId), Number(match[1])),
-    );
-    if (!entry) {
-      await ctx.answerCbQuery("Цей запит уже завершено.");
+function presentSummaryProgress(
+  output: SummaryPresentationSession,
+  event: SummarizationEvent,
+): Promise<void> | void {
+  switch (event.type) {
+    case "segment-started":
+      return output.status(`Аналізую… 0/${event.total}`);
+    case "segment-completed":
+      return output.status(`Аналізую… ${event.completed}/${event.total}`);
+    case "render-started":
+      return output.status("Формую підсумок…");
+    case "summary-completed":
       return;
-    }
-
-    entry.disclosure.cancelling();
-    entry.controller.abort(new DOMException("Cancelled by user", "AbortError"));
-    await ctx.answerCbQuery("Скасовую…");
-  };
-}
-
-function toDisclosureTransport(
-  ctx: Context,
-  commandMessageId: number,
-): DisclosureTransport {
-  const chatId = ctx.chat?.id;
-  if (chatId === undefined) {
-    throw new Error("Telegram context has no chat ID");
   }
-
-  return {
-    sendTyping: async () => {
-      await ctx.sendChatAction("typing");
-    },
-    sendStatus: async (text, cancellable) => {
-      const message = await ctx.reply(text, {
-        reply_markup: cancelMarkup(commandMessageId, cancellable),
-      });
-      return message.message_id;
-    },
-    editStatus: async (messageId, text, cancellable) => {
-      await ctx.telegram.editMessageText(chatId, messageId, undefined, text, {
-        reply_markup: cancelMarkup(commandMessageId, cancellable),
-      });
-    },
-    sendFinal: async (text) => {
-      await ctx.reply(text);
-    },
-  };
-}
-
-function cancelMarkup(commandMessageId: number, enabled: boolean) {
-  return {
-    inline_keyboard: enabled
-      ? [
-          [
-            {
-              text: "Скасувати",
-              callback_data: `cancel_summary:${commandMessageId}`,
-            },
-          ],
-        ]
-      : [],
-  };
-}
-
-function summaryKey(chatId: string, commandMessageId: number): string {
-  return `${chatId}:${commandMessageId}`;
 }
 
 function isAbortError(error: unknown): boolean {

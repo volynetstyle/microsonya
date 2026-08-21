@@ -1,4 +1,4 @@
-import {
+﻿import {
   buildClaimsPrompt,
   PIPE_V3_LANGUAGE_GUIDE,
   serializePipeV3,
@@ -22,6 +22,6 @@ export function buildSegmentPrompt(segment: DiscussionSegment): string {
       "pipe-v3",
       PIPE_V3_LANGUAGE_GUIDE,
     ),
-    "Вимога до мови відповіді: пиши title, topic і text українською. Зберігай авторство тверджень у text. Назви JSON-полів залишай без змін.",
+    "Language requirement: write title, topic, and text in Ukrainian. Preserve claim attribution in text. Keep JSON field names unchanged.",
   ].join("\n\n");
 }
