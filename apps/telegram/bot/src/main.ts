@@ -3,21 +3,32 @@ import {
   launchWithRetry,
   isRetryableTelegramError,
 } from "./launchWithRetry.js";
-import { createMemoryModels, createModels } from "./models.js";
+import { createModels } from "./models.js";
 import { createStorage } from "./storage.js";
 import { telegramCommands as summarizeCommands } from "./commands/summarize.js";
 import { telegramCommands as webappCommands } from "./commands/webapp.js";
 import { createTelegramBot } from "./telegramBot.js";
-import { SummarizationTelemetryService } from "@microsonya/summarize";
+import {
+  createSummarizer,
+  SummarizationTelemetryService,
+} from "@microsonya/summarize";
 
 const telegramCommands = [...summarizeCommands, ...webappCommands];
 
 const config = readConfig();
+const storage = createStorage(config);
+const models = createModels(config);
+const summarizer = models
+  ? createSummarizer({
+      messages: storage.messages,
+      summaries: storage.summaries,
+      models,
+      telemetry: new SummarizationTelemetryService(),
+    })
+  : undefined;
 const bot = createTelegramBot(config, {
-  storage: createStorage(config),
-  models: createModels(config),
-  memoryModels: createMemoryModels(config),
-  telemetry: new SummarizationTelemetryService(),
+  storage,
+  summarizer,
   wmaUrl: config.wmaUrl,
 });
 const shutdown = new AbortController();

@@ -1,13 +1,8 @@
-import {
-  summarize,
-  type SummarizationEvent,
-  type SummarizationTelemetryService,
-} from "@microsonya/summarize";
+import type { SummarizationEvent, Summarizer } from "@microsonya/summarize";
 import type { Context } from "telegraf";
 import { toCommandInvocation } from "./commands/telegram.js";
 import { parseSummarizeArgs, toSummaryCommand } from "./commands/summarize.js";
 import { buildWebAppMarkup } from "./commands/webapp.js";
-import type { SummarizationModelService } from "@microsonya/model-gateway";
 import type { Storage } from "./storage.js";
 import { ingestMessage } from "./telegram/ingest.js";
 import {
@@ -27,9 +22,7 @@ import { SummaryPresentationSession } from "./summaryPresentation.js";
 
 export type BotServices = {
   storage: Storage;
-  models?: SummarizationModelService;
-  memoryModels?: SummarizationModelService;
-  telemetry?: SummarizationTelemetryService;
+  summarizer?: Summarizer;
   wmaUrl?: string;
 };
 
@@ -90,7 +83,7 @@ export function createMessageHandler(services: BotServices) {
       };
       const commandParseMs = Date.now() - commandParseStartedAt;
 
-      if (!services.models) {
+      if (!services.summarizer) {
         await ctx.reply("Підсумки вимкнені, бо MODELS_MODE=disabled.");
         return;
       }
@@ -107,20 +100,11 @@ export function createMessageHandler(services: BotServices) {
 
       const startedAt = Date.now();
 
-      const summaryText = await summarize(
-        {
-          memory: services.storage.memory,
-          messages: services.storage.messages,
-          summaries: services.storage.summaries,
-          models: services.models,
-            memoryModels: services.memoryModels,
-            telemetry: services.telemetry,
-          observer: {
-            emit: (event) => presentSummaryProgress(output, event),
-          },
+      const summaryText = await services.summarizer.summarize(command, {
+        observer: {
+          emit: (event) => presentSummaryProgress(output, event),
         },
-        command,
-      );
+      });
 
       const summarizeMs = Date.now() - startedAt;
 
@@ -137,7 +121,7 @@ export function createMessageHandler(services: BotServices) {
           preSummarizeMs: startedAt - updateStartedAt,
           summarizeMs,
           replyMs: Date.now() - replyStartedAt,
-          totalMs: Date.now() - startedAt,
+          totalMs: Date.now() - updateStartedAt,
         }),
       );
     } catch (error) {
