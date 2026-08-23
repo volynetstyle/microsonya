@@ -47,7 +47,7 @@ export function createMessageHandler(services: BotServices) {
       const invocation = toCommandInvocation(telegramMessage, ctx.me);
       if (!invocation) return;
 
-      if (invocation.name !== "summarize") {
+      if (invocation.name !== "summary") {
         return;
       }
       const args = parseSummarizeArgs(invocation.args);

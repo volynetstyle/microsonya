@@ -17,7 +17,6 @@ for (const envPath of [
 
 export type AppConfig = {
   telegramToken: string;
-  databaseUrl: string;
 
   model: ModelConfig;
 };
@@ -25,14 +24,8 @@ export type AppConfig = {
 export function readConfig(): AppConfig {
   const telegramToken = requiredEnv("TELEGRAM_BOT_TOKEN");
 
-  const databaseUrl = requiredEnv("DATABASE_URL");
-  validateDatabaseUrl(databaseUrl);
-
   return {
     telegramToken,
-
-    databaseUrl,
-
     model: loadModelConfig(process.env),
   };
 }
@@ -45,25 +38,4 @@ function requiredEnv(name: string): string {
   }
 
   return value;
-}
-
-function validateDatabaseUrl(databaseUrl: string): void {
-  let url: URL;
-
-  try {
-    url = new URL(databaseUrl);
-  } catch {
-    throw new Error(
-      "DATABASE_URL must be a valid Postgres URL. Encode special password characters, for example # as %23.",
-    );
-  }
-
-  if (url.protocol !== "postgres:" && url.protocol !== "postgresql:") {
-    throw new Error("DATABASE_URL must use postgres:// or postgresql://.");
-  }
-  if (url.hash) {
-    throw new Error(
-      "DATABASE_URL must be a valid Postgres URL. Encode special password characters, for example # as %23.",
-    );
-  }
 }

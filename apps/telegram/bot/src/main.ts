@@ -15,7 +15,7 @@ import {
 const telegramCommands = summarizeCommands;
 
 const config = readConfig();
-const storage = createStorage(config);
+const storage = createStorage();
 const model = withTelemetry(new OllamaModel(config.model), (event) =>
   console.info("Model telemetry", JSON.stringify(event)),
 );

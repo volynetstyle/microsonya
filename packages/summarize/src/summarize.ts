@@ -6,13 +6,14 @@ import type {
   SummaryCommand,
   SummaryRun,
 } from "@microsonya/shared";
-import { z } from "zod";
 import type { SummarizationTelemetryService } from "./telemetry.js";
-
-const outputSchema = z.object({
-  title: z.string().min(1),
-  summary: z.string().min(1),
-});
+import {
+  outputSchema,
+  DAY_MS,
+  MAX_MESSAGES,
+  SUMMARY_INSTRUCTIONS,
+} from "./constants.js";
+import { encodePipe, PIPE_GUIDE } from "./pipe.js";
 
 export type Summarizer = {
   summarize(
@@ -20,6 +21,7 @@ export type Summarizer = {
     signal?: AbortSignal,
   ): Promise<string | null>;
 };
+
 export type SummarizerDeps = {
   messages: Pick<MessagesRepo, "listByChat">;
   summaries: Pick<SummariesRepo, "findLastRun" | "saveRun">;
@@ -28,7 +30,9 @@ export type SummarizerDeps = {
 };
 
 export function createSummarizer(deps: SummarizerDeps): Summarizer {
-  return { summarize: (command, signal) => run(deps, command, signal) };
+  return {
+    summarize: (command, signal) => run(deps, command, signal),
+  };
 }
 
 async function run(
@@ -37,74 +41,174 @@ async function run(
   signal?: AbortSignal,
 ): Promise<string | null> {
   const startedAt = performance.now();
+
+  const telemetry = deps.telemetry?.start({
+    traceId: `${command.chatId}:${command.commandMessageId}:${randomUUID()}`,
+    chatId: command.chatId,
+    commandMessageId: command.commandMessageId,
+  });
+
+  let stage = "start";
+
   try {
+    telemetry?.record({
+      type: "summary.start",
+      mode: command.mode,
+    });
+
     signal?.throwIfAborted();
+
+    stage = "messages.load";
+
     const [all, previous] = await Promise.all([
       deps.messages.listByChat(command.chatId),
       deps.summaries.findLastRun(command.chatId),
     ]);
+
+    telemetry?.record({
+      type: "messages.loaded",
+      messageCount: all.length,
+      hasPreviousRun: previous !== undefined,
+    });
+
+    signal?.throwIfAborted();
+
+    stage = "messages.select";
+
     const messages = selectMessages(all, command, previous?.toMessageId);
-    if (!messages.length) return null;
-    const result = await deps.model.generate(
-      buildPrompt(messages),
-      outputSchema,
-      { signal, maxOutputTokens: 2_500 },
-    );
-    await saveRun(deps.summaries, command, messages, result.summary);
-    deps.telemetry?.record({
-      chatId: command.chatId,
-      commandMessageId: command.commandMessageId,
+
+    telemetry?.record({
+      type: "messages.selected",
       messageCount: messages.length,
+      fromMessageId: messages[0]?.id,
+      toMessageId: messages.at(-1)?.id,
+    });
+
+    if (messages.length === 0) {
+      telemetry?.record({
+        type: "summary.finish",
+        durationMs: performance.now() - startedAt,
+        status: "empty",
+      });
+
+      return null;
+    }
+
+    stage = "model.generate";
+
+    const prompt = buildPrompt(messages);
+
+    telemetry?.record({
+      type: "model.request",
+      messageCount: messages.length,
+      promptChars: prompt.length,
+      prompt,
+    });
+
+    const modelStartedAt = performance.now();
+
+    const { summary } = await deps.model.generate(prompt, outputSchema, {
+      signal,
+      maxOutputTokens: 2_500,
+    });
+
+    telemetry?.record({
+      type: "model.response",
+      durationMs: performance.now() - modelStartedAt,
+      summaryChars: summary.length,
+    });
+
+    signal?.throwIfAborted();
+
+    stage = "summary.save";
+
+    const saveStartedAt = performance.now();
+
+    await saveRun(deps.summaries, command, messages, summary);
+
+    telemetry?.record({
+      type: "summary.saved",
+      durationMs: performance.now() - saveStartedAt,
+    });
+
+    telemetry?.record({
+      type: "summary.finish",
       durationMs: performance.now() - startedAt,
       status: "ok",
     });
-    return result.summary;
+
+    return summary;
   } catch (error) {
-    deps.telemetry?.record({
-      chatId: command.chatId,
-      commandMessageId: command.commandMessageId,
+    telemetry?.record({
+      type: "summary.error",
       durationMs: performance.now() - startedAt,
-      status: "error",
-      error: error instanceof Error ? error.message : String(error),
+      stage,
+      error: serializeError(error),
     });
+
     throw error;
   }
 }
 
-function selectMessages(
+function serializeError(error: unknown): {
+  name?: string;
+  message: string;
+  stack?: string;
+} {
+  if (error instanceof Error) {
+    return {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+    };
+  }
+
+  return {
+    message: String(error),
+  };
+}
+
+export function selectMessages(
   all: readonly ChatMessage[],
   command: SummaryCommand,
   lastId?: number,
 ): ChatMessage[] {
-  const messages = all.filter(
-    (m) =>
-      m.id !== command.commandMessageId &&
-      !m.isCommand &&
-      m.kind === "text" &&
-      m.text.trim() &&
-      m.id > (lastId ?? -1),
+  const afterId = lastId ?? -1;
+
+  const eligible = all.filter(
+    (message) =>
+      message.id !== command.commandMessageId &&
+      message.id > afterId &&
+      !message.isCommand &&
+      message.kind === "text" &&
+      message.text.trim().length > 0,
   );
-  if (command.mode === "count")
-    return messages.slice(-Math.max(1, command.count ?? 100));
+
+  if (command.mode === "count") {
+    const count = Math.max(1, command.count ?? 100);
+    return eligible.slice(-count);
+  }
+
   const since =
     command.mode === "today"
       ? new Date(command.date).setHours(0, 0, 0, 0)
-      : command.date - 86_400_000;
-  return messages.filter((m) => m.date >= since).slice(-1024);
+      : command.date - DAY_MS;
+
+  return eligible
+    .filter((message) => message.date >= since)
+    .slice(-MAX_MESSAGES);
 }
 
-function buildPrompt(messages: readonly ChatMessage[]): string {
-  const transcript = messages
-    .map((m) => `[${m.id}] ${m.authorName || m.authorId}: ${m.text}`)
-    .join("\n");
+export function buildPrompt(messages: readonly ChatMessage[]): string {
   return [
-    "Summarize this Telegram conversation in natural Ukrainian.",
-    "Preserve attribution, decisions, unresolved questions, important facts, numbers, negation, and uncertainty.",
-    "Remove greetings, repetition, jokes, and minor tangents unless they affect the outcome.",
-    "Do not invent facts or causal links. Return JSON only with title and summary fields.",
-    "Messages:",
-    transcript,
+    section("SUMMARY_POLICY", SUMMARY_INSTRUCTIONS),
+    section("TRANSCRIPT_FORMAT", PIPE_GUIDE),
+    section("VISIBLE_MESSAGES", encodePipe(messages)),
   ].join("\n\n");
+}
+
+function section(name: string, content: string): string {
+  return [`${name}_BEGIN`, content, `${name}_END`].join("\n");
 }
 
 async function saveRun(
@@ -124,5 +228,6 @@ async function saveRun(
     status: "ok",
     finalText,
   };
+
   await summaries.saveRun(run);
 }
