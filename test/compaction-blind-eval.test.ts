@@ -115,7 +115,8 @@ describe("blind compaction evaluation", () => {
     const original = buildCompactionPrompt(fixture, "original");
     const rulesOnly = buildCompactionPrompt(fixture, "rules-only");
     const crossDomain = buildCompactionPrompt(fixture, "cross-domain");
-    const policyMarker = "Apply these rules in order. Stop at the first matching rule.";
+    const policyMarker =
+      "Apply these rules in order. Stop at the first matching rule.";
     expect(original).toContain(policyMarker);
     expect(rulesOnly).toContain(policyMarker);
     expect(crossDomain).toContain(policyMarker);
