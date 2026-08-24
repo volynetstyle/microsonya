@@ -1,0 +1,18 @@
+{
+  "fixture": "compaction-boundaries",
+  "models": ["gpt-oss:120b-cloud"],
+  "reasoning": ["low"],
+  "think": "low",
+  "seeds": [1, 2, 3, 4, 5],
+  "generationOptions": {
+    "temperature": 0.2,
+    "topK": 20,
+    "topP": 0.9,
+    "minP": 0,
+    "numPredict": 256,
+    "repeatPenalty": 1,
+    "presencePenalty": 0,
+    "frequencyPenalty": 0
+  },
+  "promptVersion": "v10"
+}

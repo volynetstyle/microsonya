@@ -17,6 +17,8 @@
     "format:json": "prettier --write \"**/*.{json,jsonc}\"",
     "format:json:check": "prettier --check \"**/*.{json,jsonc}\"",
     "eval": "pnpm --filter @microsonya/eval eval",
+    "eval:compaction": "pnpm --filter @microsonya/eval compaction",
+    "eval:compaction:blind": "pnpm --filter @microsonya/eval compaction:blind",
     "eval:reconstruct": "pnpm --filter @microsonya/eval reconstruct",
     "eval:factuality": "pnpm --filter @microsonya/eval factuality",
     "start": "pnpm bot:start",

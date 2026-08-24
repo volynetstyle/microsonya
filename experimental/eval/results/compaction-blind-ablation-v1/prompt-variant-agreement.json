@@ -1,0 +1,92 @@
+[
+  {
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "seed": 42,
+    "leftVariant": "cross-domain",
+    "rightVariant": "cross-language",
+    "comparable": 47,
+    "agreement": 0.8936170212765957
+  },
+  {
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "seed": 42,
+    "leftVariant": "cross-domain",
+    "rightVariant": "lexical-clones",
+    "comparable": 48,
+    "agreement": 0.8333333333333334
+  },
+  {
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "seed": 42,
+    "leftVariant": "cross-domain",
+    "rightVariant": "original",
+    "comparable": 48,
+    "agreement": 0.875
+  },
+  {
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "seed": 42,
+    "leftVariant": "cross-domain",
+    "rightVariant": "rules-only",
+    "comparable": 48,
+    "agreement": 0.8958333333333334
+  },
+  {
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "seed": 42,
+    "leftVariant": "cross-language",
+    "rightVariant": "lexical-clones",
+    "comparable": 47,
+    "agreement": 0.9148936170212766
+  },
+  {
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "seed": 42,
+    "leftVariant": "cross-language",
+    "rightVariant": "original",
+    "comparable": 47,
+    "agreement": 0.851063829787234
+  },
+  {
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "seed": 42,
+    "leftVariant": "cross-language",
+    "rightVariant": "rules-only",
+    "comparable": 47,
+    "agreement": 0.9361702127659575
+  },
+  {
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "seed": 42,
+    "leftVariant": "lexical-clones",
+    "rightVariant": "original",
+    "comparable": 48,
+    "agreement": 0.8333333333333334
+  },
+  {
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "seed": 42,
+    "leftVariant": "lexical-clones",
+    "rightVariant": "rules-only",
+    "comparable": 48,
+    "agreement": 0.875
+  },
+  {
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "seed": 42,
+    "leftVariant": "original",
+    "rightVariant": "rules-only",
+    "comparable": 48,
+    "agreement": 0.8125
+  }
+]

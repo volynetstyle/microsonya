@@ -1,0 +1,202 @@
+[
+  {
+    "id": "banter-with-professional-words",
+    "expected": "SKIP_BANTER",
+    "messages": [
+      {
+        "user": "Іра",
+        "time": "12:01",
+        "text": "Я сьогодні офіційно стала senior coffee engineer"
+      },
+      { "user": "Макс", "time": "12:01", "text": "підвищення?" },
+      {
+        "user": "Іра",
+        "time": "12:02",
+        "text": "так, тепер я можу робити дві кави одночасно"
+      },
+      { "user": "Макс", "time": "12:02", "text": "це вже staff" },
+      {
+        "user": "Іра",
+        "time": "12:03",
+        "text": "staff буде коли навчуся не забувати чашку під кавомашиною"
+      },
+      { "user": "Макс", "time": "12:03", "text": "архітектурні проблеми" },
+      { "user": "Іра", "time": "12:04", "text": "legacy cup" }
+    ]
+  },
+  {
+    "id": "short-complete-deployment-update",
+    "expected": "DEFER_COMPACT",
+    "messages": [
+      {
+        "user": "Олег",
+        "time": "14:20",
+        "text": "Деплой перенесли на четвер."
+      },
+      {
+        "user": "Олег",
+        "time": "14:20",
+        "text": "Причина — Stripe ще не підтвердили production access."
+      }
+    ]
+  },
+  {
+    "id": "deployment-plan-with-dependencies",
+    "expected": "SUMMARIZE",
+    "messages": [
+      {
+        "user": "Олег",
+        "time": "14:20",
+        "text": "Деплой перенесли на четвер."
+      },
+      { "user": "Марина", "time": "14:21", "text": "Stripe?" },
+      {
+        "user": "Олег",
+        "time": "14:21",
+        "text": "Так, production access ще не підтвердили."
+      },
+      {
+        "user": "Марина",
+        "time": "14:23",
+        "text": "Тоді checkout поки лишаємо за feature flag."
+      },
+      {
+        "user": "Олег",
+        "time": "14:24",
+        "text": "Так. Решту релізу можемо катити незалежно."
+      },
+      { "user": "Марина", "time": "14:25", "text": "А міграцію БД?" },
+      {
+        "user": "Олег",
+        "time": "14:26",
+        "text": "Її запускаємо в середу ввечері, вона backward-compatible."
+      },
+      {
+        "user": "Марина",
+        "time": "14:27",
+        "text": "Тобто середа — migration, четвер — checkout після Stripe."
+      }
+    ]
+  },
+  {
+    "id": "memory-leak-investigation-open",
+    "expected": "DEFER_INCOMPLETE",
+    "messages": [
+      {
+        "user": "Аня",
+        "time": "16:10",
+        "text": "Я знайшла причину витоку пам'яті."
+      },
+      { "user": "Денис", "time": "16:10", "text": "де?" },
+      {
+        "user": "Аня",
+        "time": "16:11",
+        "text": "Схоже, subscriptions не dispose-яться після видалення компонента."
+      },
+      { "user": "Денис", "time": "16:11", "text": "точно?" },
+      {
+        "user": "Аня",
+        "time": "16:12",
+        "text": "Зараз перевіряю. Без devtools витік значно менший."
+      },
+      {
+        "user": "Денис",
+        "time": "16:13",
+        "text": "може самі devtools тримають references?"
+      },
+      {
+        "user": "Аня",
+        "time": "16:14",
+        "text": "Можливо. Запущу heap snapshot без них."
+      }
+    ]
+  },
+  {
+    "id": "unresolved-referents",
+    "expected": "DEFER_CONTEXT",
+    "messages": [
+      { "user": "Катя", "time": "09:14", "text": "Він погодився." },
+      { "user": "Роман", "time": "09:14", "text": "на другий варіант?" },
+      {
+        "user": "Катя",
+        "time": "09:15",
+        "text": "ні, на той що вчора обговорювали"
+      },
+      { "user": "Роман", "time": "09:15", "text": "тоді взагалі супер" },
+      {
+        "user": "Катя",
+        "time": "09:16",
+        "text": "так, до п'ятниці має бути готово"
+      }
+    ]
+  },
+  {
+    "id": "short-settled-database-choice",
+    "expected": "DEFER_COMPACT",
+    "messages": [
+      { "user": "Саша", "time": "18:40", "text": "Беремо PostgreSQL." },
+      { "user": "Іван", "time": "18:40", "text": "ок" }
+    ]
+  },
+  {
+    "id": "reactions-only",
+    "expected": "SKIP_REACTIONS",
+    "messages": [
+      { "user": "Саша", "time": "18:40", "text": "ахахах" },
+      { "user": "Іван", "time": "18:40", "text": "😭😭😭" },
+      { "user": "Марина", "time": "18:41", "text": "жесть" },
+      { "user": "Саша", "time": "18:41", "text": "ага" },
+      { "user": "Марина", "time": "18:41", "text": "💀" }
+    ]
+  },
+  {
+    "id": "vague-discussion",
+    "expected": "SKIP_NO_VALUE",
+    "messages": [
+      {
+        "user": "Макс",
+        "time": "20:01",
+        "text": "Мені здається треба щось змінити."
+      },
+      { "user": "Іра", "time": "20:02", "text": "можливо" },
+      { "user": "Макс", "time": "20:03", "text": "бо зараз якось не дуже" },
+      { "user": "Іра", "time": "20:03", "text": "ну так" },
+      { "user": "Макс", "time": "20:04", "text": "треба буде подумати" },
+      { "user": "Іра", "time": "20:04", "text": "угу" }
+    ]
+  },
+  {
+    "id": "cache-design-awaiting-options",
+    "expected": "DEFER_INCOMPLETE",
+    "messages": [
+      {
+        "user": "Макс",
+        "time": "20:01",
+        "text": "Треба змінити схему кешування API."
+      },
+      { "user": "Іра", "time": "20:02", "text": "що саме?" },
+      {
+        "user": "Макс",
+        "time": "20:03",
+        "text": "Кешуємо весь response, але це ламає персоналізовані поля."
+      },
+      { "user": "Іра", "time": "20:04", "text": "і що пропонуєш?" },
+      {
+        "user": "Макс",
+        "time": "20:05",
+        "text": "Є два варіанти. Зараз напишу."
+      }
+    ]
+  },
+  {
+    "id": "structured-renderer-invariants",
+    "expected": "DEFER_COMPACT",
+    "messages": [
+      {
+        "user": "Андрій",
+        "time": "22:10",
+        "text": "Правило для нового renderer: framework не повинен володіти моделлю стану; simulation core не імпортує Solid, React або DOM; UI отримує snapshot/state через adapter; renderer можна замінити без зміни simulation model."
+      }
+    ]
+  }
+]

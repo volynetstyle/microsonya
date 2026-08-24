@@ -1,0 +1,311 @@
+[
+  {
+    "id": "reactions-pair-pure",
+    "expected": "SKIP_REACTIONS",
+    "messages": [
+      { "user": "Леся", "time": "08:01", "text": "доброго ранку" },
+      { "user": "Тарас", "time": "08:01", "text": "привіт" },
+      { "user": "Леся", "time": "08:02", "text": "👍" },
+      { "user": "Тарас", "time": "08:02", "text": "ага" }
+    ]
+  },
+  {
+    "id": "reactions-pair-hidden-decision",
+    "expected": "DEFER_COMPACT",
+    "messages": [
+      { "user": "Леся", "time": "08:01", "text": "доброго ранку" },
+      { "user": "Тарас", "time": "08:01", "text": "привіт" },
+      {
+        "user": "Леся",
+        "time": "08:02",
+        "text": "Тоді залишаємо старий тариф до кінця кварталу."
+      },
+      { "user": "Тарас", "time": "08:02", "text": "👍" }
+    ]
+  },
+  {
+    "id": "banter-pair-pure",
+    "expected": "SKIP_BANTER",
+    "messages": [
+      {
+        "user": "Оля",
+        "time": "11:10",
+        "text": "Після третього rollback я вже principal time traveler."
+      },
+      {
+        "user": "Богдан",
+        "time": "11:11",
+        "text": "ще один — і отримаєш доступ до production минулого тижня"
+      },
+      {
+        "user": "Оля",
+        "time": "11:12",
+        "text": "додам це в performance review"
+      }
+    ]
+  },
+  {
+    "id": "banter-pair-real-action",
+    "expected": "DEFER_COMPACT",
+    "messages": [
+      {
+        "user": "Оля",
+        "time": "11:10",
+        "text": "Після третього rollback я вже principal time traveler."
+      },
+      {
+        "user": "Богдан",
+        "time": "11:11",
+        "text": "ще один — і отримаєш доступ до production минулого тижня"
+      },
+      {
+        "user": "Оля",
+        "time": "11:12",
+        "text": "А якщо серйозно: автоматичний rollback вимикаємо до виправлення health check."
+      },
+      { "user": "Богдан", "time": "11:13", "text": "домовились" }
+    ]
+  },
+  {
+    "id": "no-value-pair-vague",
+    "expected": "SKIP_NO_VALUE",
+    "messages": [
+      {
+        "user": "Ігор",
+        "time": "13:00",
+        "text": "Тут точно є системна проблема."
+      },
+      { "user": "Ніна", "time": "13:01", "text": "може бути" },
+      { "user": "Ігор", "time": "13:02", "text": "треба якось інакше" },
+      { "user": "Ніна", "time": "13:03", "text": "подумаємо" }
+    ]
+  },
+  {
+    "id": "no-value-pair-concrete-pending",
+    "expected": "DEFER_INCOMPLETE",
+    "messages": [
+      {
+        "user": "Ігор",
+        "time": "13:00",
+        "text": "У воркері invoice-export кожні шість хвилин подвоюється кількість retry jobs."
+      },
+      { "user": "Ніна", "time": "13:01", "text": "Через повторну доставку?" },
+      {
+        "user": "Ігор",
+        "time": "13:02",
+        "text": "Або через lease timeout. Зараз порівняю job IDs і напишу, яка версія підтвердилась."
+      }
+    ]
+  },
+  {
+    "id": "context-pair-unresolved-aliases",
+    "expected": "DEFER_CONTEXT",
+    "messages": [
+      {
+        "user": "Марта",
+        "time": "15:20",
+        "text": "Зелений погодив, але тільки після їхнього кроку."
+      },
+      { "user": "Роман", "time": "15:21", "text": "А Синій?" },
+      {
+        "user": "Марта",
+        "time": "15:22",
+        "text": "Він лишається на попередній схемі до вівторка."
+      }
+    ]
+  },
+  {
+    "id": "context-pair-locally-resolved-aliases",
+    "expected": "DEFER_COMPACT",
+    "messages": [
+      {
+        "user": "Марта",
+        "time": "15:20",
+        "text": "Зелений — команда Payments — погодив міграцію після ротації ключів командою Risk; Risk лишається на попередній схемі до вівторка."
+      }
+    ]
+  },
+  {
+    "id": "incomplete-pair-confident-opening",
+    "expected": "DEFER_INCOMPLETE",
+    "messages": [
+      {
+        "user": "Сергій",
+        "time": "17:30",
+        "text": "Причину падіння знайшов: новий pool allocator."
+      },
+      { "user": "Аліна", "time": "17:31", "text": "Підтвердив bisect?" },
+      {
+        "user": "Сергій",
+        "time": "17:32",
+        "text": "Ще ні. Збірка без allocator зараз на CI; якщо теж впаде, причина інша."
+      }
+    ]
+  },
+  {
+    "id": "incomplete-pair-verified-result",
+    "expected": "DEFER_COMPACT",
+    "messages": [
+      {
+        "user": "Сергій",
+        "time": "17:30",
+        "text": "Причину падіння знайшов: новий pool allocator."
+      },
+      { "user": "Аліна", "time": "17:31", "text": "Підтвердив bisect?" },
+      {
+        "user": "Сергій",
+        "time": "17:32",
+        "text": "Так. П'ять запусків без allocator пройшли, а з ним відтворили падіння п'ять із п'яти."
+      }
+    ]
+  },
+  {
+    "id": "compact-pair-long-single-status",
+    "expected": "DEFER_COMPACT",
+    "messages": [
+      {
+        "user": "Дарина",
+        "time": "09:40",
+        "text": "Статус імпорту: 18 420 із 18 420 записів завантажено, 37 дублікатів пропущено за idempotency key, контрольні суми збіглися, повторний запуск нічого не змінив; імпорт завершено успішно."
+      }
+    ]
+  },
+  {
+    "id": "compact-pair-connected-rollout-model",
+    "expected": "SUMMARIZE",
+    "messages": [
+      {
+        "user": "Дарина",
+        "time": "09:40",
+        "text": "Імпорт 18 420 записів завершено; 37 дублікатів пропущено."
+      },
+      { "user": "Павло", "time": "09:41", "text": "Контрольні суми?" },
+      {
+        "user": "Дарина",
+        "time": "09:42",
+        "text": "Збіглися, тому стару таблицю переводимо read-only."
+      },
+      { "user": "Павло", "time": "09:43", "text": "Коли перемикаємо читання?" },
+      {
+        "user": "Дарина",
+        "time": "09:44",
+        "text": "Після ранкового backup. Якщо error rate понад 0.5%, повертаємо читання на стару таблицю; нові записи весь час dual-write."
+      },
+      {
+        "user": "Павло",
+        "time": "09:45",
+        "text": "Отже: backup, read switch, контроль error rate, rollback лише читання; dual-write не чіпаємо."
+      }
+    ]
+  },
+  {
+    "id": "invariants-pair-compact-contract",
+    "expected": "DEFER_COMPACT",
+    "messages": [
+      {
+        "user": "Юрко",
+        "time": "19:00",
+        "text": "Контракт черги: producer не знає про transport; envelope завжди містить schemaVersion; consumer ідемпотентний; невідома версія йде в quarantine; replay не змінює event ID."
+      }
+    ]
+  },
+  {
+    "id": "invariants-pair-contract-with-migration",
+    "expected": "SUMMARIZE",
+    "messages": [
+      {
+        "user": "Юрко",
+        "time": "19:00",
+        "text": "Контракт черги: producer не знає про transport; envelope містить schemaVersion; consumer ідемпотентний; невідома версія йде в quarantine."
+      },
+      {
+        "user": "Ліда",
+        "time": "19:01",
+        "text": "Як переходимо зі старих подій без schemaVersion?"
+      },
+      {
+        "user": "Юрко",
+        "time": "19:02",
+        "text": "Gateway тимчасово ставить v1, потім запускаємо replay з незмінним event ID."
+      },
+      { "user": "Ліда", "time": "19:03", "text": "Коли прибираємо fallback?" },
+      {
+        "user": "Юрко",
+        "time": "19:04",
+        "text": "Коли lag старої черги стане нульовим і quarantine буде порожнім 48 годин."
+      }
+    ]
+  },
+  {
+    "id": "decision-pair-single-with-noise",
+    "expected": "DEFER_COMPACT",
+    "messages": [
+      {
+        "user": "Віра",
+        "time": "21:10",
+        "text": "Може назвемо реліз «Капібара»?"
+      },
+      {
+        "user": "Антон",
+        "time": "21:11",
+        "text": "тільки якщо логотип у панамі"
+      },
+      {
+        "user": "Віра",
+        "time": "21:12",
+        "text": "По суті: релізимо 3.4.1 без нового search index."
+      },
+      { "user": "Антон", "time": "21:13", "text": "підтверджую" },
+      { "user": "Віра", "time": "21:14", "text": "а капібару ще обговоримо 😄" }
+    ]
+  },
+  {
+    "id": "decision-pair-multi-stage-release",
+    "expected": "SUMMARIZE",
+    "messages": [
+      {
+        "user": "Віра",
+        "time": "21:10",
+        "text": "Релізимо 3.4.1 без нового search index."
+      },
+      { "user": "Антон", "time": "21:11", "text": "Index тоді окремо?" },
+      {
+        "user": "Віра",
+        "time": "21:12",
+        "text": "Так: у понеділок backfill на replica, у вівторок shadow queries, у середу 10% трафіку."
+      },
+      { "user": "Антон", "time": "21:13", "text": "Критерій продовження?" },
+      {
+        "user": "Віра",
+        "time": "21:14",
+        "text": "p95 не гірше ніж +8 ms і mismatch нижче 0.1%; інакше трафік повертаємо на старий index."
+      }
+    ]
+  },
+  {
+    "id": "reaction-word-pair-social",
+    "expected": "SKIP_REACTIONS",
+    "messages": [
+      { "user": "Кіра", "time": "23:50", "text": "жесть" },
+      { "user": "Лев", "time": "23:50", "text": "реально" },
+      { "user": "Кіра", "time": "23:51", "text": "😬" }
+    ]
+  },
+  {
+    "id": "reaction-word-pair-concrete-result",
+    "expected": "DEFER_COMPACT",
+    "messages": [
+      {
+        "user": "Кіра",
+        "time": "23:50",
+        "text": "жесть: черга виросла до 900 тисяч повідомлень"
+      },
+      { "user": "Лев", "time": "23:50", "text": "Після scale-up падає?" },
+      {
+        "user": "Кіра",
+        "time": "23:51",
+        "text": "Так, за 12 хвилин повернулась до нуля; втрат повідомлень немає."
+      }
+    ]
+  }
+]

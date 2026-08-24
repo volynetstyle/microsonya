@@ -1,0 +1,19 @@
+{
+  "total": 50,
+  "correct": 0,
+  "accuracy": 0,
+  "think": false,
+  "generationOptions": {
+    "temperature": 0.2,
+    "topK": 20,
+    "topP": 0.9,
+    "minP": 0,
+    "numPredict": 16,
+    "repeatPenalty": 1,
+    "presencePenalty": 0,
+    "frequencyPenalty": 0,
+    "stop": [
+      "\n"
+    ]
+  }
+}

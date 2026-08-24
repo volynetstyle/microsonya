@@ -1,0 +1,778 @@
+{
+  "id": "compaction-blind-v1",
+  "promptVersion": "v10",
+  "families": [
+    {
+      "id": "reaction-only",
+      "expected": "SKIP_REACTIONS",
+      "variants": [
+        {
+          "id": "software-uk",
+          "domain": "software",
+          "language": "uk",
+          "messages": [
+            { "user": "A", "time": "09:00", "text": "ого" },
+            { "user": "B", "time": "09:01", "text": "++" },
+            { "user": "A", "time": "09:02", "text": "😅" }
+          ]
+        },
+        {
+          "id": "business-en",
+          "domain": "business",
+          "language": "en",
+          "messages": [
+            { "user": "Mia", "time": "09:00", "text": "good morning" },
+            { "user": "Noah", "time": "09:01", "text": "morning" },
+            { "user": "Mia", "time": "09:02", "text": "👍" }
+          ]
+        },
+        {
+          "id": "everyday-uk",
+          "domain": "everyday",
+          "language": "uk",
+          "messages": [
+            { "user": "Іра", "time": "09:00", "text": "ахаха" },
+            { "user": "Лев", "time": "09:01", "text": "та взагалі" },
+            { "user": "Іра", "time": "09:02", "text": "😂" }
+          ]
+        },
+        {
+          "id": "legal-es",
+          "domain": "legal",
+          "language": "es",
+          "messages": [
+            { "user": "Ana", "time": "09:00", "text": "vaya" },
+            { "user": "Luis", "time": "09:01", "text": "sí" },
+            { "user": "Ana", "time": "09:02", "text": "😮" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reaction-with-decision",
+      "expected": "DEFER_COMPACT",
+      "variants": [
+        {
+          "id": "software-uk",
+          "domain": "software",
+          "language": "uk",
+          "messages": [
+            { "user": "A", "time": "09:00", "text": "ого" },
+            {
+              "user": "B",
+              "time": "09:01",
+              "text": "Залишаємо попередній scheduler до наступного релізу."
+            },
+            { "user": "A", "time": "09:02", "text": "👍" }
+          ]
+        },
+        {
+          "id": "business-en",
+          "domain": "business",
+          "language": "en",
+          "messages": [
+            { "user": "Mia", "time": "09:00", "text": "good morning" },
+            {
+              "user": "Noah",
+              "time": "09:01",
+              "text": "We will keep the current supplier through June."
+            },
+            { "user": "Mia", "time": "09:02", "text": "👍" }
+          ]
+        },
+        {
+          "id": "everyday-uk",
+          "domain": "everyday",
+          "language": "uk",
+          "messages": [
+            { "user": "Іра", "time": "09:00", "text": "ахаха" },
+            {
+              "user": "Лев",
+              "time": "09:01",
+              "text": "Зустрічаємось біля вокзалу о сьомій."
+            },
+            { "user": "Іра", "time": "09:02", "text": "😂 добре" }
+          ]
+        },
+        {
+          "id": "legal-es",
+          "domain": "legal",
+          "language": "es",
+          "messages": [
+            { "user": "Ana", "time": "09:00", "text": "vaya" },
+            {
+              "user": "Luis",
+              "time": "09:01",
+              "text": "Presentaremos la solicitud bajo el procedimiento anterior."
+            },
+            { "user": "Ana", "time": "09:02", "text": "de acuerdo" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "banter-only",
+      "expected": "SKIP_BANTER",
+      "variants": [
+        {
+          "id": "software-uk",
+          "domain": "software",
+          "language": "uk",
+          "messages": [
+            {
+              "user": "Дан",
+              "time": "10:00",
+              "text": "Після такого diff я вже археолог."
+            },
+            {
+              "user": "Яна",
+              "time": "10:01",
+              "text": "ще один commit — і видадуть пензлик"
+            }
+          ]
+        },
+        {
+          "id": "business-en",
+          "domain": "business",
+          "language": "en",
+          "messages": [
+            {
+              "user": "Amy",
+              "time": "10:00",
+              "text": "This spreadsheet has achieved consciousness."
+            },
+            {
+              "user": "Ben",
+              "time": "10:01",
+              "text": "promote it before it asks for equity"
+            }
+          ]
+        },
+        {
+          "id": "everyday-uk",
+          "domain": "everyday",
+          "language": "uk",
+          "messages": [
+            {
+              "user": "Оля",
+              "time": "10:00",
+              "text": "Мій фікус знову проводить performance review."
+            },
+            {
+              "user": "Макс",
+              "time": "10:01",
+              "text": "цього разу ти пройдеш probation"
+            }
+          ]
+        },
+        {
+          "id": "research-es",
+          "domain": "research",
+          "language": "es",
+          "messages": [
+            {
+              "user": "Sol",
+              "time": "10:00",
+              "text": "La centrifugadora ya es la autora principal."
+            },
+            {
+              "user": "Paz",
+              "time": "10:01",
+              "text": "que también responda a los revisores"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "banter-with-action",
+      "expected": "DEFER_COMPACT",
+      "variants": [
+        {
+          "id": "software-uk",
+          "domain": "software",
+          "language": "uk",
+          "messages": [
+            {
+              "user": "Дан",
+              "time": "10:00",
+              "text": "Після такого diff я вже археолог."
+            },
+            {
+              "user": "Яна",
+              "time": "10:01",
+              "text": "Серйозно: цей модуль заморожуємо до завершення аудиту."
+            }
+          ]
+        },
+        {
+          "id": "business-en",
+          "domain": "business",
+          "language": "en",
+          "messages": [
+            {
+              "user": "Amy",
+              "time": "10:00",
+              "text": "This spreadsheet has achieved consciousness."
+            },
+            {
+              "user": "Ben",
+              "time": "10:01",
+              "text": "Seriously, finance will own the forecast from Monday."
+            }
+          ]
+        },
+        {
+          "id": "everyday-uk",
+          "domain": "everyday",
+          "language": "uk",
+          "messages": [
+            {
+              "user": "Оля",
+              "time": "10:00",
+              "text": "Мій фікус проводить performance review."
+            },
+            {
+              "user": "Макс",
+              "time": "10:01",
+              "text": "А без жартів: поливаємо його тільки щосуботи."
+            }
+          ]
+        },
+        {
+          "id": "research-es",
+          "domain": "research",
+          "language": "es",
+          "messages": [
+            {
+              "user": "Sol",
+              "time": "10:00",
+              "text": "La centrifugadora ya es la autora principal."
+            },
+            {
+              "user": "Paz",
+              "time": "10:01",
+              "text": "En serio: repetiremos todas las muestras del lote siete."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "vague-no-value",
+      "expected": "SKIP_NO_VALUE",
+      "variants": [
+        {
+          "id": "software-uk",
+          "domain": "software",
+          "language": "uk",
+          "messages": [
+            { "user": "A", "time": "11:00", "text": "Тут щось не так." },
+            {
+              "user": "B",
+              "time": "11:01",
+              "text": "зараз перевіряю, але поки незрозуміло що саме"
+            }
+          ]
+        },
+        {
+          "id": "business-en",
+          "domain": "business",
+          "language": "en",
+          "messages": [
+            {
+              "user": "A",
+              "time": "11:00",
+              "text": "The process should somehow be better."
+            },
+            { "user": "B", "time": "11:01", "text": "We can revisit it later." }
+          ]
+        },
+        {
+          "id": "everyday-uk",
+          "domain": "everyday",
+          "language": "uk",
+          "messages": [
+            { "user": "A", "time": "11:00", "text": "Треба щось вирішити." },
+            { "user": "B", "time": "11:01", "text": "можливо" }
+          ]
+        },
+        {
+          "id": "foreign-es",
+          "domain": "education",
+          "language": "es",
+          "messages": [
+            {
+              "user": "A",
+              "time": "11:00",
+              "text": "La clase debería ser distinta de alguna manera."
+            },
+            { "user": "B", "time": "11:01", "text": "ya lo pensaremos" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "concrete-pending",
+      "expected": "DEFER_INCOMPLETE",
+      "variants": [
+        {
+          "id": "software-uk",
+          "domain": "software",
+          "language": "uk",
+          "messages": [
+            {
+              "user": "A",
+              "time": "11:00",
+              "text": "Worker billing-sync повторно створює invoice після lease timeout."
+            },
+            {
+              "user": "B",
+              "time": "11:01",
+              "text": "Логи ще обробляються; причина може бути в ack або retry policy."
+            }
+          ]
+        },
+        {
+          "id": "business-en",
+          "domain": "business",
+          "language": "en",
+          "messages": [
+            {
+              "user": "A",
+              "time": "11:00",
+              "text": "Warehouse 12 reports twice as many returned units as scanned parcels."
+            },
+            {
+              "user": "B",
+              "time": "11:01",
+              "text": "The recount has not established whether intake or reporting is wrong."
+            }
+          ]
+        },
+        {
+          "id": "everyday-uk",
+          "domain": "everyday",
+          "language": "uk",
+          "messages": [
+            {
+              "user": "A",
+              "time": "11:00",
+              "text": "Після заміни фільтра тиск у котлі падає щогодини."
+            },
+            {
+              "user": "B",
+              "time": "11:01",
+              "text": "Майстер ще не визначив, це датчик чи витік."
+            }
+          ]
+        },
+        {
+          "id": "foreign-es",
+          "domain": "manufacturing",
+          "language": "es",
+          "messages": [
+            {
+              "user": "A",
+              "time": "11:00",
+              "text": "La prensa de la línea cuatro deja una grieta junto a la soldadura."
+            },
+            {
+              "user": "B",
+              "time": "11:01",
+              "text": "La microscopía aún no confirma si falla la aleación o la temperatura."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "unresolved-context",
+      "expected": "DEFER_CONTEXT",
+      "variants": [
+        {
+          "id": "software-uk",
+          "domain": "software",
+          "language": "uk",
+          "messages": [
+            {
+              "user": "A",
+              "time": "12:00",
+              "text": "Вони залишили його на старій схемі після її кроку."
+            },
+            { "user": "B", "time": "12:01", "text": "до середи?" },
+            { "user": "A", "time": "12:02", "text": "так" }
+          ]
+        },
+        {
+          "id": "business-en",
+          "domain": "business",
+          "language": "en",
+          "messages": [
+            {
+              "user": "A",
+              "time": "12:00",
+              "text": "The northern group accepted the earlier arrangement after their part."
+            },
+            { "user": "B", "time": "12:01", "text": "before close?" },
+            { "user": "A", "time": "12:02", "text": "yes" }
+          ]
+        },
+        {
+          "id": "everyday-uk",
+          "domain": "everyday",
+          "language": "uk",
+          "messages": [
+            {
+              "user": "A",
+              "time": "12:00",
+              "text": "Візьми той, що вона радила після їхньої поїздки."
+            },
+            { "user": "B", "time": "12:01", "text": "на п'ятницю?" },
+            { "user": "A", "time": "12:02", "text": "угу" }
+          ]
+        },
+        {
+          "id": "logistics-es",
+          "domain": "logistics",
+          "language": "es",
+          "messages": [
+            {
+              "user": "A",
+              "time": "12:00",
+              "text": "Ellos lo enviarán por la ruta anterior después de su autorización."
+            },
+            { "user": "B", "time": "12:01", "text": "¿antes del martes?" },
+            { "user": "A", "time": "12:02", "text": "sí" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "resolved-context",
+      "expected": "DEFER_COMPACT",
+      "variants": [
+        {
+          "id": "software-uk",
+          "domain": "software",
+          "language": "uk",
+          "messages": [
+            {
+              "user": "A",
+              "time": "12:00",
+              "text": "Команда Search залишила indexer на старій схемі після ротації ключів командою Platform, до середи."
+            }
+          ]
+        },
+        {
+          "id": "business-en",
+          "domain": "business",
+          "language": "en",
+          "messages": [
+            {
+              "user": "A",
+              "time": "12:00",
+              "text": "The northern sales group accepted the January pricing arrangement after finance approval, before close."
+            }
+          ]
+        },
+        {
+          "id": "everyday-uk",
+          "domain": "everyday",
+          "language": "uk",
+          "messages": [
+            {
+              "user": "A",
+              "time": "12:00",
+              "text": "На п'ятницю візьми синю валізу, яку Олена радила після поїздки до Львова."
+            }
+          ]
+        },
+        {
+          "id": "logistics-es",
+          "domain": "logistics",
+          "language": "es",
+          "messages": [
+            {
+              "user": "A",
+              "time": "12:00",
+              "text": "El transportista Norte enviará el lote 18 por la ruta costera después de la autorización aduanera, antes del martes."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "unverified-hypothesis",
+      "expected": "DEFER_INCOMPLETE",
+      "variants": [
+        {
+          "id": "software-uk",
+          "domain": "software",
+          "language": "uk",
+          "messages": [
+            {
+              "user": "A",
+              "time": "13:00",
+              "text": "Причина, напевно, у новому allocator."
+            },
+            {
+              "user": "B",
+              "time": "13:01",
+              "text": "Контрольна збірка ще виконується."
+            }
+          ]
+        },
+        {
+          "id": "business-en",
+          "domain": "business",
+          "language": "en",
+          "messages": [
+            {
+              "user": "A",
+              "time": "13:00",
+              "text": "The missing revenue may come from delayed currency conversion."
+            },
+            {
+              "user": "B",
+              "time": "13:01",
+              "text": "The ledger reconciliation has not finished."
+            }
+          ]
+        },
+        {
+          "id": "everyday-uk",
+          "domain": "everyday",
+          "language": "uk",
+          "messages": [
+            {
+              "user": "A",
+              "time": "13:00",
+              "text": "Мабуть, холодильник гріється через ущільнювач."
+            },
+            {
+              "user": "B",
+              "time": "13:01",
+              "text": "Тест із термометром ще триває."
+            }
+          ]
+        },
+        {
+          "id": "research-es",
+          "domain": "research",
+          "language": "es",
+          "messages": [
+            {
+              "user": "A",
+              "time": "13:00",
+              "text": "La señal podría deberse al segundo reactivo."
+            },
+            {
+              "user": "B",
+              "time": "13:01",
+              "text": "La muestra de control sigue incubándose."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "verified-result",
+      "expected": "DEFER_COMPACT",
+      "variants": [
+        {
+          "id": "software-uk",
+          "domain": "software",
+          "language": "uk",
+          "messages": [
+            {
+              "user": "A",
+              "time": "13:00",
+              "text": "Bisect підтвердив новий allocator: без нього 8 запусків пройшли, з ним 8 із 8 впали."
+            }
+          ]
+        },
+        {
+          "id": "business-en",
+          "domain": "business",
+          "language": "en",
+          "messages": [
+            {
+              "user": "A",
+              "time": "13:00",
+              "text": "The reconciled ledger confirmed that delayed currency conversion caused the missing revenue."
+            }
+          ]
+        },
+        {
+          "id": "everyday-uk",
+          "domain": "everyday",
+          "language": "uk",
+          "messages": [
+            {
+              "user": "A",
+              "time": "13:00",
+              "text": "Термометр підтвердив витік через ущільнювач; після заміни температура стабільна."
+            }
+          ]
+        },
+        {
+          "id": "research-es",
+          "domain": "research",
+          "language": "es",
+          "messages": [
+            {
+              "user": "A",
+              "time": "13:00",
+              "text": "La muestra de control confirmó que el segundo reactivo causaba la señal."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "compact-status",
+      "expected": "DEFER_COMPACT",
+      "variants": [
+        {
+          "id": "software-uk",
+          "domain": "software",
+          "language": "uk",
+          "messages": [
+            {
+              "user": "A",
+              "time": "14:00",
+              "text": "Backfill завершено: 52 тисячі записів, checksum збігся, повторний запуск змін не вніс."
+            }
+          ]
+        },
+        {
+          "id": "business-en",
+          "domain": "business",
+          "language": "en",
+          "messages": [
+            {
+              "user": "A",
+              "time": "14:00",
+              "text": "The annual audit is complete: all balances reconcile and no material exceptions remain."
+            }
+          ]
+        },
+        {
+          "id": "everyday-uk",
+          "domain": "everyday",
+          "language": "uk",
+          "messages": [
+            {
+              "user": "A",
+              "time": "14:00",
+              "text": "Ремонт завершено: трубу замінили, тиск стабільний, протікання немає."
+            }
+          ]
+        },
+        {
+          "id": "manufacturing-es",
+          "domain": "manufacturing",
+          "language": "es",
+          "messages": [
+            {
+              "user": "A",
+              "time": "14:00",
+              "text": "La calibración terminó: las 200 piezas cumplen tolerancia y la repetición no cambió el resultado."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "multi-stage-model",
+      "expected": "SUMMARIZE",
+      "variants": [
+        {
+          "id": "software-uk",
+          "domain": "software",
+          "language": "uk",
+          "messages": [
+            { "user": "A", "time": "14:00", "text": "Backfill завершено." },
+            {
+              "user": "B",
+              "time": "14:01",
+              "text": "Після backup перемикаємо 10% читання; при mismatch понад 0.1% робимо rollback, dual-write лишається."
+            }
+          ]
+        },
+        {
+          "id": "business-en",
+          "domain": "business",
+          "language": "en",
+          "messages": [
+            { "user": "A", "time": "14:00", "text": "The audit is complete." },
+            {
+              "user": "B",
+              "time": "14:01",
+              "text": "Finance closes first, legal reviews exceptions next, and filing proceeds only if exposure stays below the threshold; otherwise we reopen the ledger."
+            }
+          ]
+        },
+        {
+          "id": "everyday-uk",
+          "domain": "everyday",
+          "language": "uk",
+          "messages": [
+            { "user": "A", "time": "14:00", "text": "Трубу замінили." },
+            {
+              "user": "B",
+              "time": "14:01",
+              "text": "Завтра перевіряємо тиск, потім відкриваємо основний клапан; якщо знову тече, повертаємо резервну лінію."
+            }
+          ]
+        },
+        {
+          "id": "manufacturing-es",
+          "domain": "manufacturing",
+          "language": "es",
+          "messages": [
+            { "user": "A", "time": "14:00", "text": "La calibración terminó." },
+            {
+              "user": "B",
+              "time": "14:01",
+              "text": "Primero producimos 200 piezas, después inspeccionamos el 20%, ampliamos el lote si los defectos quedan bajo 0.2% y volvemos al ajuste anterior si superan el límite."
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "sensitivityPairs": [
+    {
+      "id": "reaction-to-decision",
+      "leftFamily": "reaction-only",
+      "rightFamily": "reaction-with-decision"
+    },
+    {
+      "id": "banter-to-action",
+      "leftFamily": "banter-only",
+      "rightFamily": "banter-with-action"
+    },
+    {
+      "id": "vague-to-concrete",
+      "leftFamily": "vague-no-value",
+      "rightFamily": "concrete-pending"
+    },
+    {
+      "id": "unresolved-to-resolved",
+      "leftFamily": "unresolved-context",
+      "rightFamily": "resolved-context"
+    },
+    {
+      "id": "hypothesis-to-result",
+      "leftFamily": "unverified-hypothesis",
+      "rightFamily": "verified-result"
+    },
+    {
+      "id": "status-to-model",
+      "leftFamily": "compact-status",
+      "rightFamily": "multi-stage-model"
+    }
+  ]
+}

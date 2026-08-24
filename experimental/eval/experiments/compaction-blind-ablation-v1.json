@@ -1,0 +1,26 @@
+{
+  "dataset": "compaction-blind-v1",
+  "models": ["gpt-oss:120b-cloud"],
+  "reasoning": ["low"],
+  "think": "low",
+  "seeds": [42],
+  "promptVariants": [
+    "original",
+    "rules-only",
+    "lexical-clones",
+    "cross-domain",
+    "cross-language"
+  ],
+  "generationOptions": {
+    "temperature": 0,
+    "topK": 1,
+    "topP": 1,
+    "minP": 0,
+    "numPredict": 256,
+    "repeatPenalty": 1,
+    "presencePenalty": 0,
+    "frequencyPenalty": 0
+  },
+  "promptVersion": "v10",
+  "bootstrapSamples": 2000
+}

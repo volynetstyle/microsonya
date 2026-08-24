@@ -62,6 +62,43 @@ and run success. It deliberately does not collapse them into one quality
 score. `reasoning-paired.csv` compares every target level with `low` separately
 for every metric and produces a 95% cluster-bootstrap interval over cases.
 
+## Blind compaction-boundary evaluation
+
+`compaction-blind-v1` is a held-out classifier evaluation for the frozen `v10`
+policy. It contains 12 semantic families with four surface/domain/language
+variants each. Six paired interventions align variant IDs across two families,
+so a transition passes only when both sides are correct and the expected label
+change occurs. Within-family pairs measure invariance to irrelevant surface
+changes.
+
+Run the one-time frozen-prompt baseline (48 calls):
+
+```bash
+pnpm eval:compaction:blind compaction-blind-baseline-v1
+```
+
+Validate the full five-way example ablation without model calls:
+
+```bash
+pnpm eval:compaction:blind compaction-blind-ablation-v1 --validate-only
+```
+
+The full ablation compares current examples, rules only, lexically unrelated
+examples, unrelated-domain examples, and Spanish examples (240 calls):
+
+```bash
+pnpm eval:compaction:blind compaction-blind-ablation-v1
+```
+
+`summary.json` reports completion, valid-label and case accuracy; mean and
+strict family accuracy; sensitivity-transition and surface-invariance rates;
+domain/language breakdowns and domain gap; plus deterministic 95% bootstrap
+intervals resampled by paired semantic boundary rather than by clone.
+`prompt-variant-agreement.json` compares labels for the same held-out case
+across ablation prompts. After the first blind run, failures are diagnostic:
+do not tune `v10` on them. Any future policy change turns this holdout into a
+regression set and requires a new blind dataset.
+
 ## Behavioral evaluation
 
 `behavioral-v1` treats each chat as a family of related executions rather than

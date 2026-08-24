@@ -5,10 +5,24 @@ export type RunConfig = {
   model: string;
   prompt: string;
   reasoning: Reasoning;
+  think?: Reasoning | boolean;
   seed: number;
+  generationOptions?: GenerationOptions;
   baseUrl?: string;
   apiKey?: string;
   timeoutMs?: number;
+};
+
+export type GenerationOptions = {
+  temperature?: number;
+  topK?: number;
+  topP?: number;
+  minP?: number;
+  numPredict?: number;
+  repeatPenalty?: number;
+  presencePenalty?: number;
+  frequencyPenalty?: number;
+  stop?: string[];
 };
 
 export type OllamaResult = {
@@ -60,9 +74,20 @@ export async function runOllama(config: RunConfig): Promise<OllamaResult> {
       body: JSON.stringify({
         model: config.model,
         stream: false,
-        think: config.reasoning,
+        think: config.think ?? config.reasoning,
         messages: [{ role: "user", content: config.prompt }],
-        options: { seed: config.seed, temperature: 1, top_p: 1 },
+        options: {
+          seed: config.seed,
+          temperature: config.generationOptions?.temperature ?? 1,
+          top_k: config.generationOptions?.topK,
+          top_p: config.generationOptions?.topP ?? 1,
+          min_p: config.generationOptions?.minP,
+          num_predict: config.generationOptions?.numPredict,
+          repeat_penalty: config.generationOptions?.repeatPenalty,
+          presence_penalty: config.generationOptions?.presencePenalty,
+          frequency_penalty: config.generationOptions?.frequencyPenalty,
+          stop: config.generationOptions?.stop,
+        },
       }),
     });
   } catch (error) {

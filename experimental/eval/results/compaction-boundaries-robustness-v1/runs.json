@@ -1,0 +1,1702 @@
+[
+  {
+    "fixture": "banter-with-professional-words",
+    "expected": "SKIP_BANTER",
+    "actual": null,
+    "correct": false,
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "think": false,
+    "generationOptions": {
+      "temperature": 0.2,
+      "topK": 20,
+      "topP": 0.9,
+      "minP": 0,
+      "numPredict": 16,
+      "repeatPenalty": 1,
+      "presencePenalty": 0,
+      "frequencyPenalty": 0,
+      "stop": [
+        "\n"
+      ]
+    },
+    "seed": 1,
+    "raw": "",
+    "thinking": "We need to apply rules.\n\nWe have messages in Ukrainian. Content",
+    "usage": {
+      "durationMs": 449.15720000000005,
+      "ollamaTotalMs": 245.091851,
+      "promptEvalCount": 566,
+      "evalCount": 16,
+      "doneReason": "length",
+      "thinkingTextTokenCount": 13,
+      "finalTextTokenCount": 0
+    }
+  },
+  {
+    "fixture": "banter-with-professional-words",
+    "expected": "SKIP_BANTER",
+    "actual": null,
+    "correct": false,
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "think": false,
+    "generationOptions": {
+      "temperature": 0.2,
+      "topK": 20,
+      "topP": 0.9,
+      "minP": 0,
+      "numPredict": 16,
+      "repeatPenalty": 1,
+      "presencePenalty": 0,
+      "frequencyPenalty": 0,
+      "stop": [
+        "\n"
+      ]
+    },
+    "seed": 2,
+    "raw": "",
+    "thinking": "We need to apply rules.\n\nWe have messages in Ukrainian. Content",
+    "usage": {
+      "durationMs": 1214.9309999999998,
+      "ollamaTotalMs": 976.113612,
+      "promptEvalCount": 566,
+      "evalCount": 16,
+      "doneReason": "length",
+      "thinkingTextTokenCount": 13,
+      "finalTextTokenCount": 0
+    }
+  },
+  {
+    "fixture": "banter-with-professional-words",
+    "expected": "SKIP_BANTER",
+    "actual": null,
+    "correct": false,
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "think": false,
+    "generationOptions": {
+      "temperature": 0.2,
+      "topK": 20,
+      "topP": 0.9,
+      "minP": 0,
+      "numPredict": 16,
+      "repeatPenalty": 1,
+      "presencePenalty": 0,
+      "frequencyPenalty": 0,
+      "stop": [
+        "\n"
+      ]
+    },
+    "seed": 3,
+    "raw": "",
+    "thinking": "We need to apply rules.\n\nWe have messages in Ukrainian. Content",
+    "usage": {
+      "durationMs": 428.69510000000037,
+      "ollamaTotalMs": 271.07283,
+      "promptEvalCount": 566,
+      "evalCount": 16,
+      "doneReason": "length",
+      "thinkingTextTokenCount": 13,
+      "finalTextTokenCount": 0
+    }
+  },
+  {
+    "fixture": "banter-with-professional-words",
+    "expected": "SKIP_BANTER",
+    "actual": null,
+    "correct": false,
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "think": false,
+    "generationOptions": {
+      "temperature": 0.2,
+      "topK": 20,
+      "topP": 0.9,
+      "minP": 0,
+      "numPredict": 16,
+      "repeatPenalty": 1,
+      "presencePenalty": 0,
+      "frequencyPenalty": 0,
+      "stop": [
+        "\n"
+      ]
+    },
+    "seed": 4,
+    "raw": "",
+    "thinking": "We need to apply rules.\n\nWe have messages in Ukrainian. Content",
+    "usage": {
+      "durationMs": 1238.2242,
+      "ollamaTotalMs": 1024.263961,
+      "promptEvalCount": 566,
+      "evalCount": 16,
+      "doneReason": "length",
+      "thinkingTextTokenCount": 13,
+      "finalTextTokenCount": 0
+    }
+  },
+  {
+    "fixture": "banter-with-professional-words",
+    "expected": "SKIP_BANTER",
+    "actual": null,
+    "correct": false,
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "think": false,
+    "generationOptions": {
+      "temperature": 0.2,
+      "topK": 20,
+      "topP": 0.9,
+      "minP": 0,
+      "numPredict": 16,
+      "repeatPenalty": 1,
+      "presencePenalty": 0,
+      "frequencyPenalty": 0,
+      "stop": [
+        "\n"
+      ]
+    },
+    "seed": 5,
+    "raw": "",
+    "thinking": "We need to apply rules in order.\n\nWe have messages in Ukrainian",
+    "usage": {
+      "durationMs": 1481.4955999999997,
+      "ollamaTotalMs": 1323.233768,
+      "promptEvalCount": 566,
+      "evalCount": 16,
+      "doneReason": "length",
+      "thinkingTextTokenCount": 13,
+      "finalTextTokenCount": 0
+    }
+  },
+  {
+    "fixture": "short-complete-deployment-update",
+    "expected": "DEFER_COMPACT",
+    "actual": null,
+    "correct": false,
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "think": false,
+    "generationOptions": {
+      "temperature": 0.2,
+      "topK": 20,
+      "topP": 0.9,
+      "minP": 0,
+      "numPredict": 16,
+      "repeatPenalty": 1,
+      "presencePenalty": 0,
+      "frequencyPenalty": 0,
+      "stop": [
+        "\n"
+      ]
+    },
+    "seed": 1,
+    "raw": "",
+    "thinking": "We need to apply rules.\n\nWe have two messages: \"О",
+    "usage": {
+      "durationMs": 1113.9937999999993,
+      "ollamaTotalMs": 949.314535,
+      "promptEvalCount": 480,
+      "evalCount": 16,
+      "doneReason": "length",
+      "thinkingTextTokenCount": 13,
+      "finalTextTokenCount": 0
+    }
+  },
+  {
+    "fixture": "short-complete-deployment-update",
+    "expected": "DEFER_COMPACT",
+    "actual": null,
+    "correct": false,
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "think": false,
+    "generationOptions": {
+      "temperature": 0.2,
+      "topK": 20,
+      "topP": 0.9,
+      "minP": 0,
+      "numPredict": 16,
+      "repeatPenalty": 1,
+      "presencePenalty": 0,
+      "frequencyPenalty": 0,
+      "stop": [
+        "\n"
+      ]
+    },
+    "seed": 2,
+    "raw": "",
+    "thinking": "We need to apply rules.\n\nWe have two messages: both substantive",
+    "usage": {
+      "durationMs": 1160.7522999999992,
+      "ollamaTotalMs": 973.176076,
+      "promptEvalCount": 480,
+      "evalCount": 16,
+      "doneReason": "length",
+      "thinkingTextTokenCount": 13,
+      "finalTextTokenCount": 0
+    }
+  },
+  {
+    "fixture": "short-complete-deployment-update",
+    "expected": "DEFER_COMPACT",
+    "actual": null,
+    "correct": false,
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "think": false,
+    "generationOptions": {
+      "temperature": 0.2,
+      "topK": 20,
+      "topP": 0.9,
+      "minP": 0,
+      "numPredict": 16,
+      "repeatPenalty": 1,
+      "presencePenalty": 0,
+      "frequencyPenalty": 0,
+      "stop": [
+        "\n"
+      ]
+    },
+    "seed": 3,
+    "raw": "",
+    "thinking": "We need to apply rules in order.\n\nWe have messages:\n\n[",
+    "usage": {
+      "durationMs": 852.2005000000008,
+      "ollamaTotalMs": 648.78306,
+      "promptEvalCount": 480,
+      "evalCount": 16,
+      "doneReason": "length",
+      "thinkingTextTokenCount": 13,
+      "finalTextTokenCount": 0
+    }
+  },
+  {
+    "fixture": "short-complete-deployment-update",
+    "expected": "DEFER_COMPACT",
+    "actual": null,
+    "correct": false,
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "think": false,
+    "generationOptions": {
+      "temperature": 0.2,
+      "topK": 20,
+      "topP": 0.9,
+      "minP": 0,
+      "numPredict": 16,
+      "repeatPenalty": 1,
+      "presencePenalty": 0,
+      "frequencyPenalty": 0,
+      "stop": [
+        "\n"
+      ]
+    },
+    "seed": 4,
+    "raw": "",
+    "thinking": "We need to apply rules.\n\nWe have two messages: \"О",
+    "usage": {
+      "durationMs": 796.6230999999989,
+      "ollamaTotalMs": 622.128524,
+      "promptEvalCount": 480,
+      "evalCount": 16,
+      "doneReason": "length",
+      "thinkingTextTokenCount": 13,
+      "finalTextTokenCount": 0
+    }
+  },
+  {
+    "fixture": "short-complete-deployment-update",
+    "expected": "DEFER_COMPACT",
+    "actual": null,
+    "correct": false,
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "think": false,
+    "generationOptions": {
+      "temperature": 0.2,
+      "topK": 20,
+      "topP": 0.9,
+      "minP": 0,
+      "numPredict": 16,
+      "repeatPenalty": 1,
+      "presencePenalty": 0,
+      "frequencyPenalty": 0,
+      "stop": [
+        "\n"
+      ]
+    },
+    "seed": 5,
+    "raw": "",
+    "thinking": "We need to apply rules.\n\nWe have two messages: \"Д",
+    "usage": {
+      "durationMs": 765.2065000000002,
+      "ollamaTotalMs": 609.489776,
+      "promptEvalCount": 480,
+      "evalCount": 16,
+      "doneReason": "length",
+      "thinkingTextTokenCount": 13,
+      "finalTextTokenCount": 0
+    }
+  },
+  {
+    "fixture": "deployment-plan-with-dependencies",
+    "expected": "SUMMARIZE",
+    "actual": null,
+    "correct": false,
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "think": false,
+    "generationOptions": {
+      "temperature": 0.2,
+      "topK": 20,
+      "topP": 0.9,
+      "minP": 0,
+      "numPredict": 16,
+      "repeatPenalty": 1,
+      "presencePenalty": 0,
+      "frequencyPenalty": 0,
+      "stop": [
+        "\n"
+      ]
+    },
+    "seed": 1,
+    "raw": "",
+    "thinking": "We need to apply rules in order.\n\nWe have messages in Ukrainian",
+    "usage": {
+      "durationMs": 418.41969999999856,
+      "ollamaTotalMs": 257.922894,
+      "promptEvalCount": 592,
+      "evalCount": 16,
+      "doneReason": "length",
+      "thinkingTextTokenCount": 13,
+      "finalTextTokenCount": 0
+    }
+  },
+  {
+    "fixture": "deployment-plan-with-dependencies",
+    "expected": "SUMMARIZE",
+    "actual": null,
+    "correct": false,
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "think": false,
+    "generationOptions": {
+      "temperature": 0.2,
+      "topK": 20,
+      "topP": 0.9,
+      "minP": 0,
+      "numPredict": 16,
+      "repeatPenalty": 1,
+      "presencePenalty": 0,
+      "frequencyPenalty": 0,
+      "stop": [
+        "\n"
+      ]
+    },
+    "seed": 2,
+    "raw": "",
+    "thinking": "We need to apply rules sequentially.\n\nWe have messages in Ukrainian",
+    "usage": {
+      "durationMs": 428.6226999999999,
+      "ollamaTotalMs": 263.49349,
+      "promptEvalCount": 592,
+      "evalCount": 16,
+      "doneReason": "length",
+      "thinkingTextTokenCount": 13,
+      "finalTextTokenCount": 0
+    }
+  },
+  {
+    "fixture": "deployment-plan-with-dependencies",
+    "expected": "SUMMARIZE",
+    "actual": null,
+    "correct": false,
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "think": false,
+    "generationOptions": {
+      "temperature": 0.2,
+      "topK": 20,
+      "topP": 0.9,
+      "minP": 0,
+      "numPredict": 16,
+      "repeatPenalty": 1,
+      "presencePenalty": 0,
+      "frequencyPenalty": 0,
+      "stop": [
+        "\n"
+      ]
+    },
+    "seed": 3,
+    "raw": "",
+    "thinking": "We need to apply rules.\n\nWe have messages in Ukrainian. Content",
+    "usage": {
+      "durationMs": 458.5114999999987,
+      "ollamaTotalMs": 246.480686,
+      "promptEvalCount": 592,
+      "evalCount": 16,
+      "doneReason": "length",
+      "thinkingTextTokenCount": 13,
+      "finalTextTokenCount": 0
+    }
+  },
+  {
+    "fixture": "deployment-plan-with-dependencies",
+    "expected": "SUMMARIZE",
+    "actual": null,
+    "correct": false,
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "think": false,
+    "generationOptions": {
+      "temperature": 0.2,
+      "topK": 20,
+      "topP": 0.9,
+      "minP": 0,
+      "numPredict": 16,
+      "repeatPenalty": 1,
+      "presencePenalty": 0,
+      "frequencyPenalty": 0,
+      "stop": [
+        "\n"
+      ]
+    },
+    "seed": 4,
+    "raw": "",
+    "thinking": "We need to apply rules.\n\nWe have messages in Ukrainian. Content",
+    "usage": {
+      "durationMs": 505.2089999999989,
+      "ollamaTotalMs": 289.036522,
+      "promptEvalCount": 592,
+      "evalCount": 16,
+      "doneReason": "length",
+      "thinkingTextTokenCount": 13,
+      "finalTextTokenCount": 0
+    }
+  },
+  {
+    "fixture": "deployment-plan-with-dependencies",
+    "expected": "SUMMARIZE",
+    "actual": null,
+    "correct": false,
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "think": false,
+    "generationOptions": {
+      "temperature": 0.2,
+      "topK": 20,
+      "topP": 0.9,
+      "minP": 0,
+      "numPredict": 16,
+      "repeatPenalty": 1,
+      "presencePenalty": 0,
+      "frequencyPenalty": 0,
+      "stop": [
+        "\n"
+      ]
+    },
+    "seed": 5,
+    "raw": "",
+    "thinking": "We need to apply rules.\n\nWe have messages in Ukrainian. Content",
+    "usage": {
+      "durationMs": 515.0077000000001,
+      "ollamaTotalMs": 293.621466,
+      "promptEvalCount": 592,
+      "evalCount": 16,
+      "doneReason": "length",
+      "thinkingTextTokenCount": 13,
+      "finalTextTokenCount": 0
+    }
+  },
+  {
+    "fixture": "memory-leak-investigation-open",
+    "expected": "DEFER_INCOMPLETE",
+    "actual": null,
+    "correct": false,
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "think": false,
+    "generationOptions": {
+      "temperature": 0.2,
+      "topK": 20,
+      "topP": 0.9,
+      "minP": 0,
+      "numPredict": 16,
+      "repeatPenalty": 1,
+      "presencePenalty": 0,
+      "frequencyPenalty": 0,
+      "stop": [
+        "\n"
+      ]
+    },
+    "seed": 1,
+    "raw": "",
+    "thinking": "We need to apply rules.\n\nWe have messages in Ukrainian. Content",
+    "usage": {
+      "durationMs": 662.0730000000003,
+      "ollamaTotalMs": 283.452089,
+      "promptEvalCount": 572,
+      "evalCount": 16,
+      "doneReason": "length",
+      "thinkingTextTokenCount": 13,
+      "finalTextTokenCount": 0
+    }
+  },
+  {
+    "fixture": "memory-leak-investigation-open",
+    "expected": "DEFER_INCOMPLETE",
+    "actual": null,
+    "correct": false,
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "think": false,
+    "generationOptions": {
+      "temperature": 0.2,
+      "topK": 20,
+      "topP": 0.9,
+      "minP": 0,
+      "numPredict": 16,
+      "repeatPenalty": 1,
+      "presencePenalty": 0,
+      "frequencyPenalty": 0,
+      "stop": [
+        "\n"
+      ]
+    },
+    "seed": 2,
+    "raw": "",
+    "thinking": "We need to apply rules.\n\nWe have messages in Ukrainian. Content",
+    "usage": {
+      "durationMs": 433.72319999999854,
+      "ollamaTotalMs": 273.861109,
+      "promptEvalCount": 572,
+      "evalCount": 16,
+      "doneReason": "length",
+      "thinkingTextTokenCount": 13,
+      "finalTextTokenCount": 0
+    }
+  },
+  {
+    "fixture": "memory-leak-investigation-open",
+    "expected": "DEFER_INCOMPLETE",
+    "actual": null,
+    "correct": false,
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "think": false,
+    "generationOptions": {
+      "temperature": 0.2,
+      "topK": 20,
+      "topP": 0.9,
+      "minP": 0,
+      "numPredict": 16,
+      "repeatPenalty": 1,
+      "presencePenalty": 0,
+      "frequencyPenalty": 0,
+      "stop": [
+        "\n"
+      ]
+    },
+    "seed": 3,
+    "raw": "",
+    "thinking": "We need to apply rules.\n\nWe have messages in Ukrainian. Content",
+    "usage": {
+      "durationMs": 510.3881000000001,
+      "ollamaTotalMs": 237.212691,
+      "promptEvalCount": 572,
+      "evalCount": 16,
+      "doneReason": "length",
+      "thinkingTextTokenCount": 13,
+      "finalTextTokenCount": 0
+    }
+  },
+  {
+    "fixture": "memory-leak-investigation-open",
+    "expected": "DEFER_INCOMPLETE",
+    "actual": null,
+    "correct": false,
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "think": false,
+    "generationOptions": {
+      "temperature": 0.2,
+      "topK": 20,
+      "topP": 0.9,
+      "minP": 0,
+      "numPredict": 16,
+      "repeatPenalty": 1,
+      "presencePenalty": 0,
+      "frequencyPenalty": 0,
+      "stop": [
+        "\n"
+      ]
+    },
+    "seed": 4,
+    "raw": "",
+    "thinking": "We need to apply rules sequentially.\n\nWe have messages in Ukrainian",
+    "usage": {
+      "durationMs": 792.7580999999991,
+      "ollamaTotalMs": 260.685399,
+      "promptEvalCount": 572,
+      "evalCount": 16,
+      "doneReason": "length",
+      "thinkingTextTokenCount": 13,
+      "finalTextTokenCount": 0
+    }
+  },
+  {
+    "fixture": "memory-leak-investigation-open",
+    "expected": "DEFER_INCOMPLETE",
+    "actual": null,
+    "correct": false,
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "think": false,
+    "generationOptions": {
+      "temperature": 0.2,
+      "topK": 20,
+      "topP": 0.9,
+      "minP": 0,
+      "numPredict": 16,
+      "repeatPenalty": 1,
+      "presencePenalty": 0,
+      "frequencyPenalty": 0,
+      "stop": [
+        "\n"
+      ]
+    },
+    "seed": 5,
+    "raw": "",
+    "thinking": "We need to apply rules sequentially.\n\nWe have messages in Ukrainian",
+    "usage": {
+      "durationMs": 872.5781999999999,
+      "ollamaTotalMs": 646.826164,
+      "promptEvalCount": 572,
+      "evalCount": 16,
+      "doneReason": "length",
+      "thinkingTextTokenCount": 13,
+      "finalTextTokenCount": 0
+    }
+  },
+  {
+    "fixture": "unresolved-referents",
+    "expected": "DEFER_CONTEXT",
+    "actual": null,
+    "correct": false,
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "think": false,
+    "generationOptions": {
+      "temperature": 0.2,
+      "topK": 20,
+      "topP": 0.9,
+      "minP": 0,
+      "numPredict": 16,
+      "repeatPenalty": 1,
+      "presencePenalty": 0,
+      "frequencyPenalty": 0,
+      "stop": [
+        "\n"
+      ]
+    },
+    "seed": 1,
+    "raw": "",
+    "thinking": "We need to apply rules in order.\n\nWe have messages in Ukrainian",
+    "usage": {
+      "durationMs": 453.8235000000004,
+      "ollamaTotalMs": 292.703147,
+      "promptEvalCount": 528,
+      "evalCount": 16,
+      "doneReason": "length",
+      "thinkingTextTokenCount": 13,
+      "finalTextTokenCount": 0
+    }
+  },
+  {
+    "fixture": "unresolved-referents",
+    "expected": "DEFER_CONTEXT",
+    "actual": null,
+    "correct": false,
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "think": false,
+    "generationOptions": {
+      "temperature": 0.2,
+      "topK": 20,
+      "topP": 0.9,
+      "minP": 0,
+      "numPredict": 16,
+      "repeatPenalty": 1,
+      "presencePenalty": 0,
+      "frequencyPenalty": 0,
+      "stop": [
+        "\n"
+      ]
+    },
+    "seed": 2,
+    "raw": "",
+    "thinking": "We need to apply rules.\n\nWe have messages in Ukrainian. Let's",
+    "usage": {
+      "durationMs": 786.8940999999995,
+      "ollamaTotalMs": 261.565981,
+      "promptEvalCount": 528,
+      "evalCount": 16,
+      "doneReason": "length",
+      "thinkingTextTokenCount": 13,
+      "finalTextTokenCount": 0
+    }
+  },
+  {
+    "fixture": "unresolved-referents",
+    "expected": "DEFER_CONTEXT",
+    "actual": null,
+    "correct": false,
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "think": false,
+    "generationOptions": {
+      "temperature": 0.2,
+      "topK": 20,
+      "topP": 0.9,
+      "minP": 0,
+      "numPredict": 16,
+      "repeatPenalty": 1,
+      "presencePenalty": 0,
+      "frequencyPenalty": 0,
+      "stop": [
+        "\n"
+      ]
+    },
+    "seed": 3,
+    "raw": "",
+    "thinking": "We need to apply rules.\n\nWe have messages in Ukrainian. Let's",
+    "usage": {
+      "durationMs": 594.0968999999968,
+      "ollamaTotalMs": 299.914212,
+      "promptEvalCount": 528,
+      "evalCount": 16,
+      "doneReason": "length",
+      "thinkingTextTokenCount": 13,
+      "finalTextTokenCount": 0
+    }
+  },
+  {
+    "fixture": "unresolved-referents",
+    "expected": "DEFER_CONTEXT",
+    "actual": null,
+    "correct": false,
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "think": false,
+    "generationOptions": {
+      "temperature": 0.2,
+      "topK": 20,
+      "topP": 0.9,
+      "minP": 0,
+      "numPredict": 16,
+      "repeatPenalty": 1,
+      "presencePenalty": 0,
+      "frequencyPenalty": 0,
+      "stop": [
+        "\n"
+      ]
+    },
+    "seed": 4,
+    "raw": "",
+    "thinking": "We need to apply rules.\n\nWe have messages in Ukrainian. Let's",
+    "usage": {
+      "durationMs": 1141.188399999999,
+      "ollamaTotalMs": 985.117294,
+      "promptEvalCount": 528,
+      "evalCount": 16,
+      "doneReason": "length",
+      "thinkingTextTokenCount": 13,
+      "finalTextTokenCount": 0
+    }
+  },
+  {
+    "fixture": "unresolved-referents",
+    "expected": "DEFER_CONTEXT",
+    "actual": null,
+    "correct": false,
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "think": false,
+    "generationOptions": {
+      "temperature": 0.2,
+      "topK": 20,
+      "topP": 0.9,
+      "minP": 0,
+      "numPredict": 16,
+      "repeatPenalty": 1,
+      "presencePenalty": 0,
+      "frequencyPenalty": 0,
+      "stop": [
+        "\n"
+      ]
+    },
+    "seed": 5,
+    "raw": "",
+    "thinking": "We need to apply rules.\n\nWe have messages in Ukrainian. Let's",
+    "usage": {
+      "durationMs": 835.3215999999993,
+      "ollamaTotalMs": 642.303858,
+      "promptEvalCount": 528,
+      "evalCount": 16,
+      "doneReason": "length",
+      "thinkingTextTokenCount": 13,
+      "finalTextTokenCount": 0
+    }
+  },
+  {
+    "fixture": "short-settled-database-choice",
+    "expected": "DEFER_COMPACT",
+    "actual": null,
+    "correct": false,
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "think": false,
+    "generationOptions": {
+      "temperature": 0.2,
+      "topK": 20,
+      "topP": 0.9,
+      "minP": 0,
+      "numPredict": 16,
+      "repeatPenalty": 1,
+      "presencePenalty": 0,
+      "frequencyPenalty": 0,
+      "stop": [
+        "\n"
+      ]
+    },
+    "seed": 1,
+    "raw": "",
+    "thinking": "We need to apply rules.\n\nWe have two messages: \"Бер",
+    "usage": {
+      "durationMs": 390.1887999999999,
+      "ollamaTotalMs": 228.113681,
+      "promptEvalCount": 466,
+      "evalCount": 16,
+      "doneReason": "length",
+      "thinkingTextTokenCount": 13,
+      "finalTextTokenCount": 0
+    }
+  },
+  {
+    "fixture": "short-settled-database-choice",
+    "expected": "DEFER_COMPACT",
+    "actual": null,
+    "correct": false,
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "think": false,
+    "generationOptions": {
+      "temperature": 0.2,
+      "topK": 20,
+      "topP": 0.9,
+      "minP": 0,
+      "numPredict": 16,
+      "repeatPenalty": 1,
+      "presencePenalty": 0,
+      "frequencyPenalty": 0,
+      "stop": [
+        "\n"
+      ]
+    },
+    "seed": 2,
+    "raw": "",
+    "thinking": "We need to apply rules.\n\nWe have two messages: \"Бер",
+    "usage": {
+      "durationMs": 940.6394,
+      "ollamaTotalMs": 604.536834,
+      "promptEvalCount": 466,
+      "evalCount": 16,
+      "doneReason": "length",
+      "thinkingTextTokenCount": 13,
+      "finalTextTokenCount": 0
+    }
+  },
+  {
+    "fixture": "short-settled-database-choice",
+    "expected": "DEFER_COMPACT",
+    "actual": null,
+    "correct": false,
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "think": false,
+    "generationOptions": {
+      "temperature": 0.2,
+      "topK": 20,
+      "topP": 0.9,
+      "minP": 0,
+      "numPredict": 16,
+      "repeatPenalty": 1,
+      "presencePenalty": 0,
+      "frequencyPenalty": 0,
+      "stop": [
+        "\n"
+      ]
+    },
+    "seed": 3,
+    "raw": "",
+    "thinking": "We need to apply rules.\n\nWe have two messages: \"Бер",
+    "usage": {
+      "durationMs": 882.7654999999977,
+      "ollamaTotalMs": 653.194404,
+      "promptEvalCount": 466,
+      "evalCount": 16,
+      "doneReason": "length",
+      "thinkingTextTokenCount": 13,
+      "finalTextTokenCount": 0
+    }
+  },
+  {
+    "fixture": "short-settled-database-choice",
+    "expected": "DEFER_COMPACT",
+    "actual": null,
+    "correct": false,
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "think": false,
+    "generationOptions": {
+      "temperature": 0.2,
+      "topK": 20,
+      "topP": 0.9,
+      "minP": 0,
+      "numPredict": 16,
+      "repeatPenalty": 1,
+      "presencePenalty": 0,
+      "frequencyPenalty": 0,
+      "stop": [
+        "\n"
+      ]
+    },
+    "seed": 4,
+    "raw": "",
+    "thinking": "We need to apply rules in order.\n\nWe have two messages:",
+    "usage": {
+      "durationMs": 637.0966000000008,
+      "ollamaTotalMs": 363.094579,
+      "promptEvalCount": 466,
+      "evalCount": 16,
+      "doneReason": "length",
+      "thinkingTextTokenCount": 13,
+      "finalTextTokenCount": 0
+    }
+  },
+  {
+    "fixture": "short-settled-database-choice",
+    "expected": "DEFER_COMPACT",
+    "actual": null,
+    "correct": false,
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "think": false,
+    "generationOptions": {
+      "temperature": 0.2,
+      "topK": 20,
+      "topP": 0.9,
+      "minP": 0,
+      "numPredict": 16,
+      "repeatPenalty": 1,
+      "presencePenalty": 0,
+      "frequencyPenalty": 0,
+      "stop": [
+        "\n"
+      ]
+    },
+    "seed": 5,
+    "raw": "",
+    "thinking": "We need to apply rules.\n\nWe have two messages: \"Бер",
+    "usage": {
+      "durationMs": 475.83469999999943,
+      "ollamaTotalMs": 311.25981,
+      "promptEvalCount": 466,
+      "evalCount": 16,
+      "doneReason": "length",
+      "thinkingTextTokenCount": 13,
+      "finalTextTokenCount": 0
+    }
+  },
+  {
+    "fixture": "reactions-only",
+    "expected": "SKIP_REACTIONS",
+    "actual": null,
+    "correct": false,
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "think": false,
+    "generationOptions": {
+      "temperature": 0.2,
+      "topK": 20,
+      "topP": 0.9,
+      "minP": 0,
+      "numPredict": 16,
+      "repeatPenalty": 1,
+      "presencePenalty": 0,
+      "frequencyPenalty": 0,
+      "stop": [
+        "\n"
+      ]
+    },
+    "seed": 1,
+    "raw": "",
+    "thinking": "We need to apply rules. The messages are all reactions/emojis",
+    "usage": {
+      "durationMs": 514.0555000000022,
+      "ollamaTotalMs": 256.44201,
+      "promptEvalCount": 500,
+      "evalCount": 16,
+      "doneReason": "length",
+      "thinkingTextTokenCount": 13,
+      "finalTextTokenCount": 0
+    }
+  },
+  {
+    "fixture": "reactions-only",
+    "expected": "SKIP_REACTIONS",
+    "actual": null,
+    "correct": false,
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "think": false,
+    "generationOptions": {
+      "temperature": 0.2,
+      "topK": 20,
+      "topP": 0.9,
+      "minP": 0,
+      "numPredict": 16,
+      "repeatPenalty": 1,
+      "presencePenalty": 0,
+      "frequencyPenalty": 0,
+      "stop": [
+        "\n"
+      ]
+    },
+    "seed": 2,
+    "raw": "",
+    "thinking": "We need to apply rules. The messages are all reactions/emojis",
+    "usage": {
+      "durationMs": 1483.932499999999,
+      "ollamaTotalMs": 1326.209437,
+      "promptEvalCount": 500,
+      "evalCount": 16,
+      "doneReason": "length",
+      "thinkingTextTokenCount": 13,
+      "finalTextTokenCount": 0
+    }
+  },
+  {
+    "fixture": "reactions-only",
+    "expected": "SKIP_REACTIONS",
+    "actual": null,
+    "correct": false,
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "think": false,
+    "generationOptions": {
+      "temperature": 0.2,
+      "topK": 20,
+      "topP": 0.9,
+      "minP": 0,
+      "numPredict": 16,
+      "repeatPenalty": 1,
+      "presencePenalty": 0,
+      "frequencyPenalty": 0,
+      "stop": [
+        "\n"
+      ]
+    },
+    "seed": 3,
+    "raw": "",
+    "thinking": "We need to apply rules in order.\n\nWe have messages: all",
+    "usage": {
+      "durationMs": 446.03559999999925,
+      "ollamaTotalMs": 278.040896,
+      "promptEvalCount": 500,
+      "evalCount": 16,
+      "doneReason": "length",
+      "thinkingTextTokenCount": 13,
+      "finalTextTokenCount": 0
+    }
+  },
+  {
+    "fixture": "reactions-only",
+    "expected": "SKIP_REACTIONS",
+    "actual": null,
+    "correct": false,
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "think": false,
+    "generationOptions": {
+      "temperature": 0.2,
+      "topK": 20,
+      "topP": 0.9,
+      "minP": 0,
+      "numPredict": 16,
+      "repeatPenalty": 1,
+      "presencePenalty": 0,
+      "frequencyPenalty": 0,
+      "stop": [
+        "\n"
+      ]
+    },
+    "seed": 4,
+    "raw": "",
+    "thinking": "We need to apply rules. The messages are all reactions, emojis",
+    "usage": {
+      "durationMs": 467.4087999999974,
+      "ollamaTotalMs": 291.126499,
+      "promptEvalCount": 500,
+      "evalCount": 16,
+      "doneReason": "length",
+      "thinkingTextTokenCount": 13,
+      "finalTextTokenCount": 0
+    }
+  },
+  {
+    "fixture": "reactions-only",
+    "expected": "SKIP_REACTIONS",
+    "actual": null,
+    "correct": false,
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "think": false,
+    "generationOptions": {
+      "temperature": 0.2,
+      "topK": 20,
+      "topP": 0.9,
+      "minP": 0,
+      "numPredict": 16,
+      "repeatPenalty": 1,
+      "presencePenalty": 0,
+      "frequencyPenalty": 0,
+      "stop": [
+        "\n"
+      ]
+    },
+    "seed": 5,
+    "raw": "",
+    "thinking": "We need to apply rules. The messages are all reactions/emojis",
+    "usage": {
+      "durationMs": 977.3340000000026,
+      "ollamaTotalMs": 659.86995,
+      "promptEvalCount": 500,
+      "evalCount": 16,
+      "doneReason": "length",
+      "thinkingTextTokenCount": 13,
+      "finalTextTokenCount": 0
+    }
+  },
+  {
+    "fixture": "vague-discussion",
+    "expected": "SKIP_NO_VALUE",
+    "actual": null,
+    "correct": false,
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "think": false,
+    "generationOptions": {
+      "temperature": 0.2,
+      "topK": 20,
+      "topP": 0.9,
+      "minP": 0,
+      "numPredict": 16,
+      "repeatPenalty": 1,
+      "presencePenalty": 0,
+      "frequencyPenalty": 0,
+      "stop": [
+        "\n"
+      ]
+    },
+    "seed": 1,
+    "raw": "",
+    "thinking": "We need to apply rules. The messages are in Ukrainian. Content",
+    "usage": {
+      "durationMs": 432.179500000002,
+      "ollamaTotalMs": 276.078893,
+      "promptEvalCount": 523,
+      "evalCount": 16,
+      "doneReason": "length",
+      "thinkingTextTokenCount": 13,
+      "finalTextTokenCount": 0
+    }
+  },
+  {
+    "fixture": "vague-discussion",
+    "expected": "SKIP_NO_VALUE",
+    "actual": null,
+    "correct": false,
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "think": false,
+    "generationOptions": {
+      "temperature": 0.2,
+      "topK": 20,
+      "topP": 0.9,
+      "minP": 0,
+      "numPredict": 16,
+      "repeatPenalty": 1,
+      "presencePenalty": 0,
+      "frequencyPenalty": 0,
+      "stop": [
+        "\n"
+      ]
+    },
+    "seed": 2,
+    "raw": "",
+    "thinking": "We need to apply rules.\n\nWe have messages in Ukrainian: \"",
+    "usage": {
+      "durationMs": 984.2891000000018,
+      "ollamaTotalMs": 827.733865,
+      "promptEvalCount": 523,
+      "evalCount": 16,
+      "doneReason": "length",
+      "thinkingTextTokenCount": 13,
+      "finalTextTokenCount": 0
+    }
+  },
+  {
+    "fixture": "vague-discussion",
+    "expected": "SKIP_NO_VALUE",
+    "actual": null,
+    "correct": false,
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "think": false,
+    "generationOptions": {
+      "temperature": 0.2,
+      "topK": 20,
+      "topP": 0.9,
+      "minP": 0,
+      "numPredict": 16,
+      "repeatPenalty": 1,
+      "presencePenalty": 0,
+      "frequencyPenalty": 0,
+      "stop": [
+        "\n"
+      ]
+    },
+    "seed": 3,
+    "raw": "",
+    "thinking": "We need to apply rules.\n\nWe have messages in Ukrainian: \"",
+    "usage": {
+      "durationMs": 494.72569999999905,
+      "ollamaTotalMs": 336.252947,
+      "promptEvalCount": 523,
+      "evalCount": 16,
+      "doneReason": "length",
+      "thinkingTextTokenCount": 13,
+      "finalTextTokenCount": 0
+    }
+  },
+  {
+    "fixture": "vague-discussion",
+    "expected": "SKIP_NO_VALUE",
+    "actual": null,
+    "correct": false,
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "think": false,
+    "generationOptions": {
+      "temperature": 0.2,
+      "topK": 20,
+      "topP": 0.9,
+      "minP": 0,
+      "numPredict": 16,
+      "repeatPenalty": 1,
+      "presencePenalty": 0,
+      "frequencyPenalty": 0,
+      "stop": [
+        "\n"
+      ]
+    },
+    "seed": 4,
+    "raw": "",
+    "thinking": "We need to apply rules.\n\nWe have messages in Ukrainian: \"",
+    "usage": {
+      "durationMs": 430.8119000000006,
+      "ollamaTotalMs": 273.83582,
+      "promptEvalCount": 523,
+      "evalCount": 16,
+      "doneReason": "length",
+      "thinkingTextTokenCount": 13,
+      "finalTextTokenCount": 0
+    }
+  },
+  {
+    "fixture": "vague-discussion",
+    "expected": "SKIP_NO_VALUE",
+    "actual": null,
+    "correct": false,
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "think": false,
+    "generationOptions": {
+      "temperature": 0.2,
+      "topK": 20,
+      "topP": 0.9,
+      "minP": 0,
+      "numPredict": 16,
+      "repeatPenalty": 1,
+      "presencePenalty": 0,
+      "frequencyPenalty": 0,
+      "stop": [
+        "\n"
+      ]
+    },
+    "seed": 5,
+    "raw": "",
+    "thinking": "We need to apply rules. The messages are in Ukrainian. They",
+    "usage": {
+      "durationMs": 629.4408000000003,
+      "ollamaTotalMs": 335.644767,
+      "promptEvalCount": 523,
+      "evalCount": 16,
+      "doneReason": "length",
+      "thinkingTextTokenCount": 13,
+      "finalTextTokenCount": 0
+    }
+  },
+  {
+    "fixture": "cache-design-awaiting-options",
+    "expected": "DEFER_INCOMPLETE",
+    "actual": null,
+    "correct": false,
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "think": false,
+    "generationOptions": {
+      "temperature": 0.2,
+      "topK": 20,
+      "topP": 0.9,
+      "minP": 0,
+      "numPredict": 16,
+      "repeatPenalty": 1,
+      "presencePenalty": 0,
+      "frequencyPenalty": 0,
+      "stop": [
+        "\n"
+      ]
+    },
+    "seed": 1,
+    "raw": "",
+    "thinking": "We need to apply rules.\n\nWe have messages in Ukrainian. Content",
+    "usage": {
+      "durationMs": 521.546699999999,
+      "ollamaTotalMs": 269.188092,
+      "promptEvalCount": 537,
+      "evalCount": 16,
+      "doneReason": "length",
+      "thinkingTextTokenCount": 13,
+      "finalTextTokenCount": 0
+    }
+  },
+  {
+    "fixture": "cache-design-awaiting-options",
+    "expected": "DEFER_INCOMPLETE",
+    "actual": null,
+    "correct": false,
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "think": false,
+    "generationOptions": {
+      "temperature": 0.2,
+      "topK": 20,
+      "topP": 0.9,
+      "minP": 0,
+      "numPredict": 16,
+      "repeatPenalty": 1,
+      "presencePenalty": 0,
+      "frequencyPenalty": 0,
+      "stop": [
+        "\n"
+      ]
+    },
+    "seed": 2,
+    "raw": "",
+    "thinking": "We need to apply rules. The messages are in Ukrainian. Content",
+    "usage": {
+      "durationMs": 866.3408000000018,
+      "ollamaTotalMs": 621.960315,
+      "promptEvalCount": 537,
+      "evalCount": 16,
+      "doneReason": "length",
+      "thinkingTextTokenCount": 13,
+      "finalTextTokenCount": 0
+    }
+  },
+  {
+    "fixture": "cache-design-awaiting-options",
+    "expected": "DEFER_INCOMPLETE",
+    "actual": null,
+    "correct": false,
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "think": false,
+    "generationOptions": {
+      "temperature": 0.2,
+      "topK": 20,
+      "topP": 0.9,
+      "minP": 0,
+      "numPredict": 16,
+      "repeatPenalty": 1,
+      "presencePenalty": 0,
+      "frequencyPenalty": 0,
+      "stop": [
+        "\n"
+      ]
+    },
+    "seed": 3,
+    "raw": "",
+    "thinking": "We need to apply rules.\n\nWe have messages:\n\n[20:",
+    "usage": {
+      "durationMs": 452.03180000000066,
+      "ollamaTotalMs": 288.435902,
+      "promptEvalCount": 537,
+      "evalCount": 16,
+      "doneReason": "length",
+      "thinkingTextTokenCount": 13,
+      "finalTextTokenCount": 0
+    }
+  },
+  {
+    "fixture": "cache-design-awaiting-options",
+    "expected": "DEFER_INCOMPLETE",
+    "actual": null,
+    "correct": false,
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "think": false,
+    "generationOptions": {
+      "temperature": 0.2,
+      "topK": 20,
+      "topP": 0.9,
+      "minP": 0,
+      "numPredict": 16,
+      "repeatPenalty": 1,
+      "presencePenalty": 0,
+      "frequencyPenalty": 0,
+      "stop": [
+        "\n"
+      ]
+    },
+    "seed": 4,
+    "raw": "",
+    "thinking": "We need to apply rules.\n\nWe have messages:\n\n[20:",
+    "usage": {
+      "durationMs": 457.9840000000004,
+      "ollamaTotalMs": 271.636191,
+      "promptEvalCount": 537,
+      "evalCount": 16,
+      "doneReason": "length",
+      "thinkingTextTokenCount": 13,
+      "finalTextTokenCount": 0
+    }
+  },
+  {
+    "fixture": "cache-design-awaiting-options",
+    "expected": "DEFER_INCOMPLETE",
+    "actual": null,
+    "correct": false,
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "think": false,
+    "generationOptions": {
+      "temperature": 0.2,
+      "topK": 20,
+      "topP": 0.9,
+      "minP": 0,
+      "numPredict": 16,
+      "repeatPenalty": 1,
+      "presencePenalty": 0,
+      "frequencyPenalty": 0,
+      "stop": [
+        "\n"
+      ]
+    },
+    "seed": 5,
+    "raw": "",
+    "thinking": "We need to apply rules.\n\nWe have messages in Ukrainian. Content",
+    "usage": {
+      "durationMs": 412.26350000000093,
+      "ollamaTotalMs": 254.180997,
+      "promptEvalCount": 537,
+      "evalCount": 16,
+      "doneReason": "length",
+      "thinkingTextTokenCount": 13,
+      "finalTextTokenCount": 0
+    }
+  },
+  {
+    "fixture": "structured-renderer-invariants",
+    "expected": "DEFER_COMPACT",
+    "actual": null,
+    "correct": false,
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "think": false,
+    "generationOptions": {
+      "temperature": 0.2,
+      "topK": 20,
+      "topP": 0.9,
+      "minP": 0,
+      "numPredict": 16,
+      "repeatPenalty": 1,
+      "presencePenalty": 0,
+      "frequencyPenalty": 0,
+      "stop": [
+        "\n"
+      ]
+    },
+    "seed": 1,
+    "raw": "",
+    "thinking": "We need to apply rules. The chat window contains a single substantive",
+    "usage": {
+      "durationMs": 493.1085000000021,
+      "ollamaTotalMs": 292.96496,
+      "promptEvalCount": 504,
+      "evalCount": 16,
+      "doneReason": "length",
+      "thinkingTextTokenCount": 13,
+      "finalTextTokenCount": 0
+    }
+  },
+  {
+    "fixture": "structured-renderer-invariants",
+    "expected": "DEFER_COMPACT",
+    "actual": null,
+    "correct": false,
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "think": false,
+    "generationOptions": {
+      "temperature": 0.2,
+      "topK": 20,
+      "topP": 0.9,
+      "minP": 0,
+      "numPredict": 16,
+      "repeatPenalty": 1,
+      "presencePenalty": 0,
+      "frequencyPenalty": 0,
+      "stop": [
+        "\n"
+      ]
+    },
+    "seed": 2,
+    "raw": "",
+    "thinking": "We need to apply rules. The chat window has only one substantive",
+    "usage": {
+      "durationMs": 485.75810000000274,
+      "ollamaTotalMs": 245.486911,
+      "promptEvalCount": 504,
+      "evalCount": 16,
+      "doneReason": "length",
+      "thinkingTextTokenCount": 13,
+      "finalTextTokenCount": 0
+    }
+  },
+  {
+    "fixture": "structured-renderer-invariants",
+    "expected": "DEFER_COMPACT",
+    "actual": null,
+    "correct": false,
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "think": false,
+    "generationOptions": {
+      "temperature": 0.2,
+      "topK": 20,
+      "topP": 0.9,
+      "minP": 0,
+      "numPredict": 16,
+      "repeatPenalty": 1,
+      "presencePenalty": 0,
+      "frequencyPenalty": 0,
+      "stop": [
+        "\n"
+      ]
+    },
+    "seed": 3,
+    "raw": "",
+    "thinking": "We need to apply rules. The chat window has only one substantive",
+    "usage": {
+      "durationMs": 454.8336999999956,
+      "ollamaTotalMs": 275.938068,
+      "promptEvalCount": 504,
+      "evalCount": 16,
+      "doneReason": "length",
+      "thinkingTextTokenCount": 13,
+      "finalTextTokenCount": 0
+    }
+  },
+  {
+    "fixture": "structured-renderer-invariants",
+    "expected": "DEFER_COMPACT",
+    "actual": null,
+    "correct": false,
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "think": false,
+    "generationOptions": {
+      "temperature": 0.2,
+      "topK": 20,
+      "topP": 0.9,
+      "minP": 0,
+      "numPredict": 16,
+      "repeatPenalty": 1,
+      "presencePenalty": 0,
+      "frequencyPenalty": 0,
+      "stop": [
+        "\n"
+      ]
+    },
+    "seed": 4,
+    "raw": "",
+    "thinking": "We need to apply rules. The chat window contains a single substantive",
+    "usage": {
+      "durationMs": 409.60080000000016,
+      "ollamaTotalMs": 252.284249,
+      "promptEvalCount": 504,
+      "evalCount": 16,
+      "doneReason": "length",
+      "thinkingTextTokenCount": 13,
+      "finalTextTokenCount": 0
+    }
+  },
+  {
+    "fixture": "structured-renderer-invariants",
+    "expected": "DEFER_COMPACT",
+    "actual": null,
+    "correct": false,
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "think": false,
+    "generationOptions": {
+      "temperature": 0.2,
+      "topK": 20,
+      "topP": 0.9,
+      "minP": 0,
+      "numPredict": 16,
+      "repeatPenalty": 1,
+      "presencePenalty": 0,
+      "frequencyPenalty": 0,
+      "stop": [
+        "\n"
+      ]
+    },
+    "seed": 5,
+    "raw": "",
+    "thinking": "We need to apply rules. The user gave a single message (",
+    "usage": {
+      "durationMs": 396.22290000000066,
+      "ollamaTotalMs": 238.86013,
+      "promptEvalCount": 504,
+      "evalCount": 16,
+      "doneReason": "length",
+      "thinkingTextTokenCount": 13,
+      "finalTextTokenCount": 0
+    }
+  }
+]

@@ -1,0 +1,20 @@
+{
+  "total": 10,
+  "completed": 10,
+  "completionRate": 1,
+  "validLabels": 10,
+  "validLabelRate": 1,
+  "correct": 10,
+  "classificationAccuracy": 1,
+  "think": "low",
+  "generationOptions": {
+    "temperature": 0,
+    "topK": 1,
+    "topP": 1,
+    "minP": 0,
+    "numPredict": 256,
+    "repeatPenalty": 1,
+    "presencePenalty": 0,
+    "frequencyPenalty": 0
+  }
+}
