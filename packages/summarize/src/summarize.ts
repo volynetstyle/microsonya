@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import type { MessagesRepo, SummariesRepo } from "@microsonya/db";
-import type { Model } from "@microsonya/model";
+import { SUMMARIZER_PROFILE, type OllamaClient } from "@microsonya/model";
 import type {
   ChatMessage,
   SummaryCommand,
@@ -25,7 +25,7 @@ export type Summarizer = {
 export type SummarizerDeps = {
   messages: Pick<MessagesRepo, "listByChat">;
   summaries: Pick<SummariesRepo, "findLastRun" | "saveRun">;
-  model: Model;
+  ollama: Pick<OllamaClient, "chat">;
   telemetry?: SummarizationTelemetryService;
 };
 
@@ -107,10 +107,17 @@ async function run(
 
     const modelStartedAt = performance.now();
 
-    const { summary } = await deps.model.generate(prompt, outputSchema, {
-      signal,
-      maxOutputTokens: 2_500,
-    });
+    const response = await deps.ollama.chat(
+      {
+        ...SUMMARIZER_PROFILE,
+        stream: false,
+        messages: [{ role: "user", content: prompt }],
+      },
+      { signal },
+    );
+    const { summary } = outputSchema.parse(
+      JSON.parse(response.message.content),
+    );
 
     telemetry?.record({
       type: "model.response",
@@ -217,7 +224,7 @@ async function saveRun(
   messages: readonly ChatMessage[],
   finalText: string,
 ): Promise<void> {
-  const run: SummaryRun = {
+  await summaries.saveRun({
     id: randomUUID(),
     chatId: command.chatId,
     commandMessageId: command.commandMessageId,
@@ -227,7 +234,5 @@ async function saveRun(
     mode: command.mode,
     status: "ok",
     finalText,
-  };
-
-  await summaries.saveRun(run);
+  } satisfies SummaryRun);
 }

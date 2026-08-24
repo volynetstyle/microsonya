@@ -25,7 +25,6 @@ export type BotServices = {
 
 export function createMessageHandler(services: BotServices) {
   return async function handleMessage(ctx: Context): Promise<void> {
-    const updateStartedAt = Date.now();
     let commandContext:
       | { chatId: string; commandMessageId: number }
       | undefined;
@@ -35,15 +34,12 @@ export function createMessageHandler(services: BotServices) {
       const telegramMessage = ctx.message as TelegramMessageLike;
       const chatMessage = toChatMessage(telegramMessage);
 
-      const ingestStartedAt = Date.now();
       await ingestMessage(services.storage.messages, chatMessage);
-      const ingestMs = Date.now() - ingestStartedAt;
 
       if (isForwardedMessage(telegramMessage)) {
         return;
       }
 
-      const commandParseStartedAt = Date.now();
       const invocation = toCommandInvocation(telegramMessage, ctx.me);
       if (!invocation) return;
 
@@ -58,7 +54,6 @@ export function createMessageHandler(services: BotServices) {
         chatId: command.chatId,
         commandMessageId: command.commandMessageId,
       };
-      const commandParseMs = Date.now() - commandParseStartedAt;
 
       const output = new SummaryPresentationSession(
         ctx.chat?.type === "private"
@@ -70,41 +65,14 @@ export function createMessageHandler(services: BotServices) {
       );
       summaryOutput = output;
 
-      const startedAt = Date.now();
-
       await output.status("Аналізую…");
+
       const summaryText = await services.summarizer.summarize(command);
 
-      const summarizeMs = Date.now() - startedAt;
-
-      const replyStartedAt = Date.now();
       await output.complete(
         summaryText ?? "Немає нових повідомлень для підсумку.",
       );
-
-      console.log(
-        "Summary command completed",
-        safeStringify({
-          chatId: command.chatId,
-          commandMessageId: command.commandMessageId,
-          ingestMs,
-          commandParseMs,
-          preSummarizeMs: startedAt - updateStartedAt,
-          summarizeMs,
-          replyMs: Date.now() - replyStartedAt,
-          totalMs: Date.now() - updateStartedAt,
-        }),
-      );
     } catch (error) {
-      console.error(
-        "Failed to process Telegram update",
-        formatErrorForLog(error),
-        safeStringify({
-          ...commandContext,
-          failedAfterMs: Date.now() - updateStartedAt,
-        }),
-      );
-
       if (isAbortError(error)) {
         if (summaryOutput) await summaryOutput.fail("Скасовано.");
         else await ctx.reply("Скасовано.");

@@ -1,10 +1,13 @@
-export type ModelConfig = { host: string; model: string };
+import type { OllamaClientConfig } from "./providers/ollama/index.js";
 
-export function loadModelConfig(
+export type OllamaConfig = Pick<OllamaClientConfig, "baseUrl" | "apiKey">;
+
+export function loadOllamaConfig(
   env: NodeJS.ProcessEnv = process.env,
-): ModelConfig {
+): OllamaConfig {
+  const host = env.OLLAMA_HOST?.trim() || "http://localhost:11434";
   return {
-    host: env.OLLAMA_HOST?.trim() || "http://localhost:11434",
-    model: env.OLLAMA_MODEL?.trim() || "gpt-oss:120b-cloud",
+    baseUrl: `${host.replace(/\/+$/, "").replace(/\/api$/, "")}/api`,
+    apiKey: env.OLLAMA_API_KEY?.trim() || undefined,
   };
 }

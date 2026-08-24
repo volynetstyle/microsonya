@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { config as loadEnv } from "dotenv";
-import { loadModelConfig, type ModelConfig } from "@microsonya/model";
+import { loadOllamaConfig, type OllamaConfig } from "@microsonya/model";
 
 loadEnv();
 
@@ -18,7 +18,7 @@ for (const envPath of [
 export type AppConfig = {
   telegramToken: string;
 
-  model: ModelConfig;
+  ollama: OllamaConfig;
 };
 
 export function readConfig(): AppConfig {
@@ -26,7 +26,7 @@ export function readConfig(): AppConfig {
 
   return {
     telegramToken,
-    model: loadModelConfig(process.env),
+    ollama: loadOllamaConfig(process.env),
   };
 }
 

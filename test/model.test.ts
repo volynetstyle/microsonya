@@ -1,40 +1,76 @@
 import { describe, expect, it, vi } from "vitest";
-import { z } from "zod";
-import { OllamaModel, withTelemetry } from "../packages/model/src/index.js";
+import {
+  CLASSIFIER_PROFILE,
+  loadOllamaConfig,
+  OllamaClient,
+  withTelemetry,
+} from "../packages/model/src/index.js";
 
-describe("OllamaModel", () => {
-  it("generates and validates structured output through /api/chat", async () => {
+describe("OllamaClient profiles", () => {
+  it("keeps the provider endpoint in config and the model in the profile", () => {
+    expect(
+      loadOllamaConfig({
+        OLLAMA_HOST: "https://ollama.example/api/",
+        OLLAMA_API_KEY: "secret",
+        OLLAMA_MODEL: "must-not-override-the-validated-profile",
+      }),
+    ).toEqual({
+      baseUrl: "https://ollama.example/api",
+      apiKey: "secret",
+    });
+    expect(CLASSIFIER_PROFILE.model).toBe("gpt-oss:120b-cloud");
+    expect(CLASSIFIER_PROFILE.options).toMatchObject({
+      temperature: 0,
+      top_k: 1,
+      seed: 42,
+      num_predict: 256,
+    });
+  });
+
+  it("sends a task profile directly through /api/chat", async () => {
     const fetch = vi.fn(
       async () =>
         new Response(
           JSON.stringify({
-            message: { content: JSON.stringify({ summary: "Готово" }) },
+            message: { content: JSON.stringify({ action: "SUMMARIZE" }) },
           }),
           { status: 200 },
         ),
     );
-    const model = new OllamaModel({
-      host: "http://localhost:11434/v1",
-      model: "test",
+    const ollama = new OllamaClient({
+      baseUrl: "http://localhost:11434/api",
       fetch,
     });
-
     await expect(
-      model.generate("prompt", z.object({ summary: z.string() })),
-    ).resolves.toEqual({ summary: "Готово" });
+      ollama.chat({
+        ...CLASSIFIER_PROFILE,
+        stream: false,
+        messages: [{ role: "user", content: "prompt" }],
+      }),
+    ).resolves.toMatchObject({
+      message: { content: JSON.stringify({ action: "SUMMARIZE" }) },
+    });
     expect(fetch).toHaveBeenCalledWith(
       "http://localhost:11434/api/chat",
       expect.objectContaining({ method: "POST" }),
     );
+    const request = JSON.parse(
+      String((fetch.mock.calls[0]?.[1] as RequestInit).body),
+    );
+    expect(request).toMatchObject({
+      ...CLASSIFIER_PROFILE,
+      stream: false,
+      messages: [{ role: "user", content: "prompt" }],
+    });
   });
 
-  it("adds telemetry without coupling it to the transport", async () => {
+  it("instruments fetch without coupling telemetry to a model abstraction", async () => {
     const onCall = vi.fn();
-    const model = withTelemetry(
-      { generate: async () => ({ ok: true }) },
+    const instrumentedFetch = withTelemetry(
+      async () => new Response("{}", { status: 200 }),
       onCall,
     );
-    await model.generate("prompt", z.object({ ok: z.boolean() }));
+    await instrumentedFetch("http://localhost");
     expect(onCall).toHaveBeenCalledWith(
       expect.objectContaining({ status: "ok" }),
     );

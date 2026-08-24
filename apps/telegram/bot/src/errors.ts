@@ -1,3 +1,5 @@
+import { OllamaError } from "@microsonya/model";
+
 export function requiredConfigValue<T>(value: T | undefined, name: string): T {
   if (value === undefined) {
     throw new Error(`${name} is required.`);
@@ -7,10 +9,7 @@ export function requiredConfigValue<T>(value: T | undefined, name: string): T {
 }
 
 export function isModelRateLimitError(error: unknown): error is Error {
-  return (
-    error instanceof Error &&
-    error.message.includes("Model request failed: 429")
-  );
+  return error instanceof OllamaError && error.status === 429;
 }
 
 export function formatRateLimitMessage(error: Error): string {

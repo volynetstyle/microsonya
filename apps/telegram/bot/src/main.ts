@@ -3,7 +3,7 @@ import {
   launchWithRetry,
   isRetryableTelegramError,
 } from "./launchWithRetry.js";
-import { OllamaModel, withTelemetry } from "@microsonya/model";
+import { OllamaClient, withTelemetry } from "@microsonya/model";
 import { createStorage } from "./storage.js";
 import { telegramCommands as summarizeCommands } from "./commands/summarize.js";
 import { createTelegramBot } from "./telegramBot.js";
@@ -16,13 +16,16 @@ const telegramCommands = summarizeCommands;
 
 const config = readConfig();
 const storage = createStorage();
-const model = withTelemetry(new OllamaModel(config.model), (event) =>
-  console.info("Model telemetry", JSON.stringify(event)),
-);
+const ollama = new OllamaClient({
+  ...config.ollama,
+  fetch: withTelemetry(globalThis.fetch, (event) =>
+    console.info("Model telemetry", JSON.stringify(event)),
+  ),
+});
 const summarizer = createSummarizer({
   messages: storage.messages,
   summaries: storage.summaries,
-  model,
+  ollama,
   telemetry: new SummarizationTelemetryService(),
 });
 const bot = createTelegramBot(config, {

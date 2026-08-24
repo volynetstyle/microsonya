@@ -215,26 +215,7 @@ export const SUMMARY_INSTRUCTIONS = `
   Return only JSON matching the required output schema.
 `.trim();
 
-type SummaryDecision =
-  | "SUMMARIZE"
-  | "DEFER_COMPACT"
-  | "DEFER_INCOMPLETE"
-  | "DEFER_CONTEXT"
-  | "SKIP_REACTIONS"
-  | "SKIP_BANTER"
-  | "SKIP_NO_VALUE";
 
-type SummaryDecisionSignal =
-  | "HAS_FACT"
-  | "HAS_PLAN"
-  | "HAS_DECISION"
-  | "HAS_REQUEST"
-  | "HAS_OPEN_QUESTION"
-  | "HAS_EVENT"
-  | "MOSTLY_REACTIONS"
-  | "MOSTLY_BANTER"
-  | "ACTIVE_EXCHANGE"
-  | "MISSING_CONTEXT";
 
 export const SUMMARY_DECISION_RESPONSE_INSTRUCTIONS = `
 Explain the provided summarization decision to the user.
