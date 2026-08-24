@@ -19,6 +19,7 @@
     "eval": "pnpm --filter @microsonya/eval eval",
     "eval:compaction": "pnpm --filter @microsonya/eval compaction",
     "eval:compaction:blind": "pnpm --filter @microsonya/eval compaction:blind",
+    "eval:compaction:predicates": "pnpm --filter @microsonya/eval compaction:predicates",
     "eval:reconstruct": "pnpm --filter @microsonya/eval reconstruct",
     "eval:factuality": "pnpm --filter @microsonya/eval factuality",
     "start": "pnpm bot:start",

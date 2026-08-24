@@ -15,6 +15,7 @@
     "eval": "tsx src/run.ts",
     "compaction": "tsx src/runCompaction.ts",
     "compaction:blind": "tsx src/runBlindCompaction.ts",
+    "compaction:predicates": "tsx src/runPredicateCompaction.ts",
     "reconstruct": "tsx src/runReconstruction.ts",
     "factuality": "tsx src/runFactuality.ts",
     "selective": "tsx src/runSelectiveAblation.ts",

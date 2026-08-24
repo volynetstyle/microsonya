@@ -1,0 +1,93 @@
+[
+  {
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "seed": 42,
+    "baselineVariant": "original",
+    "targetVariant": "identity-replay",
+    "metric": "endToEndAccuracy",
+    "delta": 0.04166666666666663,
+    "bootstrap95": {
+      "low": 0,
+      "high": 0.08333333333333337
+    }
+  },
+  {
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "seed": 42,
+    "baselineVariant": "original",
+    "targetVariant": "identity-replay",
+    "metric": "caseAccuracy",
+    "delta": 0.04166666666666663,
+    "bootstrap95": {
+      "low": 0,
+      "high": 0.08333333333333337
+    }
+  },
+  {
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "seed": 42,
+    "baselineVariant": "original",
+    "targetVariant": "identity-replay",
+    "metric": "strictFamilyAccuracy",
+    "delta": 0.08333333333333326,
+    "bootstrap95": {
+      "low": 0,
+      "high": 0.25
+    }
+  },
+  {
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "seed": 42,
+    "baselineVariant": "original",
+    "targetVariant": "identity-replay",
+    "metric": "strictSensitivityTransitionAccuracy",
+    "delta": 0.08333333333333337,
+    "bootstrap95": {
+      "low": 0,
+      "high": 0.2222222222222222
+    }
+  },
+  {
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "seed": 42,
+    "baselineVariant": "original",
+    "targetVariant": "identity-replay",
+    "metric": "transitionRate",
+    "delta": 0.04166666666666674,
+    "bootstrap95": {
+      "low": 0,
+      "high": 0.1875
+    }
+  },
+  {
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "seed": 42,
+    "baselineVariant": "original",
+    "targetVariant": "identity-replay",
+    "metric": "strictSurfaceInvarianceAccuracy",
+    "delta": 0.06944444444444442,
+    "bootstrap95": {
+      "low": 0,
+      "high": 0.20833333333333337
+    }
+  },
+  {
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "seed": 42,
+    "baselineVariant": "original",
+    "targetVariant": "identity-replay",
+    "metric": "surfaceAgreement",
+    "delta": 0.06944444444444442,
+    "bootstrap95": {
+      "low": 0,
+      "high": 0.1875
+    }
+  }
+]

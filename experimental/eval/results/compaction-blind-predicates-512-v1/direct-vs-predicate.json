@@ -1,0 +1,402 @@
+{
+  "comparable": 48,
+  "directEndToEndAccuracy": 0.8541666666666666,
+  "predicateProjectedEndToEndAccuracy": 0.875,
+  "pairedDelta": 0.020833333333333332,
+  "pairedClusterBootstrap95": [
+    -0.10416666666666663,
+    0.10416666666666674
+  ],
+  "diagnosticCounts": {
+    "both-correct": 38,
+    "both-wrong-semantic": 3,
+    "predicate-correct-direct-wrong": 4,
+    "direct-correct-predicate-wrong": 3
+  },
+  "cases": [
+    {
+      "caseId": "reaction-only/software-uk",
+      "family": "reaction-only",
+      "directCorrect": true,
+      "predicateCorrect": true,
+      "predicateExact": false,
+      "diagnostic": "both-correct"
+    },
+    {
+      "caseId": "reaction-only/business-en",
+      "family": "reaction-only",
+      "directCorrect": true,
+      "predicateCorrect": true,
+      "predicateExact": true,
+      "diagnostic": "both-correct"
+    },
+    {
+      "caseId": "reaction-only/everyday-uk",
+      "family": "reaction-only",
+      "directCorrect": true,
+      "predicateCorrect": true,
+      "predicateExact": false,
+      "diagnostic": "both-correct"
+    },
+    {
+      "caseId": "reaction-only/legal-es",
+      "family": "reaction-only",
+      "directCorrect": true,
+      "predicateCorrect": true,
+      "predicateExact": false,
+      "diagnostic": "both-correct"
+    },
+    {
+      "caseId": "reaction-with-decision/software-uk",
+      "family": "reaction-with-decision",
+      "directCorrect": true,
+      "predicateCorrect": true,
+      "predicateExact": true,
+      "diagnostic": "both-correct"
+    },
+    {
+      "caseId": "reaction-with-decision/business-en",
+      "family": "reaction-with-decision",
+      "directCorrect": true,
+      "predicateCorrect": true,
+      "predicateExact": true,
+      "diagnostic": "both-correct"
+    },
+    {
+      "caseId": "reaction-with-decision/everyday-uk",
+      "family": "reaction-with-decision",
+      "directCorrect": true,
+      "predicateCorrect": true,
+      "predicateExact": true,
+      "diagnostic": "both-correct"
+    },
+    {
+      "caseId": "reaction-with-decision/legal-es",
+      "family": "reaction-with-decision",
+      "directCorrect": true,
+      "predicateCorrect": true,
+      "predicateExact": true,
+      "diagnostic": "both-correct"
+    },
+    {
+      "caseId": "banter-only/software-uk",
+      "family": "banter-only",
+      "directCorrect": true,
+      "predicateCorrect": true,
+      "predicateExact": false,
+      "diagnostic": "both-correct"
+    },
+    {
+      "caseId": "banter-only/business-en",
+      "family": "banter-only",
+      "directCorrect": true,
+      "predicateCorrect": true,
+      "predicateExact": true,
+      "diagnostic": "both-correct"
+    },
+    {
+      "caseId": "banter-only/everyday-uk",
+      "family": "banter-only",
+      "directCorrect": true,
+      "predicateCorrect": true,
+      "predicateExact": true,
+      "diagnostic": "both-correct"
+    },
+    {
+      "caseId": "banter-only/research-es",
+      "family": "banter-only",
+      "directCorrect": false,
+      "predicateCorrect": false,
+      "predicateExact": false,
+      "diagnostic": "both-wrong-semantic"
+    },
+    {
+      "caseId": "banter-with-action/software-uk",
+      "family": "banter-with-action",
+      "directCorrect": true,
+      "predicateCorrect": true,
+      "predicateExact": true,
+      "diagnostic": "both-correct"
+    },
+    {
+      "caseId": "banter-with-action/business-en",
+      "family": "banter-with-action",
+      "directCorrect": true,
+      "predicateCorrect": true,
+      "predicateExact": true,
+      "diagnostic": "both-correct"
+    },
+    {
+      "caseId": "banter-with-action/everyday-uk",
+      "family": "banter-with-action",
+      "directCorrect": false,
+      "predicateCorrect": true,
+      "predicateExact": true,
+      "diagnostic": "predicate-correct-direct-wrong"
+    },
+    {
+      "caseId": "banter-with-action/research-es",
+      "family": "banter-with-action",
+      "directCorrect": true,
+      "predicateCorrect": true,
+      "predicateExact": true,
+      "diagnostic": "both-correct"
+    },
+    {
+      "caseId": "vague-no-value/software-uk",
+      "family": "vague-no-value",
+      "directCorrect": true,
+      "predicateCorrect": true,
+      "predicateExact": false,
+      "diagnostic": "both-correct"
+    },
+    {
+      "caseId": "vague-no-value/business-en",
+      "family": "vague-no-value",
+      "directCorrect": true,
+      "predicateCorrect": true,
+      "predicateExact": false,
+      "diagnostic": "both-correct"
+    },
+    {
+      "caseId": "vague-no-value/everyday-uk",
+      "family": "vague-no-value",
+      "directCorrect": true,
+      "predicateCorrect": true,
+      "predicateExact": false,
+      "diagnostic": "both-correct"
+    },
+    {
+      "caseId": "vague-no-value/foreign-es",
+      "family": "vague-no-value",
+      "directCorrect": true,
+      "predicateCorrect": true,
+      "predicateExact": false,
+      "diagnostic": "both-correct"
+    },
+    {
+      "caseId": "concrete-pending/software-uk",
+      "family": "concrete-pending",
+      "directCorrect": true,
+      "predicateCorrect": true,
+      "predicateExact": true,
+      "diagnostic": "both-correct"
+    },
+    {
+      "caseId": "concrete-pending/business-en",
+      "family": "concrete-pending",
+      "directCorrect": true,
+      "predicateCorrect": true,
+      "predicateExact": true,
+      "diagnostic": "both-correct"
+    },
+    {
+      "caseId": "concrete-pending/everyday-uk",
+      "family": "concrete-pending",
+      "directCorrect": false,
+      "predicateCorrect": true,
+      "predicateExact": true,
+      "diagnostic": "predicate-correct-direct-wrong"
+    },
+    {
+      "caseId": "concrete-pending/foreign-es",
+      "family": "concrete-pending",
+      "directCorrect": true,
+      "predicateCorrect": true,
+      "predicateExact": true,
+      "diagnostic": "both-correct"
+    },
+    {
+      "caseId": "unresolved-context/software-uk",
+      "family": "unresolved-context",
+      "directCorrect": true,
+      "predicateCorrect": true,
+      "predicateExact": true,
+      "diagnostic": "both-correct"
+    },
+    {
+      "caseId": "unresolved-context/business-en",
+      "family": "unresolved-context",
+      "directCorrect": false,
+      "predicateCorrect": false,
+      "predicateExact": false,
+      "diagnostic": "both-wrong-semantic"
+    },
+    {
+      "caseId": "unresolved-context/everyday-uk",
+      "family": "unresolved-context",
+      "directCorrect": false,
+      "predicateCorrect": false,
+      "predicateExact": false,
+      "diagnostic": "both-wrong-semantic"
+    },
+    {
+      "caseId": "unresolved-context/logistics-es",
+      "family": "unresolved-context",
+      "directCorrect": false,
+      "predicateCorrect": true,
+      "predicateExact": false,
+      "diagnostic": "predicate-correct-direct-wrong"
+    },
+    {
+      "caseId": "resolved-context/software-uk",
+      "family": "resolved-context",
+      "directCorrect": true,
+      "predicateCorrect": true,
+      "predicateExact": true,
+      "diagnostic": "both-correct"
+    },
+    {
+      "caseId": "resolved-context/business-en",
+      "family": "resolved-context",
+      "directCorrect": true,
+      "predicateCorrect": true,
+      "predicateExact": true,
+      "diagnostic": "both-correct"
+    },
+    {
+      "caseId": "resolved-context/everyday-uk",
+      "family": "resolved-context",
+      "directCorrect": true,
+      "predicateCorrect": true,
+      "predicateExact": true,
+      "diagnostic": "both-correct"
+    },
+    {
+      "caseId": "resolved-context/logistics-es",
+      "family": "resolved-context",
+      "directCorrect": true,
+      "predicateCorrect": true,
+      "predicateExact": true,
+      "diagnostic": "both-correct"
+    },
+    {
+      "caseId": "unverified-hypothesis/software-uk",
+      "family": "unverified-hypothesis",
+      "directCorrect": true,
+      "predicateCorrect": false,
+      "predicateExact": false,
+      "diagnostic": "direct-correct-predicate-wrong"
+    },
+    {
+      "caseId": "unverified-hypothesis/business-en",
+      "family": "unverified-hypothesis",
+      "directCorrect": true,
+      "predicateCorrect": true,
+      "predicateExact": false,
+      "diagnostic": "both-correct"
+    },
+    {
+      "caseId": "unverified-hypothesis/everyday-uk",
+      "family": "unverified-hypothesis",
+      "directCorrect": true,
+      "predicateCorrect": true,
+      "predicateExact": true,
+      "diagnostic": "both-correct"
+    },
+    {
+      "caseId": "unverified-hypothesis/research-es",
+      "family": "unverified-hypothesis",
+      "directCorrect": false,
+      "predicateCorrect": true,
+      "predicateExact": true,
+      "diagnostic": "predicate-correct-direct-wrong"
+    },
+    {
+      "caseId": "verified-result/software-uk",
+      "family": "verified-result",
+      "directCorrect": true,
+      "predicateCorrect": true,
+      "predicateExact": true,
+      "diagnostic": "both-correct"
+    },
+    {
+      "caseId": "verified-result/business-en",
+      "family": "verified-result",
+      "directCorrect": true,
+      "predicateCorrect": true,
+      "predicateExact": true,
+      "diagnostic": "both-correct"
+    },
+    {
+      "caseId": "verified-result/everyday-uk",
+      "family": "verified-result",
+      "directCorrect": true,
+      "predicateCorrect": true,
+      "predicateExact": true,
+      "diagnostic": "both-correct"
+    },
+    {
+      "caseId": "verified-result/research-es",
+      "family": "verified-result",
+      "directCorrect": true,
+      "predicateCorrect": true,
+      "predicateExact": true,
+      "diagnostic": "both-correct"
+    },
+    {
+      "caseId": "compact-status/software-uk",
+      "family": "compact-status",
+      "directCorrect": true,
+      "predicateCorrect": true,
+      "predicateExact": true,
+      "diagnostic": "both-correct"
+    },
+    {
+      "caseId": "compact-status/business-en",
+      "family": "compact-status",
+      "directCorrect": true,
+      "predicateCorrect": true,
+      "predicateExact": true,
+      "diagnostic": "both-correct"
+    },
+    {
+      "caseId": "compact-status/everyday-uk",
+      "family": "compact-status",
+      "directCorrect": true,
+      "predicateCorrect": true,
+      "predicateExact": true,
+      "diagnostic": "both-correct"
+    },
+    {
+      "caseId": "compact-status/manufacturing-es",
+      "family": "compact-status",
+      "directCorrect": true,
+      "predicateCorrect": true,
+      "predicateExact": true,
+      "diagnostic": "both-correct"
+    },
+    {
+      "caseId": "multi-stage-model/software-uk",
+      "family": "multi-stage-model",
+      "directCorrect": true,
+      "predicateCorrect": true,
+      "predicateExact": true,
+      "diagnostic": "both-correct"
+    },
+    {
+      "caseId": "multi-stage-model/business-en",
+      "family": "multi-stage-model",
+      "directCorrect": true,
+      "predicateCorrect": false,
+      "predicateExact": false,
+      "diagnostic": "direct-correct-predicate-wrong"
+    },
+    {
+      "caseId": "multi-stage-model/everyday-uk",
+      "family": "multi-stage-model",
+      "directCorrect": true,
+      "predicateCorrect": false,
+      "predicateExact": false,
+      "diagnostic": "direct-correct-predicate-wrong"
+    },
+    {
+      "caseId": "multi-stage-model/manufacturing-es",
+      "family": "multi-stage-model",
+      "directCorrect": true,
+      "predicateCorrect": true,
+      "predicateExact": true,
+      "diagnostic": "both-correct"
+    }
+  ]
+}

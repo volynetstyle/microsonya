@@ -1,0 +1,22 @@
+{
+  "dataset": "compaction-blind-v1",
+  "predicateGold": "compaction-blind-predicates-v1",
+  "directExperiment": "compaction-blind-baseline-v1",
+  "models": ["gpt-oss:120b-cloud"],
+  "reasoning": ["low"],
+  "think": "low",
+  "seeds": [42],
+  "promptVariants": ["original"],
+  "generationOptions": {
+    "temperature": 0,
+    "topK": 1,
+    "topP": 1,
+    "minP": 0,
+    "numPredict": 512,
+    "repeatPenalty": 1,
+    "presencePenalty": 0,
+    "frequencyPenalty": 0
+  },
+  "promptVersion": "v10",
+  "bootstrapSamples": 2000
+}

@@ -141,6 +141,101 @@ export function promptVariantAgreement(runs: BlindRun[]) {
   return rows;
 }
 
+export function pairedAblationComparisons(
+  runs: BlindRun[],
+  dataset: BlindDataset,
+  bootstrapSamples: number,
+) {
+  const cells = groupBy(
+    runs,
+    (run) => `${run.model}|${run.reasoning}|${run.seed}`,
+  );
+  const rows = [];
+  const metricNames = [
+    "endToEndAccuracy",
+    "caseAccuracy",
+    "strictFamilyAccuracy",
+    "strictSensitivityTransitionAccuracy",
+    "transitionRate",
+    "strictSurfaceInvarianceAccuracy",
+    "surfaceAgreement",
+  ] as const;
+  for (const cell of cells.values()) {
+    const first = cell[0]!;
+    const baseline = cell.filter((run) => run.promptVariant === "original");
+    if (baseline.length === 0) continue;
+    const targets = [...new Set(cell.map((run) => run.promptVariant))].filter(
+      (variant) => variant !== "original",
+    );
+    for (const targetVariant of targets) {
+      const target = cell.filter((run) => run.promptVariant === targetVariant);
+      const baselineMetrics = coreMetricsWithoutBootstrap(baseline, dataset);
+      const targetMetrics = coreMetricsWithoutBootstrap(target, dataset);
+      const distributions = Object.fromEntries(
+        metricNames.map((name) => [name, [] as number[]]),
+      ) as Record<(typeof metricNames)[number], number[]>;
+      const rng = xorshift32(
+        hashSeed(`${first.model}|${first.seed}|${targetVariant}|paired`),
+      );
+      for (let sample = 0; sample < bootstrapSamples; sample += 1) {
+        const sampledPairs = [];
+        const sampledFamilies = [];
+        const baselineSample: BlindRun[] = [];
+        const targetSample: BlindRun[] = [];
+        for (
+          let index = 0;
+          index < dataset.sensitivityPairs.length;
+          index += 1
+        ) {
+          const selected = Math.floor(rng() * dataset.sensitivityPairs.length);
+          const pair = dataset.sensitivityPairs[selected]!;
+          const familyIds = [pair.leftFamily, pair.rightFamily];
+          sampledPairs.push(pair);
+          sampledFamilies.push(
+            ...dataset.families.filter((family) =>
+              familyIds.includes(family.id),
+            ),
+          );
+          baselineSample.push(
+            ...baseline.filter((run) => familyIds.includes(run.family)),
+          );
+          targetSample.push(
+            ...target.filter((run) => familyIds.includes(run.family)),
+          );
+        }
+        const sampledDataset = {
+          ...dataset,
+          families: sampledFamilies,
+          sensitivityPairs: sampledPairs,
+        };
+        const baselineCore = coreMetricsWithoutBootstrap(
+          baselineSample,
+          sampledDataset,
+        );
+        const targetCore = coreMetricsWithoutBootstrap(
+          targetSample,
+          sampledDataset,
+        );
+        for (const name of metricNames)
+          distributions[name].push(targetCore[name] - baselineCore[name]);
+      }
+      for (const name of metricNames) {
+        rows.push({
+          model: first.model,
+          reasoning: first.reasoning,
+          seed: first.seed,
+          baselineVariant: "original" as const,
+          targetVariant,
+          metric: name,
+          delta: targetMetrics[name] - baselineMetrics[name],
+          bootstrap95: interval(distributions[name]),
+        });
+      }
+    }
+  }
+  return rows;
+}
+
 export function validateBlindDataset(dataset: BlindDataset): void {
   const familyIds = new Set<string>();
   for (const family of dataset.families) {
@@ -186,6 +281,10 @@ export function summarizeBlindRuns(
     const core = coreMetrics(cell, dataset);
     const byDomain = breakdown(cell, (run) => run.domain);
     const byLanguage = breakdown(cell, (run) => run.language);
+    const languageDomainCells = breakdown(
+      cell,
+      (run) => `${run.domain}|${run.language}`,
+    );
     return {
       promptVariant: first.promptVariant,
       model: first.model,
@@ -195,14 +294,10 @@ export function summarizeBlindRuns(
       byDomain,
       byLanguage,
       domainGap: range(byDomain.map((item) => item.accuracy)),
-      crossLanguageTransfer: {
-        primaryLanguageAccuracy:
-          byLanguage.find((item) => item.name === "uk")?.accuracy ?? 0,
-        otherLanguageAccuracy: ratio(
-          cell.filter((run) => run.language !== "uk" && run.correct).length,
-          cell.filter((run) => run.language !== "uk").length,
-        ),
-      },
+      languageDomainCells,
+      matchedLanguageAnalysis: matchedLanguageAnalysis(cell),
+      confusionMatrix: confusionMatrix(cell),
+      leaveOneBoundaryClusterOut: leaveOneBoundaryClusterOut(cell, dataset),
       bootstrap95: bootstrapByBoundary(
         cell,
         dataset,
@@ -235,19 +330,28 @@ function coreMetrics(runs: BlindRun[], dataset: BlindDataset) {
     total: runs.length,
     completionRate: ratio(completed, runs.length),
     validLabelRate: ratio(valid, completed),
+    endToEndAccuracy: ratio(correct, runs.length),
     caseAccuracy: ratio(correct, valid),
     familyAccuracy: mean(families.map((family) => family.accuracy)),
     strictFamilyAccuracy: ratio(
       families.filter((family) => family.strict).length,
       families.length,
     ),
-    sensitivityTransitionAccuracy: ratio(
-      sensitivity.filter((item) => item.passed).length,
+    strictSensitivityTransitionAccuracy: ratio(
+      sensitivity.filter((item) => item.strictPassed).length,
       sensitivity.length,
     ),
-    surfaceInvarianceRate: ratio(
-      invariance.filter((item) => item.passed).length,
+    transitionRate: ratio(
+      sensitivity.filter((item) => item.transitioned).length,
+      sensitivity.filter((item) => item.comparable).length,
+    ),
+    strictSurfaceInvarianceAccuracy: ratio(
+      invariance.filter((item) => item.strictPassed).length,
       invariance.length,
+    ),
+    surfaceAgreement: ratio(
+      invariance.filter((item) => item.agreed).length,
+      invariance.filter((item) => item.comparable).length,
     ),
     families,
     sensitivity,
@@ -270,7 +374,12 @@ function sensitivityOutcomes(runs: BlindRun[], dataset: BlindDataset) {
         variant: left.variant,
         leftCase: left.caseId,
         rightCase: right.caseId,
-        passed:
+        comparable: left.actual !== null && right.actual !== null,
+        transitioned:
+          left.actual !== null &&
+          right.actual !== null &&
+          left.actual !== right.actual,
+        strictPassed:
           left.correct &&
           right.correct &&
           left.actual !== null &&
@@ -298,7 +407,12 @@ function invarianceOutcomes(runs: BlindRun[], dataset: BlindDataset) {
           family: family.id,
           leftCase: left.caseId,
           rightCase: right.caseId,
-          passed:
+          comparable: left.actual !== null && right.actual !== null,
+          agreed:
+            left.actual !== null &&
+            right.actual !== null &&
+            left.actual === right.actual,
+          strictPassed:
             left.correct &&
             right.correct &&
             left.actual !== null &&
@@ -318,6 +432,79 @@ function breakdown(runs: BlindRun[], key: (run: BlindRun) => string) {
   }));
 }
 
+function confusionMatrix(runs: BlindRun[]) {
+  const matrix: Record<string, Record<string, number>> = {};
+  for (const run of runs) {
+    const actual = !run.completed
+      ? "NO_CONTENT"
+      : run.actual === null
+        ? "INVALID"
+        : run.actual;
+    matrix[run.expected] ??= {};
+    matrix[run.expected]![actual] = (matrix[run.expected]![actual] ?? 0) + 1;
+  }
+  return matrix;
+}
+
+function matchedLanguageAnalysis(runs: BlindRun[]) {
+  const comparisons = [];
+  for (const [domain, items] of groupBy(runs, (run) => run.domain)) {
+    const languages = [...groupBy(items, (run) => run.language).entries()];
+    if (languages.length < 2) continue;
+    for (let leftIndex = 0; leftIndex < languages.length; leftIndex += 1) {
+      for (
+        let rightIndex = leftIndex + 1;
+        rightIndex < languages.length;
+        rightIndex += 1
+      ) {
+        const [leftLanguage, leftRuns] = languages[leftIndex]!;
+        const [rightLanguage, rightRuns] = languages[rightIndex]!;
+        comparisons.push({
+          domain,
+          leftLanguage,
+          rightLanguage,
+          leftAccuracy: ratio(
+            leftRuns.filter((run) => run.correct).length,
+            leftRuns.length,
+          ),
+          rightAccuracy: ratio(
+            rightRuns.filter((run) => run.correct).length,
+            rightRuns.length,
+          ),
+        });
+      }
+    }
+  }
+  return {
+    available: comparisons.length > 0,
+    confounded: comparisons.length === 0,
+    comparisons,
+  };
+}
+
+function leaveOneBoundaryClusterOut(runs: BlindRun[], dataset: BlindDataset) {
+  return dataset.sensitivityPairs.map((pair) => {
+    const retainedRuns = runs.filter(
+      (run) =>
+        run.family !== pair.leftFamily && run.family !== pair.rightFamily,
+    );
+    const retainedDataset = {
+      ...dataset,
+      families: dataset.families.filter(
+        (family) =>
+          family.id !== pair.leftFamily && family.id !== pair.rightFamily,
+      ),
+      sensitivityPairs: dataset.sensitivityPairs.filter(
+        (candidate) => candidate.id !== pair.id,
+      ),
+    };
+    return {
+      omittedBoundary: pair.id,
+      ...coreMetricsWithoutBootstrap(retainedRuns, retainedDataset),
+    };
+  });
+}
+
 function bootstrapByBoundary(
   runs: BlindRun[],
   dataset: BlindDataset,
@@ -330,9 +517,13 @@ function bootstrapByBoundary(
   ]);
   const rng = xorshift32(seed);
   const values = {
-    caseAccuracy: [] as number[],
+    endToEndAccuracy: [] as number[],
+    conditionalCaseAccuracy: [] as number[],
     strictFamilyAccuracy: [] as number[],
-    sensitivityTransitionAccuracy: [] as number[],
+    strictSensitivityTransitionAccuracy: [] as number[],
+    transitionRate: [] as number[],
+    strictSurfaceInvarianceAccuracy: [] as number[],
+    surfaceAgreement: [] as number[],
   };
   for (let sample = 0; sample < samples; sample += 1) {
     const sampledRuns: BlindRun[] = [];
@@ -353,11 +544,17 @@ function bootstrapByBoundary(
       sensitivityPairs: sampledPairs,
     };
     const core = coreMetricsWithoutBootstrap(sampledRuns, sampledDataset);
-    values.caseAccuracy.push(core.caseAccuracy);
+    values.endToEndAccuracy.push(core.endToEndAccuracy);
+    values.conditionalCaseAccuracy.push(core.caseAccuracy);
     values.strictFamilyAccuracy.push(core.strictFamilyAccuracy);
-    values.sensitivityTransitionAccuracy.push(
-      core.sensitivityTransitionAccuracy,
+    values.strictSensitivityTransitionAccuracy.push(
+      core.strictSensitivityTransitionAccuracy,
     );
+    values.transitionRate.push(core.transitionRate);
+    values.strictSurfaceInvarianceAccuracy.push(
+      core.strictSurfaceInvarianceAccuracy,
+    );
+    values.surfaceAgreement.push(core.surfaceAgreement);
   }
   return Object.fromEntries(
     Object.entries(values).map(([name, samplesForMetric]) => [
@@ -375,15 +572,29 @@ function coreMetricsWithoutBootstrap(runs: BlindRun[], dataset: BlindDataset) {
     return items.length > 0 && items.every((item) => item.correct);
   });
   const sensitivity = sensitivityOutcomes(runs, dataset);
+  const invariance = invarianceOutcomes(runs, dataset);
   return {
+    endToEndAccuracy: ratio(correct, runs.length),
     caseAccuracy: ratio(correct, valid),
     strictFamilyAccuracy: ratio(
       familyStrict.filter(Boolean).length,
       familyStrict.length,
     ),
-    sensitivityTransitionAccuracy: ratio(
-      sensitivity.filter((item) => item.passed).length,
+    strictSensitivityTransitionAccuracy: ratio(
+      sensitivity.filter((item) => item.strictPassed).length,
       sensitivity.length,
+    ),
+    transitionRate: ratio(
+      sensitivity.filter((item) => item.transitioned).length,
+      sensitivity.filter((item) => item.comparable).length,
+    ),
+    strictSurfaceInvarianceAccuracy: ratio(
+      invariance.filter((item) => item.strictPassed).length,
+      invariance.length,
+    ),
+    surfaceAgreement: ratio(
+      invariance.filter((item) => item.agreed).length,
+      invariance.filter((item) => item.comparable).length,
     ),
   };
 }

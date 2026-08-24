@@ -5,16 +5,16 @@
     "reasoning": "low",
     "seed": 42,
     "total": 48,
-    "completionRate": 0.9791666666666666,
+    "completionRate": 1,
     "validLabelRate": 1,
-    "endToEndAccuracy": 0.8541666666666666,
-    "caseAccuracy": 0.8723404255319149,
-    "familyAccuracy": 0.8541666666666666,
-    "strictFamilyAccuracy": 0.5833333333333334,
-    "strictSensitivityTransitionAccuracy": 0.7083333333333334,
-    "transitionRate": 0.8695652173913043,
-    "strictSurfaceInvarianceAccuracy": 0.75,
-    "surfaceAgreement": 0.7971014492753623,
+    "endToEndAccuracy": 0.875,
+    "caseAccuracy": 0.875,
+    "familyAccuracy": 0.875,
+    "strictFamilyAccuracy": 0.6666666666666666,
+    "strictSensitivityTransitionAccuracy": 0.75,
+    "transitionRate": 0.9583333333333334,
+    "strictSurfaceInvarianceAccuracy": 0.7777777777777778,
+    "surfaceAgreement": 0.7916666666666666,
     "families": [
       {
         "family": "reaction-only",
@@ -43,10 +43,10 @@
       {
         "family": "banter-with-action",
         "expected": "DEFER_COMPACT",
-        "correct": 3,
+        "correct": 4,
         "total": 4,
-        "accuracy": 0.75,
-        "strict": false
+        "accuracy": 1,
+        "strict": true
       },
       {
         "family": "vague-no-value",
@@ -59,17 +59,17 @@
       {
         "family": "concrete-pending",
         "expected": "DEFER_INCOMPLETE",
-        "correct": 3,
+        "correct": 4,
         "total": 4,
-        "accuracy": 0.75,
-        "strict": false
+        "accuracy": 1,
+        "strict": true
       },
       {
         "family": "unresolved-context",
         "expected": "DEFER_CONTEXT",
-        "correct": 1,
+        "correct": 2,
         "total": 4,
-        "accuracy": 0.25,
+        "accuracy": 0.5,
         "strict": false
       },
       {
@@ -107,10 +107,10 @@
       {
         "family": "multi-stage-model",
         "expected": "SUMMARIZE",
-        "correct": 4,
+        "correct": 2,
         "total": 4,
-        "accuracy": 1,
-        "strict": true
+        "accuracy": 0.5,
+        "strict": false
       }
     ],
     "sensitivity": [
@@ -174,8 +174,8 @@
         "leftCase": "banter-only/everyday-uk",
         "rightCase": "banter-with-action/everyday-uk",
         "comparable": true,
-        "transitioned": false,
-        "strictPassed": false
+        "transitioned": true,
+        "strictPassed": true
       },
       {
         "pair": "banter-to-action",
@@ -209,9 +209,9 @@
         "variant": "everyday-uk",
         "leftCase": "vague-no-value/everyday-uk",
         "rightCase": "concrete-pending/everyday-uk",
-        "comparable": false,
-        "transitioned": false,
-        "strictPassed": false
+        "comparable": true,
+        "transitioned": true,
+        "strictPassed": true
       },
       {
         "pair": "vague-to-concrete",
@@ -255,8 +255,8 @@
         "leftCase": "unresolved-context/logistics-es",
         "rightCase": "resolved-context/logistics-es",
         "comparable": true,
-        "transitioned": false,
-        "strictPassed": false
+        "transitioned": true,
+        "strictPassed": true
       },
       {
         "pair": "hypothesis-to-result",
@@ -265,7 +265,7 @@
         "rightCase": "verified-result/software-uk",
         "comparable": true,
         "transitioned": true,
-        "strictPassed": true
+        "strictPassed": false
       },
       {
         "pair": "hypothesis-to-result",
@@ -292,7 +292,7 @@
         "rightCase": "verified-result/research-es",
         "comparable": true,
         "transitioned": true,
-        "strictPassed": false
+        "strictPassed": true
       },
       {
         "pair": "status-to-model",
@@ -310,7 +310,7 @@
         "rightCase": "multi-stage-model/business-en",
         "comparable": true,
         "transitioned": true,
-        "strictPassed": true
+        "strictPassed": false
       },
       {
         "pair": "status-to-model",
@@ -319,7 +319,7 @@
         "rightCase": "multi-stage-model/everyday-uk",
         "comparable": true,
         "transitioned": true,
-        "strictPassed": true
+        "strictPassed": false
       },
       {
         "pair": "status-to-model",
@@ -489,8 +489,8 @@
         "leftCase": "banter-with-action/software-uk",
         "rightCase": "banter-with-action/everyday-uk",
         "comparable": true,
-        "agreed": false,
-        "strictPassed": false
+        "agreed": true,
+        "strictPassed": true
       },
       {
         "family": "banter-with-action",
@@ -505,8 +505,8 @@
         "leftCase": "banter-with-action/business-en",
         "rightCase": "banter-with-action/everyday-uk",
         "comparable": true,
-        "agreed": false,
-        "strictPassed": false
+        "agreed": true,
+        "strictPassed": true
       },
       {
         "family": "banter-with-action",
@@ -521,8 +521,8 @@
         "leftCase": "banter-with-action/everyday-uk",
         "rightCase": "banter-with-action/research-es",
         "comparable": true,
-        "agreed": false,
-        "strictPassed": false
+        "agreed": true,
+        "strictPassed": true
       },
       {
         "family": "vague-no-value",
@@ -584,9 +584,9 @@
         "family": "concrete-pending",
         "leftCase": "concrete-pending/software-uk",
         "rightCase": "concrete-pending/everyday-uk",
-        "comparable": false,
-        "agreed": false,
-        "strictPassed": false
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
       },
       {
         "family": "concrete-pending",
@@ -600,9 +600,9 @@
         "family": "concrete-pending",
         "leftCase": "concrete-pending/business-en",
         "rightCase": "concrete-pending/everyday-uk",
-        "comparable": false,
-        "agreed": false,
-        "strictPassed": false
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
       },
       {
         "family": "concrete-pending",
@@ -616,9 +616,9 @@
         "family": "concrete-pending",
         "leftCase": "concrete-pending/everyday-uk",
         "rightCase": "concrete-pending/foreign-es",
-        "comparable": false,
-        "agreed": false,
-        "strictPassed": false
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
       },
       {
         "family": "unresolved-context",
@@ -641,8 +641,8 @@
         "leftCase": "unresolved-context/software-uk",
         "rightCase": "unresolved-context/logistics-es",
         "comparable": true,
-        "agreed": false,
-        "strictPassed": false
+        "agreed": true,
+        "strictPassed": true
       },
       {
         "family": "unresolved-context",
@@ -657,7 +657,7 @@
         "leftCase": "unresolved-context/business-en",
         "rightCase": "unresolved-context/logistics-es",
         "comparable": true,
-        "agreed": true,
+        "agreed": false,
         "strictPassed": false
       },
       {
@@ -721,16 +721,16 @@
         "leftCase": "unverified-hypothesis/software-uk",
         "rightCase": "unverified-hypothesis/business-en",
         "comparable": true,
-        "agreed": true,
-        "strictPassed": true
+        "agreed": false,
+        "strictPassed": false
       },
       {
         "family": "unverified-hypothesis",
         "leftCase": "unverified-hypothesis/software-uk",
         "rightCase": "unverified-hypothesis/everyday-uk",
         "comparable": true,
-        "agreed": true,
-        "strictPassed": true
+        "agreed": false,
+        "strictPassed": false
       },
       {
         "family": "unverified-hypothesis",
@@ -753,16 +753,16 @@
         "leftCase": "unverified-hypothesis/business-en",
         "rightCase": "unverified-hypothesis/research-es",
         "comparable": true,
-        "agreed": false,
-        "strictPassed": false
+        "agreed": true,
+        "strictPassed": true
       },
       {
         "family": "unverified-hypothesis",
         "leftCase": "unverified-hypothesis/everyday-uk",
         "rightCase": "unverified-hypothesis/research-es",
         "comparable": true,
-        "agreed": false,
-        "strictPassed": false
+        "agreed": true,
+        "strictPassed": true
       },
       {
         "family": "verified-result",
@@ -865,16 +865,16 @@
         "leftCase": "multi-stage-model/software-uk",
         "rightCase": "multi-stage-model/business-en",
         "comparable": true,
-        "agreed": true,
-        "strictPassed": true
+        "agreed": false,
+        "strictPassed": false
       },
       {
         "family": "multi-stage-model",
         "leftCase": "multi-stage-model/software-uk",
         "rightCase": "multi-stage-model/everyday-uk",
         "comparable": true,
-        "agreed": true,
-        "strictPassed": true
+        "agreed": false,
+        "strictPassed": false
       },
       {
         "family": "multi-stage-model",
@@ -890,40 +890,40 @@
         "rightCase": "multi-stage-model/everyday-uk",
         "comparable": true,
         "agreed": true,
-        "strictPassed": true
+        "strictPassed": false
       },
       {
         "family": "multi-stage-model",
         "leftCase": "multi-stage-model/business-en",
         "rightCase": "multi-stage-model/manufacturing-es",
         "comparable": true,
-        "agreed": true,
-        "strictPassed": true
+        "agreed": false,
+        "strictPassed": false
       },
       {
         "family": "multi-stage-model",
         "leftCase": "multi-stage-model/everyday-uk",
         "rightCase": "multi-stage-model/manufacturing-es",
         "comparable": true,
-        "agreed": true,
-        "strictPassed": true
+        "agreed": false,
+        "strictPassed": false
       }
     ],
     "byDomain": [
       {
         "name": "software",
         "total": 12,
-        "accuracy": 1
+        "accuracy": 0.9166666666666666
       },
       {
         "name": "business",
         "total": 12,
-        "accuracy": 0.9166666666666666
+        "accuracy": 0.8333333333333334
       },
       {
         "name": "everyday",
         "total": 12,
-        "accuracy": 0.75
+        "accuracy": 0.8333333333333334
       },
       {
         "name": "legal",
@@ -933,7 +933,7 @@
       {
         "name": "research",
         "total": 4,
-        "accuracy": 0.5
+        "accuracy": 0.75
       },
       {
         "name": "education",
@@ -948,7 +948,7 @@
       {
         "name": "logistics",
         "total": 2,
-        "accuracy": 0.5
+        "accuracy": 1
       }
     ],
     "byLanguage": [
@@ -960,30 +960,30 @@
       {
         "name": "en",
         "total": 12,
-        "accuracy": 0.9166666666666666
+        "accuracy": 0.8333333333333334
       },
       {
         "name": "es",
         "total": 12,
-        "accuracy": 0.75
+        "accuracy": 0.9166666666666666
       }
     ],
-    "domainGap": 0.5,
+    "domainGap": 0.25,
     "languageDomainCells": [
       {
         "name": "software|uk",
         "total": 12,
-        "accuracy": 1
+        "accuracy": 0.9166666666666666
       },
       {
         "name": "business|en",
         "total": 12,
-        "accuracy": 0.9166666666666666
+        "accuracy": 0.8333333333333334
       },
       {
         "name": "everyday|uk",
         "total": 12,
-        "accuracy": 0.75
+        "accuracy": 0.8333333333333334
       },
       {
         "name": "legal|es",
@@ -993,7 +993,7 @@
       {
         "name": "research|es",
         "total": 4,
-        "accuracy": 0.5
+        "accuracy": 0.75
       },
       {
         "name": "education|es",
@@ -1008,7 +1008,7 @@
       {
         "name": "logistics|es",
         "total": 2,
-        "accuracy": 0.5
+        "accuracy": 1
       }
     ],
     "matchedLanguageAnalysis": {
@@ -1021,50 +1021,49 @@
         "SKIP_REACTIONS": 4
       },
       "DEFER_COMPACT": {
-        "DEFER_COMPACT": 19,
-        "SKIP_BANTER": 1
+        "DEFER_COMPACT": 20
       },
       "SKIP_BANTER": {
         "SKIP_BANTER": 3,
-        "SKIP_NO_VALUE": 1
+        "DEFER_INCOMPLETE": 1
       },
       "SKIP_NO_VALUE": {
         "SKIP_NO_VALUE": 4
       },
       "DEFER_INCOMPLETE": {
-        "DEFER_INCOMPLETE": 6,
-        "NO_CONTENT": 1,
-        "SKIP_NO_VALUE": 1
+        "DEFER_INCOMPLETE": 7,
+        "SUMMARIZE": 1
       },
       "DEFER_CONTEXT": {
-        "DEFER_CONTEXT": 1,
-        "DEFER_COMPACT": 2,
+        "DEFER_CONTEXT": 2,
+        "DEFER_COMPACT": 1,
         "SKIP_NO_VALUE": 1
       },
       "SUMMARIZE": {
-        "SUMMARIZE": 4
+        "SUMMARIZE": 2,
+        "DEFER_INCOMPLETE": 2
       }
     },
     "leaveOneBoundaryClusterOut": [
       {
         "omittedBoundary": "reaction-to-decision",
-        "endToEndAccuracy": 0.825,
-        "caseAccuracy": 0.8461538461538461,
-        "strictFamilyAccuracy": 0.5,
-        "strictSensitivityTransitionAccuracy": 0.65,
-        "transitionRate": 0.8421052631578947,
-        "strictSurfaceInvarianceAccuracy": 0.7,
-        "surfaceAgreement": 0.7543859649122807
+        "endToEndAccuracy": 0.85,
+        "caseAccuracy": 0.85,
+        "strictFamilyAccuracy": 0.6,
+        "strictSensitivityTransitionAccuracy": 0.7,
+        "transitionRate": 0.95,
+        "strictSurfaceInvarianceAccuracy": 0.7333333333333333,
+        "surfaceAgreement": 0.75
       },
       {
         "omittedBoundary": "banter-to-action",
         "endToEndAccuracy": 0.875,
-        "caseAccuracy": 0.8974358974358975,
+        "caseAccuracy": 0.875,
         "strictFamilyAccuracy": 0.7,
         "strictSensitivityTransitionAccuracy": 0.75,
-        "transitionRate": 0.8947368421052632,
-        "strictSurfaceInvarianceAccuracy": 0.8,
-        "surfaceAgreement": 0.8596491228070176
+        "transitionRate": 0.95,
+        "strictSurfaceInvarianceAccuracy": 0.7833333333333333,
+        "surfaceAgreement": 0.8
       },
       {
         "omittedBoundary": "vague-to-concrete",
@@ -1072,69 +1071,69 @@
         "caseAccuracy": 0.85,
         "strictFamilyAccuracy": 0.6,
         "strictSensitivityTransitionAccuracy": 0.7,
-        "transitionRate": 0.85,
-        "strictSurfaceInvarianceAccuracy": 0.75,
-        "surfaceAgreement": 0.7666666666666667
+        "transitionRate": 0.95,
+        "strictSurfaceInvarianceAccuracy": 0.7333333333333333,
+        "surfaceAgreement": 0.75
       },
       {
         "omittedBoundary": "unresolved-to-resolved",
         "endToEndAccuracy": 0.9,
-        "caseAccuracy": 0.9230769230769231,
-        "strictFamilyAccuracy": 0.6,
+        "caseAccuracy": 0.9,
+        "strictFamilyAccuracy": 0.7,
         "strictSensitivityTransitionAccuracy": 0.8,
-        "transitionRate": 0.9473684210526315,
-        "strictSurfaceInvarianceAccuracy": 0.8,
-        "surfaceAgreement": 0.8421052631578947
+        "transitionRate": 1,
+        "strictSurfaceInvarianceAccuracy": 0.8166666666666667,
+        "surfaceAgreement": 0.8333333333333334
       },
       {
         "omittedBoundary": "hypothesis-to-result",
-        "endToEndAccuracy": 0.85,
-        "caseAccuracy": 0.8717948717948718,
-        "strictFamilyAccuracy": 0.6,
-        "strictSensitivityTransitionAccuracy": 0.7,
-        "transitionRate": 0.8421052631578947,
-        "strictSurfaceInvarianceAccuracy": 0.75,
-        "surfaceAgreement": 0.8070175438596491
+        "endToEndAccuracy": 0.875,
+        "caseAccuracy": 0.875,
+        "strictFamilyAccuracy": 0.7,
+        "strictSensitivityTransitionAccuracy": 0.75,
+        "transitionRate": 0.95,
+        "strictSurfaceInvarianceAccuracy": 0.7833333333333333,
+        "surfaceAgreement": 0.8
       },
       {
         "omittedBoundary": "status-to-model",
-        "endToEndAccuracy": 0.825,
-        "caseAccuracy": 0.8461538461538461,
-        "strictFamilyAccuracy": 0.5,
-        "strictSensitivityTransitionAccuracy": 0.65,
-        "transitionRate": 0.8421052631578947,
-        "strictSurfaceInvarianceAccuracy": 0.7,
-        "surfaceAgreement": 0.7543859649122807
+        "endToEndAccuracy": 0.9,
+        "caseAccuracy": 0.9,
+        "strictFamilyAccuracy": 0.7,
+        "strictSensitivityTransitionAccuracy": 0.8,
+        "transitionRate": 0.95,
+        "strictSurfaceInvarianceAccuracy": 0.8166666666666667,
+        "surfaceAgreement": 0.8166666666666667
       }
     ],
     "bootstrap95": {
       "endToEndAccuracy": {
-        "low": 0.75,
+        "low": 0.7916666666666666,
         "high": 0.9583333333333334
       },
       "conditionalCaseAccuracy": {
-        "low": 0.75,
-        "high": 0.9787234042553191
+        "low": 0.7916666666666666,
+        "high": 0.9583333333333334
       },
       "strictFamilyAccuracy": {
-        "low": 0.3333333333333333,
+        "low": 0.5,
         "high": 0.8333333333333334
       },
       "strictSensitivityTransitionAccuracy": {
-        "low": 0.375,
+        "low": 0.5416666666666666,
         "high": 0.9583333333333334
       },
       "transitionRate": {
-        "low": 0.6041666666666666,
+        "low": 0.8125,
         "high": 1
       },
       "strictSurfaceInvarianceAccuracy": {
-        "low": 0.5416666666666666,
-        "high": 0.9861111111111112
+        "low": 0.6211538461538462,
+        "high": 0.9903846153846154
       },
       "surfaceAgreement": {
-        "low": 0.6134259259259259,
-        "high": 0.9939271255060729
+        "low": 0.6736111111111112,
+        "high": 0.9903846153846154
       }
     }
   }

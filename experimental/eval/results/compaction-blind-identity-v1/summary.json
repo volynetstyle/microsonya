@@ -1,0 +1,2278 @@
+[
+  {
+    "promptVariant": "original",
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "seed": 42,
+    "total": 48,
+    "completionRate": 1,
+    "validLabelRate": 1,
+    "endToEndAccuracy": 0.8125,
+    "caseAccuracy": 0.8125,
+    "familyAccuracy": 0.8125,
+    "strictFamilyAccuracy": 0.5833333333333334,
+    "strictSensitivityTransitionAccuracy": 0.625,
+    "transitionRate": 0.7916666666666666,
+    "strictSurfaceInvarianceAccuracy": 0.6944444444444444,
+    "surfaceAgreement": 0.75,
+    "families": [
+      {
+        "family": "reaction-only",
+        "expected": "SKIP_REACTIONS",
+        "correct": 4,
+        "total": 4,
+        "accuracy": 1,
+        "strict": true
+      },
+      {
+        "family": "reaction-with-decision",
+        "expected": "DEFER_COMPACT",
+        "correct": 4,
+        "total": 4,
+        "accuracy": 1,
+        "strict": true
+      },
+      {
+        "family": "banter-only",
+        "expected": "SKIP_BANTER",
+        "correct": 2,
+        "total": 4,
+        "accuracy": 0.5,
+        "strict": false
+      },
+      {
+        "family": "banter-with-action",
+        "expected": "DEFER_COMPACT",
+        "correct": 3,
+        "total": 4,
+        "accuracy": 0.75,
+        "strict": false
+      },
+      {
+        "family": "vague-no-value",
+        "expected": "SKIP_NO_VALUE",
+        "correct": 4,
+        "total": 4,
+        "accuracy": 1,
+        "strict": true
+      },
+      {
+        "family": "concrete-pending",
+        "expected": "DEFER_INCOMPLETE",
+        "correct": 4,
+        "total": 4,
+        "accuracy": 1,
+        "strict": true
+      },
+      {
+        "family": "unresolved-context",
+        "expected": "DEFER_CONTEXT",
+        "correct": 2,
+        "total": 4,
+        "accuracy": 0.5,
+        "strict": false
+      },
+      {
+        "family": "resolved-context",
+        "expected": "DEFER_COMPACT",
+        "correct": 4,
+        "total": 4,
+        "accuracy": 1,
+        "strict": true
+      },
+      {
+        "family": "unverified-hypothesis",
+        "expected": "DEFER_INCOMPLETE",
+        "correct": 1,
+        "total": 4,
+        "accuracy": 0.25,
+        "strict": false
+      },
+      {
+        "family": "verified-result",
+        "expected": "DEFER_COMPACT",
+        "correct": 4,
+        "total": 4,
+        "accuracy": 1,
+        "strict": true
+      },
+      {
+        "family": "compact-status",
+        "expected": "DEFER_COMPACT",
+        "correct": 4,
+        "total": 4,
+        "accuracy": 1,
+        "strict": true
+      },
+      {
+        "family": "multi-stage-model",
+        "expected": "SUMMARIZE",
+        "correct": 3,
+        "total": 4,
+        "accuracy": 0.75,
+        "strict": false
+      }
+    ],
+    "sensitivity": [
+      {
+        "pair": "reaction-to-decision",
+        "variant": "software-uk",
+        "leftCase": "reaction-only/software-uk",
+        "rightCase": "reaction-with-decision/software-uk",
+        "comparable": true,
+        "transitioned": true,
+        "strictPassed": true
+      },
+      {
+        "pair": "reaction-to-decision",
+        "variant": "business-en",
+        "leftCase": "reaction-only/business-en",
+        "rightCase": "reaction-with-decision/business-en",
+        "comparable": true,
+        "transitioned": true,
+        "strictPassed": true
+      },
+      {
+        "pair": "reaction-to-decision",
+        "variant": "everyday-uk",
+        "leftCase": "reaction-only/everyday-uk",
+        "rightCase": "reaction-with-decision/everyday-uk",
+        "comparable": true,
+        "transitioned": true,
+        "strictPassed": true
+      },
+      {
+        "pair": "reaction-to-decision",
+        "variant": "legal-es",
+        "leftCase": "reaction-only/legal-es",
+        "rightCase": "reaction-with-decision/legal-es",
+        "comparable": true,
+        "transitioned": true,
+        "strictPassed": true
+      },
+      {
+        "pair": "banter-to-action",
+        "variant": "software-uk",
+        "leftCase": "banter-only/software-uk",
+        "rightCase": "banter-with-action/software-uk",
+        "comparable": true,
+        "transitioned": true,
+        "strictPassed": false
+      },
+      {
+        "pair": "banter-to-action",
+        "variant": "business-en",
+        "leftCase": "banter-only/business-en",
+        "rightCase": "banter-with-action/business-en",
+        "comparable": true,
+        "transitioned": true,
+        "strictPassed": true
+      },
+      {
+        "pair": "banter-to-action",
+        "variant": "everyday-uk",
+        "leftCase": "banter-only/everyday-uk",
+        "rightCase": "banter-with-action/everyday-uk",
+        "comparable": true,
+        "transitioned": false,
+        "strictPassed": false
+      },
+      {
+        "pair": "banter-to-action",
+        "variant": "research-es",
+        "leftCase": "banter-only/research-es",
+        "rightCase": "banter-with-action/research-es",
+        "comparable": true,
+        "transitioned": false,
+        "strictPassed": false
+      },
+      {
+        "pair": "vague-to-concrete",
+        "variant": "software-uk",
+        "leftCase": "vague-no-value/software-uk",
+        "rightCase": "concrete-pending/software-uk",
+        "comparable": true,
+        "transitioned": true,
+        "strictPassed": true
+      },
+      {
+        "pair": "vague-to-concrete",
+        "variant": "business-en",
+        "leftCase": "vague-no-value/business-en",
+        "rightCase": "concrete-pending/business-en",
+        "comparable": true,
+        "transitioned": true,
+        "strictPassed": true
+      },
+      {
+        "pair": "vague-to-concrete",
+        "variant": "everyday-uk",
+        "leftCase": "vague-no-value/everyday-uk",
+        "rightCase": "concrete-pending/everyday-uk",
+        "comparable": true,
+        "transitioned": true,
+        "strictPassed": true
+      },
+      {
+        "pair": "vague-to-concrete",
+        "variant": "foreign-es",
+        "leftCase": "vague-no-value/foreign-es",
+        "rightCase": "concrete-pending/foreign-es",
+        "comparable": true,
+        "transitioned": true,
+        "strictPassed": true
+      },
+      {
+        "pair": "unresolved-to-resolved",
+        "variant": "software-uk",
+        "leftCase": "unresolved-context/software-uk",
+        "rightCase": "resolved-context/software-uk",
+        "comparable": true,
+        "transitioned": true,
+        "strictPassed": true
+      },
+      {
+        "pair": "unresolved-to-resolved",
+        "variant": "business-en",
+        "leftCase": "unresolved-context/business-en",
+        "rightCase": "resolved-context/business-en",
+        "comparable": true,
+        "transitioned": false,
+        "strictPassed": false
+      },
+      {
+        "pair": "unresolved-to-resolved",
+        "variant": "everyday-uk",
+        "leftCase": "unresolved-context/everyday-uk",
+        "rightCase": "resolved-context/everyday-uk",
+        "comparable": true,
+        "transitioned": true,
+        "strictPassed": true
+      },
+      {
+        "pair": "unresolved-to-resolved",
+        "variant": "logistics-es",
+        "leftCase": "unresolved-context/logistics-es",
+        "rightCase": "resolved-context/logistics-es",
+        "comparable": true,
+        "transitioned": false,
+        "strictPassed": false
+      },
+      {
+        "pair": "hypothesis-to-result",
+        "variant": "software-uk",
+        "leftCase": "unverified-hypothesis/software-uk",
+        "rightCase": "verified-result/software-uk",
+        "comparable": true,
+        "transitioned": true,
+        "strictPassed": false
+      },
+      {
+        "pair": "hypothesis-to-result",
+        "variant": "business-en",
+        "leftCase": "unverified-hypothesis/business-en",
+        "rightCase": "verified-result/business-en",
+        "comparable": true,
+        "transitioned": true,
+        "strictPassed": false
+      },
+      {
+        "pair": "hypothesis-to-result",
+        "variant": "everyday-uk",
+        "leftCase": "unverified-hypothesis/everyday-uk",
+        "rightCase": "verified-result/everyday-uk",
+        "comparable": true,
+        "transitioned": true,
+        "strictPassed": true
+      },
+      {
+        "pair": "hypothesis-to-result",
+        "variant": "research-es",
+        "leftCase": "unverified-hypothesis/research-es",
+        "rightCase": "verified-result/research-es",
+        "comparable": true,
+        "transitioned": true,
+        "strictPassed": false
+      },
+      {
+        "pair": "status-to-model",
+        "variant": "software-uk",
+        "leftCase": "compact-status/software-uk",
+        "rightCase": "multi-stage-model/software-uk",
+        "comparable": true,
+        "transitioned": true,
+        "strictPassed": true
+      },
+      {
+        "pair": "status-to-model",
+        "variant": "business-en",
+        "leftCase": "compact-status/business-en",
+        "rightCase": "multi-stage-model/business-en",
+        "comparable": true,
+        "transitioned": false,
+        "strictPassed": false
+      },
+      {
+        "pair": "status-to-model",
+        "variant": "everyday-uk",
+        "leftCase": "compact-status/everyday-uk",
+        "rightCase": "multi-stage-model/everyday-uk",
+        "comparable": true,
+        "transitioned": true,
+        "strictPassed": true
+      },
+      {
+        "pair": "status-to-model",
+        "variant": "manufacturing-es",
+        "leftCase": "compact-status/manufacturing-es",
+        "rightCase": "multi-stage-model/manufacturing-es",
+        "comparable": true,
+        "transitioned": true,
+        "strictPassed": true
+      }
+    ],
+    "invariance": [
+      {
+        "family": "reaction-only",
+        "leftCase": "reaction-only/software-uk",
+        "rightCase": "reaction-only/business-en",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "reaction-only",
+        "leftCase": "reaction-only/software-uk",
+        "rightCase": "reaction-only/everyday-uk",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "reaction-only",
+        "leftCase": "reaction-only/software-uk",
+        "rightCase": "reaction-only/legal-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "reaction-only",
+        "leftCase": "reaction-only/business-en",
+        "rightCase": "reaction-only/everyday-uk",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "reaction-only",
+        "leftCase": "reaction-only/business-en",
+        "rightCase": "reaction-only/legal-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "reaction-only",
+        "leftCase": "reaction-only/everyday-uk",
+        "rightCase": "reaction-only/legal-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "reaction-with-decision",
+        "leftCase": "reaction-with-decision/software-uk",
+        "rightCase": "reaction-with-decision/business-en",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "reaction-with-decision",
+        "leftCase": "reaction-with-decision/software-uk",
+        "rightCase": "reaction-with-decision/everyday-uk",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "reaction-with-decision",
+        "leftCase": "reaction-with-decision/software-uk",
+        "rightCase": "reaction-with-decision/legal-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "reaction-with-decision",
+        "leftCase": "reaction-with-decision/business-en",
+        "rightCase": "reaction-with-decision/everyday-uk",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "reaction-with-decision",
+        "leftCase": "reaction-with-decision/business-en",
+        "rightCase": "reaction-with-decision/legal-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "reaction-with-decision",
+        "leftCase": "reaction-with-decision/everyday-uk",
+        "rightCase": "reaction-with-decision/legal-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "banter-only",
+        "leftCase": "banter-only/software-uk",
+        "rightCase": "banter-only/business-en",
+        "comparable": true,
+        "agreed": false,
+        "strictPassed": false
+      },
+      {
+        "family": "banter-only",
+        "leftCase": "banter-only/software-uk",
+        "rightCase": "banter-only/everyday-uk",
+        "comparable": true,
+        "agreed": false,
+        "strictPassed": false
+      },
+      {
+        "family": "banter-only",
+        "leftCase": "banter-only/software-uk",
+        "rightCase": "banter-only/research-es",
+        "comparable": true,
+        "agreed": false,
+        "strictPassed": false
+      },
+      {
+        "family": "banter-only",
+        "leftCase": "banter-only/business-en",
+        "rightCase": "banter-only/everyday-uk",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "banter-only",
+        "leftCase": "banter-only/business-en",
+        "rightCase": "banter-only/research-es",
+        "comparable": true,
+        "agreed": false,
+        "strictPassed": false
+      },
+      {
+        "family": "banter-only",
+        "leftCase": "banter-only/everyday-uk",
+        "rightCase": "banter-only/research-es",
+        "comparable": true,
+        "agreed": false,
+        "strictPassed": false
+      },
+      {
+        "family": "banter-with-action",
+        "leftCase": "banter-with-action/software-uk",
+        "rightCase": "banter-with-action/business-en",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "banter-with-action",
+        "leftCase": "banter-with-action/software-uk",
+        "rightCase": "banter-with-action/everyday-uk",
+        "comparable": true,
+        "agreed": false,
+        "strictPassed": false
+      },
+      {
+        "family": "banter-with-action",
+        "leftCase": "banter-with-action/software-uk",
+        "rightCase": "banter-with-action/research-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "banter-with-action",
+        "leftCase": "banter-with-action/business-en",
+        "rightCase": "banter-with-action/everyday-uk",
+        "comparable": true,
+        "agreed": false,
+        "strictPassed": false
+      },
+      {
+        "family": "banter-with-action",
+        "leftCase": "banter-with-action/business-en",
+        "rightCase": "banter-with-action/research-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "banter-with-action",
+        "leftCase": "banter-with-action/everyday-uk",
+        "rightCase": "banter-with-action/research-es",
+        "comparable": true,
+        "agreed": false,
+        "strictPassed": false
+      },
+      {
+        "family": "vague-no-value",
+        "leftCase": "vague-no-value/software-uk",
+        "rightCase": "vague-no-value/business-en",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "vague-no-value",
+        "leftCase": "vague-no-value/software-uk",
+        "rightCase": "vague-no-value/everyday-uk",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "vague-no-value",
+        "leftCase": "vague-no-value/software-uk",
+        "rightCase": "vague-no-value/foreign-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "vague-no-value",
+        "leftCase": "vague-no-value/business-en",
+        "rightCase": "vague-no-value/everyday-uk",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "vague-no-value",
+        "leftCase": "vague-no-value/business-en",
+        "rightCase": "vague-no-value/foreign-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "vague-no-value",
+        "leftCase": "vague-no-value/everyday-uk",
+        "rightCase": "vague-no-value/foreign-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "concrete-pending",
+        "leftCase": "concrete-pending/software-uk",
+        "rightCase": "concrete-pending/business-en",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "concrete-pending",
+        "leftCase": "concrete-pending/software-uk",
+        "rightCase": "concrete-pending/everyday-uk",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "concrete-pending",
+        "leftCase": "concrete-pending/software-uk",
+        "rightCase": "concrete-pending/foreign-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "concrete-pending",
+        "leftCase": "concrete-pending/business-en",
+        "rightCase": "concrete-pending/everyday-uk",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "concrete-pending",
+        "leftCase": "concrete-pending/business-en",
+        "rightCase": "concrete-pending/foreign-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "concrete-pending",
+        "leftCase": "concrete-pending/everyday-uk",
+        "rightCase": "concrete-pending/foreign-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "unresolved-context",
+        "leftCase": "unresolved-context/software-uk",
+        "rightCase": "unresolved-context/business-en",
+        "comparable": true,
+        "agreed": false,
+        "strictPassed": false
+      },
+      {
+        "family": "unresolved-context",
+        "leftCase": "unresolved-context/software-uk",
+        "rightCase": "unresolved-context/everyday-uk",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "unresolved-context",
+        "leftCase": "unresolved-context/software-uk",
+        "rightCase": "unresolved-context/logistics-es",
+        "comparable": true,
+        "agreed": false,
+        "strictPassed": false
+      },
+      {
+        "family": "unresolved-context",
+        "leftCase": "unresolved-context/business-en",
+        "rightCase": "unresolved-context/everyday-uk",
+        "comparable": true,
+        "agreed": false,
+        "strictPassed": false
+      },
+      {
+        "family": "unresolved-context",
+        "leftCase": "unresolved-context/business-en",
+        "rightCase": "unresolved-context/logistics-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": false
+      },
+      {
+        "family": "unresolved-context",
+        "leftCase": "unresolved-context/everyday-uk",
+        "rightCase": "unresolved-context/logistics-es",
+        "comparable": true,
+        "agreed": false,
+        "strictPassed": false
+      },
+      {
+        "family": "resolved-context",
+        "leftCase": "resolved-context/software-uk",
+        "rightCase": "resolved-context/business-en",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "resolved-context",
+        "leftCase": "resolved-context/software-uk",
+        "rightCase": "resolved-context/everyday-uk",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "resolved-context",
+        "leftCase": "resolved-context/software-uk",
+        "rightCase": "resolved-context/logistics-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "resolved-context",
+        "leftCase": "resolved-context/business-en",
+        "rightCase": "resolved-context/everyday-uk",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "resolved-context",
+        "leftCase": "resolved-context/business-en",
+        "rightCase": "resolved-context/logistics-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "resolved-context",
+        "leftCase": "resolved-context/everyday-uk",
+        "rightCase": "resolved-context/logistics-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "unverified-hypothesis",
+        "leftCase": "unverified-hypothesis/software-uk",
+        "rightCase": "unverified-hypothesis/business-en",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": false
+      },
+      {
+        "family": "unverified-hypothesis",
+        "leftCase": "unverified-hypothesis/software-uk",
+        "rightCase": "unverified-hypothesis/everyday-uk",
+        "comparable": true,
+        "agreed": false,
+        "strictPassed": false
+      },
+      {
+        "family": "unverified-hypothesis",
+        "leftCase": "unverified-hypothesis/software-uk",
+        "rightCase": "unverified-hypothesis/research-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": false
+      },
+      {
+        "family": "unverified-hypothesis",
+        "leftCase": "unverified-hypothesis/business-en",
+        "rightCase": "unverified-hypothesis/everyday-uk",
+        "comparable": true,
+        "agreed": false,
+        "strictPassed": false
+      },
+      {
+        "family": "unverified-hypothesis",
+        "leftCase": "unverified-hypothesis/business-en",
+        "rightCase": "unverified-hypothesis/research-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": false
+      },
+      {
+        "family": "unverified-hypothesis",
+        "leftCase": "unverified-hypothesis/everyday-uk",
+        "rightCase": "unverified-hypothesis/research-es",
+        "comparable": true,
+        "agreed": false,
+        "strictPassed": false
+      },
+      {
+        "family": "verified-result",
+        "leftCase": "verified-result/software-uk",
+        "rightCase": "verified-result/business-en",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "verified-result",
+        "leftCase": "verified-result/software-uk",
+        "rightCase": "verified-result/everyday-uk",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "verified-result",
+        "leftCase": "verified-result/software-uk",
+        "rightCase": "verified-result/research-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "verified-result",
+        "leftCase": "verified-result/business-en",
+        "rightCase": "verified-result/everyday-uk",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "verified-result",
+        "leftCase": "verified-result/business-en",
+        "rightCase": "verified-result/research-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "verified-result",
+        "leftCase": "verified-result/everyday-uk",
+        "rightCase": "verified-result/research-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "compact-status",
+        "leftCase": "compact-status/software-uk",
+        "rightCase": "compact-status/business-en",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "compact-status",
+        "leftCase": "compact-status/software-uk",
+        "rightCase": "compact-status/everyday-uk",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "compact-status",
+        "leftCase": "compact-status/software-uk",
+        "rightCase": "compact-status/manufacturing-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "compact-status",
+        "leftCase": "compact-status/business-en",
+        "rightCase": "compact-status/everyday-uk",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "compact-status",
+        "leftCase": "compact-status/business-en",
+        "rightCase": "compact-status/manufacturing-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "compact-status",
+        "leftCase": "compact-status/everyday-uk",
+        "rightCase": "compact-status/manufacturing-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "multi-stage-model",
+        "leftCase": "multi-stage-model/software-uk",
+        "rightCase": "multi-stage-model/business-en",
+        "comparable": true,
+        "agreed": false,
+        "strictPassed": false
+      },
+      {
+        "family": "multi-stage-model",
+        "leftCase": "multi-stage-model/software-uk",
+        "rightCase": "multi-stage-model/everyday-uk",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "multi-stage-model",
+        "leftCase": "multi-stage-model/software-uk",
+        "rightCase": "multi-stage-model/manufacturing-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "multi-stage-model",
+        "leftCase": "multi-stage-model/business-en",
+        "rightCase": "multi-stage-model/everyday-uk",
+        "comparable": true,
+        "agreed": false,
+        "strictPassed": false
+      },
+      {
+        "family": "multi-stage-model",
+        "leftCase": "multi-stage-model/business-en",
+        "rightCase": "multi-stage-model/manufacturing-es",
+        "comparable": true,
+        "agreed": false,
+        "strictPassed": false
+      },
+      {
+        "family": "multi-stage-model",
+        "leftCase": "multi-stage-model/everyday-uk",
+        "rightCase": "multi-stage-model/manufacturing-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      }
+    ],
+    "byDomain": [
+      {
+        "name": "software",
+        "total": 12,
+        "accuracy": 0.8333333333333334
+      },
+      {
+        "name": "business",
+        "total": 12,
+        "accuracy": 0.75
+      },
+      {
+        "name": "everyday",
+        "total": 12,
+        "accuracy": 0.9166666666666666
+      },
+      {
+        "name": "legal",
+        "total": 2,
+        "accuracy": 1
+      },
+      {
+        "name": "research",
+        "total": 4,
+        "accuracy": 0.5
+      },
+      {
+        "name": "education",
+        "total": 1,
+        "accuracy": 1
+      },
+      {
+        "name": "manufacturing",
+        "total": 3,
+        "accuracy": 1
+      },
+      {
+        "name": "logistics",
+        "total": 2,
+        "accuracy": 0.5
+      }
+    ],
+    "byLanguage": [
+      {
+        "name": "uk",
+        "total": 24,
+        "accuracy": 0.875
+      },
+      {
+        "name": "en",
+        "total": 12,
+        "accuracy": 0.75
+      },
+      {
+        "name": "es",
+        "total": 12,
+        "accuracy": 0.75
+      }
+    ],
+    "domainGap": 0.5,
+    "languageDomainCells": [
+      {
+        "name": "software|uk",
+        "total": 12,
+        "accuracy": 0.8333333333333334
+      },
+      {
+        "name": "business|en",
+        "total": 12,
+        "accuracy": 0.75
+      },
+      {
+        "name": "everyday|uk",
+        "total": 12,
+        "accuracy": 0.9166666666666666
+      },
+      {
+        "name": "legal|es",
+        "total": 2,
+        "accuracy": 1
+      },
+      {
+        "name": "research|es",
+        "total": 4,
+        "accuracy": 0.5
+      },
+      {
+        "name": "education|es",
+        "total": 1,
+        "accuracy": 1
+      },
+      {
+        "name": "manufacturing|es",
+        "total": 3,
+        "accuracy": 1
+      },
+      {
+        "name": "logistics|es",
+        "total": 2,
+        "accuracy": 0.5
+      }
+    ],
+    "matchedLanguageAnalysis": {
+      "available": false,
+      "confounded": true,
+      "comparisons": []
+    },
+    "confusionMatrix": {
+      "SKIP_REACTIONS": {
+        "SKIP_REACTIONS": 4
+      },
+      "DEFER_COMPACT": {
+        "DEFER_COMPACT": 19,
+        "SKIP_BANTER": 1
+      },
+      "SKIP_BANTER": {
+        "SKIP_REACTIONS": 1,
+        "SKIP_BANTER": 2,
+        "DEFER_COMPACT": 1
+      },
+      "SKIP_NO_VALUE": {
+        "SKIP_NO_VALUE": 4
+      },
+      "DEFER_INCOMPLETE": {
+        "DEFER_INCOMPLETE": 5,
+        "SKIP_NO_VALUE": 3
+      },
+      "DEFER_CONTEXT": {
+        "DEFER_CONTEXT": 2,
+        "DEFER_COMPACT": 2
+      },
+      "SUMMARIZE": {
+        "SUMMARIZE": 3,
+        "DEFER_COMPACT": 1
+      }
+    },
+    "leaveOneBoundaryClusterOut": [
+      {
+        "omittedBoundary": "reaction-to-decision",
+        "endToEndAccuracy": 0.775,
+        "caseAccuracy": 0.775,
+        "strictFamilyAccuracy": 0.5,
+        "strictSensitivityTransitionAccuracy": 0.55,
+        "transitionRate": 0.75,
+        "strictSurfaceInvarianceAccuracy": 0.6333333333333333,
+        "surfaceAgreement": 0.7
+      },
+      {
+        "omittedBoundary": "banter-to-action",
+        "endToEndAccuracy": 0.85,
+        "caseAccuracy": 0.85,
+        "strictFamilyAccuracy": 0.7,
+        "strictSensitivityTransitionAccuracy": 0.7,
+        "transitionRate": 0.85,
+        "strictSurfaceInvarianceAccuracy": 0.7666666666666667,
+        "surfaceAgreement": 0.8333333333333334
+      },
+      {
+        "omittedBoundary": "vague-to-concrete",
+        "endToEndAccuracy": 0.775,
+        "caseAccuracy": 0.775,
+        "strictFamilyAccuracy": 0.5,
+        "strictSensitivityTransitionAccuracy": 0.55,
+        "transitionRate": 0.75,
+        "strictSurfaceInvarianceAccuracy": 0.6333333333333333,
+        "surfaceAgreement": 0.7
+      },
+      {
+        "omittedBoundary": "unresolved-to-resolved",
+        "endToEndAccuracy": 0.825,
+        "caseAccuracy": 0.825,
+        "strictFamilyAccuracy": 0.6,
+        "strictSensitivityTransitionAccuracy": 0.65,
+        "transitionRate": 0.85,
+        "strictSurfaceInvarianceAccuracy": 0.7166666666666667,
+        "surfaceAgreement": 0.7666666666666667
+      },
+      {
+        "omittedBoundary": "hypothesis-to-result",
+        "endToEndAccuracy": 0.85,
+        "caseAccuracy": 0.85,
+        "strictFamilyAccuracy": 0.6,
+        "strictSensitivityTransitionAccuracy": 0.7,
+        "transitionRate": 0.75,
+        "strictSurfaceInvarianceAccuracy": 0.7333333333333333,
+        "surfaceAgreement": 0.75
+      },
+      {
+        "omittedBoundary": "status-to-model",
+        "endToEndAccuracy": 0.8,
+        "caseAccuracy": 0.8,
+        "strictFamilyAccuracy": 0.6,
+        "strictSensitivityTransitionAccuracy": 0.6,
+        "transitionRate": 0.8,
+        "strictSurfaceInvarianceAccuracy": 0.6833333333333333,
+        "surfaceAgreement": 0.75
+      }
+    ],
+    "bootstrap95": {
+      "endToEndAccuracy": {
+        "low": 0.6875,
+        "high": 0.9375
+      },
+      "conditionalCaseAccuracy": {
+        "low": 0.6875,
+        "high": 0.9375
+      },
+      "strictFamilyAccuracy": {
+        "low": 0.3333333333333333,
+        "high": 0.8333333333333334
+      },
+      "strictSensitivityTransitionAccuracy": {
+        "low": 0.3125,
+        "high": 0.9375
+      },
+      "transitionRate": {
+        "low": 0.5555555555555556,
+        "high": 0.9861111111111112
+      },
+      "strictSurfaceInvarianceAccuracy": {
+        "low": 0.41898148148148145,
+        "high": 0.9857723577235772
+      },
+      "surfaceAgreement": {
+        "low": 0.4861111111111111,
+        "high": 0.9878048780487805
+      }
+    }
+  },
+  {
+    "promptVariant": "identity-replay",
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "seed": 42,
+    "total": 48,
+    "completionRate": 1,
+    "validLabelRate": 1,
+    "endToEndAccuracy": 0.8541666666666666,
+    "caseAccuracy": 0.8541666666666666,
+    "familyAccuracy": 0.8541666666666666,
+    "strictFamilyAccuracy": 0.6666666666666666,
+    "strictSensitivityTransitionAccuracy": 0.7083333333333334,
+    "transitionRate": 0.8333333333333334,
+    "strictSurfaceInvarianceAccuracy": 0.7638888888888888,
+    "surfaceAgreement": 0.8194444444444444,
+    "families": [
+      {
+        "family": "reaction-only",
+        "expected": "SKIP_REACTIONS",
+        "correct": 4,
+        "total": 4,
+        "accuracy": 1,
+        "strict": true
+      },
+      {
+        "family": "reaction-with-decision",
+        "expected": "DEFER_COMPACT",
+        "correct": 4,
+        "total": 4,
+        "accuracy": 1,
+        "strict": true
+      },
+      {
+        "family": "banter-only",
+        "expected": "SKIP_BANTER",
+        "correct": 3,
+        "total": 4,
+        "accuracy": 0.75,
+        "strict": false
+      },
+      {
+        "family": "banter-with-action",
+        "expected": "DEFER_COMPACT",
+        "correct": 3,
+        "total": 4,
+        "accuracy": 0.75,
+        "strict": false
+      },
+      {
+        "family": "vague-no-value",
+        "expected": "SKIP_NO_VALUE",
+        "correct": 4,
+        "total": 4,
+        "accuracy": 1,
+        "strict": true
+      },
+      {
+        "family": "concrete-pending",
+        "expected": "DEFER_INCOMPLETE",
+        "correct": 4,
+        "total": 4,
+        "accuracy": 1,
+        "strict": true
+      },
+      {
+        "family": "unresolved-context",
+        "expected": "DEFER_CONTEXT",
+        "correct": 2,
+        "total": 4,
+        "accuracy": 0.5,
+        "strict": false
+      },
+      {
+        "family": "resolved-context",
+        "expected": "DEFER_COMPACT",
+        "correct": 4,
+        "total": 4,
+        "accuracy": 1,
+        "strict": true
+      },
+      {
+        "family": "unverified-hypothesis",
+        "expected": "DEFER_INCOMPLETE",
+        "correct": 1,
+        "total": 4,
+        "accuracy": 0.25,
+        "strict": false
+      },
+      {
+        "family": "verified-result",
+        "expected": "DEFER_COMPACT",
+        "correct": 4,
+        "total": 4,
+        "accuracy": 1,
+        "strict": true
+      },
+      {
+        "family": "compact-status",
+        "expected": "DEFER_COMPACT",
+        "correct": 4,
+        "total": 4,
+        "accuracy": 1,
+        "strict": true
+      },
+      {
+        "family": "multi-stage-model",
+        "expected": "SUMMARIZE",
+        "correct": 4,
+        "total": 4,
+        "accuracy": 1,
+        "strict": true
+      }
+    ],
+    "sensitivity": [
+      {
+        "pair": "reaction-to-decision",
+        "variant": "software-uk",
+        "leftCase": "reaction-only/software-uk",
+        "rightCase": "reaction-with-decision/software-uk",
+        "comparable": true,
+        "transitioned": true,
+        "strictPassed": true
+      },
+      {
+        "pair": "reaction-to-decision",
+        "variant": "business-en",
+        "leftCase": "reaction-only/business-en",
+        "rightCase": "reaction-with-decision/business-en",
+        "comparable": true,
+        "transitioned": true,
+        "strictPassed": true
+      },
+      {
+        "pair": "reaction-to-decision",
+        "variant": "everyday-uk",
+        "leftCase": "reaction-only/everyday-uk",
+        "rightCase": "reaction-with-decision/everyday-uk",
+        "comparable": true,
+        "transitioned": true,
+        "strictPassed": true
+      },
+      {
+        "pair": "reaction-to-decision",
+        "variant": "legal-es",
+        "leftCase": "reaction-only/legal-es",
+        "rightCase": "reaction-with-decision/legal-es",
+        "comparable": true,
+        "transitioned": true,
+        "strictPassed": true
+      },
+      {
+        "pair": "banter-to-action",
+        "variant": "software-uk",
+        "leftCase": "banter-only/software-uk",
+        "rightCase": "banter-with-action/software-uk",
+        "comparable": true,
+        "transitioned": true,
+        "strictPassed": true
+      },
+      {
+        "pair": "banter-to-action",
+        "variant": "business-en",
+        "leftCase": "banter-only/business-en",
+        "rightCase": "banter-with-action/business-en",
+        "comparable": true,
+        "transitioned": true,
+        "strictPassed": true
+      },
+      {
+        "pair": "banter-to-action",
+        "variant": "everyday-uk",
+        "leftCase": "banter-only/everyday-uk",
+        "rightCase": "banter-with-action/everyday-uk",
+        "comparable": true,
+        "transitioned": false,
+        "strictPassed": false
+      },
+      {
+        "pair": "banter-to-action",
+        "variant": "research-es",
+        "leftCase": "banter-only/research-es",
+        "rightCase": "banter-with-action/research-es",
+        "comparable": true,
+        "transitioned": false,
+        "strictPassed": false
+      },
+      {
+        "pair": "vague-to-concrete",
+        "variant": "software-uk",
+        "leftCase": "vague-no-value/software-uk",
+        "rightCase": "concrete-pending/software-uk",
+        "comparable": true,
+        "transitioned": true,
+        "strictPassed": true
+      },
+      {
+        "pair": "vague-to-concrete",
+        "variant": "business-en",
+        "leftCase": "vague-no-value/business-en",
+        "rightCase": "concrete-pending/business-en",
+        "comparable": true,
+        "transitioned": true,
+        "strictPassed": true
+      },
+      {
+        "pair": "vague-to-concrete",
+        "variant": "everyday-uk",
+        "leftCase": "vague-no-value/everyday-uk",
+        "rightCase": "concrete-pending/everyday-uk",
+        "comparable": true,
+        "transitioned": true,
+        "strictPassed": true
+      },
+      {
+        "pair": "vague-to-concrete",
+        "variant": "foreign-es",
+        "leftCase": "vague-no-value/foreign-es",
+        "rightCase": "concrete-pending/foreign-es",
+        "comparable": true,
+        "transitioned": true,
+        "strictPassed": true
+      },
+      {
+        "pair": "unresolved-to-resolved",
+        "variant": "software-uk",
+        "leftCase": "unresolved-context/software-uk",
+        "rightCase": "resolved-context/software-uk",
+        "comparable": true,
+        "transitioned": true,
+        "strictPassed": true
+      },
+      {
+        "pair": "unresolved-to-resolved",
+        "variant": "business-en",
+        "leftCase": "unresolved-context/business-en",
+        "rightCase": "resolved-context/business-en",
+        "comparable": true,
+        "transitioned": false,
+        "strictPassed": false
+      },
+      {
+        "pair": "unresolved-to-resolved",
+        "variant": "everyday-uk",
+        "leftCase": "unresolved-context/everyday-uk",
+        "rightCase": "resolved-context/everyday-uk",
+        "comparable": true,
+        "transitioned": true,
+        "strictPassed": true
+      },
+      {
+        "pair": "unresolved-to-resolved",
+        "variant": "logistics-es",
+        "leftCase": "unresolved-context/logistics-es",
+        "rightCase": "resolved-context/logistics-es",
+        "comparable": true,
+        "transitioned": false,
+        "strictPassed": false
+      },
+      {
+        "pair": "hypothesis-to-result",
+        "variant": "software-uk",
+        "leftCase": "unverified-hypothesis/software-uk",
+        "rightCase": "verified-result/software-uk",
+        "comparable": true,
+        "transitioned": true,
+        "strictPassed": false
+      },
+      {
+        "pair": "hypothesis-to-result",
+        "variant": "business-en",
+        "leftCase": "unverified-hypothesis/business-en",
+        "rightCase": "verified-result/business-en",
+        "comparable": true,
+        "transitioned": true,
+        "strictPassed": false
+      },
+      {
+        "pair": "hypothesis-to-result",
+        "variant": "everyday-uk",
+        "leftCase": "unverified-hypothesis/everyday-uk",
+        "rightCase": "verified-result/everyday-uk",
+        "comparable": true,
+        "transitioned": true,
+        "strictPassed": true
+      },
+      {
+        "pair": "hypothesis-to-result",
+        "variant": "research-es",
+        "leftCase": "unverified-hypothesis/research-es",
+        "rightCase": "verified-result/research-es",
+        "comparable": true,
+        "transitioned": true,
+        "strictPassed": false
+      },
+      {
+        "pair": "status-to-model",
+        "variant": "software-uk",
+        "leftCase": "compact-status/software-uk",
+        "rightCase": "multi-stage-model/software-uk",
+        "comparable": true,
+        "transitioned": true,
+        "strictPassed": true
+      },
+      {
+        "pair": "status-to-model",
+        "variant": "business-en",
+        "leftCase": "compact-status/business-en",
+        "rightCase": "multi-stage-model/business-en",
+        "comparable": true,
+        "transitioned": true,
+        "strictPassed": true
+      },
+      {
+        "pair": "status-to-model",
+        "variant": "everyday-uk",
+        "leftCase": "compact-status/everyday-uk",
+        "rightCase": "multi-stage-model/everyday-uk",
+        "comparable": true,
+        "transitioned": true,
+        "strictPassed": true
+      },
+      {
+        "pair": "status-to-model",
+        "variant": "manufacturing-es",
+        "leftCase": "compact-status/manufacturing-es",
+        "rightCase": "multi-stage-model/manufacturing-es",
+        "comparable": true,
+        "transitioned": true,
+        "strictPassed": true
+      }
+    ],
+    "invariance": [
+      {
+        "family": "reaction-only",
+        "leftCase": "reaction-only/software-uk",
+        "rightCase": "reaction-only/business-en",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "reaction-only",
+        "leftCase": "reaction-only/software-uk",
+        "rightCase": "reaction-only/everyday-uk",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "reaction-only",
+        "leftCase": "reaction-only/software-uk",
+        "rightCase": "reaction-only/legal-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "reaction-only",
+        "leftCase": "reaction-only/business-en",
+        "rightCase": "reaction-only/everyday-uk",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "reaction-only",
+        "leftCase": "reaction-only/business-en",
+        "rightCase": "reaction-only/legal-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "reaction-only",
+        "leftCase": "reaction-only/everyday-uk",
+        "rightCase": "reaction-only/legal-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "reaction-with-decision",
+        "leftCase": "reaction-with-decision/software-uk",
+        "rightCase": "reaction-with-decision/business-en",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "reaction-with-decision",
+        "leftCase": "reaction-with-decision/software-uk",
+        "rightCase": "reaction-with-decision/everyday-uk",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "reaction-with-decision",
+        "leftCase": "reaction-with-decision/software-uk",
+        "rightCase": "reaction-with-decision/legal-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "reaction-with-decision",
+        "leftCase": "reaction-with-decision/business-en",
+        "rightCase": "reaction-with-decision/everyday-uk",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "reaction-with-decision",
+        "leftCase": "reaction-with-decision/business-en",
+        "rightCase": "reaction-with-decision/legal-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "reaction-with-decision",
+        "leftCase": "reaction-with-decision/everyday-uk",
+        "rightCase": "reaction-with-decision/legal-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "banter-only",
+        "leftCase": "banter-only/software-uk",
+        "rightCase": "banter-only/business-en",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "banter-only",
+        "leftCase": "banter-only/software-uk",
+        "rightCase": "banter-only/everyday-uk",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "banter-only",
+        "leftCase": "banter-only/software-uk",
+        "rightCase": "banter-only/research-es",
+        "comparable": true,
+        "agreed": false,
+        "strictPassed": false
+      },
+      {
+        "family": "banter-only",
+        "leftCase": "banter-only/business-en",
+        "rightCase": "banter-only/everyday-uk",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "banter-only",
+        "leftCase": "banter-only/business-en",
+        "rightCase": "banter-only/research-es",
+        "comparable": true,
+        "agreed": false,
+        "strictPassed": false
+      },
+      {
+        "family": "banter-only",
+        "leftCase": "banter-only/everyday-uk",
+        "rightCase": "banter-only/research-es",
+        "comparable": true,
+        "agreed": false,
+        "strictPassed": false
+      },
+      {
+        "family": "banter-with-action",
+        "leftCase": "banter-with-action/software-uk",
+        "rightCase": "banter-with-action/business-en",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "banter-with-action",
+        "leftCase": "banter-with-action/software-uk",
+        "rightCase": "banter-with-action/everyday-uk",
+        "comparable": true,
+        "agreed": false,
+        "strictPassed": false
+      },
+      {
+        "family": "banter-with-action",
+        "leftCase": "banter-with-action/software-uk",
+        "rightCase": "banter-with-action/research-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "banter-with-action",
+        "leftCase": "banter-with-action/business-en",
+        "rightCase": "banter-with-action/everyday-uk",
+        "comparable": true,
+        "agreed": false,
+        "strictPassed": false
+      },
+      {
+        "family": "banter-with-action",
+        "leftCase": "banter-with-action/business-en",
+        "rightCase": "banter-with-action/research-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "banter-with-action",
+        "leftCase": "banter-with-action/everyday-uk",
+        "rightCase": "banter-with-action/research-es",
+        "comparable": true,
+        "agreed": false,
+        "strictPassed": false
+      },
+      {
+        "family": "vague-no-value",
+        "leftCase": "vague-no-value/software-uk",
+        "rightCase": "vague-no-value/business-en",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "vague-no-value",
+        "leftCase": "vague-no-value/software-uk",
+        "rightCase": "vague-no-value/everyday-uk",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "vague-no-value",
+        "leftCase": "vague-no-value/software-uk",
+        "rightCase": "vague-no-value/foreign-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "vague-no-value",
+        "leftCase": "vague-no-value/business-en",
+        "rightCase": "vague-no-value/everyday-uk",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "vague-no-value",
+        "leftCase": "vague-no-value/business-en",
+        "rightCase": "vague-no-value/foreign-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "vague-no-value",
+        "leftCase": "vague-no-value/everyday-uk",
+        "rightCase": "vague-no-value/foreign-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "concrete-pending",
+        "leftCase": "concrete-pending/software-uk",
+        "rightCase": "concrete-pending/business-en",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "concrete-pending",
+        "leftCase": "concrete-pending/software-uk",
+        "rightCase": "concrete-pending/everyday-uk",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "concrete-pending",
+        "leftCase": "concrete-pending/software-uk",
+        "rightCase": "concrete-pending/foreign-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "concrete-pending",
+        "leftCase": "concrete-pending/business-en",
+        "rightCase": "concrete-pending/everyday-uk",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "concrete-pending",
+        "leftCase": "concrete-pending/business-en",
+        "rightCase": "concrete-pending/foreign-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "concrete-pending",
+        "leftCase": "concrete-pending/everyday-uk",
+        "rightCase": "concrete-pending/foreign-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "unresolved-context",
+        "leftCase": "unresolved-context/software-uk",
+        "rightCase": "unresolved-context/business-en",
+        "comparable": true,
+        "agreed": false,
+        "strictPassed": false
+      },
+      {
+        "family": "unresolved-context",
+        "leftCase": "unresolved-context/software-uk",
+        "rightCase": "unresolved-context/everyday-uk",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "unresolved-context",
+        "leftCase": "unresolved-context/software-uk",
+        "rightCase": "unresolved-context/logistics-es",
+        "comparable": true,
+        "agreed": false,
+        "strictPassed": false
+      },
+      {
+        "family": "unresolved-context",
+        "leftCase": "unresolved-context/business-en",
+        "rightCase": "unresolved-context/everyday-uk",
+        "comparable": true,
+        "agreed": false,
+        "strictPassed": false
+      },
+      {
+        "family": "unresolved-context",
+        "leftCase": "unresolved-context/business-en",
+        "rightCase": "unresolved-context/logistics-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": false
+      },
+      {
+        "family": "unresolved-context",
+        "leftCase": "unresolved-context/everyday-uk",
+        "rightCase": "unresolved-context/logistics-es",
+        "comparable": true,
+        "agreed": false,
+        "strictPassed": false
+      },
+      {
+        "family": "resolved-context",
+        "leftCase": "resolved-context/software-uk",
+        "rightCase": "resolved-context/business-en",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "resolved-context",
+        "leftCase": "resolved-context/software-uk",
+        "rightCase": "resolved-context/everyday-uk",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "resolved-context",
+        "leftCase": "resolved-context/software-uk",
+        "rightCase": "resolved-context/logistics-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "resolved-context",
+        "leftCase": "resolved-context/business-en",
+        "rightCase": "resolved-context/everyday-uk",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "resolved-context",
+        "leftCase": "resolved-context/business-en",
+        "rightCase": "resolved-context/logistics-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "resolved-context",
+        "leftCase": "resolved-context/everyday-uk",
+        "rightCase": "resolved-context/logistics-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "unverified-hypothesis",
+        "leftCase": "unverified-hypothesis/software-uk",
+        "rightCase": "unverified-hypothesis/business-en",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": false
+      },
+      {
+        "family": "unverified-hypothesis",
+        "leftCase": "unverified-hypothesis/software-uk",
+        "rightCase": "unverified-hypothesis/everyday-uk",
+        "comparable": true,
+        "agreed": false,
+        "strictPassed": false
+      },
+      {
+        "family": "unverified-hypothesis",
+        "leftCase": "unverified-hypothesis/software-uk",
+        "rightCase": "unverified-hypothesis/research-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": false
+      },
+      {
+        "family": "unverified-hypothesis",
+        "leftCase": "unverified-hypothesis/business-en",
+        "rightCase": "unverified-hypothesis/everyday-uk",
+        "comparable": true,
+        "agreed": false,
+        "strictPassed": false
+      },
+      {
+        "family": "unverified-hypothesis",
+        "leftCase": "unverified-hypothesis/business-en",
+        "rightCase": "unverified-hypothesis/research-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": false
+      },
+      {
+        "family": "unverified-hypothesis",
+        "leftCase": "unverified-hypothesis/everyday-uk",
+        "rightCase": "unverified-hypothesis/research-es",
+        "comparable": true,
+        "agreed": false,
+        "strictPassed": false
+      },
+      {
+        "family": "verified-result",
+        "leftCase": "verified-result/software-uk",
+        "rightCase": "verified-result/business-en",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "verified-result",
+        "leftCase": "verified-result/software-uk",
+        "rightCase": "verified-result/everyday-uk",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "verified-result",
+        "leftCase": "verified-result/software-uk",
+        "rightCase": "verified-result/research-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "verified-result",
+        "leftCase": "verified-result/business-en",
+        "rightCase": "verified-result/everyday-uk",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "verified-result",
+        "leftCase": "verified-result/business-en",
+        "rightCase": "verified-result/research-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "verified-result",
+        "leftCase": "verified-result/everyday-uk",
+        "rightCase": "verified-result/research-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "compact-status",
+        "leftCase": "compact-status/software-uk",
+        "rightCase": "compact-status/business-en",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "compact-status",
+        "leftCase": "compact-status/software-uk",
+        "rightCase": "compact-status/everyday-uk",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "compact-status",
+        "leftCase": "compact-status/software-uk",
+        "rightCase": "compact-status/manufacturing-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "compact-status",
+        "leftCase": "compact-status/business-en",
+        "rightCase": "compact-status/everyday-uk",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "compact-status",
+        "leftCase": "compact-status/business-en",
+        "rightCase": "compact-status/manufacturing-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "compact-status",
+        "leftCase": "compact-status/everyday-uk",
+        "rightCase": "compact-status/manufacturing-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "multi-stage-model",
+        "leftCase": "multi-stage-model/software-uk",
+        "rightCase": "multi-stage-model/business-en",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "multi-stage-model",
+        "leftCase": "multi-stage-model/software-uk",
+        "rightCase": "multi-stage-model/everyday-uk",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "multi-stage-model",
+        "leftCase": "multi-stage-model/software-uk",
+        "rightCase": "multi-stage-model/manufacturing-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "multi-stage-model",
+        "leftCase": "multi-stage-model/business-en",
+        "rightCase": "multi-stage-model/everyday-uk",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "multi-stage-model",
+        "leftCase": "multi-stage-model/business-en",
+        "rightCase": "multi-stage-model/manufacturing-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      },
+      {
+        "family": "multi-stage-model",
+        "leftCase": "multi-stage-model/everyday-uk",
+        "rightCase": "multi-stage-model/manufacturing-es",
+        "comparable": true,
+        "agreed": true,
+        "strictPassed": true
+      }
+    ],
+    "byDomain": [
+      {
+        "name": "software",
+        "total": 12,
+        "accuracy": 0.9166666666666666
+      },
+      {
+        "name": "business",
+        "total": 12,
+        "accuracy": 0.8333333333333334
+      },
+      {
+        "name": "everyday",
+        "total": 12,
+        "accuracy": 0.9166666666666666
+      },
+      {
+        "name": "legal",
+        "total": 2,
+        "accuracy": 1
+      },
+      {
+        "name": "research",
+        "total": 4,
+        "accuracy": 0.5
+      },
+      {
+        "name": "education",
+        "total": 1,
+        "accuracy": 1
+      },
+      {
+        "name": "manufacturing",
+        "total": 3,
+        "accuracy": 1
+      },
+      {
+        "name": "logistics",
+        "total": 2,
+        "accuracy": 0.5
+      }
+    ],
+    "byLanguage": [
+      {
+        "name": "uk",
+        "total": 24,
+        "accuracy": 0.9166666666666666
+      },
+      {
+        "name": "en",
+        "total": 12,
+        "accuracy": 0.8333333333333334
+      },
+      {
+        "name": "es",
+        "total": 12,
+        "accuracy": 0.75
+      }
+    ],
+    "domainGap": 0.5,
+    "languageDomainCells": [
+      {
+        "name": "software|uk",
+        "total": 12,
+        "accuracy": 0.9166666666666666
+      },
+      {
+        "name": "business|en",
+        "total": 12,
+        "accuracy": 0.8333333333333334
+      },
+      {
+        "name": "everyday|uk",
+        "total": 12,
+        "accuracy": 0.9166666666666666
+      },
+      {
+        "name": "legal|es",
+        "total": 2,
+        "accuracy": 1
+      },
+      {
+        "name": "research|es",
+        "total": 4,
+        "accuracy": 0.5
+      },
+      {
+        "name": "education|es",
+        "total": 1,
+        "accuracy": 1
+      },
+      {
+        "name": "manufacturing|es",
+        "total": 3,
+        "accuracy": 1
+      },
+      {
+        "name": "logistics|es",
+        "total": 2,
+        "accuracy": 0.5
+      }
+    ],
+    "matchedLanguageAnalysis": {
+      "available": false,
+      "confounded": true,
+      "comparisons": []
+    },
+    "confusionMatrix": {
+      "SKIP_REACTIONS": {
+        "SKIP_REACTIONS": 4
+      },
+      "DEFER_COMPACT": {
+        "DEFER_COMPACT": 19,
+        "SKIP_BANTER": 1
+      },
+      "SKIP_BANTER": {
+        "SKIP_BANTER": 3,
+        "DEFER_COMPACT": 1
+      },
+      "SKIP_NO_VALUE": {
+        "SKIP_NO_VALUE": 4
+      },
+      "DEFER_INCOMPLETE": {
+        "DEFER_INCOMPLETE": 5,
+        "SKIP_NO_VALUE": 3
+      },
+      "DEFER_CONTEXT": {
+        "DEFER_CONTEXT": 2,
+        "DEFER_COMPACT": 2
+      },
+      "SUMMARIZE": {
+        "SUMMARIZE": 4
+      }
+    },
+    "leaveOneBoundaryClusterOut": [
+      {
+        "omittedBoundary": "reaction-to-decision",
+        "endToEndAccuracy": 0.825,
+        "caseAccuracy": 0.825,
+        "strictFamilyAccuracy": 0.6,
+        "strictSensitivityTransitionAccuracy": 0.65,
+        "transitionRate": 0.8,
+        "strictSurfaceInvarianceAccuracy": 0.7166666666666667,
+        "surfaceAgreement": 0.7833333333333333
+      },
+      {
+        "omittedBoundary": "banter-to-action",
+        "endToEndAccuracy": 0.875,
+        "caseAccuracy": 0.875,
+        "strictFamilyAccuracy": 0.8,
+        "strictSensitivityTransitionAccuracy": 0.75,
+        "transitionRate": 0.9,
+        "strictSurfaceInvarianceAccuracy": 0.8166666666666667,
+        "surfaceAgreement": 0.8833333333333333
+      },
+      {
+        "omittedBoundary": "vague-to-concrete",
+        "endToEndAccuracy": 0.825,
+        "caseAccuracy": 0.825,
+        "strictFamilyAccuracy": 0.6,
+        "strictSensitivityTransitionAccuracy": 0.65,
+        "transitionRate": 0.8,
+        "strictSurfaceInvarianceAccuracy": 0.7166666666666667,
+        "surfaceAgreement": 0.7833333333333333
+      },
+      {
+        "omittedBoundary": "unresolved-to-resolved",
+        "endToEndAccuracy": 0.875,
+        "caseAccuracy": 0.875,
+        "strictFamilyAccuracy": 0.7,
+        "strictSensitivityTransitionAccuracy": 0.75,
+        "transitionRate": 0.9,
+        "strictSurfaceInvarianceAccuracy": 0.8,
+        "surfaceAgreement": 0.85
+      },
+      {
+        "omittedBoundary": "hypothesis-to-result",
+        "endToEndAccuracy": 0.9,
+        "caseAccuracy": 0.9,
+        "strictFamilyAccuracy": 0.7,
+        "strictSensitivityTransitionAccuracy": 0.8,
+        "transitionRate": 0.8,
+        "strictSurfaceInvarianceAccuracy": 0.8166666666666667,
+        "surfaceAgreement": 0.8333333333333334
+      },
+      {
+        "omittedBoundary": "status-to-model",
+        "endToEndAccuracy": 0.825,
+        "caseAccuracy": 0.825,
+        "strictFamilyAccuracy": 0.6,
+        "strictSensitivityTransitionAccuracy": 0.65,
+        "transitionRate": 0.8,
+        "strictSurfaceInvarianceAccuracy": 0.7166666666666667,
+        "surfaceAgreement": 0.7833333333333333
+      }
+    ],
+    "bootstrap95": {
+      "endToEndAccuracy": {
+        "low": 0.7291666666666666,
+        "high": 0.9583333333333334
+      },
+      "conditionalCaseAccuracy": {
+        "low": 0.7291666666666666,
+        "high": 0.9583333333333334
+      },
+      "strictFamilyAccuracy": {
+        "low": 0.3333333333333333,
+        "high": 0.9166666666666666
+      },
+      "strictSensitivityTransitionAccuracy": {
+        "low": 0.375,
+        "high": 0.9642857142857143
+      },
+      "transitionRate": {
+        "low": 0.5833333333333334,
+        "high": 1
+      },
+      "strictSurfaceInvarianceAccuracy": {
+        "low": 0.5403846153846154,
+        "high": 0.9903846153846154
+      },
+      "surfaceAgreement": {
+        "low": 0.6194029850746269,
+        "high": 0.9942307692307693
+      }
+    }
+  }
+]

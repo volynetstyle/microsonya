@@ -1,0 +1,366 @@
+[
+  {
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "seed": 42,
+    "baselineVariant": "original",
+    "targetVariant": "rules-only",
+    "metric": "endToEndAccuracy",
+    "delta": -0.02083333333333326,
+    "bootstrap95": {
+      "low": -0.125,
+      "high": 0.08333333333333326
+    }
+  },
+  {
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "seed": 42,
+    "baselineVariant": "original",
+    "targetVariant": "rules-only",
+    "metric": "caseAccuracy",
+    "delta": -0.02083333333333326,
+    "bootstrap95": {
+      "low": -0.125,
+      "high": 0.08333333333333326
+    }
+  },
+  {
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "seed": 42,
+    "baselineVariant": "original",
+    "targetVariant": "rules-only",
+    "metric": "strictFamilyAccuracy",
+    "delta": 0.16666666666666663,
+    "bootstrap95": {
+      "low": 0,
+      "high": 0.33333333333333337
+    }
+  },
+  {
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "seed": 42,
+    "baselineVariant": "original",
+    "targetVariant": "rules-only",
+    "metric": "strictSensitivityTransitionAccuracy",
+    "delta": -0.04166666666666674,
+    "bootstrap95": {
+      "low": -0.35416666666666674,
+      "high": 0.20000000000000007
+    }
+  },
+  {
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "seed": 42,
+    "baselineVariant": "original",
+    "targetVariant": "rules-only",
+    "metric": "transitionRate",
+    "delta": -0.16666666666666663,
+    "bootstrap95": {
+      "low": -0.6041666666666666,
+      "high": 0.14583333333333326
+    }
+  },
+  {
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "seed": 42,
+    "baselineVariant": "original",
+    "targetVariant": "rules-only",
+    "metric": "strictSurfaceInvarianceAccuracy",
+    "delta": 0.05555555555555547,
+    "bootstrap95": {
+      "low": -0.09722222222222221,
+      "high": 0.2152777777777778
+    }
+  },
+  {
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "seed": 42,
+    "baselineVariant": "original",
+    "targetVariant": "rules-only",
+    "metric": "surfaceAgreement",
+    "delta": 0.125,
+    "bootstrap95": {
+      "low": 0.006944444444444531,
+      "high": 0.20161290322580638
+    }
+  },
+  {
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "seed": 42,
+    "baselineVariant": "original",
+    "targetVariant": "lexical-clones",
+    "metric": "endToEndAccuracy",
+    "delta": -0.02083333333333326,
+    "bootstrap95": {
+      "low": -0.125,
+      "high": 0.0625
+    }
+  },
+  {
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "seed": 42,
+    "baselineVariant": "original",
+    "targetVariant": "lexical-clones",
+    "metric": "caseAccuracy",
+    "delta": -0.02083333333333326,
+    "bootstrap95": {
+      "low": -0.125,
+      "high": 0.0625
+    }
+  },
+  {
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "seed": 42,
+    "baselineVariant": "original",
+    "targetVariant": "lexical-clones",
+    "metric": "strictFamilyAccuracy",
+    "delta": 0.08333333333333326,
+    "bootstrap95": {
+      "low": 0,
+      "high": 0.25000000000000006
+    }
+  },
+  {
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "seed": 42,
+    "baselineVariant": "original",
+    "targetVariant": "lexical-clones",
+    "metric": "strictSensitivityTransitionAccuracy",
+    "delta": -0.04166666666666674,
+    "bootstrap95": {
+      "low": -0.35416666666666663,
+      "high": 0.1607142857142858
+    }
+  },
+  {
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "seed": 42,
+    "baselineVariant": "original",
+    "targetVariant": "lexical-clones",
+    "metric": "transitionRate",
+    "delta": -0.04166666666666663,
+    "bootstrap95": {
+      "low": -0.3541666666666667,
+      "high": 0.1607142857142857
+    }
+  },
+  {
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "seed": 42,
+    "baselineVariant": "original",
+    "targetVariant": "lexical-clones",
+    "metric": "strictSurfaceInvarianceAccuracy",
+    "delta": 0.02777777777777768,
+    "bootstrap95": {
+      "low": -0.09722222222222221,
+      "high": 0.2060185185185186
+    }
+  },
+  {
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "seed": 42,
+    "baselineVariant": "original",
+    "targetVariant": "lexical-clones",
+    "metric": "surfaceAgreement",
+    "delta": 0.06944444444444442,
+    "bootstrap95": {
+      "low": 0,
+      "high": 0.19212962962962965
+    }
+  },
+  {
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "seed": 42,
+    "baselineVariant": "original",
+    "targetVariant": "cross-domain",
+    "metric": "endToEndAccuracy",
+    "delta": -0.02083333333333326,
+    "bootstrap95": {
+      "low": -0.125,
+      "high": 0.0625
+    }
+  },
+  {
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "seed": 42,
+    "baselineVariant": "original",
+    "targetVariant": "cross-domain",
+    "metric": "caseAccuracy",
+    "delta": -0.02083333333333326,
+    "bootstrap95": {
+      "low": -0.125,
+      "high": 0.0625
+    }
+  },
+  {
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "seed": 42,
+    "baselineVariant": "original",
+    "targetVariant": "cross-domain",
+    "metric": "strictFamilyAccuracy",
+    "delta": 0.08333333333333326,
+    "bootstrap95": {
+      "low": 0,
+      "high": 0.25000000000000006
+    }
+  },
+  {
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "seed": 42,
+    "baselineVariant": "original",
+    "targetVariant": "cross-domain",
+    "metric": "strictSensitivityTransitionAccuracy",
+    "delta": -0.04166666666666674,
+    "bootstrap95": {
+      "low": -0.35416666666666674,
+      "high": 0.1607142857142857
+    }
+  },
+  {
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "seed": 42,
+    "baselineVariant": "original",
+    "targetVariant": "cross-domain",
+    "metric": "transitionRate",
+    "delta": -0.08333333333333337,
+    "bootstrap95": {
+      "low": -0.37499999999999994,
+      "high": 0
+    }
+  },
+  {
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "seed": 42,
+    "baselineVariant": "original",
+    "targetVariant": "cross-domain",
+    "metric": "strictSurfaceInvarianceAccuracy",
+    "delta": 0.02777777777777768,
+    "bootstrap95": {
+      "low": -0.09722222222222221,
+      "high": 0.2060185185185186
+    }
+  },
+  {
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "seed": 42,
+    "baselineVariant": "original",
+    "targetVariant": "cross-domain",
+    "metric": "surfaceAgreement",
+    "delta": 0.06944444444444442,
+    "bootstrap95": {
+      "low": 0,
+      "high": 0.1875
+    }
+  },
+  {
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "seed": 42,
+    "baselineVariant": "original",
+    "targetVariant": "cross-language",
+    "metric": "endToEndAccuracy",
+    "delta": -0.02083333333333326,
+    "bootstrap95": {
+      "low": -0.125,
+      "high": 0.08333333333333337
+    }
+  },
+  {
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "seed": 42,
+    "baselineVariant": "original",
+    "targetVariant": "cross-language",
+    "metric": "caseAccuracy",
+    "delta": -0.00310283687943258,
+    "bootstrap95": {
+      "low": -0.10992907801418439,
+      "high": 0.08333333333333337
+    }
+  },
+  {
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "seed": 42,
+    "baselineVariant": "original",
+    "targetVariant": "cross-language",
+    "metric": "strictFamilyAccuracy",
+    "delta": 0.08333333333333326,
+    "bootstrap95": {
+      "low": -0.16666666666666674,
+      "high": 0.33333333333333337
+    }
+  },
+  {
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "seed": 42,
+    "baselineVariant": "original",
+    "targetVariant": "cross-language",
+    "metric": "strictSensitivityTransitionAccuracy",
+    "delta": -0.04166666666666674,
+    "bootstrap95": {
+      "low": -0.35416666666666663,
+      "high": 0.19444444444444442
+    }
+  },
+  {
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "seed": 42,
+    "baselineVariant": "original",
+    "targetVariant": "cross-language",
+    "metric": "transitionRate",
+    "delta": -0.048913043478260865,
+    "bootstrap95": {
+      "low": -0.37499999999999994,
+      "high": 0.19444444444444453
+    }
+  },
+  {
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "seed": 42,
+    "baselineVariant": "original",
+    "targetVariant": "cross-language",
+    "metric": "strictSurfaceInvarianceAccuracy",
+    "delta": 0.02777777777777768,
+    "bootstrap95": {
+      "low": -0.1967592592592592,
+      "high": 0.2152777777777778
+    }
+  },
+  {
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "seed": 42,
+    "baselineVariant": "original",
+    "targetVariant": "cross-language",
+    "metric": "surfaceAgreement",
+    "delta": 0.0905797101449275,
+    "bootstrap95": {
+      "low": -0.053159803159803176,
+      "high": 0.19771432271432265
+    }
+  }
+]

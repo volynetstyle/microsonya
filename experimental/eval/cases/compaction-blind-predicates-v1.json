@@ -1,0 +1,139 @@
+{
+  "id": "compaction-blind-predicates-v1",
+  "sourceDataset": "compaction-blind-v1",
+  "extractorVersion": "predicate-v1",
+  "families": [
+    {
+      "id": "reaction-only",
+      "predicates": {
+        "durable": false,
+        "essentialReferentsResolved": true,
+        "visiblyIncomplete": false,
+        "alreadyCompact": false,
+        "primarilyReaction": true,
+        "primarilyBanter": false
+      }
+    },
+    {
+      "id": "reaction-with-decision",
+      "predicates": {
+        "durable": true,
+        "essentialReferentsResolved": true,
+        "visiblyIncomplete": false,
+        "alreadyCompact": true,
+        "primarilyReaction": false,
+        "primarilyBanter": false
+      }
+    },
+    {
+      "id": "banter-only",
+      "predicates": {
+        "durable": false,
+        "essentialReferentsResolved": true,
+        "visiblyIncomplete": false,
+        "alreadyCompact": false,
+        "primarilyReaction": false,
+        "primarilyBanter": true
+      }
+    },
+    {
+      "id": "banter-with-action",
+      "predicates": {
+        "durable": true,
+        "essentialReferentsResolved": true,
+        "visiblyIncomplete": false,
+        "alreadyCompact": true,
+        "primarilyReaction": false,
+        "primarilyBanter": false
+      }
+    },
+    {
+      "id": "vague-no-value",
+      "predicates": {
+        "durable": false,
+        "essentialReferentsResolved": true,
+        "visiblyIncomplete": false,
+        "alreadyCompact": false,
+        "primarilyReaction": false,
+        "primarilyBanter": false
+      }
+    },
+    {
+      "id": "concrete-pending",
+      "predicates": {
+        "durable": true,
+        "essentialReferentsResolved": true,
+        "visiblyIncomplete": true,
+        "alreadyCompact": false,
+        "primarilyReaction": false,
+        "primarilyBanter": false
+      }
+    },
+    {
+      "id": "unresolved-context",
+      "predicates": {
+        "durable": true,
+        "essentialReferentsResolved": false,
+        "visiblyIncomplete": false,
+        "alreadyCompact": true,
+        "primarilyReaction": false,
+        "primarilyBanter": false
+      }
+    },
+    {
+      "id": "resolved-context",
+      "predicates": {
+        "durable": true,
+        "essentialReferentsResolved": true,
+        "visiblyIncomplete": false,
+        "alreadyCompact": true,
+        "primarilyReaction": false,
+        "primarilyBanter": false
+      }
+    },
+    {
+      "id": "unverified-hypothesis",
+      "predicates": {
+        "durable": true,
+        "essentialReferentsResolved": true,
+        "visiblyIncomplete": true,
+        "alreadyCompact": false,
+        "primarilyReaction": false,
+        "primarilyBanter": false
+      }
+    },
+    {
+      "id": "verified-result",
+      "predicates": {
+        "durable": true,
+        "essentialReferentsResolved": true,
+        "visiblyIncomplete": false,
+        "alreadyCompact": true,
+        "primarilyReaction": false,
+        "primarilyBanter": false
+      }
+    },
+    {
+      "id": "compact-status",
+      "predicates": {
+        "durable": true,
+        "essentialReferentsResolved": true,
+        "visiblyIncomplete": false,
+        "alreadyCompact": true,
+        "primarilyReaction": false,
+        "primarilyBanter": false
+      }
+    },
+    {
+      "id": "multi-stage-model",
+      "predicates": {
+        "durable": true,
+        "essentialReferentsResolved": true,
+        "visiblyIncomplete": false,
+        "alreadyCompact": false,
+        "primarilyReaction": false,
+        "primarilyBanter": false
+      }
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+[
+  {
+    "model": "gpt-oss:120b-cloud",
+    "reasoning": "low",
+    "seed": 42,
+    "leftVariant": "identity-replay",
+    "rightVariant": "original",
+    "comparable": 48,
+    "agreement": 0.9583333333333334
+  }
+]

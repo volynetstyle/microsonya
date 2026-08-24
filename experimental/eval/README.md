@@ -83,6 +83,12 @@ Validate the full five-way example ablation without model calls:
 pnpm eval:compaction:blind compaction-blind-ablation-v1 --validate-only
 ```
 
+Recompute reports from stored runs without model calls:
+
+```bash
+pnpm eval:compaction:blind compaction-blind-ablation-v1 --rescore
+```
+
 The full ablation compares current examples, rules only, lexically unrelated
 examples, unrelated-domain examples, and Spanish examples (240 calls):
 
@@ -90,14 +96,52 @@ examples, unrelated-domain examples, and Spanish examples (240 calls):
 pnpm eval:compaction:blind compaction-blind-ablation-v1
 ```
 
-`summary.json` reports completion, valid-label and case accuracy; mean and
-strict family accuracy; sensitivity-transition and surface-invariance rates;
-domain/language breakdowns and domain gap; plus deterministic 95% bootstrap
+Measure the provider noise floor with byte-identical prompts (96 calls):
+
+```bash
+pnpm eval:compaction:blind compaction-blind-identity-v1
+```
+
+`summary.json` reports completion, valid-label, end-to-end and conditional case
+accuracy; mean and strict family accuracy; strict paired correctness plus raw
+transition/agreement rates; confusion matrices; matched language/domain
+diagnostics; leave-one-boundary-cluster-out results; and deterministic 95% bootstrap
 intervals resampled by paired semantic boundary rather than by clone.
 `prompt-variant-agreement.json` compares labels for the same held-out case
-across ablation prompts. After the first blind run, failures are diagnostic:
+across ablation prompts. `ablation-paired.json` reports target-minus-original
+deltas with paired boundary-cluster bootstrap intervals. After the first blind run, failures are diagnostic:
 do not tune `v10` on them. Any future policy change turns this holdout into a
 regression set and requires a new blind dataset.
+
+### Predicate decomposition diagnostic
+
+The separate `predicate-v1` experiment tests whether errors come from semantic
+interpretation or from mapping an understood case onto the product taxonomy.
+It asks for six strict boolean predicates, then applies rule precedence in
+ordinary TypeScript. It does not change or replace frozen prompt `v10`.
+
+```bash
+pnpm eval:compaction:predicates compaction-blind-predicates-v1 --validate-only
+pnpm eval:compaction:predicates compaction-blind-predicates-v1
+pnpm eval:compaction:predicates compaction-blind-predicates-v1 --rescore
+```
+
+If GPT-OSS exhausts the shared reasoning/final budget at 256 tokens, run the
+predefined completion-rescue cell. It changes only `numPredict` to 512; the
+extractor prompt, gold predicates, model, reasoning level, and seed stay fixed:
+
+```bash
+pnpm eval:compaction:predicates compaction-blind-predicates-512-v1
+```
+
+`predicate-summary.json` reports schema completion, exact-vector accuracy,
+projected end-to-end accuracy, and TP/FP/TN/FN for every predicate.
+`projected-summary.json` uses the existing blind metrics.
+`direct-vs-predicate.json` contains matched outcomes and a paired 95% bootstrap
+interval resampled by semantic boundary. Predicate-correct/direct-wrong cases
+indicate a taxonomy-mapping or calibration bottleneck; wrong predicates expose
+semantic extraction errors. This is diagnostic rather than a new untouched
+holdout because it reuses the already-opened `compaction-blind-v1` cases.
 
 ## Behavioral evaluation
 

@@ -3,6 +3,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   blindDatasetSchema,
+  pairedAblationComparisons,
   promptVariantAgreement,
   summarizeBlindRuns,
   validateBlindDataset,
@@ -88,11 +89,14 @@ describe("blind compaction evaluation", () => {
     );
     const summary = summarizeBlindRuns(runs, dataset, 100)[0]!;
     expect(summary).toMatchObject({
+      endToEndAccuracy: 1,
       caseAccuracy: 1,
       familyAccuracy: 1,
       strictFamilyAccuracy: 1,
-      sensitivityTransitionAccuracy: 1,
-      surfaceInvarianceRate: 1,
+      strictSensitivityTransitionAccuracy: 1,
+      transitionRate: 1,
+      strictSurfaceInvarianceAccuracy: 1,
+      surfaceAgreement: 1,
     });
 
     runs.find((run) => run.family === "reaction-only")!.correct = false;
@@ -101,9 +105,21 @@ describe("blind compaction evaluation", () => {
     const failed = summarizeBlindRuns(runs, dataset, 100)[0]!;
     expect(failed.caseAccuracy).toBeLessThan(1);
     expect(failed.strictFamilyAccuracy).toBeLessThan(1);
-    expect(failed.sensitivityTransitionAccuracy).toBeLessThan(1);
-    expect(failed.surfaceInvarianceRate).toBeLessThan(1);
+    expect(failed.strictSensitivityTransitionAccuracy).toBeLessThan(1);
+    expect(failed.strictSurfaceInvarianceAccuracy).toBeLessThan(1);
     expect(promptVariantAgreement(runs)).toEqual([]);
+
+    const replayRuns = runs.map((run) => ({
+      ...run,
+      promptVariant: "identity-replay" as const,
+    }));
+    const paired = pairedAblationComparisons(
+      [...runs, ...replayRuns],
+      dataset,
+      100,
+    );
+    expect(paired).not.toHaveLength(0);
+    expect(paired.every((row) => row.delta === 0)).toBe(true);
   });
 
   it("keeps policy fixed while varying only calibration examples", () => {
@@ -115,12 +131,14 @@ describe("blind compaction evaluation", () => {
     const original = buildCompactionPrompt(fixture, "original");
     const rulesOnly = buildCompactionPrompt(fixture, "rules-only");
     const crossDomain = buildCompactionPrompt(fixture, "cross-domain");
+    const identityReplay = buildCompactionPrompt(fixture, "identity-replay");
     const policyMarker =
       "Apply these rules in order. Stop at the first matching rule.";
     expect(original).toContain(policyMarker);
     expect(rulesOnly).toContain(policyMarker);
     expect(crossDomain).toContain(policyMarker);
     expect(original).toContain("Boundary examples:");
+    expect(identityReplay).toBe(original);
     expect(rulesOnly).not.toContain("Boundary examples:");
     expect(crossDomain).toContain("The hearing moved to Tuesday.");
     expect(crossDomain).not.toContain("Stripe");

@@ -1,0 +1,51 @@
+{
+  "total": 48,
+  "completionRate": 0.8541666666666666,
+  "schemaValidRate": 0.7804878048780488,
+  "predicateExactVectorAccuracy": 0.4791666666666667,
+  "projectedEndToEndAccuracy": 0.5833333333333334,
+  "perPredicate": {
+    "durable": {
+      "tp": 21,
+      "fp": 0,
+      "tn": 10,
+      "fn": 1,
+      "accuracy": 0.96875
+    },
+    "essentialReferentsResolved": {
+      "tp": 30,
+      "fp": 1,
+      "tn": 1,
+      "fn": 0,
+      "accuracy": 0.96875
+    },
+    "visiblyIncomplete": {
+      "tp": 5,
+      "fp": 3,
+      "tn": 24,
+      "fn": 0,
+      "accuracy": 0.90625
+    },
+    "alreadyCompact": {
+      "tp": 14,
+      "fp": 4,
+      "tn": 13,
+      "fn": 1,
+      "accuracy": 0.84375
+    },
+    "primarilyReaction": {
+      "tp": 4,
+      "fp": 1,
+      "tn": 27,
+      "fn": 0,
+      "accuracy": 0.96875
+    },
+    "primarilyBanter": {
+      "tp": 3,
+      "fp": 0,
+      "tn": 29,
+      "fn": 0,
+      "accuracy": 1
+    }
+  }
+}

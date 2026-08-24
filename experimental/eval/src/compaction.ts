@@ -36,6 +36,7 @@ export type CompactionFixture = z.infer<typeof compactionFixtureSchema>;
 
 export const compactionPromptVariantSchema = z.enum([
   "original",
+  "identity-replay",
   "rules-only",
   "lexical-clones",
   "cross-domain",
@@ -60,6 +61,7 @@ const BOUNDARY_EXAMPLES: Record<CompactionPromptVariant, string[]> = {
     'Messages: "Deploy перенесли на четвер через Stripe." / "Checkout лишається за feature flag; решту релізу катимо незалежно." / "Migration запускаємо в середу ввечері; у четвер checkout після Stripe." => {"action":"SUMMARIZE"}',
     'Messages: "Consumers require schemaVersion; unknown versions go to quarantine." / "Legacy events temporarily receive v1 at the gateway and are replayed." / "Remove the fallback after old lag is zero and quarantine stays empty." => {"action":"SUMMARIZE"}',
   ],
+  "identity-replay": [],
   "rules-only": [],
   "lexical-clones": [
     'Messages: "The archive review moved to Monday." / "The curator approval is still pending." => {"action":"DEFER_COMPACT"}',
@@ -94,6 +96,10 @@ export function buildCompactionPrompt(
   fixture: CompactionFixture[number],
   promptVariant: CompactionPromptVariant = "original",
 ): string {
+  const examples =
+    promptVariant === "identity-replay"
+      ? BOUNDARY_EXAMPLES.original
+      : BOUNDARY_EXAMPLES[promptVariant];
   return [
     "Choose whether this chat window should now be summarized into durable history.",
     'Return JSON only: {"action":"ONE_LABEL"}.',
@@ -105,9 +111,7 @@ export function buildCompactionPrompt(
     "5. IF the visible exchange contains an unverified hypothesis, uncertainty, or explicitly shows that a result, answer, verification, explanation, decision, or set of alternatives is still pending: RETURN DEFER_INCOMPLETE",
     "6. IF all durable information is already stated as one self-contained decision, status update, result, short plan, or compact list of invariants, AND a future reader would gain no materially shorter or clearer model from cross-message synthesis: RETURN DEFER_COMPACT. Here, a short plan means one action, or one action with a deadline; it does not include a staged schedule with gates, thresholds, prerequisites, fallback, or rollback. A steady-state architecture contract plus a temporary compatibility path and criteria for removing that path are two semantic phases, not one compact item. Message length and the number of facts do not by themselves justify summarization.",
     "7. RETURN SUMMARIZE when durable information must be combined across messages into a materially clearer model. Strong signals are multiple dependent steps, sequencing, prerequisites, thresholds, fallback or rollback conditions, parallel work streams, or an architecture contract plus a separate migration, compatibility, or retirement lifecycle. A plan is not 'one short plan' merely because its steps can be listed in one sentence.",
-    ...(BOUNDARY_EXAMPLES[promptVariant].length > 0
-      ? ["Boundary examples:", ...BOUNDARY_EXAMPLES[promptVariant]]
-      : []),
+    ...(examples.length > 0 ? ["Boundary examples:", ...examples] : []),
     "Do not infer missing context or turn hypotheses, jokes, or reactions into facts.",
     "Messages:",
     ...fixture.messages.map(
@@ -123,5 +127,3 @@ export function parseCompactionAction(raw: string): CompactionAction | null {
     return null;
   }
 }
-
-
