@@ -23,20 +23,21 @@ describe("OllamaClient profiles", () => {
       temperature: 0,
       top_k: 1,
       seed: 42,
-      num_predict: 256,
+      num_predict: 512,
     });
   });
 
   it("sends a task profile directly through /api/chat", async () => {
-    const fetch = vi.fn(
-      async () =>
-        new Response(
-          JSON.stringify({
-            message: { content: JSON.stringify({ action: "SUMMARIZE" }) },
-          }),
-          { status: 200 },
-        ),
-    );
+    let requestInit: RequestInit | undefined;
+    const fetch = vi.fn<typeof globalThis.fetch>(async (_input, init) => {
+      requestInit = init;
+      return new Response(
+        JSON.stringify({
+          message: { content: JSON.stringify({ action: "SUMMARIZE" }) },
+        }),
+        { status: 200 },
+      );
+    });
     const ollama = new OllamaClient({
       baseUrl: "http://localhost:11434/api",
       fetch,
@@ -54,9 +55,7 @@ describe("OllamaClient profiles", () => {
       "http://localhost:11434/api/chat",
       expect.objectContaining({ method: "POST" }),
     );
-    const request = JSON.parse(
-      String((fetch.mock.calls[0]?.[1] as RequestInit).body),
-    );
+    const request = JSON.parse(String(requestInit?.body));
     expect(request).toMatchObject({
       ...CLASSIFIER_PROFILE,
       stream: false,

@@ -1,63 +1,93 @@
 import { randomUUID } from "node:crypto";
-import type { MessagesRepo, SummariesRepo } from "@microsonya/db";
-import { SUMMARIZER_PROFILE, type OllamaClient } from "@microsonya/model";
-import type {
-  ChatMessage,
-  SummaryCommand,
-  SummaryRun,
-} from "@microsonya/shared";
-import type { SummarizationTelemetryService } from "./telemetry.js";
+import type { OllamaClient } from "@microsonya/model";
 import {
-  outputSchema,
-  DAY_MS,
-  MAX_MESSAGES,
-  SUMMARY_INSTRUCTIONS,
-} from "./constants.js";
-import { encodePipe, PIPE_GUIDE } from "./pipe.js";
+  asSummaryId,
+  asTimestampMs,
+  createConversationWindow,
+  type ChatId,
+  type ChatMessage,
+  type ConversationWindow,
+  type MessageId,
+  type SummaryCommand,
+  type SummaryId,
+  type SummaryRun,
+  type TimestampMs,
+  type WindowDisposition,
+} from "@microsonya/shared";
+import {
+  createClassifier,
+  type SummaryDecisionClassifier,
+} from "./classifier.js";
+import {
+  createConversationSummarizer,
+  type ConversationSummarizer,
+} from "./conversationSummarizer.js";
+import { DAY_MS, MAX_MESSAGES } from "./constants.js";
+import { processWindow, type FastClassifier } from "./orchestrator.js";
+import type { SummarizationTelemetryService } from "./telemetry.js";
+import { ModelOutputError } from "./modelOutput.js";
 
-export type Summarizer = {
-  summarize(
+export interface MessageReader {
+  listByChat(chatId: ChatId): Promise<readonly ChatMessage[]>;
+}
+
+export interface SummaryRunStore {
+  findLastRun(chatId: ChatId): Promise<SummaryRun | undefined>;
+  saveRun(run: SummaryRun): Promise<void>;
+}
+
+/** Command-facing workflow facade. Model-facing contracts consume only W. */
+export interface Summarizer {
+  process(
     command: SummaryCommand,
     signal?: AbortSignal,
-  ): Promise<string | null>;
-};
+  ): Promise<WindowDisposition | null>;
+}
 
-export type SummarizerDeps = {
-  messages: Pick<MessagesRepo, "listByChat">;
-  summaries: Pick<SummariesRepo, "findLastRun" | "saveRun">;
-  ollama: Pick<OllamaClient, "chat">;
-  telemetry?: SummarizationTelemetryService;
-};
+export interface SummarizerDeps {
+  readonly messages: MessageReader;
+  readonly summaries: SummaryRunStore;
+  readonly ollama?: Pick<OllamaClient, "chat">;
+  readonly classifier?: SummaryDecisionClassifier;
+  readonly conversationSummarizer?: ConversationSummarizer;
+  readonly fastClassifier?: FastClassifier;
+  readonly telemetry?: SummarizationTelemetryService;
+  readonly createSummaryId?: () => SummaryId;
+  readonly now?: () => TimestampMs;
+}
 
 export function createSummarizer(deps: SummarizerDeps): Summarizer {
-  return {
-    summarize: (command, signal) => run(deps, command, signal),
-  };
+  const classifier =
+    deps.classifier ?? createClassifier({ ollama: requireOllama(deps) });
+
+  const conversationSummarizer =
+    deps.conversationSummarizer ??
+    createConversationSummarizer({ ollama: requireOllama(deps) });
+
+  const process = (command: SummaryCommand, signal?: AbortSignal) =>
+    run(deps, classifier, conversationSummarizer, command, signal);
+
+  return { process };
 }
 
 async function run(
   deps: SummarizerDeps,
+  classifier: SummaryDecisionClassifier,
+  conversationSummarizer: ConversationSummarizer,
   command: SummaryCommand,
   signal?: AbortSignal,
-): Promise<string | null> {
+): Promise<WindowDisposition | null> {
   const startedAt = performance.now();
-
   const telemetry = deps.telemetry?.start({
     traceId: `${command.chatId}:${command.commandMessageId}:${randomUUID()}`,
     chatId: command.chatId,
     commandMessageId: command.commandMessageId,
   });
-
   let stage = "start";
 
   try {
-    telemetry?.record({
-      type: "summary.start",
-      mode: command.mode,
-    });
-
+    telemetry?.record({ type: "summary.start", mode: command.mode });
     signal?.throwIfAborted();
-
     stage = "messages.load";
 
     const [all, previous] = await Promise.all([
@@ -70,126 +100,94 @@ async function run(
       messageCount: all.length,
       hasPreviousRun: previous !== undefined,
     });
-
     signal?.throwIfAborted();
-
     stage = "messages.select";
 
-    const messages = selectMessages(all, command, previous?.toMessageId);
+    const window = selectConversationWindow(
+      all,
+      command,
+      previous?.covers.lastId,
+    );
 
     telemetry?.record({
       type: "messages.selected",
-      messageCount: messages.length,
-      fromMessageId: messages[0]?.id,
-      toMessageId: messages.at(-1)?.id,
+      messageCount: window?.messages.length ?? 0,
+      fromMessageId: window?.messages[0]?.id,
+      toMessageId: window?.messages.at(-1)?.id,
     });
 
-    if (messages.length === 0) {
+    if (window === null) {
       telemetry?.record({
         type: "summary.finish",
         durationMs: performance.now() - startedAt,
         status: "empty",
       });
-
       return null;
     }
 
-    stage = "model.generate";
-
-    const prompt = buildPrompt(messages);
-
-    telemetry?.record({
-      type: "model.request",
-      messageCount: messages.length,
-      promptChars: prompt.length,
-      prompt,
-    });
-
-    const modelStartedAt = performance.now();
-
-    const response = await deps.ollama.chat(
+    stage = "window.process";
+    const result = await processWindow(
+      window,
       {
-        ...SUMMARIZER_PROFILE,
-        stream: false,
-        messages: [{ role: "user", content: prompt }],
+        classifier,
+        summarizer: conversationSummarizer,
+        fastClassifier: deps.fastClassifier,
+        createSummaryId: deps.createSummaryId,
+        now: deps.now,
+        telemetry,
       },
-      { signal },
+      signal,
     );
-    const { summary } = outputSchema.parse(
-      JSON.parse(response.message.content),
-    );
-
-    telemetry?.record({
-      type: "model.response",
-      durationMs: performance.now() - modelStartedAt,
-      summaryChars: summary.length,
-    });
-
     signal?.throwIfAborted();
 
-    stage = "summary.save";
-
-    const saveStartedAt = performance.now();
-
-    await saveRun(deps.summaries, command, messages, summary);
-
-    telemetry?.record({
-      type: "summary.saved",
-      durationMs: performance.now() - saveStartedAt,
-    });
+    if (result.disposition.kind !== "deferred") {
+      stage = "disposition.save";
+      const saveStartedAt = performance.now();
+      await deps.summaries.saveRun(
+        toSummaryRun(
+          window,
+          command,
+          result.decision.action,
+          result.disposition,
+          deps,
+        ),
+      );
+      telemetry?.record({
+        type: "summary.saved",
+        durationMs: performance.now() - saveStartedAt,
+      });
+    }
 
     telemetry?.record({
       type: "summary.finish",
       durationMs: performance.now() - startedAt,
-      status: "ok",
+      status: result.disposition.kind,
     });
-
-    return summary;
+    return result.disposition;
   } catch (error) {
     telemetry?.record({
       type: "summary.error",
       durationMs: performance.now() - startedAt,
-      stage,
+      stage: error instanceof ModelOutputError ? error.stage : stage,
       error: serializeError(error),
     });
-
     throw error;
   }
-}
-
-function serializeError(error: unknown): {
-  name?: string;
-  message: string;
-  stack?: string;
-} {
-  if (error instanceof Error) {
-    return {
-      name: error.name,
-      message: error.message,
-      stack: error.stack,
-    };
-  }
-
-  return {
-    message: String(error),
-  };
 }
 
 export function selectMessages(
   all: readonly ChatMessage[],
   command: SummaryCommand,
-  lastId?: number,
+  lastId?: MessageId,
 ): ChatMessage[] {
-  const afterId = lastId ?? -1;
-
-  const eligible = all.filter(
-    (message) =>
-      message.id !== command.commandMessageId &&
-      message.id > afterId &&
-      !message.isCommand &&
-      message.kind === "text" &&
-      message.text.trim().length > 0,
-  );
+  const eligible = all
+    .filter(
+      (message) =>
+        message.id !== command.commandMessageId &&
+        (lastId === undefined || message.id > lastId) &&
+        message.text.trim().length > 0,
+    )
+    .sort(compareChronologically);
 
   if (command.mode === "count") {
     const count = Math.max(1, command.count ?? 100);
@@ -202,37 +200,139 @@ export function selectMessages(
       : command.date - DAY_MS;
 
   return eligible
-    .filter((message) => message.date >= since)
+    .filter((message) => message.time >= since)
     .slice(-MAX_MESSAGES);
 }
 
-export function buildPrompt(messages: readonly ChatMessage[]): string {
-  return [
-    section("SUMMARY_POLICY", SUMMARY_INSTRUCTIONS),
-    section("TRANSCRIPT_FORMAT", PIPE_GUIDE),
-    section("VISIBLE_MESSAGES", encodePipe(messages)),
-  ].join("\n\n");
-}
-
-function section(name: string, content: string): string {
-  return [`${name}_BEGIN`, content, `${name}_END`].join("\n");
-}
-
-async function saveRun(
-  summaries: SummarizerDeps["summaries"],
+export function selectConversationWindow(
+  all: readonly ChatMessage[],
   command: SummaryCommand,
-  messages: readonly ChatMessage[],
-  finalText: string,
-): Promise<void> {
-  await summaries.saveRun({
-    id: randomUUID(),
-    chatId: command.chatId,
+  lastId?: MessageId,
+): ConversationWindow | null {
+  const messages = selectMessages(all, command, lastId);
+  return messages.length === 0 ? null : createConversationWindow(messages);
+}
+
+export function presentDisposition(disposition: WindowDisposition): string {
+  switch (disposition.kind) {
+    case "summarized":
+      return disposition.summary.text;
+    case "deferred":
+      return DEFER_PRESENTATION[disposition.reason];
+    case "skipped":
+      return SKIP_PRESENTATION[disposition.reason];
+  }
+}
+
+const DEFER_PRESENTATION = {
+  DEFER_COMPACT:
+    "У цих повідомленнях є корисна інформація, але вона вже достатньо стисла. Залишаю її для наступного підсумку.",
+  DEFER_INCOMPLETE:
+    "Обговорення ще розвивається. Зачекаю на результат або уточнення, щоб підсумок був кориснішим.",
+  DEFER_CONTEXT:
+    "У видимих повідомленнях бракує контексту для надійного підсумку без здогадок. Залишаю їх для наступного вікна.",
+} as const;
+
+const SKIP_PRESENTATION = {
+  SKIP_REACTIONS:
+    "Тут переважно короткі реакції та підтвердження, тож окремий підсумок не створюю.",
+  SKIP_BANTER:
+    "Тут переважно невимушене спілкування без інформації, яку варто переносити в історію підсумків.",
+  SKIP_NO_VALUE:
+    "У цьому вікні поки немає достатньо конкретної інформації для корисного підсумку.",
+} as const;
+
+function toSummaryRun(
+  window: ConversationWindow,
+  command: SummaryCommand,
+  action: SummaryRun["action"],
+  disposition: Exclude<WindowDisposition, { kind: "deferred" }>,
+  deps: Pick<SummarizerDeps, "createSummaryId" | "now">,
+): SummaryRun {
+  const covers = Object.freeze({
+    firstId: window.messages[0]!.id,
+    lastId: window.messages.at(-1)!.id,
+    count: window.messages.length,
+  });
+
+  if (disposition.kind === "summarized") {
+    return Object.freeze({
+      id: disposition.summary.id,
+      chatId: disposition.summary.chatId,
+      commandMessageId: command.commandMessageId,
+      createdAt: disposition.summary.createdAt,
+      covers: disposition.summary.covers,
+      mode: command.mode,
+      status: "summarized",
+      action,
+      finalText: disposition.summary.text,
+    });
+  }
+
+  return Object.freeze({
+    id: (deps.createSummaryId ?? defaultSummaryId)(),
+    chatId: window.chatId,
     commandMessageId: command.commandMessageId,
-    createdAt: Date.now(),
-    fromMessageId: messages[0]!.id,
-    toMessageId: messages.at(-1)!.id,
+    createdAt: (deps.now ?? defaultNow)(),
+    covers,
     mode: command.mode,
-    status: "ok",
-    finalText,
-  } satisfies SummaryRun);
+    status: "skipped",
+    action,
+    finalText: presentDisposition(disposition),
+  });
+}
+
+function compareChronologically(left: ChatMessage, right: ChatMessage): number {
+  return left.time - right.time || left.id - right.id;
+}
+
+function requireOllama(deps: SummarizerDeps): Pick<OllamaClient, "chat"> {
+  if (!deps.ollama) {
+    throw new TypeError(
+      "createSummarizer requires ollama when model-facing dependencies are not injected.",
+    );
+  }
+  return deps.ollama;
+}
+
+function defaultSummaryId(): SummaryId {
+  return asSummaryId(randomUUID());
+}
+
+function defaultNow(): TimestampMs {
+  return asTimestampMs(Date.now());
+}
+
+function serializeError(error: unknown): {
+  name?: string;
+  code?: string;
+  outputChars?: number;
+  outputPreview?: string;
+  message: string;
+  stack?: string;
+} {
+  if (error instanceof Error) {
+    return {
+      name: error.name,
+      ...(error instanceof ModelOutputError
+        ? {
+            code: error.code,
+            outputChars: error.outputChars,
+            ...(includeModelOutputInLogs()
+              ? { outputPreview: error.outputPreview }
+              : {}),
+          }
+        : {}),
+      message: error.message,
+      stack: error.stack,
+    };
+  }
+  return { message: String(error) };
+}
+
+function includeModelOutputInLogs(): boolean {
+  return (
+    process.env.NODE_ENV === "development" ||
+    process.env.SUMMARIZATION_LOG_MODEL_RESPONSE === "1"
+  );
 }

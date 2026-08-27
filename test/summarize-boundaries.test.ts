@@ -1,14 +1,21 @@
 import { describe, expect, it } from "vitest";
-import type {
-  ChatMessage,
-  SummaryCommand,
+import {
+  asAuthorId,
+  asChatId,
+  asMessageId,
+  asTimestampMs,
+  type ChatMessage,
+  type SummaryCommand,
 } from "../packages/shared/src/index.js";
-import { selectMessages } from "../packages/summarize/src/index.js";
+import {
+  selectConversationWindow,
+  selectMessages,
+} from "../packages/summarize/src/index.js";
 
 const command: SummaryCommand = {
-  chatId: "chat",
-  commandMessageId: 10,
-  date: Date.UTC(2026, 0, 2, 12),
+  chatId: asChatId("chat"),
+  commandMessageId: asMessageId(10),
+  date: asTimestampMs(Date.UTC(2026, 0, 2, 12)),
   mode: "recent",
 };
 
@@ -17,46 +24,58 @@ function message(
   overrides: Partial<ChatMessage> = {},
 ): ChatMessage {
   return {
-    id,
-    chatId: "chat",
-    date: command.date - 1_000,
-    authorId: "author",
-    authorName: "Author",
+    id: asMessageId(id),
+    chatId: asChatId("chat"),
+    author: { id: asAuthorId("author"), label: "Author" },
+    time: asTimestampMs(command.date - 1_000),
+    parentId: null,
     text: `message ${id}`,
-    kind: "text",
     ...overrides,
   };
 }
 
-describe("summary message-window invariants", () => {
-  it("includes only non-command, non-empty text messages strictly after the cursor", () => {
+describe("summary conversation-window selection", () => {
+  it("includes only non-empty messages strictly after the cursor and omits the trigger", () => {
     expect(
       selectMessages(
         [
           message(4),
           message(5),
-          message(6, { isCommand: true }),
           message(7, { text: "  " }),
-          message(8, { kind: "photo" }),
           message(9),
-          message(10, { isCommand: true, text: "/summarize" }),
+          message(10, { text: "/summarize" }),
         ],
         command,
-        4,
+        asMessageId(4),
       ).map((item) => item.id),
     ).toEqual([5, 9]);
   });
 
-  it("applies the time boundary after cursor and eligibility filtering", () => {
-    const recent = selectMessages(
+  it("applies the time boundary and returns one validated canonical window", () => {
+    const window = selectConversationWindow(
       [
-        message(11, { date: command.date - 86_400_001 }),
-        message(12, { date: command.date - 86_400_000 }),
-        message(13, { date: command.date + 1 }),
+        message(11, {
+          time: asTimestampMs(command.date - 86_400_001),
+        }),
+        message(12, {
+          time: asTimestampMs(command.date - 86_400_000),
+        }),
+        message(13, { time: asTimestampMs(command.date + 1) }),
       ],
       command,
     );
 
-    expect(recent.map((item) => item.id)).toEqual([12, 13]);
+    expect(window?.messages.map((item) => item.id)).toEqual([12, 13]);
+    expect(Object.isFrozen(window)).toBe(true);
+    expect(Object.isFrozen(window?.messages)).toBe(true);
+  });
+
+  it("lets the ConversationWindow factory reject a mixed-chat repository result", () => {
+    expect(() =>
+      selectConversationWindow(
+        [message(1), message(2, { chatId: asChatId("wrong-chat") })],
+        { ...command, commandMessageId: asMessageId(99) },
+      ),
+    ).toThrow(/different chat/i);
   });
 });
