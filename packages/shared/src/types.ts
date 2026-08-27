@@ -148,6 +148,91 @@ export interface SummaryRun {
   readonly finalText: string;
 }
 
+export type SummaryRunAttemptStatus =
+  | "summarized"
+  | "deferred"
+  | "skipped"
+  | "empty"
+  | "error";
+
+export type SummaryRunMessageRole = "eligible" | "context";
+
+/** Immutable copy of the exact message state visible to one production run. */
+export interface SummaryRunMessageSnapshot {
+  readonly ordinal: number;
+  readonly chatId: ChatId;
+  readonly messageId: MessageId;
+  readonly role: SummaryRunMessageRole;
+  readonly authorId: AuthorId;
+  readonly authorName: string;
+  readonly text: string;
+  readonly sentAt: TimestampMs;
+  readonly replyToId: MessageId | null;
+}
+
+export interface ModelInvocationEvidence {
+  readonly id: SummaryId;
+  readonly stage: "classifier" | "summarizer";
+  readonly model: string;
+  readonly promptHash: string;
+  readonly inputTokens?: number;
+  readonly outputTokens?: number;
+  readonly latencyMs?: number;
+  readonly outputJson?: unknown;
+  readonly outputText?: string;
+  readonly status: "pending" | "succeeded" | "failed";
+  readonly errorCode?: string;
+  readonly createdAt: TimestampMs;
+}
+
+export interface DatasetCandidateEvidence {
+  readonly priority: number;
+  readonly reasons: readonly string[];
+}
+
+/**
+ * Observed evidence for exactly one /summary attempt. It is deliberately not
+ * a label: production output becomes ground truth only after human review.
+ */
+export interface SummaryRunAttempt {
+  readonly id: SummaryId;
+  readonly chatId: ChatId;
+  readonly commandMessageId: MessageId;
+  readonly startedAt: TimestampMs;
+  readonly completedAt: TimestampMs;
+  readonly checkpointBefore: MessageId | null;
+  readonly checkpointAfter: MessageId | null;
+  readonly eligibleCount: number;
+  readonly contextCount: number;
+  readonly mode: SummaryMode;
+  readonly action?: SummaryAction;
+  readonly status: SummaryRunAttemptStatus;
+  readonly classifierModel?: string;
+  readonly summarizerModel?: string;
+  readonly classifierPromptHash?: string;
+  readonly summaryPromptHash?: string;
+  readonly policyHash: string;
+  readonly classifierLatencyMs: number;
+  readonly summarizerLatencyMs: number;
+  readonly totalLatencyMs: number;
+  readonly summaryText?: string;
+  readonly errorCode?: string;
+  readonly inputHash: string;
+  readonly messages: readonly SummaryRunMessageSnapshot[];
+  readonly modelInvocations: readonly ModelInvocationEvidence[];
+  readonly candidate?: DatasetCandidateEvidence;
+}
+
+export interface SummaryFeedback {
+  readonly id: SummaryId;
+  readonly runId: SummaryId;
+  readonly source: "user" | "moderator" | "developer" | "automatic";
+  readonly signal: "good" | "bad" | "corrected" | "rerun" | "ignored";
+  readonly comment?: string;
+  readonly correctedSummary?: string;
+  readonly createdAt: TimestampMs;
+}
+
 function asNonEmptyString(value: unknown, label: string): string {
   if (typeof value !== "string" || value.trim().length === 0) {
     throw new TypeError(`${label} must be a non-empty string.`);
