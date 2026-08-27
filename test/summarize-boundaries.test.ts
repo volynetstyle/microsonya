@@ -65,9 +65,33 @@ describe("summary conversation-window selection", () => {
       command,
     );
 
-    expect(window?.messages.map((item) => item.id)).toEqual([12, 13]);
+    expect(window?.window.messages.map((item) => item.id)).toEqual([12, 13]);
+    expect(window?.messages.map(({ role }) => role)).toEqual([
+      "eligible",
+      "eligible",
+    ]);
     expect(Object.isFrozen(window)).toBe(true);
     expect(Object.isFrozen(window?.messages)).toBe(true);
+  });
+
+  it("marks a parent behind the cursor as context rather than eligible content", () => {
+    const selected = selectConversationWindow(
+      [
+        message(4, { text: "old parent" }),
+        message(9, { parentId: asMessageId(4), text: "new reply" }),
+      ],
+      command,
+      asMessageId(4),
+    )!;
+
+    expect(
+      selected.messages.map(({ message, role }) => ({ id: message.id, role })),
+    ).toEqual([
+      { id: 4, role: "context" },
+      { id: 9, role: "eligible" },
+    ]);
+    expect(selected.eligibleMessages.map(({ id }) => id)).toEqual([9]);
+    expect(selected.contextMessages.map(({ id }) => id)).toEqual([4]);
   });
 
   it("lets the ConversationWindow factory reject a mixed-chat repository result", () => {

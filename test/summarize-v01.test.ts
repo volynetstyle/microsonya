@@ -3,9 +3,11 @@ import {
   asAuthorId,
   asChatId,
   asMessageId,
+  asSummaryId,
   asTimestampMs,
   type ChatMessage,
   type SummaryCommand,
+  type SummaryRun,
 } from "../packages/shared/src/index.js";
 import {
   createSummarizer,
@@ -76,7 +78,18 @@ describe("summarizer 0.1 workflow", () => {
       "window.disposition",
       "summary.saved",
       "summary.finish",
+      "summary.run",
     ]);
+    expect(events.at(-1)).toMatchObject({
+      type: "summary.run",
+      action: "SUMMARIZE",
+      messageCount: 1,
+      contextMessageCount: 0,
+      modelCalls: 2,
+      checkpointAdvanced: true,
+      consecutiveDeferCount: 0,
+      status: "summarized",
+    });
     expect(events).toContainEqual(
       expect.objectContaining({
         type: "model.response",
@@ -172,6 +185,112 @@ describe("summarizer 0.1 workflow", () => {
     expect(saveRun).not.toHaveBeenCalled();
   });
 
+  it("reports a consecutive defer streak for the same persisted checkpoint", async () => {
+    const events: SummarizationTelemetryEvent[] = [];
+    const summarizer = createSummarizer({
+      messages: { listByChat: async () => [message(5, "Checking now")] },
+      summaries: { findLastRun: async () => undefined, saveRun: vi.fn() },
+      classifier: {
+        classify: async () => ({
+          action: "DEFER_COMPACT",
+          evidence: { source: "model", model: "test" },
+        }),
+      },
+      conversationSummarizer: { summarize: vi.fn() },
+      telemetry: new SummarizationTelemetryService((event) =>
+        events.push(event),
+      ),
+    });
+
+    await summarizer.process(command());
+    await summarizer.process(command());
+
+    expect(
+      events
+        .filter((event) => event.type === "summary.run")
+        .map((event) => event.consecutiveDeferCount),
+    ).toEqual([1, 2]);
+  });
+
+  it("uses an old reply parent as model context but persists coverage for eligible content only", async () => {
+    const saveRun = vi.fn(async () => undefined);
+    const previous = previousRun(1);
+    const summarizer = createSummarizer({
+      messages: {
+        listByChat: async () => [
+          message(1, "Deploy is blocked by migration 42"),
+          message(2, "Migration is complete; deploy can start", 1),
+        ],
+      },
+      summaries: { findLastRun: async () => previous, saveRun },
+      classifier: {
+        classify: async (window) => {
+          expect(window.messages.map(({ id }) => id)).toEqual([1, 2]);
+          return {
+            action: "SUMMARIZE",
+            evidence: { source: "model", model: "test" },
+          };
+        },
+      },
+      conversationSummarizer: {
+        summarize: async () => ({
+          text: "Migration complete; deploy unblocked.",
+        }),
+      },
+      createSummaryId: () => asSummaryId("reply-summary"),
+      now: () => asTimestampMs(200_000_001),
+    });
+
+    await expect(summarizer.process(command())).resolves.toMatchObject({
+      kind: "summarized",
+      summary: { covers: { firstId: 2, lastId: 2, count: 1 } },
+    });
+    expect(saveRun).toHaveBeenCalledWith(
+      expect.objectContaining({
+        covers: { firstId: 2, lastId: 2, count: 1 },
+      }),
+    );
+  });
+
+  it("does not advance the persisted checkpoint when saving the terminal run fails", async () => {
+    const events: SummarizationTelemetryEvent[] = [];
+    const previous = previousRun(1);
+    const saveFailure = new Error("database unavailable");
+    const summarizer = createSummarizer({
+      messages: {
+        listByChat: async () => [message(1, "old"), message(2, "new")],
+      },
+      summaries: {
+        findLastRun: async () => previous,
+        saveRun: async () => Promise.reject(saveFailure),
+      },
+      classifier: {
+        classify: async () => ({
+          action: "SKIP_NO_VALUE",
+          evidence: { source: "model", model: "test" },
+        }),
+      },
+      conversationSummarizer: { summarize: vi.fn() },
+      telemetry: new SummarizationTelemetryService((event) =>
+        events.push(event),
+      ),
+    });
+
+    await expect(summarizer.process(command())).rejects.toBe(saveFailure);
+    expect(
+      events.find((event) => event.type === "summary.error"),
+    ).toMatchObject({
+      type: "summary.error",
+      error: { code: "STORAGE_ERROR" },
+    });
+    expect(events.at(-1)).toMatchObject({
+      type: "summary.run",
+      checkpointAdvanced: false,
+      status: "error",
+      errorCode: "STORAGE_ERROR",
+    });
+  });
+
   it("returns null without calling either model when selection is empty", async () => {
     const chat = vi.fn();
     const summarizer = createSummarizer({
@@ -208,16 +327,23 @@ describe("summarizer 0.1 workflow", () => {
     await expect(summarizer.process(command())).rejects.toMatchObject({
       code: "MODEL_OUTPUT_EMPTY",
     });
-    expect(events.at(-1)).toMatchObject({
+    const errorEvent = events.find((event) => event.type === "summary.error");
+    expect(errorEvent).toMatchObject({
       type: "summary.error",
       stage: "classifier.output",
       error: {
         name: "ModelOutputError",
         code: "MODEL_OUTPUT_EMPTY",
+        detailCode: "MODEL_OUTPUT_EMPTY",
         outputChars: 0,
       },
     });
-    expect(events.at(-1)).not.toHaveProperty("error.outputPreview");
+    expect(errorEvent).not.toHaveProperty("error.outputPreview");
+    expect(events.at(-1)).toMatchObject({
+      type: "summary.run",
+      status: "error",
+      errorCode: "MODEL_OUTPUT_EMPTY",
+    });
     expect(saveRun).not.toHaveBeenCalled();
   });
 
@@ -270,13 +396,35 @@ function command(): SummaryCommand {
   };
 }
 
-function message(id: number, text: string): ChatMessage {
+function message(
+  id: number,
+  text: string,
+  parentId: number | null = null,
+): ChatMessage {
   return {
     id: asMessageId(id),
     chatId: asChatId("chat"),
     author: { id: asAuthorId("1"), label: "Olia" },
     time: asTimestampMs(199_999_000 + id),
-    parentId: null,
+    parentId: parentId === null ? null : asMessageId(parentId),
     text,
+  };
+}
+
+function previousRun(lastId: number): SummaryRun {
+  return {
+    id: asSummaryId("previous"),
+    chatId: asChatId("chat"),
+    commandMessageId: asMessageId(8),
+    createdAt: asTimestampMs(199_000_000),
+    covers: {
+      firstId: asMessageId(1),
+      lastId: asMessageId(lastId),
+      count: lastId,
+    },
+    mode: "recent",
+    status: "summarized",
+    action: "SUMMARIZE",
+    finalText: "previous",
   };
 }

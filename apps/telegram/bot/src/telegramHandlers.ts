@@ -10,6 +10,10 @@ import { createNativeDraftTransport } from "./telegram/nativeDraftTransport.js";
 export type BotServices = {
   messages: { save(message: ChatMessage): Promise<void> };
   summarizer: Pick<Summarizer, "process">;
+  onError?: (event: {
+    readonly code: "DELIVERY_ERROR";
+    readonly error: unknown;
+  }) => void;
 };
 
 export function createMessageHandler(services: BotServices) {
@@ -41,7 +45,17 @@ export function createMessageHandler(services: BotServices) {
     }
 
     // Delivery errors are infrastructure failures, not summary failures.
-    await reply.finish(finalText);
+    try {
+      await reply.finish(finalText);
+    } catch (error) {
+      const event = {
+        code: "DELIVERY_ERROR",
+        error,
+      } as const;
+      if (services.onError) services.onError(event);
+      else console.error("[summary:delivery-error]", event);
+      throw error;
+    }
   };
 }
 

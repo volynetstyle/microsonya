@@ -40,6 +40,7 @@ describe("Telegram message handler reply boundary", () => {
 
   it("does not disguise or swallow final delivery failures", async () => {
     const failure = new Error("Telegram unavailable");
+    const onError = vi.fn();
     const reply = vi.fn(async () => Promise.reject(failure));
     const handler = createMessageHandler({
       messages: { save: vi.fn(async () => undefined) },
@@ -49,6 +50,7 @@ describe("Telegram message handler reply boundary", () => {
           reason: "SKIP_NO_VALUE" as const,
         })),
       },
+      onError,
     });
     const ctx = contextFor("/summary", reply, [
       { type: "bot_command", offset: 0, length: 8 },
@@ -56,6 +58,10 @@ describe("Telegram message handler reply boundary", () => {
 
     await expect(handler(ctx as never)).rejects.toBe(failure);
     expect(reply).toHaveBeenCalledOnce();
+    expect(onError).toHaveBeenCalledWith({
+      code: "DELIVERY_ERROR",
+      error: failure,
+    });
   });
 });
 

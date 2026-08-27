@@ -13,6 +13,14 @@ export type ModelOutputFailure =
   | "MODEL_OUTPUT_INVALID_JSON"
   | "MODEL_OUTPUT_SCHEMA_MISMATCH";
 
+export type SummaryErrorCode =
+  | "MODEL_TIMEOUT"
+  | "MODEL_PROVIDER_ERROR"
+  | "MODEL_OUTPUT_INVALID"
+  | "MODEL_OUTPUT_EMPTY"
+  | "DELIVERY_ERROR"
+  | "STORAGE_ERROR";
+
 export type SummarizationTelemetryContext = {
   traceId: string;
   chatId: ChatId;
@@ -32,6 +40,7 @@ export type SummarizationTelemetryPayload =
   | {
       type: "messages.selected";
       messageCount: number;
+      contextMessageCount: number;
       fromMessageId?: MessageId;
       toMessageId?: MessageId;
     }
@@ -130,12 +139,27 @@ export type SummarizationTelemetryPayload =
       status: "summarized" | "deferred" | "skipped" | "empty";
     }
   | {
+      type: "summary.run";
+      action?: SummaryAction;
+      messageCount: number;
+      contextMessageCount: number;
+      classifierMs: number;
+      summarizerMs: number;
+      totalMs: number;
+      modelCalls: number;
+      checkpointAdvanced: boolean;
+      consecutiveDeferCount: number;
+      status: "summarized" | "deferred" | "skipped" | "empty" | "error";
+      errorCode?: SummaryErrorCode;
+    }
+  | {
       type: "summary.error";
       durationMs: number;
       stage: string;
       error: {
         name?: string;
-        code?: string;
+        code: SummaryErrorCode;
+        detailCode?: string;
         outputChars?: number;
         outputPreview?: string;
         message: string;
@@ -171,6 +195,9 @@ export class SummarizationTelemetryService {
 
 export class SummarizationTelemetryTrace {
   private readonly startedAt = performance.now();
+  private modelCalls = 0;
+  private classifierMs = 0;
+  private summarizerMs = 0;
 
   constructor(
     private readonly context: SummarizationTelemetryContext,
@@ -179,6 +206,12 @@ export class SummarizationTelemetryTrace {
   ) {}
 
   record(payload: SummarizationTelemetryPayload): void {
+    if (payload.type === "model.request") this.modelCalls += 1;
+    if (payload.type === "model.response.envelope") {
+      if (payload.stage === "classifier")
+        this.classifierMs += payload.durationMs;
+      else this.summarizerMs += payload.durationMs;
+    }
     if (payload.type === "model.request" && !this.options.includePrompt) {
       const { prompt: _, ...withoutPrompt } = payload;
 
@@ -205,6 +238,18 @@ export class SummarizationTelemetryTrace {
     }
 
     this.emit(payload);
+  }
+
+  modelMetrics(): Readonly<{
+    modelCalls: number;
+    classifierMs: number;
+    summarizerMs: number;
+  }> {
+    return Object.freeze({
+      modelCalls: this.modelCalls,
+      classifierMs: this.classifierMs,
+      summarizerMs: this.summarizerMs,
+    });
   }
 
   private emit(payload: SummarizationTelemetryPayload): void {
