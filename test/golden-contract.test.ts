@@ -4,6 +4,7 @@ import {
   assessAction,
   assertStable,
   evaluateRuns,
+  isAcceptedAction,
 } from "./goldenEvaluation.js";
 
 describe("golden E2E specification", () => {
@@ -97,6 +98,21 @@ describe("weighted action errors", () => {
       category: "golden_under_review",
     });
   });
+
+  it("separates exact labels from operationally accepted actions", () => {
+    expect(
+      isAcceptedAction(
+        fixture("checkpoint-single-banter-after-summary"),
+        "SKIP_NO_VALUE",
+      ),
+    ).toBe(true);
+    expect(
+      isAcceptedAction(
+        fixture("checkpoint-single-banter-after-summary"),
+        "DEFER_COMPACT",
+      ),
+    ).toBe(false);
+  });
 });
 
 describe("golden evaluation metrics", () => {
@@ -112,7 +128,9 @@ describe("golden evaluation metrics", () => {
       ]),
     ).toEqual({
       accuracy: 0.5,
+      acceptedActionRate: 0.5,
       stability: 0.5,
+      actionDistribution: { SKIP_BANTER: 1, SUMMARIZE: 1 },
       irreversibleLossRate: 0.5,
       unsupportedClaimRate: 0,
       checkpointCorrectness: 1,
@@ -138,6 +156,11 @@ describe("golden evaluation metrics", () => {
       checkpointAdvanced: call !== 1,
     }));
     expect(metrics.accuracy).toBe(0.95);
+    expect(metrics.acceptedActionRate).toBe(1);
     expect(metrics.stability).toBe(0.95);
+    expect(metrics.actionDistribution).toEqual({
+      DEFER_COMPACT: 1,
+      SUMMARIZE: 19,
+    });
   });
 });

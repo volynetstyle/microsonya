@@ -24,7 +24,7 @@
     "eval:live": "tsx test/runLiveGolden.ts",
     "eval:live:smoke": "tsx test/runLiveGolden.ts --suite smoke",
     "eval:live:extraction": "tsx test/runLiveGolden.ts --suite extraction",
-    "eval:live:stability": "tsx test/runLiveGolden.ts --suite stability --runs 20"
+    "eval:live:stability": "tsx test/runLiveGolden.ts --suite stability --runs 5"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.3",

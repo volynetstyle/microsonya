@@ -409,6 +409,7 @@ export function expandExtractionFixture(
     messages,
     expected: {
       action: "SUMMARIZE",
+      acceptableActions: ["SUMMARIZE", "DEFER_COMPACT"],
       summary: {
         mustInclude: fixture.required.map(({ anyOf }) => anyOf[0]!),
         mustExclude: fixture.forbidden.flatMap(({ anyOf }) => anyOf),

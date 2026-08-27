@@ -8,7 +8,11 @@ export interface E2EResult {
 
 export interface EvaluationMetrics {
   readonly accuracy: number;
+  readonly acceptedActionRate: number;
   readonly stability: number;
+  readonly actionDistribution: Readonly<
+    Partial<Record<ExpectedAction, number>>
+  >;
   readonly irreversibleLossRate: number;
   readonly unsupportedClaimRate: number;
   readonly checkpointCorrectness: number;
@@ -100,12 +104,14 @@ export function evaluateRuns(
   const expectedAdvance = fixture.expected.checkpoint?.advance;
   const meaningful = isMeaningful(fixture.expected.action);
   let correct = 0;
+  let accepted = 0;
   let irreversibleLosses = 0;
   let unsupported = 0;
   let checkpointMatches = 0;
 
   for (const result of results) {
     if (result.action === fixture.expected.action) correct += 1;
+    if (isAcceptedAction(fixture, result.action)) accepted += 1;
     if (
       meaningful &&
       result.action.startsWith("SKIP_") &&
@@ -125,11 +131,22 @@ export function evaluateRuns(
   const total = results.length;
   return Object.freeze({
     accuracy: correct / total,
+    acceptedActionRate: accepted / total,
     stability: dominantShare(results.map(({ action }) => action)),
+    actionDistribution: actionDistribution(results.map(({ action }) => action)),
     irreversibleLossRate: irreversibleLosses / total,
     unsupportedClaimRate: unsupported / total,
     checkpointCorrectness: checkpointMatches / total,
   });
+}
+
+export function isAcceptedAction(
+  fixture: E2EFixture,
+  actual: ExpectedAction,
+): boolean {
+  return (
+    fixture.expected.acceptableActions ?? [fixture.expected.action]
+  ).includes(actual);
 }
 
 export async function assertStable(
@@ -171,4 +188,12 @@ function dominantShare(actions: readonly ExpectedAction[]): number {
   for (const action of actions)
     counts.set(action, (counts.get(action) ?? 0) + 1);
   return Math.max(...counts.values()) / actions.length;
+}
+
+function actionDistribution(
+  actions: readonly ExpectedAction[],
+): Readonly<Partial<Record<ExpectedAction, number>>> {
+  const counts: Partial<Record<ExpectedAction, number>> = {};
+  for (const action of actions) counts[action] = (counts[action] ?? 0) + 1;
+  return Object.freeze(counts);
 }

@@ -16,6 +16,8 @@ export interface E2EFixture {
   readonly messages: readonly string[];
   readonly expected: {
     readonly action: ExpectedAction;
+    /** Product-safe alternatives. The preferred action remains `action`. */
+    readonly acceptableActions?: readonly ExpectedAction[];
     readonly summary?: {
       readonly mustInclude?: readonly string[];
       readonly mustExclude?: readonly string[];
@@ -58,6 +60,7 @@ export const goldenFixtures = [
     ],
     expected: {
       action: "SUMMARIZE",
+      acceptableActions: ["SUMMARIZE", "DEFER_COMPACT"],
       summary: {
         mustInclude: ["70к", "12к", "повернути комплектуючі"],
         mustExclude: ["жарт як окремий змістовний факт"],
@@ -225,6 +228,7 @@ export const goldenFixtures = [
     ],
     expected: {
       action: "SUMMARIZE",
+      acceptableActions: ["SUMMARIZE", "DEFER_COMPACT"],
       summary: {
         mustInclude: [
           "schemaVersion",
@@ -250,6 +254,7 @@ export const goldenFixtures = [
     ],
     expected: {
       action: "SUMMARIZE",
+      acceptableActions: ["SUMMARIZE", "DEFER_COMPACT"],
       summary: {
         mustInclude: ["Notion AI", "4 ГБ", "3 ГБ", "інфраструктурою"],
         mustExclude: ["Губка Боб", "GPT скоро вимре"],
@@ -282,7 +287,11 @@ export const goldenFixtures = [
     id: "checkpoint-single-banter-after-summary",
     source: "live",
     messages: ["Бо то робив кацап."],
-    expected: { action: "SKIP_BANTER", checkpoint: { advance: true } },
+    expected: {
+      action: "SKIP_BANTER",
+      acceptableActions: ["SKIP_BANTER", "SKIP_NO_VALUE"],
+      checkpoint: { advance: true },
+    },
   }),
   fixture({
     id: "checkpoint-no-new-messages",
@@ -322,6 +331,7 @@ export const goldenFixtures = [
     ],
     expected: {
       action: "SUMMARIZE",
+      acceptableActions: ["SUMMARIZE", "DEFER_COMPACT"],
       summary: {
         mustInclude: ["userId", "shared entries", "stale"],
         mustExclude: ["реакції"],

@@ -11,6 +11,11 @@ pnpm eval:live:extraction
 pnpm eval:live -- --fixture durable-70k-pc-story --runs 20
 ```
 
+The stability suite runs each known decision-boundary fixture five times and
+reports its action distribution, dominant-action stability, and accepted-action
+rate. `expected.action` remains the preferred label; explicitly declared
+`acceptableActions` count only toward policy behavior accuracy.
+
 The runner writes a JSON report to stdout and progress to stderr. A non-zero exit
 means accuracy fell below the configured threshold, irreversible loss occurred,
 checkpoint behavior diverged, or the provider failed. Use

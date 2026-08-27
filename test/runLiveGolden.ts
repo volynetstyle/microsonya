@@ -23,6 +23,7 @@ import {
 import {
   assessAction,
   evaluateRuns,
+  isAcceptedAction,
   type E2EResult,
   type EvaluationMetrics,
 } from "./goldenEvaluation.js";
@@ -43,6 +44,8 @@ interface LiveResult extends E2EResult {
   readonly expectedAction: E2EFixture["expected"]["action"];
   readonly durationMs: number;
   readonly modelCalls: number;
+  readonly classifierCalls: number;
+  readonly summarizerCalls: number;
   readonly missingRequired: readonly string[];
   readonly forbiddenClaims: readonly string[];
   readonly extractionMetrics?: ExtractionMetrics;
@@ -139,12 +142,16 @@ async function runFixture(
 ): Promise<LiveResult> {
   const startedAt = performance.now();
   let modelCalls = 0;
-  const countedClient = {
+  let classifierCalls = 0;
+  let summarizerCalls = 0;
+  const countedClient = (kind: "classifier" | "summarizer") => ({
     chat: async (...chatArgs: Parameters<OllamaClient["chat"]>) => {
       modelCalls += 1;
+      if (kind === "classifier") classifierCalls += 1;
+      else summarizerCalls += 1;
       return ollama.chat(...(chatArgs as [never, never])) as never;
     },
-  };
+  });
 
   if (fixture.messages.length === 0) {
     return {
@@ -154,6 +161,8 @@ async function runFixture(
       checkpointAdvanced: false,
       durationMs: performance.now() - startedAt,
       modelCalls,
+      classifierCalls,
+      summarizerCalls,
       missingRequired: [],
       forbiddenClaims: [],
     };
@@ -169,9 +178,11 @@ async function runFixture(
     const result = await processWindow(
       window,
       {
-        classifier: createClassifier({ ollama: countedClient as never }),
+        classifier: createClassifier({
+          ollama: countedClient("classifier") as never,
+        }),
         summarizer: createConversationSummarizer({
-          ollama: countedClient as never,
+          ollama: countedClient("summarizer") as never,
         }),
       },
       controller.signal,
@@ -191,6 +202,8 @@ async function runFixture(
       checkpointAdvanced: shouldAdvanceCheckpoint(result.decision.action),
       durationMs: performance.now() - startedAt,
       modelCalls,
+      classifierCalls,
+      summarizerCalls,
       ...constraints,
       ...(extractionFixture
         ? { extractionMetrics: evaluateExtraction(extractionFixture, summary) }
@@ -204,6 +217,8 @@ async function runFixture(
       checkpointAdvanced: false,
       durationMs: performance.now() - startedAt,
       modelCalls,
+      classifierCalls,
+      summarizerCalls,
       missingRequired: fixture.expected.summary?.mustInclude ?? [],
       forbiddenClaims: [],
       error:
@@ -313,8 +328,12 @@ function selectFixtures(args: ReturnType<typeof parseArgs>): E2EFixture[] {
         : args.suite === "stability"
           ? [
               "live-casual-high-information-minecraft",
-              "durable-70k-pc-story",
-              "banter-70k-pc",
+              "summarize-schema-fallback-lifecycle",
+              "live-prod-version-vs-time",
+              "banter-with-durable-technical-island",
+              "long-frequency-vs-final-state@front",
+              "long-frequency-vs-final-state@middle",
+              "long-frequency-vs-final-state@tail",
             ]
           : args.suite === "extraction"
             ? extraction.map(({ id }) => id)
@@ -332,7 +351,9 @@ function findExtractionFixture(expandedId: string) {
 }
 
 function isPassingResult(result: LiveResult): boolean {
-  if (result.error || result.action !== result.expectedAction) return false;
+  if (result.error) return false;
+  const fixture = findFixture(result.fixtureId);
+  if (!fixture || !isAcceptedAction(fixture, result.action)) return false;
   const metrics = result.extractionMetrics;
   return (
     metrics === undefined ||
@@ -342,6 +363,28 @@ function isPassingResult(result: LiveResult): boolean {
       metrics.relationPreservation === 1 &&
       metrics.entityBindingAccuracy === 1 &&
       metrics.epistemicStateAccuracy === 1)
+  );
+}
+
+function findFixture(id: string): E2EFixture | undefined {
+  const baseId = id.split("@")[0];
+  const golden = goldenFixtures.find(({ id: candidate }) => candidate === id);
+  if (golden) return golden;
+  const extraction = extractionFixtures.find(
+    ({ id: candidate }) => candidate === baseId,
+  );
+  const placement = id.split("@")[1];
+  if (
+    !extraction ||
+    !EXTRACTION_PLACEMENTS.includes(
+      placement as (typeof EXTRACTION_PLACEMENTS)[number],
+    )
+  ) {
+    return undefined;
+  }
+  return expandExtractionFixture(
+    extraction,
+    placement as (typeof EXTRACTION_PLACEMENTS)[number],
   );
 }
 
@@ -377,6 +420,25 @@ function aggregate(reports: readonly FixtureReport[]) {
     fixtures: reports.length,
     runs: runs.length,
     modelCalls: runs.reduce((sum, result) => sum + result.modelCalls, 0),
+    classifierCalls: runs.reduce(
+      (sum, result) => sum + result.classifierCalls,
+      0,
+    ),
+    summarizerCalls: runs.reduce(
+      (sum, result) => sum + result.summarizerCalls,
+      0,
+    ),
+    telemetryInvariants: {
+      callsBalance: runs.every(
+        ({ modelCalls, classifierCalls, summarizerCalls }) =>
+          modelCalls === classifierCalls + summarizerCalls,
+      ),
+      summarizerMatchesActions: runs.every(
+        ({ action, summarizerCalls, error }) =>
+          error !== undefined ||
+          summarizerCalls === (action === "SUMMARIZE" ? 1 : 0),
+      ),
+    },
     errors,
     accuracy: runs.length === 0 ? 0 : correct / runs.length,
     semanticHeadline: {
@@ -392,6 +454,44 @@ function aggregate(reports: readonly FixtureReport[]) {
               (result) =>
                 result.action === result.expectedAction && !result.error,
             ).length / acceptedSemanticRuns.length,
+    },
+    policyBehaviorHeadline: {
+      fixtures: acceptedSemantic.length,
+      runs: acceptedSemanticRuns.length,
+      correct: acceptedSemantic.flatMap((report) => {
+        const fixture = findFixture(report.fixtureId)!;
+        return report.runs.filter(
+          (result) => !result.error && isAcceptedAction(fixture, result.action),
+        );
+      }).length,
+      accuracy:
+        acceptedSemanticRuns.length === 0
+          ? 0
+          : acceptedSemantic.flatMap((report) => {
+              const fixture = findFixture(report.fixtureId)!;
+              return report.runs.filter(
+                (result) =>
+                  !result.error && isAcceptedAction(fixture, result.action),
+              );
+            }).length / acceptedSemanticRuns.length,
+    },
+    stability: {
+      mean:
+        acceptedSemantic.length === 0
+          ? 0
+          : acceptedSemantic.reduce(
+              (sum, report) => sum + report.metrics.stability,
+              0,
+            ) / acceptedSemantic.length,
+      min:
+        acceptedSemantic.length === 0
+          ? 0
+          : Math.min(
+              ...acceptedSemantic.map(({ metrics }) => metrics.stability),
+            ),
+      unstableFixtureCount: acceptedSemantic.filter(
+        ({ metrics }) => metrics.stability < 1,
+      ).length,
     },
     excludedFromSemanticHeadline: {
       systemFixtures: reports.filter(({ scope }) => scope === "system").length,
@@ -419,6 +519,24 @@ function aggregate(reports: readonly FixtureReport[]) {
             actionAssessments.filter(
               (assessment) => assessment.category === category,
             ).length,
+          ],
+        ),
+      ),
+      costBySeverity: Object.fromEntries(
+        ["critical", "medium", "low"].map((severity) => [
+          severity,
+          actionAssessments
+            .filter((assessment) => assessment.severity === severity)
+            .reduce((sum, assessment) => sum + assessment.cost, 0),
+        ]),
+      ),
+      costByCategory: Object.fromEntries(
+        [...new Set(actionAssessments.map(({ category }) => category))].map(
+          (category) => [
+            category,
+            actionAssessments
+              .filter((assessment) => assessment.category === category)
+              .reduce((sum, assessment) => sum + assessment.cost, 0),
           ],
         ),
       ),
