@@ -65,10 +65,32 @@ export function createSummarizer(deps: SummarizerDeps): Summarizer {
     deps.conversationSummarizer ??
     createConversationSummarizer({ ollama: requireOllama(deps) });
 
+  const pendingByChat = new Map<ChatId, Promise<void>>();
   const process = (command: SummaryCommand, signal?: AbortSignal) =>
-    run(deps, classifier, conversationSummarizer, command, signal);
+    serializeByChat(pendingByChat, command.chatId, () =>
+      run(deps, classifier, conversationSummarizer, command, signal),
+    );
 
   return { process };
+}
+
+async function serializeByChat<T>(
+  pendingByChat: Map<ChatId, Promise<void>>,
+  chatId: ChatId,
+  operation: () => Promise<T>,
+): Promise<T> {
+  const previous = pendingByChat.get(chatId) ?? Promise.resolve();
+  const current = previous.catch(() => undefined).then(operation);
+  const tail = current.then(
+    () => undefined,
+    () => undefined,
+  );
+  pendingByChat.set(chatId, tail);
+  try {
+    return await current;
+  } finally {
+    if (pendingByChat.get(chatId) === tail) pendingByChat.delete(chatId);
+  }
 }
 
 async function run(
