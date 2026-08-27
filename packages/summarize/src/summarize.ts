@@ -26,6 +26,7 @@ import { DAY_MS, MAX_MESSAGES } from "./constants.js";
 import { processWindow, type FastClassifier } from "./orchestrator.js";
 import type { SummarizationTelemetryService } from "./telemetry.js";
 import { ModelOutputError } from "./modelOutput.js";
+import { shouldAdvanceCheckpoint } from "./checkpointPolicy.js";
 
 export interface MessageReader {
   listByChat(chatId: ChatId): Promise<readonly ChatMessage[]>;
@@ -140,7 +141,10 @@ async function run(
     );
     signal?.throwIfAborted();
 
-    if (result.disposition.kind !== "deferred") {
+    if (
+      result.disposition.kind !== "deferred" &&
+      shouldAdvanceCheckpoint(result.decision.action)
+    ) {
       stage = "disposition.save";
       const saveStartedAt = performance.now();
       await deps.summaries.saveRun(

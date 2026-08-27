@@ -8,3 +8,4 @@ export * from "./orchestrator.js";
 export * from "./views.js";
 export * from "./modelOutput.js";
 export * from "./predicateV3.js";
+export * from "./checkpointPolicy.js";
