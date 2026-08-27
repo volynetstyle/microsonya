@@ -236,7 +236,24 @@ export function selectConversationWindow(
   lastId?: MessageId,
 ): ConversationWindow | null {
   const messages = selectMessages(all, command, lastId);
-  return messages.length === 0 ? null : createConversationWindow(messages);
+  if (messages.length === 0) return null;
+
+  // A reply may cross the checkpoint. Include its direct parent as read-only
+  // context even though the parent itself was covered by an earlier run.
+  const selectedIds = new Set(messages.map(({ id }) => id));
+  const byId = new Map(all.map((message) => [message.id, message]));
+  const parents = messages.flatMap(({ parentId }) => {
+    if (parentId === null || selectedIds.has(parentId)) return [];
+    const parent = byId.get(parentId);
+    return parent === undefined ? [] : [parent];
+  });
+  const withReplyContext = [
+    ...new Map(
+      [...parents, ...messages].map((message) => [message.id, message]),
+    ).values(),
+  ].sort(compareChronologically);
+
+  return createConversationWindow(withReplyContext);
 }
 
 export function presentDisposition(disposition: WindowDisposition): string {
