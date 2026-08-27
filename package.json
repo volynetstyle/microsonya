@@ -20,7 +20,10 @@
     "format:json:check": "prettier --check \"**/*.{json,jsonc}\"",
     "start": "pnpm bot:start",
     "bot:start": "pnpm --filter @microsonya/telegram-bot start",
-    "test": "vitest run"
+    "test": "vitest run",
+    "eval:live": "tsx test/runLiveGolden.ts",
+    "eval:live:smoke": "tsx test/runLiveGolden.ts --suite smoke",
+    "eval:live:stability": "tsx test/runLiveGolden.ts --suite stability --runs 20"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.3",
