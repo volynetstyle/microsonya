@@ -17,17 +17,38 @@ for (const envPath of [
 
 export type AppConfig = {
   telegramToken: string;
-
+  databaseUrl?: string;
+  summaryLedgerEncryptionKey?: string;
   ollama: OllamaConfig;
 };
 
 export function readConfig(): AppConfig {
   const telegramToken = requiredEnv("TELEGRAM_BOT_TOKEN");
+  const databaseUrl = optionalEnv("DATABASE_URL");
+  const summaryLedgerEncryptionKey = optionalEnv(
+    "SUMMARY_LEDGER_ENCRYPTION_KEY",
+  );
+
+  if (process.env.NODE_ENV === "production" && databaseUrl === undefined) {
+    throw new Error("DATABASE_URL is required in production.");
+  }
+  if (databaseUrl !== undefined && summaryLedgerEncryptionKey === undefined) {
+    throw new Error(
+      "SUMMARY_LEDGER_ENCRYPTION_KEY is required when DATABASE_URL is set.",
+    );
+  }
 
   return {
     telegramToken,
+    databaseUrl,
+    summaryLedgerEncryptionKey,
     ollama: loadOllamaConfig(process.env),
   };
+}
+
+function optionalEnv(name: string): string | undefined {
+  const value = process.env[name]?.trim();
+  return value ? value : undefined;
 }
 
 function requiredEnv(name: string): string {

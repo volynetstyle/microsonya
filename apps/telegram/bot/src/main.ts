@@ -4,6 +4,12 @@ import {
   isRetryableTelegramError,
 } from "./launchWithRetry.js";
 import { OllamaClient, withTelemetry } from "@microsonya/model";
+import {
+  MessagesRepo,
+  SummariesRepo,
+  ledgerEncryptionFromBase64,
+  openDb,
+} from "@microsonya/db";
 import { Telegraf } from "telegraf";
 import { createStorage } from "./storage.js";
 import { telegramCommands } from "./command.js";
@@ -14,7 +20,18 @@ import {
 } from "@microsonya/summarize";
 
 const config = readConfig();
-const storage = createStorage();
+const dbClient =
+  config.databaseUrl === undefined ? undefined : openDb(config.databaseUrl);
+const storage =
+  dbClient === undefined
+    ? createStorage()
+    : {
+        messages: new MessagesRepo(dbClient.db),
+        summaries: new SummariesRepo(
+          dbClient.db,
+          ledgerEncryptionFromBase64(config.summaryLedgerEncryptionKey!),
+        ),
+      };
 const ollama = new OllamaClient({
   ...config.ollama,
   fetch: withTelemetry(globalThis.fetch, (event) =>
@@ -49,16 +66,23 @@ function stop(reason: string): void {
 process.once("SIGINT", () => stop("SIGINT"));
 process.once("SIGTERM", () => stop("SIGTERM"));
 
-await launchWithRetry(
-  async () => {
-    await bot.telegram.setMyCommands(telegramCommands);
-    await bot.launch();
-  },
-  {
-    signal: shutdown.signal,
-    shouldRetry: isRetryableTelegramError,
-    onRetry(error, delayMs) {
-      console.error(`Telegram launch failed; retrying in ${delayMs} ms`, error);
+try {
+  await launchWithRetry(
+    async () => {
+      await bot.telegram.setMyCommands(telegramCommands);
+      await bot.launch();
     },
-  },
-);
+    {
+      signal: shutdown.signal,
+      shouldRetry: isRetryableTelegramError,
+      onRetry(error, delayMs) {
+        console.error(
+          `Telegram launch failed; retrying in ${delayMs} ms`,
+          error,
+        );
+      },
+    },
+  );
+} finally {
+  await dbClient?.close();
+}

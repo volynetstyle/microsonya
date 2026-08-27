@@ -35,15 +35,20 @@ The domain enforces these invariants:
   processing cursor.
 - Every `SummaryRecord` carries its covered first/last message IDs and exact
   visible-message count.
+- Production output is evidence, never ground truth. Every `/summary` attempt
+  is an immutable run with encrypted input/output snapshots; feedback only
+  places evidence in a review queue.
 
 A normal `SUMMARIZE` path makes two structured model calls: classification,
 then summarization over the same W. A `DEFER_*` or `SKIP_*` result needs only the
 classifier call. The deterministic classifier contract exists but abstains in
 v0.1 until explicit fast rules are approved.
 
-Production consists of `apps/telegram/bot` and the `shared`, `model`, and
-`summarize` packages. Runtime storage is currently in-memory; the DB package
-contains compatible PostgreSQL adapters and migrations.
+Production consists of `apps/telegram/bot` and the `shared`, `model`,
+`summarize`, and `db` packages. PostgreSQL stores canonical messages plus an
+immutable summary attempt ledger. Development may omit `DATABASE_URL` and use
+in-memory storage; production requires `DATABASE_URL` and a base64-encoded
+32-byte `SUMMARY_LEDGER_ENCRYPTION_KEY`.
 
 Copy `.env.example` to `.env`, then run:
 

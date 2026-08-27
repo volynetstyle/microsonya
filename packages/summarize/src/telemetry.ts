@@ -1,9 +1,14 @@
+import { createHash, randomUUID } from "node:crypto";
 import type {
+  ModelInvocationEvidence,
   ChatId,
   MessageId,
+  SummaryId,
   SummaryAction,
   SummaryMode,
+  TimestampMs,
 } from "@microsonya/shared";
+import { asSummaryId, asTimestampMs } from "@microsonya/shared";
 import type { StructuralAnalysis } from "./views.js";
 import type { ClassificationPredicates } from "./classifier.js";
 
@@ -198,6 +203,7 @@ export class SummarizationTelemetryTrace {
   private modelCalls = 0;
   private classifierMs = 0;
   private summarizerMs = 0;
+  private readonly invocations = new Map<string, MutableInvocation>();
 
   constructor(
     private readonly context: SummarizationTelemetryContext,
@@ -206,11 +212,54 @@ export class SummarizationTelemetryTrace {
   ) {}
 
   record(payload: SummarizationTelemetryPayload): void {
-    if (payload.type === "model.request") this.modelCalls += 1;
+    if (payload.type === "model.request") {
+      this.modelCalls += 1;
+      const attempt = payload.attempt ?? 1;
+      this.invocations.set(invocationKey(payload.stage, attempt), {
+        id: asSummaryId(randomUUID()),
+        stage: payload.stage,
+        model: payload.model,
+        promptHash: sha256(payload.prompt ?? ""),
+        status: "pending",
+        createdAt: asTimestampMs(Date.now()),
+      });
+    }
     if (payload.type === "model.response.envelope") {
       if (payload.stage === "classifier")
         this.classifierMs += payload.durationMs;
       else this.summarizerMs += payload.durationMs;
+      const invocation = this.invocations.get(
+        invocationKey(payload.stage, payload.attempt),
+      );
+      if (invocation !== undefined) {
+        invocation.inputTokens = payload.promptEvalCount;
+        invocation.outputTokens = payload.evalCount;
+        invocation.latencyMs = payload.durationMs;
+        invocation.outputText = payload.content;
+      }
+    }
+    if (payload.type === "model.response.invalid") {
+      const invocation = this.invocations.get(
+        invocationKey(payload.stage, payload.attempt ?? 1),
+      );
+      if (invocation !== undefined) {
+        invocation.status = "failed";
+        invocation.errorCode = payload.reason;
+      }
+    }
+    if (payload.type === "model.response") {
+      const invocation = this.invocations.get(
+        invocationKey(payload.stage, payload.attempt ?? 1),
+      );
+      if (invocation !== undefined) {
+        invocation.status = "succeeded";
+        if (payload.stage === "classifier") {
+          invocation.outputJson = {
+            ...payload.predicates,
+            action: payload.action,
+          };
+        }
+      }
     }
     if (payload.type === "model.request" && !this.options.includePrompt) {
       const { prompt: _, ...withoutPrompt } = payload;
@@ -252,6 +301,26 @@ export class SummarizationTelemetryTrace {
     });
   }
 
+  modelInvocations(
+    errorCode?: SummaryErrorCode,
+  ): readonly ModelInvocationEvidence[] {
+    return Object.freeze(
+      [...this.invocations.values()].map((invocation) =>
+        Object.freeze({
+          ...invocation,
+          status:
+            invocation.status === "pending" && errorCode !== undefined
+              ? ("failed" as const)
+              : invocation.status,
+          errorCode:
+            invocation.status === "pending" && errorCode !== undefined
+              ? errorCode
+              : invocation.errorCode,
+        }),
+      ),
+    );
+  }
+
   private emit(payload: SummarizationTelemetryPayload): void {
     this.sink({
       ...this.context,
@@ -259,6 +328,29 @@ export class SummarizationTelemetryTrace {
       offsetMs: performance.now() - this.startedAt,
     });
   }
+}
+
+type MutableInvocation = {
+  id: SummaryId;
+  stage: ModelStage;
+  model: string;
+  promptHash: string;
+  inputTokens?: number;
+  outputTokens?: number;
+  latencyMs?: number;
+  outputJson?: unknown;
+  outputText?: string;
+  status: ModelInvocationEvidence["status"];
+  errorCode?: string;
+  createdAt: TimestampMs;
+};
+
+function invocationKey(stage: ModelStage, attempt: number): string {
+  return `${stage}:${attempt}`;
+}
+
+function sha256(value: string): string {
+  return createHash("sha256").update(value, "utf8").digest("hex");
 }
 
 function log(event: SummarizationTelemetryEvent): void {

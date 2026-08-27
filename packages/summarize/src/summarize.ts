@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { OllamaError, type OllamaClient } from "@microsonya/model";
 import {
   asSummaryId,
@@ -11,6 +11,7 @@ import {
   type SummaryAction,
   type SummaryCommand,
   type SummaryId,
+  type SummaryRunAttempt,
   type SummaryRun,
   type TimestampMs,
   type WindowDisposition,
@@ -30,7 +31,10 @@ import type {
   SummaryErrorCode,
 } from "./telemetry.js";
 import { ModelOutputError } from "./modelOutput.js";
-import { shouldAdvanceCheckpoint } from "./checkpointPolicy.js";
+import {
+  CHECKPOINT_POLICY_VERSION,
+  shouldAdvanceCheckpoint,
+} from "./checkpointPolicy.js";
 
 export interface MessageReader {
   listByChat(chatId: ChatId): Promise<readonly ChatMessage[]>;
@@ -39,6 +43,7 @@ export interface MessageReader {
 export interface SummaryRunStore {
   findLastRun(chatId: ChatId): Promise<SummaryRun | undefined>;
   saveRun(run: SummaryRun): Promise<void>;
+  saveAttempt?(attempt: SummaryRunAttempt): Promise<void>;
 }
 
 /** Command-facing workflow facade. Model-facing contracts consume only W. */
@@ -132,6 +137,7 @@ async function run(
   signal?: AbortSignal,
 ): Promise<WindowDisposition | null> {
   const startedAt = performance.now();
+  const startedWallClock = asTimestampMs(Date.now());
   const telemetry = deps.telemetry?.start({
     traceId: `${command.chatId}:${command.commandMessageId}:${randomUUID()}`,
     chatId: command.chatId,
@@ -143,6 +149,9 @@ async function run(
   let contextMessageCount = 0;
   let checkpointAdvanced = false;
   let consecutiveDeferCount = 0;
+  let checkpointBefore: MessageId | null = null;
+  let selected: SelectedConversation | null = null;
+  let attemptPersisted = false;
 
   try {
     telemetry?.record({ type: "summary.start", mode: command.mode });
@@ -162,11 +171,8 @@ async function run(
     signal?.throwIfAborted();
     stage = "messages.select";
 
-    const selected = selectConversationWindow(
-      all,
-      command,
-      previous?.covers.lastId,
-    );
+    checkpointBefore = previous?.covers.lastId ?? null;
+    selected = selectConversationWindow(all, command, previous?.covers.lastId);
     messageCount = selected?.eligibleMessages.length ?? 0;
     contextMessageCount = selected?.contextMessages.length ?? 0;
 
@@ -185,6 +191,9 @@ async function run(
         durationMs: performance.now() - startedAt,
         status: "empty",
       });
+      stage = "attempt.save";
+      await persistAttempt("empty");
+      attemptPersisted = true;
       recordRun("empty");
       return null;
     }
@@ -226,15 +235,16 @@ async function run(
     ) {
       stage = "disposition.save";
       const saveStartedAt = performance.now();
-      await deps.summaries.saveRun(
-        toSummaryRun(
-          selected,
-          command,
-          result.decision.action,
-          disposition,
-          deps,
-        ),
+      const terminalRun = toSummaryRun(
+        selected,
+        command,
+        result.decision.action,
+        disposition,
+        deps,
       );
+      stage = "attempt.save";
+      await persistAttempt(disposition.kind, undefined, terminalRun);
+      attemptPersisted = true;
       checkpointAdvanced = true;
       deferStreakByChat.delete(command.chatId);
       telemetry?.record({
@@ -248,6 +258,11 @@ async function run(
       durationMs: performance.now() - startedAt,
       status: disposition.kind,
     });
+    if (!attemptPersisted) {
+      stage = "attempt.save";
+      await persistAttempt(disposition.kind);
+      attemptPersisted = true;
+    }
     recordRun(disposition.kind);
     return disposition;
   } catch (error) {
@@ -258,8 +273,98 @@ async function run(
       stage: error instanceof ModelOutputError ? error.stage : stage,
       error: serializeError(error, errorCode),
     });
+    if (!attemptPersisted && stage !== "attempt.save") {
+      try {
+        await persistAttempt("error", errorCode);
+        attemptPersisted = true;
+      } catch (ledgerError) {
+        console.error(
+          "Failed to persist summary attempt evidence",
+          ledgerError,
+        );
+      }
+    }
     recordRun("error", errorCode);
     throw error;
+  }
+
+  async function persistAttempt(
+    status: SummaryRunAttempt["status"],
+    errorCode?: SummaryErrorCode,
+    terminalRun?: SummaryRun,
+  ): Promise<void> {
+    if (deps.summaries.saveAttempt === undefined) {
+      if (terminalRun !== undefined) await deps.summaries.saveRun(terminalRun);
+      return;
+    }
+
+    const completedAt = asTimestampMs(Date.now());
+    const model = telemetry?.modelMetrics() ?? {
+      modelCalls: 0,
+      classifierMs: 0,
+      summarizerMs: 0,
+    };
+    const modelInvocations = telemetry?.modelInvocations(errorCode) ?? [];
+    const snapshots = (selected?.messages ?? []).map(
+      ({ message, role }, ordinal) =>
+        Object.freeze({
+          ordinal,
+          chatId: message.chatId,
+          messageId: message.id,
+          role,
+          authorId: message.author.id,
+          authorName: message.author.label,
+          text: message.text,
+          sentAt: message.time,
+          replyToId: message.parentId,
+        }),
+    );
+    const inputHash = hashInput(snapshots);
+    const classifierInvocation = [...modelInvocations]
+      .reverse()
+      .find(({ stage: invocationStage }) => invocationStage === "classifier");
+    const summarizerInvocation = [...modelInvocations]
+      .reverse()
+      .find(({ stage: invocationStage }) => invocationStage === "summarizer");
+    const checkpointAfter = terminalRun?.covers.lastId ?? checkpointBefore;
+    const summaryText = terminalRun?.finalText;
+
+    await deps.summaries.saveAttempt(
+      Object.freeze({
+        id: terminalRun?.id ?? (deps.createSummaryId ?? defaultSummaryId)(),
+        chatId: command.chatId,
+        commandMessageId: command.commandMessageId,
+        startedAt: startedWallClock,
+        completedAt,
+        checkpointBefore,
+        checkpointAfter,
+        eligibleCount: messageCount,
+        contextCount: contextMessageCount,
+        mode: command.mode,
+        action,
+        status,
+        classifierModel: classifierInvocation?.model,
+        summarizerModel: summarizerInvocation?.model,
+        classifierPromptHash: classifierInvocation?.promptHash,
+        summaryPromptHash: summarizerInvocation?.promptHash,
+        policyHash: sha256(CHECKPOINT_POLICY_VERSION),
+        classifierLatencyMs: model.classifierMs,
+        summarizerLatencyMs: model.summarizerMs,
+        totalLatencyMs: performance.now() - startedAt,
+        summaryText,
+        errorCode,
+        inputHash,
+        messages: Object.freeze(snapshots),
+        modelInvocations,
+        candidate: mineDatasetCandidate({
+          action,
+          status,
+          consecutiveDeferCount,
+          snapshots,
+          inputHash,
+        }),
+      }),
+    );
   }
 
   function recordRun(
@@ -286,6 +391,84 @@ async function run(
       errorCode,
     });
   }
+}
+
+function hashInput(snapshots: SummaryRunAttempt["messages"]): string {
+  return sha256(
+    JSON.stringify(
+      snapshots.map((message) => ({
+        ordinal: message.ordinal,
+        chatId: message.chatId,
+        messageId: message.messageId,
+        role: message.role,
+        authorId: message.authorId,
+        authorName: message.authorName,
+        text: message.text,
+        sentAt: message.sentAt,
+        replyToId: message.replyToId,
+      })),
+    ),
+  );
+}
+
+function mineDatasetCandidate(input: {
+  action?: SummaryAction;
+  status: SummaryRunAttempt["status"];
+  consecutiveDeferCount: number;
+  snapshots: SummaryRunAttempt["messages"];
+  inputHash: string;
+}): SummaryRunAttempt["candidate"] {
+  const reasons = new Set<string>();
+  let priority = 0;
+  const eligibleText = input.snapshots
+    .filter(({ role }) => role === "eligible")
+    .map(({ text }) => text)
+    .join("\n");
+
+  if (input.status === "error") {
+    reasons.add("RUN_ERROR");
+    priority += 100;
+  }
+
+  if (input.consecutiveDeferCount >= 3) {
+    reasons.add("DEFER_STREAK");
+    priority += input.consecutiveDeferCount * 10;
+  }
+  if (input.snapshots.some(({ role }) => role === "context")) {
+    reasons.add("REPLY_PROVENANCE");
+    priority += 5;
+  }
+  const numericTokens = eligibleText.match(/\b\d+(?:[.:,]\d+)?\b/g) ?? [];
+  if (numericTokens.length >= 3) {
+    reasons.add("NUMERIC_RICH");
+    priority += 5;
+  }
+  if (
+    input.action?.startsWith("SKIP_") &&
+    (eligibleText.length >= 500 || numericTokens.length >= 3)
+  ) {
+    reasons.add("SKIP_HIGH_INFORMATION");
+    priority += 100;
+  }
+
+  const sampleBucket = Number.parseInt(input.inputHash.slice(0, 8), 16) % 100;
+  if (reasons.size === 0) {
+    const sampleRate = input.status === "deferred" ? 20 : 3;
+    if (sampleBucket < sampleRate) {
+      reasons.add(
+        input.status === "deferred" ? "BOUNDARY_SAMPLE" : "NORMAL_SAMPLE",
+      );
+      priority += 1;
+    }
+  }
+
+  return reasons.size === 0
+    ? undefined
+    : Object.freeze({ priority, reasons: Object.freeze([...reasons]) });
+}
+
+function sha256(value: string): string {
+  return createHash("sha256").update(value, "utf8").digest("hex");
 }
 
 export function selectMessages(

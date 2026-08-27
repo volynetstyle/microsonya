@@ -3,6 +3,7 @@ import type {
   ChatMessage,
   MessageId,
   SummaryRun,
+  SummaryRunAttempt,
 } from "@microsonya/shared";
 
 export type Storage = {
@@ -40,6 +41,7 @@ export class InMemoryMessagesRepo {
 
 export class InMemorySummariesRepo {
   private readonly runsByCommand = new Map<string, SummaryRun>();
+  private readonly attemptsByCommand = new Map<string, SummaryRunAttempt>();
 
   async findLastRun(chatId: ChatId): Promise<SummaryRun | undefined> {
     const run = [...this.runsByCommand.values()]
@@ -55,6 +57,38 @@ export class InMemorySummariesRepo {
       `${run.chatId}:${run.commandMessageId}`,
       copySummaryRun(run),
     );
+  }
+
+  async saveAttempt(attempt: SummaryRunAttempt): Promise<void> {
+    const key = `${attempt.chatId}:${attempt.commandMessageId}`;
+    if (this.attemptsByCommand.has(key)) return;
+    this.attemptsByCommand.set(key, attempt);
+
+    if (
+      (attempt.status === "summarized" || attempt.status === "skipped") &&
+      attempt.checkpointAfter !== null &&
+      attempt.action !== undefined &&
+      attempt.summaryText !== undefined
+    ) {
+      const eligible = attempt.messages.filter(
+        ({ role }) => role === "eligible",
+      );
+      await this.saveRun({
+        id: attempt.id,
+        chatId: attempt.chatId,
+        commandMessageId: attempt.commandMessageId,
+        createdAt: attempt.completedAt,
+        covers: {
+          firstId: eligible[0]!.messageId,
+          lastId: eligible.at(-1)!.messageId,
+          count: eligible.length,
+        },
+        mode: attempt.mode,
+        status: attempt.status,
+        action: attempt.action,
+        finalText: attempt.summaryText,
+      });
+    }
   }
 }
 
