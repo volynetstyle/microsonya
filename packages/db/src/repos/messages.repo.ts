@@ -1,22 +1,33 @@
 import { and, asc, eq, gt, gte, lte } from "drizzle-orm";
-import type { ChatMessage } from "@microsonya/shared";
+import {
+  asAuthorId,
+  asChatId,
+  asMessageId,
+  asTimestampMs,
+  type ChatId,
+  type ChatMessage,
+  type MessageId,
+} from "@microsonya/shared";
 import type { MicrosonyaDb } from "../client.js";
 import { messages } from "../schema.js";
 
 type MessageRow = typeof messages.$inferSelect;
 
 function mapMessageRow(row: MessageRow): ChatMessage {
-  return {
-    id: row.messageId,
-    chatId: row.chatId,
-    date: row.date,
-    authorId: row.authorId,
-    authorName: row.authorName ?? "",
+  const author = Object.freeze({
+    id: asAuthorId(row.authorId),
+    label: row.authorName ?? row.authorId,
+  });
+
+  return Object.freeze({
+    id: asMessageId(row.messageId),
+    chatId: asChatId(row.chatId),
+    author,
+    time: asTimestampMs(row.date),
+    parentId:
+      row.replyToMessageId === null ? null : asMessageId(row.replyToMessageId),
     text: row.text ?? "",
-    replyToId: row.replyToMessageId ?? undefined,
-    kind: row.kind as ChatMessage["kind"],
-    isCommand: row.isCommand,
-  };
+  });
 }
 
 export class MessagesRepo {
@@ -28,43 +39,49 @@ export class MessagesRepo {
       .values({
         chatId: message.chatId,
         messageId: message.id,
-        date: message.date,
-        authorId: message.authorId,
-        authorName: message.authorName,
+        date: message.time,
+        authorId: message.author.id,
+        authorName: message.author.label,
         text: message.text,
-        replyToMessageId: message.replyToId,
-        kind: message.kind,
-        isCommand: message.isCommand ?? false,
+        replyToMessageId: message.parentId,
+        kind: "text",
+        isCommand: false,
       })
       .onConflictDoUpdate({
         target: [messages.chatId, messages.messageId],
         set: {
-          date: message.date,
-          authorId: message.authorId,
-          authorName: message.authorName,
+          date: message.time,
+          authorId: message.author.id,
+          authorName: message.author.label,
           text: message.text,
-          replyToMessageId: message.replyToId,
-          kind: message.kind,
-          isCommand: message.isCommand ?? false,
+          replyToMessageId: message.parentId,
+          kind: "text",
+          isCommand: false,
         },
       })
       .execute();
   }
 
-  async listByChat(chatId: string): Promise<ChatMessage[]> {
+  async listByChat(chatId: ChatId): Promise<ChatMessage[]> {
     return (
       await this.db
         .select()
         .from(messages)
-        .where(eq(messages.chatId, chatId))
-        .orderBy(asc(messages.messageId))
+        .where(
+          and(
+            eq(messages.chatId, chatId),
+            eq(messages.kind, "text"),
+            eq(messages.isCommand, false),
+          ),
+        )
+        .orderBy(asc(messages.date), asc(messages.messageId))
     ).map(mapMessageRow);
   }
 
   async listRangeByChat(
-    chatId: string,
-    fromMessageId: number,
-    toMessageId: number,
+    chatId: ChatId,
+    fromMessageId: MessageId,
+    toMessageId: MessageId,
   ): Promise<ChatMessage[]> {
     return (
       await this.db
@@ -75,15 +92,17 @@ export class MessagesRepo {
             eq(messages.chatId, chatId),
             gte(messages.messageId, fromMessageId),
             lte(messages.messageId, toMessageId),
+            eq(messages.kind, "text"),
+            eq(messages.isCommand, false),
           ),
         )
-        .orderBy(asc(messages.messageId))
+        .orderBy(asc(messages.date), asc(messages.messageId))
     ).map(mapMessageRow);
   }
 
   async listAfterByChat(
-    chatId: string,
-    afterMessageId: number,
+    chatId: ChatId,
+    afterMessageId: MessageId,
     limit: number,
   ): Promise<ChatMessage[]> {
     return (
@@ -94,23 +113,30 @@ export class MessagesRepo {
           and(
             eq(messages.chatId, chatId),
             gt(messages.messageId, afterMessageId),
+            eq(messages.kind, "text"),
+            eq(messages.isCommand, false),
           ),
         )
-        .orderBy(asc(messages.messageId))
+        .orderBy(asc(messages.date), asc(messages.messageId))
         .limit(limit)
     ).map(mapMessageRow);
   }
 
   async find(
-    chatId: string,
-    messageId: number,
+    chatId: ChatId,
+    messageId: MessageId,
   ): Promise<ChatMessage | undefined> {
     const row = (
       await this.db
         .select()
         .from(messages)
         .where(
-          and(eq(messages.chatId, chatId), eq(messages.messageId, messageId)),
+          and(
+            eq(messages.chatId, chatId),
+            eq(messages.messageId, messageId),
+            eq(messages.kind, "text"),
+            eq(messages.isCommand, false),
+          ),
         )
         .limit(1)
     ).at(0);

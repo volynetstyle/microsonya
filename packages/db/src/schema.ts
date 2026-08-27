@@ -36,9 +36,11 @@ export const summaryRuns = pgTable(
     commandMessageId: integer("command_message_id").notNull(),
     fromMessageId: integer("from_message_id").notNull(),
     toMessageId: integer("to_message_id").notNull(),
+    messageCount: integer("message_count").notNull(),
     createdAt: bigint("created_at", { mode: "number" }).notNull(),
     mode: text("mode").notNull(),
     status: text("status").notNull(),
+    action: text("action").notNull(),
     text: text("text").notNull(),
   },
   (table) => [

@@ -29,9 +29,11 @@ export async function openTestDb(): Promise<DbClient> {
       command_message_id INTEGER NOT NULL,
       from_message_id INTEGER NOT NULL,
       to_message_id INTEGER NOT NULL,
+      message_count INTEGER NOT NULL,
       created_at BIGINT NOT NULL,
       mode TEXT NOT NULL,
       status TEXT NOT NULL,
+      action TEXT NOT NULL,
       text TEXT NOT NULL
     );
 
