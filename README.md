@@ -70,6 +70,12 @@ pnpm build
 pnpm start
 ```
 
+The production bot is emitted as one self-contained Node.js ESM artifact:
+`apps/telegram/bot/dist/microsonya-bot.mjs`. It includes all workspace and
+third-party JavaScript dependencies; only Node.js built-ins remain external.
+The Docker runtime image copies this single file and does not contain
+`node_modules`.
+
 The bot exposes `/summary`; `today` and numeric count arguments are
 supported.
 

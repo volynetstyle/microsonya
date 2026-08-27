@@ -5,15 +5,14 @@
   "type": "module",
   "exports": {
     ".": {
-      "types": "./dist/main.d.ts",
-      "import": "./dist/main.js"
+      "import": "./dist/microsonya-bot.mjs"
     }
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json --noEmit && node scripts/build.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "dev": "tsx watch src/main.ts",
-    "start": "node dist/main.js"
+    "start": "node dist/microsonya-bot.mjs"
   },
   "dependencies": {
     "@microsonya/db": "workspace:*",
@@ -22,5 +21,8 @@
     "@microsonya/summarize": "workspace:*",
     "dotenv": "^16.5.0",
     "telegraf": "^4.16.3"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.1"
   }
 }

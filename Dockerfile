@@ -25,17 +25,16 @@ FROM deps AS build
 COPY . .
 RUN pnpm build
 
-FROM build AS deploy
-RUN pnpm deploy --filter ./apps/telegram/bot --prod /prod
-
 FROM node:22-bookworm-slim AS runtime
 ENV NODE_ENV="production"
 WORKDIR /app
 
 RUN useradd --create-home --shell /usr/sbin/nologin microsonya
 
-COPY --from=deploy --chown=microsonya:microsonya /prod ./
+COPY --from=build --chown=microsonya:microsonya \
+  /app/apps/telegram/bot/dist/microsonya-bot.mjs \
+  /app/microsonya-bot.mjs
 
 USER microsonya
 
-CMD ["node", "dist/main.js"]
+CMD ["node", "microsonya-bot.mjs"]
