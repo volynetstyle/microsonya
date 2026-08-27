@@ -14,10 +14,10 @@ describe("Telegram summary command", () => {
         {
           message_id: 5,
           date: 1_700,
-          text: "/summarize@MicrosonyaBot today",
+          text: "/summary@MicrosonyaBot today",
           chat: { id: 42 },
           from: { id: 7, first_name: "Alice" },
-          entities: [{ type: "bot_command", offset: 0, length: 24 }],
+          entities: [{ type: "bot_command", offset: 0, length: 22 }],
         },
         "microsonyaBot",
       ),
@@ -33,13 +33,13 @@ describe("Telegram summary command", () => {
     const message = {
       message_id: 5,
       date: 1_700,
-      text: "/summarize today",
+      text: "/summary today",
       chat: { id: 42 },
       entities: [],
     };
 
     expect(parseSummaryCommand(message)).toBeUndefined();
-    expect(fromTelegram(message)?.text).toBe("/summarize today");
+    expect(fromTelegram(message)?.text).toBe("/summary today");
   });
 
   it("ignores commands addressed to another bot", () => {
@@ -48,9 +48,9 @@ describe("Telegram summary command", () => {
         {
           message_id: 5,
           date: 1_700,
-          text: "/summarize@other_bot",
+          text: "/summary@other_bot",
           chat: { id: 42 },
-          entities: [{ type: "bot_command", offset: 0, length: 20 }],
+          entities: [{ type: "bot_command", offset: 0, length: 18 }],
         },
         "microsonya_bot",
       ),
@@ -58,7 +58,7 @@ describe("Telegram summary command", () => {
   });
 
   it("uses one command name for registration and recognition", () => {
-    expect(SUMMARY_COMMAND_NAME).toBe("summarize");
+    expect(SUMMARY_COMMAND_NAME).toBe("summary");
     expect(telegramCommands[0]?.command).toBe(SUMMARY_COMMAND_NAME);
   });
 });

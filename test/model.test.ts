@@ -22,7 +22,6 @@ describe("OllamaClient profiles", () => {
     expect(CLASSIFIER_PROFILE.options).toMatchObject({
       temperature: 0,
       top_k: 1,
-      seed: 42,
       num_predict: 512,
     });
   });

@@ -25,8 +25,8 @@ describe("Telegram message handler reply boundary", () => {
       messages: { save },
       summarizer: { process },
     });
-    const ctx = contextFor("/summarize", reply, [
-      { type: "bot_command", offset: 0, length: 10 },
+    const ctx = contextFor("/summary", reply, [
+      { type: "bot_command", offset: 0, length: 8 },
     ]);
 
     await handler(ctx as never);
@@ -50,8 +50,8 @@ describe("Telegram message handler reply boundary", () => {
         })),
       },
     });
-    const ctx = contextFor("/summarize", reply, [
-      { type: "bot_command", offset: 0, length: 10 },
+    const ctx = contextFor("/summary", reply, [
+      { type: "bot_command", offset: 0, length: 8 },
     ]);
 
     await expect(handler(ctx as never)).rejects.toBe(failure);

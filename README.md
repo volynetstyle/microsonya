@@ -54,7 +54,7 @@ pnpm build
 pnpm start
 ```
 
-The bot exposes `/summarize`; `today` and numeric count arguments are
+The bot exposes `/summary`; `today` and numeric count arguments are
 supported.
 
 Set `SUMMARIZATION_LOG_PROMPT=1` temporarily to include the complete PIPECHAT
