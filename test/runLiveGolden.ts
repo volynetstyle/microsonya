@@ -1,4 +1,5 @@
 import { config as loadEnv } from "dotenv";
+import { writeFile } from "node:fs/promises";
 import {
   asAuthorId,
   asChatId,
@@ -36,6 +37,10 @@ import {
   evaluateExtraction,
   type ExtractionMetrics,
 } from "./extractionEvaluation.js";
+import {
+  evaluatePropositions,
+  type PropositionMetrics,
+} from "./propositionEvaluation.js";
 
 loadEnv({ quiet: true });
 
@@ -49,6 +54,7 @@ interface LiveResult extends E2EResult {
   readonly missingRequired: readonly string[];
   readonly forbiddenClaims: readonly string[];
   readonly extractionMetrics?: ExtractionMetrics;
+  readonly propositionMetrics?: PropositionMetrics;
   readonly error?: string;
 }
 
@@ -105,35 +111,21 @@ for (const fixture of selected) {
   });
 }
 
+const totals = aggregate(reports);
 const report = {
   generatedAt: new Date().toISOString(),
   model: "gpt-oss:120b-cloud",
   endpoint: redactEndpoint(endpoint),
   suite: args.suite,
   reports,
-  totals: aggregate(reports),
+  totals,
 };
 
-process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
+const serializedReport = `${JSON.stringify(report, null, 2)}\n`;
+process.stdout.write(serializedReport);
+if (args.output) await writeFile(args.output, serializedReport, "utf8");
 
-if (
-  reports.some(
-    ({ metrics, scope, status }) =>
-      scope === "semantic" &&
-      status === "accepted" &&
-      (metrics.accuracy < args.minimumAccuracy ||
-        metrics.irreversibleLossRate > 0 ||
-        metrics.checkpointCorrectness < 1),
-  ) ||
-  reports.some(
-    ({ runs, scope, status }) =>
-      scope === "semantic" &&
-      status === "accepted" &&
-      runs.some((result) => !isPassingResult(result)),
-  )
-) {
-  process.exitCode = 1;
-}
+if (!totals.releaseGate.passed) process.exitCode = 1;
 
 async function runFixture(
   fixture: E2EFixture,
@@ -193,6 +185,7 @@ async function runFixture(
         : undefined;
     const constraints = evaluateSummaryConstraints(fixture, summary);
     const extractionFixture = findExtractionFixture(fixture.id);
+    const propositionMetrics = evaluatePropositions(fixture.id, summary);
 
     return {
       fixtureId: fixture.id,
@@ -208,6 +201,7 @@ async function runFixture(
       ...(extractionFixture
         ? { extractionMetrics: evaluateExtraction(extractionFixture, summary) }
         : {}),
+      ...(propositionMetrics ? { propositionMetrics } : {}),
     };
   } catch (error) {
     return {
@@ -304,6 +298,7 @@ function parseArgs(argv: readonly string[]) {
     timeoutMs,
     minimumAccuracy,
     fixtureId: read("--fixture"),
+    output: read("--output"),
     json: argv.includes("--json"),
   };
 }
@@ -314,10 +309,13 @@ function selectFixtures(args: ReturnType<typeof parseArgs>): E2EFixture[] {
       expandExtractionFixture(fixture, placement),
     ),
   );
+  const semanticGoldens = goldenFixtures.filter(
+    ({ scope }) => scope !== "system",
+  );
   const available =
     args.suite === "extraction"
       ? extraction
-      : [...goldenFixtures, ...extraction];
+      : [...semanticGoldens, ...extraction];
   const byId = new Map(available.map((value) => [value.id, value]));
   const ids = args.fixtureId
     ? [args.fixtureId]
@@ -354,16 +352,12 @@ function isPassingResult(result: LiveResult): boolean {
   if (result.error) return false;
   const fixture = findFixture(result.fixtureId);
   if (!fixture || !isAcceptedAction(fixture, result.action)) return false;
+  if (result.action !== "SUMMARIZE") return true;
+  if (result.propositionMetrics && result.propositionMetrics.score < 1) {
+    return false;
+  }
   const metrics = result.extractionMetrics;
-  return (
-    metrics === undefined ||
-    (metrics.requiredFactRecall === 1 &&
-      metrics.unsupportedFactRate === 0 &&
-      metrics.supersededFactLeakRate === 0 &&
-      metrics.relationPreservation === 1 &&
-      metrics.entityBindingAccuracy === 1 &&
-      metrics.epistemicStateAccuracy === 1)
-  );
+  return metrics === undefined || result.propositionMetrics !== undefined;
 }
 
 function findFixture(id: string): E2EFixture | undefined {
@@ -416,6 +410,46 @@ function aggregate(reports: readonly FixtureReport[]) {
   const correct = runs.filter(
     (result) => result.action === result.expectedAction && !result.error,
   ).length;
+  const propositionRuns = runs.filter(
+    (result) =>
+      result.action === "SUMMARIZE" && result.propositionMetrics !== undefined,
+  );
+  const propositionPassed = propositionRuns.reduce(
+    (sum, result) => sum + result.propositionMetrics!.passed,
+    0,
+  );
+  const propositionTotal = propositionRuns.reduce(
+    (sum, result) => sum + result.propositionMetrics!.total,
+    0,
+  );
+  const policyBehaviorCorrect = acceptedSemantic.flatMap((report) => {
+    const fixture = findFixture(report.fixtureId)!;
+    return report.runs.filter(
+      (result) => !result.error && isAcceptedAction(fixture, result.action),
+    );
+  }).length;
+  const productSafeActionRate =
+    acceptedSemanticRuns.length === 0
+      ? 0
+      : policyBehaviorCorrect / acceptedSemanticRuns.length;
+  const propositionScore =
+    propositionTotal === 0 ? null : propositionPassed / propositionTotal;
+  const criticalErrors = actionAssessments.filter(
+    ({ severity }) => severity === "critical",
+  ).length;
+  const irreversibleLosses = reports.reduce(
+    (sum, report) =>
+      sum + report.runs.length * report.metrics.irreversibleLossRate,
+    0,
+  );
+  const releaseChecks = {
+    criticalErrors: criticalErrors === 0,
+    irreversibleLosses: irreversibleLosses === 0,
+    providerParseFailures: errors === 0,
+    productSafeActionRate: productSafeActionRate >= 0.9,
+    semanticPropositionScore:
+      propositionScore === null || propositionScore >= 0.9,
+  };
   return {
     fixtures: reports.length,
     runs: runs.length,
@@ -458,22 +492,8 @@ function aggregate(reports: readonly FixtureReport[]) {
     policyBehaviorHeadline: {
       fixtures: acceptedSemantic.length,
       runs: acceptedSemanticRuns.length,
-      correct: acceptedSemantic.flatMap((report) => {
-        const fixture = findFixture(report.fixtureId)!;
-        return report.runs.filter(
-          (result) => !result.error && isAcceptedAction(fixture, result.action),
-        );
-      }).length,
-      accuracy:
-        acceptedSemanticRuns.length === 0
-          ? 0
-          : acceptedSemantic.flatMap((report) => {
-              const fixture = findFixture(report.fixtureId)!;
-              return report.runs.filter(
-                (result) =>
-                  !result.error && isAcceptedAction(fixture, result.action),
-              );
-            }).length / acceptedSemanticRuns.length,
+      correct: policyBehaviorCorrect,
+      accuracy: productSafeActionRate,
     },
     stability: {
       mean:
@@ -493,6 +513,34 @@ function aggregate(reports: readonly FixtureReport[]) {
         ({ metrics }) => metrics.stability < 1,
       ).length,
     },
+    semanticPropositions: {
+      evaluatedSummaries: propositionRuns.length,
+      passed: propositionPassed,
+      total: propositionTotal,
+      score: propositionScore,
+      errorsByType: Object.fromEntries(
+        [
+          "FACT_OMISSION",
+          "FACT_INVENTION",
+          "ENTITY_BINDING",
+          "NUMERIC_TYPE",
+          "PROVENANCE",
+          "SUPERSESSION",
+          "EPISTEMIC_STATE",
+          "CONDITION_PRESERVATION",
+        ].map((errorType) => [
+          errorType,
+          propositionRuns.reduce(
+            (sum, result) =>
+              sum +
+              (result.propositionMetrics!.errorsByType[
+                errorType as keyof PropositionMetrics["errorsByType"]
+              ] ?? 0),
+            0,
+          ),
+        ]),
+      ),
+    },
     excludedFromSemanticHeadline: {
       systemFixtures: reports.filter(({ scope }) => scope === "system").length,
       underReviewFixtures: reports.filter(
@@ -505,9 +553,7 @@ function aggregate(reports: readonly FixtureReport[]) {
         (sum, assessment) => sum + assessment.cost,
         0,
       ),
-      critical: actionAssessments.filter(
-        ({ severity }) => severity === "critical",
-      ).length,
+      critical: criticalErrors,
       medium: actionAssessments.filter(({ severity }) => severity === "medium")
         .length,
       low: actionAssessments.filter(({ severity }) => severity === "low")
@@ -541,15 +587,19 @@ function aggregate(reports: readonly FixtureReport[]) {
         ),
       ),
     },
-    irreversibleLosses: reports.reduce(
-      (sum, report) =>
-        sum + report.runs.length * report.metrics.irreversibleLossRate,
-      0,
-    ),
-    constraintViolations: runs.reduce(
+    irreversibleLosses,
+    lexicalConstraintDiagnostics: runs.reduce(
       (sum, result) =>
         sum + result.missingRequired.length + result.forbiddenClaims.length,
       0,
     ),
+    releaseGate: {
+      ...releaseChecks,
+      passed: Object.values(releaseChecks).every(Boolean),
+      thresholds: {
+        productSafeActionRate: 0.9,
+        semanticPropositionScore: 0.9,
+      },
+    },
   };
 }

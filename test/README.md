@@ -17,6 +17,8 @@ rate. `expected.action` remains the preferred label; explicitly declared
 `acceptableActions` count only toward policy behavior accuracy.
 
 The runner writes a JSON report to stdout and progress to stderr. A non-zero exit
-means accuracy fell below the configured threshold, irreversible loss occurred,
-checkpoint behavior diverged, or the provider failed. Use
-`--minimum-accuracy`, `--timeout-ms`, `--suite`, and `--runs` to override defaults.
+means the release gate failed: a critical or irreversible error occurred, a
+provider/parse call failed, product-safe action rate fell below 90%, or semantic
+proposition score fell below 90%. Preferred-label accuracy is diagnostic only.
+Use `--timeout-ms`, `--suite`, `--runs`, and `--output` to override defaults and
+persist a report.
