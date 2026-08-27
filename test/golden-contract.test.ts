@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { adversarialE2E, goldenFixtures, smokeE2E } from "./goldenFixtures.js";
-import { assertStable, evaluateRuns } from "./goldenEvaluation.js";
+import {
+  assessAction,
+  assertStable,
+  evaluateRuns,
+} from "./goldenEvaluation.js";
 
 describe("golden E2E specification", () => {
   it("uses unique stable fixture identifiers", () => {
@@ -28,6 +32,70 @@ describe("golden E2E specification", () => {
         action === "SUMMARIZE" || action.startsWith("SKIP_"),
       );
     }
+  });
+
+  it("separates system cases and goldens under review from semantic accuracy", () => {
+    expect(
+      goldenFixtures
+        .filter(({ scope }) => scope === "system")
+        .map(({ id }) => id),
+    ).toEqual([
+      "reply-crosses-checkpoint",
+      "edited-message-latest-state",
+      "parallel-summary-idempotency",
+      "provider-timeout",
+    ]);
+    expect(
+      goldenFixtures
+        .filter(({ status }) => status === "under_review")
+        .map(({ id }) => id),
+    ).toEqual(["durable-70k-pc-story", "summarize-rollout-threshold"]);
+  });
+});
+
+describe("weighted action errors", () => {
+  const fixture = (id: string) =>
+    goldenFixtures.find((value) => value.id === id)!;
+
+  it("prices irreversible loss above conservative defer", () => {
+    expect(
+      assessAction(
+        fixture("live-casual-high-information-minecraft"),
+        "SKIP_BANTER",
+      ),
+    ).toMatchObject({
+      severity: "critical",
+      cost: 100,
+    });
+    expect(
+      assessAction(
+        fixture("live-casual-high-information-minecraft"),
+        "DEFER_COMPACT",
+      ),
+    ).toMatchObject({
+      severity: "medium",
+      cost: 20,
+    });
+  });
+
+  it("tracks sticky garbage separately", () => {
+    expect(
+      assessAction(fixture("banter-70k-pc"), "DEFER_COMPACT"),
+    ).toMatchObject({
+      severity: "medium",
+      cost: 25,
+      category: "sticky_garbage",
+    });
+  });
+
+  it("does not score disputed goldens until review is resolved", () => {
+    expect(
+      assessAction(fixture("summarize-rollout-threshold"), "DEFER_COMPACT"),
+    ).toMatchObject({
+      severity: "none",
+      cost: 0,
+      category: "golden_under_review",
+    });
   });
 });
 

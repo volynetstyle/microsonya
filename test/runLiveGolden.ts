@@ -21,6 +21,7 @@ import {
   type E2EFixture,
 } from "./goldenFixtures.js";
 import {
+  assessAction,
   evaluateRuns,
   type E2EResult,
   type EvaluationMetrics,
@@ -50,6 +51,8 @@ interface LiveResult extends E2EResult {
 
 interface FixtureReport {
   readonly fixtureId: string;
+  readonly scope: "semantic" | "system";
+  readonly status: "accepted" | "under_review";
   readonly expectedAction: E2EFixture["expected"]["action"];
   readonly runs: readonly LiveResult[];
   readonly metrics: EvaluationMetrics;
@@ -77,9 +80,13 @@ for (const fixture of selected) {
       const result = runs.at(-1)!;
       const marker = result.error
         ? "ERROR"
-        : isPassingResult(result)
-          ? "PASS"
-          : "FAIL";
+        : fixture.scope === "system"
+          ? "SYSTEM"
+          : fixture.status === "under_review"
+            ? "REVIEW"
+            : isPassingResult(result)
+              ? "PASS"
+              : "FAIL";
       process.stderr.write(
         `${marker} ${fixture.id} ${index + 1}/${args.runs}: ${result.action} (${Math.round(result.durationMs)}ms, ${result.modelCalls} calls)\n`,
       );
@@ -87,6 +94,8 @@ for (const fixture of selected) {
   }
   reports.push({
     fixtureId: fixture.id,
+    scope: fixture.scope ?? "semantic",
+    status: fixture.status ?? "accepted",
     expectedAction: fixture.expected.action,
     runs,
     metrics: evaluateRuns(fixture, runs),
@@ -106,12 +115,19 @@ process.stdout.write(`${JSON.stringify(report, null, 2)}\n`);
 
 if (
   reports.some(
-    ({ metrics }) =>
-      metrics.accuracy < args.minimumAccuracy ||
-      metrics.irreversibleLossRate > 0 ||
-      metrics.checkpointCorrectness < 1,
+    ({ metrics, scope, status }) =>
+      scope === "semantic" &&
+      status === "accepted" &&
+      (metrics.accuracy < args.minimumAccuracy ||
+        metrics.irreversibleLossRate > 0 ||
+        metrics.checkpointCorrectness < 1),
   ) ||
-  reports.some(({ runs }) => runs.some((result) => !isPassingResult(result)))
+  reports.some(
+    ({ runs, scope, status }) =>
+      scope === "semantic" &&
+      status === "accepted" &&
+      runs.some((result) => !isPassingResult(result)),
+  )
 ) {
   process.exitCode = 1;
 }
@@ -219,7 +235,10 @@ function evaluateSummaryConstraints(
   summary?: string,
 ): Pick<LiveResult, "missingRequired" | "forbiddenClaims"> {
   const normalized = summary?.toLocaleLowerCase() ?? "";
-  const required = fixture.expected.summary?.mustInclude ?? [];
+  const required =
+    fixture.expected.summary?.exactInvariants ??
+    fixture.expected.summary?.mustInclude ??
+    [];
   const forbidden = [
     ...(fixture.expected.summary?.mustExclude ?? []),
     ...(fixture.expected.summary?.mustNotInvent ?? []),
@@ -341,6 +360,15 @@ function redactEndpoint(baseUrl: string): string {
 
 function aggregate(reports: readonly FixtureReport[]) {
   const runs = reports.flatMap((report) => report.runs);
+  const acceptedSemantic = reports.filter(
+    ({ scope, status }) => scope === "semantic" && status === "accepted",
+  );
+  const acceptedSemanticRuns = acceptedSemantic.flatMap(({ runs }) => runs);
+  const actionAssessments = reports.flatMap((report) => {
+    const fixture = goldenFixtures.find(({ id }) => id === report.fixtureId);
+    if (!fixture || report.scope === "system") return [];
+    return report.runs.map((result) => assessAction(fixture, result.action));
+  });
   const errors = runs.filter((result) => result.error !== undefined).length;
   const correct = runs.filter(
     (result) => result.action === result.expectedAction && !result.error,
@@ -351,6 +379,50 @@ function aggregate(reports: readonly FixtureReport[]) {
     modelCalls: runs.reduce((sum, result) => sum + result.modelCalls, 0),
     errors,
     accuracy: runs.length === 0 ? 0 : correct / runs.length,
+    semanticHeadline: {
+      fixtures: acceptedSemantic.length,
+      runs: acceptedSemanticRuns.length,
+      correct: acceptedSemanticRuns.filter(
+        (result) => result.action === result.expectedAction && !result.error,
+      ).length,
+      accuracy:
+        acceptedSemanticRuns.length === 0
+          ? 0
+          : acceptedSemanticRuns.filter(
+              (result) =>
+                result.action === result.expectedAction && !result.error,
+            ).length / acceptedSemanticRuns.length,
+    },
+    excludedFromSemanticHeadline: {
+      systemFixtures: reports.filter(({ scope }) => scope === "system").length,
+      underReviewFixtures: reports.filter(
+        ({ scope, status }) =>
+          scope === "semantic" && status === "under_review",
+      ).length,
+    },
+    weightedErrors: {
+      totalCost: actionAssessments.reduce(
+        (sum, assessment) => sum + assessment.cost,
+        0,
+      ),
+      critical: actionAssessments.filter(
+        ({ severity }) => severity === "critical",
+      ).length,
+      medium: actionAssessments.filter(({ severity }) => severity === "medium")
+        .length,
+      low: actionAssessments.filter(({ severity }) => severity === "low")
+        .length,
+      categories: Object.fromEntries(
+        [...new Set(actionAssessments.map(({ category }) => category))].map(
+          (category) => [
+            category,
+            actionAssessments.filter(
+              (assessment) => assessment.category === category,
+            ).length,
+          ],
+        ),
+      ),
+    },
     irreversibleLosses: reports.reduce(
       (sum, report) =>
         sum + report.runs.length * report.metrics.irreversibleLossRate,

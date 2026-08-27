@@ -11,6 +11,8 @@ export type ExpectedAction =
 export interface E2EFixture {
   readonly id: string;
   readonly source: "exact" | "live" | "reconstructed";
+  readonly scope?: "semantic" | "system";
+  readonly status?: "accepted" | "under_review";
   readonly messages: readonly string[];
   readonly expected: {
     readonly action: ExpectedAction;
@@ -19,6 +21,12 @@ export interface E2EFixture {
       readonly mustExclude?: readonly string[];
       readonly mustNotInvent?: readonly string[];
       readonly preserveRelations?: readonly string[];
+      readonly exactInvariants?: readonly string[];
+      readonly propositions?: readonly {
+        readonly subject: string;
+        readonly relation: string;
+        readonly object: string;
+      }[];
     };
     readonly checkpoint?: { readonly advance: boolean };
   };
@@ -42,6 +50,7 @@ export const goldenFixtures = [
   fixture({
     id: "durable-70k-pc-story",
     source: "exact",
+    status: "under_review",
     messages: [
       "Her grandfather insisted, so the seller assembled a 70k PC anyway.",
       "Only 12k of that price is the graphics card; we suggested returning the parts and rebuilding it.",
@@ -52,6 +61,14 @@ export const goldenFixtures = [
       summary: {
         mustInclude: ["70к", "12к", "повернути комплектуючі"],
         mustExclude: ["жарт як окремий змістовний факт"],
+        exactInvariants: ["70к", "12к"],
+        propositions: [
+          {
+            subject: "PC components",
+            relation: "recommendation",
+            object: "return and rebuild",
+          },
+        ],
       },
       checkpoint: { advance: true },
     },
@@ -172,6 +189,7 @@ export const goldenFixtures = [
   fixture({
     id: "summarize-rollout-threshold",
     source: "exact",
+    status: "under_review",
     messages: [
       "Tomorrow we test 10% of traffic. If mismatches exceed 0.1%, we roll back; otherwise we expand to 50%.",
     ],
@@ -179,6 +197,19 @@ export const goldenFixtures = [
       action: "SUMMARIZE",
       summary: {
         mustInclude: ["10%", "0.1%", "rollback", "50%"],
+        exactInvariants: ["10%", "0.1%", "50%"],
+        propositions: [
+          {
+            subject: "rollout",
+            relation: "rollback_condition",
+            object: "mismatch > 0.1%",
+          },
+          {
+            subject: "rollout",
+            relation: "expansion_condition",
+            object: "otherwise expand to 50%",
+          },
+        ],
         preserveRelations: ["rollback condition is > 0.1%"],
       },
       checkpoint: { advance: true },
@@ -312,6 +343,7 @@ export const goldenFixtures = [
   fixture({
     id: "reply-crosses-checkpoint",
     source: "reconstructed",
+    scope: "system",
     messages: [
       "#100 Backend deploy is blocked by migration 42.",
       "#117 ^100 Міграцію вже закінчили, deploy можна запускати.",
@@ -348,6 +380,7 @@ export const goldenFixtures = [
   fixture({
     id: "edited-message-latest-state",
     source: "reconstructed",
+    scope: "system",
     messages: [
       "#200 17:00 Deploy буде о 18:00.",
       "#200 edited 17:05 Deploy переносимо на завтра.",
@@ -363,12 +396,14 @@ export const goldenFixtures = [
   fixture({
     id: "parallel-summary-idempotency",
     source: "reconstructed",
+    scope: "system",
     messages: ["Deploy завершили.", "Міграція успішна."],
     expected: { action: "SUMMARIZE" },
   }),
   fixture({
     id: "provider-timeout",
     source: "reconstructed",
+    scope: "system",
     messages: [
       "Deploy перенесли на четвер через Stripe.",
       "Migration запускаємо в середу.",

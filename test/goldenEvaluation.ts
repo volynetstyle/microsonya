@@ -14,6 +14,82 @@ export interface EvaluationMetrics {
   readonly checkpointCorrectness: number;
 }
 
+export type ErrorSeverity = "none" | "low" | "medium" | "critical";
+
+export interface ActionAssessment {
+  readonly correct: boolean;
+  readonly severity: ErrorSeverity;
+  readonly cost: number;
+  readonly category: string;
+}
+
+export function assessAction(
+  fixture: E2EFixture,
+  actual: ExpectedAction,
+): ActionAssessment {
+  const expected = fixture.expected.action;
+  if (actual === expected) {
+    return { correct: true, severity: "none", cost: 0, category: "correct" };
+  }
+  if (fixture.status === "under_review") {
+    return {
+      correct: false,
+      severity: "none",
+      cost: 0,
+      category: "golden_under_review",
+    };
+  }
+  if (isMeaningful(expected) && actual.startsWith("SKIP_")) {
+    return {
+      correct: false,
+      severity: "critical",
+      cost: 100,
+      category: "irreversible_meaningful_skip",
+    };
+  }
+  if (
+    (expected === "DEFER_CONTEXT" || expected === "DEFER_INCOMPLETE") &&
+    actual === "SUMMARIZE"
+  ) {
+    return {
+      correct: false,
+      severity: "critical",
+      cost: 100,
+      category: "unsafe_premature_summary",
+    };
+  }
+  if (expected.startsWith("SKIP_") && actual.startsWith("DEFER_")) {
+    return {
+      correct: false,
+      severity: "medium",
+      cost: 25,
+      category: "sticky_garbage",
+    };
+  }
+  if (expected === "SUMMARIZE" && actual.startsWith("DEFER_")) {
+    return {
+      correct: false,
+      severity: "medium",
+      cost: 20,
+      category: "rich_content_deferred",
+    };
+  }
+  if (expected === "DEFER_COMPACT" && actual === "SUMMARIZE") {
+    return {
+      correct: false,
+      severity: "low",
+      cost: 5,
+      category: "unnecessary_summary",
+    };
+  }
+  return {
+    correct: false,
+    severity: "medium",
+    cost: 15,
+    category: "other_mismatch",
+  };
+}
+
 export function evaluateRuns(
   fixture: E2EFixture,
   results: readonly E2EResult[],
