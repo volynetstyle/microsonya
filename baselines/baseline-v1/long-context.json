@@ -1,0 +1,1218 @@
+{
+  "generatedAt": "2026-08-27T16:26:38.956Z",
+  "model": "gpt-oss:120b-cloud",
+  "endpoint": "https://ollama.com/api",
+  "suite": "extraction",
+  "reports": [
+    {
+      "fixtureId": "long-buried-final-decision@front",
+      "scope": "semantic",
+      "status": "accepted",
+      "expectedAction": "SUMMARIZE",
+      "runs": [
+        {
+          "fixtureId": "long-buried-final-decision@front",
+          "expectedAction": "SUMMARIZE",
+          "action": "SUMMARIZE",
+          "summary": "Учасники обговорювали стратегію кешування для API. Вирішено залишити Redis, кешувати лише публічні поля профілю на 10 хвилин, не кешувати персоналізовані поля та інвалідувати кеш при оновленні профілю.",
+          "checkpointAdvanced": true,
+          "durationMs": 7109.9456,
+          "modelCalls": 2,
+          "classifierCalls": 1,
+          "summarizerCalls": 1,
+          "missingRequired": [
+            "залишаємо redis",
+            "public profile fields",
+            "personalized fields не кеш",
+            "інвалідація при update profile"
+          ],
+          "forbiddenClaims": [],
+          "extractionMetrics": {
+            "requiredFactRecall": 0.6,
+            "unsupportedFactRate": 0,
+            "supersededFactLeakRate": 0,
+            "relationPreservation": 0,
+            "entityBindingAccuracy": 0.8333333333333333,
+            "epistemicStateAccuracy": 1
+          },
+          "propositionMetrics": {
+            "passed": 4,
+            "total": 4,
+            "score": 1,
+            "violations": [],
+            "errorsByType": {}
+          }
+        }
+      ],
+      "metrics": {
+        "accuracy": 1,
+        "acceptedActionRate": 1,
+        "stability": 1,
+        "actionDistribution": {
+          "SUMMARIZE": 1
+        },
+        "irreversibleLossRate": 0,
+        "unsupportedClaimRate": 0,
+        "checkpointCorrectness": 1
+      }
+    },
+    {
+      "fixtureId": "long-buried-final-decision@middle",
+      "scope": "semantic",
+      "status": "accepted",
+      "expectedAction": "SUMMARIZE",
+      "runs": [
+        {
+          "fixtureId": "long-buried-final-decision@middle",
+          "expectedAction": "SUMMARIZE",
+          "action": "SUMMARIZE",
+          "summary": "Учасники обговорювали стратегію кешування: вирішено залишити Redis, кешувати лише публічні поля профілю на 10 хвилин, не кешувати персоналізовані поля та виконувати інвалідацію при оновленні профілю.",
+          "checkpointAdvanced": true,
+          "durationMs": 8621.858400000001,
+          "modelCalls": 2,
+          "classifierCalls": 1,
+          "summarizerCalls": 1,
+          "missingRequired": [
+            "залишаємо redis",
+            "public profile fields",
+            "personalized fields не кеш",
+            "інвалідація при update profile"
+          ],
+          "forbiddenClaims": [],
+          "extractionMetrics": {
+            "requiredFactRecall": 0.6,
+            "unsupportedFactRate": 0,
+            "supersededFactLeakRate": 0,
+            "relationPreservation": 0,
+            "entityBindingAccuracy": 0.8333333333333333,
+            "epistemicStateAccuracy": 1
+          },
+          "propositionMetrics": {
+            "passed": 4,
+            "total": 4,
+            "score": 1,
+            "violations": [],
+            "errorsByType": {}
+          }
+        }
+      ],
+      "metrics": {
+        "accuracy": 1,
+        "acceptedActionRate": 1,
+        "stability": 1,
+        "actionDistribution": {
+          "SUMMARIZE": 1
+        },
+        "irreversibleLossRate": 0,
+        "unsupportedClaimRate": 0,
+        "checkpointCorrectness": 1
+      }
+    },
+    {
+      "fixtureId": "long-buried-final-decision@tail",
+      "scope": "semantic",
+      "status": "accepted",
+      "expectedAction": "SUMMARIZE",
+      "runs": [
+        {
+          "fixtureId": "long-buried-final-decision@tail",
+          "expectedAction": "SUMMARIZE",
+          "action": "SUMMARIZE",
+          "summary": "Учасники обговорювали стратегію кешування: можна залишити Redis або перейти на локальний кеш, проте останній призведе до різних значень між інстансами. Було вирішено залишити Redis, кешувати лише публічні поля профілю на 10 хвилин і не кешувати персоналізовані поля. При оновленні профілю буде інвалідація кешу. На продакшені найбільше часу споживає endpoint profile через N+1 запити.",
+          "checkpointAdvanced": true,
+          "durationMs": 7958.183300000001,
+          "modelCalls": 2,
+          "classifierCalls": 1,
+          "summarizerCalls": 1,
+          "missingRequired": [
+            "залишаємо redis",
+            "public profile fields",
+            "personalized fields не кеш",
+            "інвалідація при update profile"
+          ],
+          "forbiddenClaims": [],
+          "extractionMetrics": {
+            "requiredFactRecall": 0.6,
+            "unsupportedFactRate": 0,
+            "supersededFactLeakRate": 0,
+            "relationPreservation": 0,
+            "entityBindingAccuracy": 0.8333333333333333,
+            "epistemicStateAccuracy": 1
+          },
+          "propositionMetrics": {
+            "passed": 4,
+            "total": 4,
+            "score": 1,
+            "violations": [],
+            "errorsByType": {}
+          }
+        }
+      ],
+      "metrics": {
+        "accuracy": 1,
+        "acceptedActionRate": 1,
+        "stability": 1,
+        "actionDistribution": {
+          "SUMMARIZE": 1
+        },
+        "irreversibleLossRate": 0,
+        "unsupportedClaimRate": 0,
+        "checkpointCorrectness": 1
+      }
+    },
+    {
+      "fixtureId": "long-multiple-corrections@front",
+      "scope": "semantic",
+      "status": "accepted",
+      "expectedAction": "SUMMARIZE",
+      "runs": [
+        {
+          "fixtureId": "long-multiple-corrections@front",
+          "expectedAction": "SUMMARIZE",
+          "action": "SUMMARIZE",
+          "summary": "Учасники узгодили, що реліз буде у четвер. Smoke‑тести проводяться у четвер ввечері; якщо вони успішні, checkout вмикається одразу в четвер, інакше – переноситься на п’ятницю.",
+          "checkpointAdvanced": true,
+          "durationMs": 6552.7173,
+          "modelCalls": 2,
+          "classifierCalls": 1,
+          "summarizerCalls": 1,
+          "missingRequired": [
+            "реліз у четвер",
+            "checkout лишаємо вимкненим",
+            "smoke tests у четвер ввечері",
+            "якщо smoke tests",
+            "якщо ні"
+          ],
+          "forbiddenClaims": [],
+          "extractionMetrics": {
+            "requiredFactRecall": 0.2,
+            "unsupportedFactRate": 0,
+            "supersededFactLeakRate": 0,
+            "relationPreservation": 0.3333333333333333,
+            "entityBindingAccuracy": 1,
+            "epistemicStateAccuracy": 1
+          },
+          "propositionMetrics": {
+            "passed": 3,
+            "total": 3,
+            "score": 1,
+            "violations": [],
+            "errorsByType": {}
+          }
+        }
+      ],
+      "metrics": {
+        "accuracy": 1,
+        "acceptedActionRate": 1,
+        "stability": 1,
+        "actionDistribution": {
+          "SUMMARIZE": 1
+        },
+        "irreversibleLossRate": 0,
+        "unsupportedClaimRate": 0,
+        "checkpointCorrectness": 1
+      }
+    },
+    {
+      "fixtureId": "long-multiple-corrections@middle",
+      "scope": "semantic",
+      "status": "accepted",
+      "expectedAction": "SUMMARIZE",
+      "runs": [
+        {
+          "fixtureId": "long-multiple-corrections@middle",
+          "expectedAction": "SUMMARIZE",
+          "action": "SUMMARIZE",
+          "summary": "Учасники обговорювали план релізу: спочатку його планували на п’ятницю, але через підтвердження партнера перенесли на четвер. Тестування (smoke tests) буде проведено у четвер ввечері; якщо вони пройдуть успішно, checkout увімкнуть одразу в четвер, інакше – у п’ятницю після тестів.",
+          "checkpointAdvanced": true,
+          "durationMs": 6838.530200000001,
+          "modelCalls": 2,
+          "classifierCalls": 1,
+          "summarizerCalls": 1,
+          "missingRequired": [
+            "реліз у четвер",
+            "checkout лишаємо вимкненим",
+            "smoke tests у четвер ввечері",
+            "якщо smoke tests",
+            "якщо ні"
+          ],
+          "forbiddenClaims": [],
+          "extractionMetrics": {
+            "requiredFactRecall": 0.4,
+            "unsupportedFactRate": 0,
+            "supersededFactLeakRate": 0,
+            "relationPreservation": 0.3333333333333333,
+            "entityBindingAccuracy": 1,
+            "epistemicStateAccuracy": 1
+          },
+          "propositionMetrics": {
+            "passed": 3,
+            "total": 3,
+            "score": 1,
+            "violations": [],
+            "errorsByType": {}
+          }
+        }
+      ],
+      "metrics": {
+        "accuracy": 1,
+        "acceptedActionRate": 1,
+        "stability": 1,
+        "actionDistribution": {
+          "SUMMARIZE": 1
+        },
+        "irreversibleLossRate": 0,
+        "unsupportedClaimRate": 0,
+        "checkpointCorrectness": 1
+      }
+    },
+    {
+      "fixtureId": "long-multiple-corrections@tail",
+      "scope": "semantic",
+      "status": "accepted",
+      "expectedAction": "SUMMARIZE",
+      "runs": [
+        {
+          "fixtureId": "long-multiple-corrections@tail",
+          "expectedAction": "SUMMARIZE",
+          "action": "DEFER_COMPACT",
+          "checkpointAdvanced": false,
+          "durationMs": 3039.1946000000025,
+          "modelCalls": 1,
+          "classifierCalls": 1,
+          "summarizerCalls": 0,
+          "missingRequired": [
+            "реліз у четвер",
+            "checkout лишаємо вимкненим",
+            "smoke tests у четвер ввечері",
+            "якщо smoke tests",
+            "якщо ні"
+          ],
+          "forbiddenClaims": [],
+          "extractionMetrics": {
+            "requiredFactRecall": 0,
+            "unsupportedFactRate": 0,
+            "supersededFactLeakRate": 0,
+            "relationPreservation": 0,
+            "entityBindingAccuracy": 1,
+            "epistemicStateAccuracy": 1
+          },
+          "propositionMetrics": {
+            "passed": 1,
+            "total": 3,
+            "score": 0.3333333333333333,
+            "violations": [
+              {
+                "assertionId": "release-thursday",
+                "errorType": "SUPERSESSION",
+                "description": "Thursday is the final release day"
+              },
+              {
+                "assertionId": "checkout-conditional",
+                "errorType": "CONDITION_PRESERVATION",
+                "description": "Checkout activation depends on green smoke tests"
+              }
+            ],
+            "errorsByType": {
+              "SUPERSESSION": 1,
+              "CONDITION_PRESERVATION": 1
+            }
+          }
+        }
+      ],
+      "metrics": {
+        "accuracy": 0,
+        "acceptedActionRate": 1,
+        "stability": 1,
+        "actionDistribution": {
+          "DEFER_COMPACT": 1
+        },
+        "irreversibleLossRate": 0,
+        "unsupportedClaimRate": 0,
+        "checkpointCorrectness": 0
+      }
+    },
+    {
+      "fixtureId": "long-hypothesis-vs-confirmed-cause@front",
+      "scope": "semantic",
+      "status": "accepted",
+      "expectedAction": "SUMMARIZE",
+      "runs": [
+        {
+          "fixtureId": "long-hypothesis-vs-confirmed-cause@front",
+          "expectedAction": "SUMMARIZE",
+          "action": "SUMMARIZE",
+          "summary": "У продакшн‑середовищі спостерігався падіння прод і 502‑помилки. Спочатку підозрювали проблеми з connection pool або race condition у Redis, проте Redis, CPU, пам’ять і пул з’єднань виявились у нормі. Виявлено, що один запит зависав 30 секунд, чекаючи зовнішнього billing API, а після рефакторингу timeout‑обгортка не завершувала підлеглий HTTP‑запит, через що завислі запити тримали сокети. Додали abort‑механізм – локально кількість сокетів перестала зростати, це підтвердилося на staging. Причина уточнена: проблема була у timeout, а не у race condition. Hotfix вже розгорнуто на staging, на продакшн ще не випущено.",
+          "checkpointAdvanced": true,
+          "durationMs": 9269.991300000002,
+          "modelCalls": 2,
+          "classifierCalls": 1,
+          "summarizerCalls": 1,
+          "missingRequired": [
+            "timeout не abort",
+            "тримають sockets",
+            "на prod ще не"
+          ],
+          "forbiddenClaims": [],
+          "extractionMetrics": {
+            "requiredFactRecall": 0.5,
+            "unsupportedFactRate": 0,
+            "supersededFactLeakRate": 0,
+            "relationPreservation": 0,
+            "entityBindingAccuracy": 1,
+            "epistemicStateAccuracy": 0.8333333333333333
+          },
+          "propositionMetrics": {
+            "passed": 3,
+            "total": 3,
+            "score": 1,
+            "violations": [],
+            "errorsByType": {}
+          }
+        }
+      ],
+      "metrics": {
+        "accuracy": 1,
+        "acceptedActionRate": 1,
+        "stability": 1,
+        "actionDistribution": {
+          "SUMMARIZE": 1
+        },
+        "irreversibleLossRate": 0,
+        "unsupportedClaimRate": 0,
+        "checkpointCorrectness": 1
+      }
+    },
+    {
+      "fixtureId": "long-hypothesis-vs-confirmed-cause@middle",
+      "scope": "semantic",
+      "status": "accepted",
+      "expectedAction": "SUMMARIZE",
+      "runs": [
+        {
+          "fixtureId": "long-hypothesis-vs-confirmed-cause@middle",
+          "expectedAction": "SUMMARIZE",
+          "action": "SUMMARIZE",
+          "summary": "У продакшн‑середовищі спостерігається 502‑помилка через завислі запити: один запит чекає 30 секунд на зовнішній billing API, а таймаут‑обгортка після рефакторингу не завершує підлеглий HTTP‑запит, що призводить до накопичення socket‑ів. Після додавання abort‑механізму кількість socket‑ів перестала зростати; проблема підтверджена на staging, hotfix вже розгорнуто там, але ще не випущений у продакшн.",
+          "checkpointAdvanced": true,
+          "durationMs": 9624.129500000003,
+          "modelCalls": 2,
+          "classifierCalls": 1,
+          "summarizerCalls": 1,
+          "missingRequired": [
+            "timeout не abort",
+            "тримають sockets",
+            "локально",
+            "на prod ще не"
+          ],
+          "forbiddenClaims": [],
+          "extractionMetrics": {
+            "requiredFactRecall": 0.25,
+            "unsupportedFactRate": 0,
+            "supersededFactLeakRate": 0,
+            "relationPreservation": 0,
+            "entityBindingAccuracy": 1,
+            "epistemicStateAccuracy": 0.6666666666666666
+          },
+          "propositionMetrics": {
+            "passed": 3,
+            "total": 3,
+            "score": 1,
+            "violations": [],
+            "errorsByType": {}
+          }
+        }
+      ],
+      "metrics": {
+        "accuracy": 1,
+        "acceptedActionRate": 1,
+        "stability": 1,
+        "actionDistribution": {
+          "SUMMARIZE": 1
+        },
+        "irreversibleLossRate": 0,
+        "unsupportedClaimRate": 0,
+        "checkpointCorrectness": 1
+      }
+    },
+    {
+      "fixtureId": "long-hypothesis-vs-confirmed-cause@tail",
+      "scope": "semantic",
+      "status": "accepted",
+      "expectedAction": "SUMMARIZE",
+      "runs": [
+        {
+          "fixtureId": "long-hypothesis-vs-confirmed-cause@tail",
+          "expectedAction": "SUMMARIZE",
+          "action": "SUMMARIZE",
+          "summary": "Учасники обговорювали проблему: прод продовжував падати, 502 помилки з gateway. Підозрювали проблеми з connection pool, race condition або Redis, проте Redis, CPU, пам'ять та connection pool виявились у нормі. Виявили, що один запит зависає 30 секунд, чекаючи зовнішнього billing API, і після рефакторингу timeout‑обгортка не абортує підлеглий HTTP‑запит, через що завислі запити тримають сокети. Додали abort‑механізм, що зупинив зростання кількості сокетів на локальній та staging‑середовищах. Причина уточнена: timeout не абортував HTTP‑запит, а race condition не була причиною. Hotfix вже розгорнуто на staging, продакшн ще не оновлено.",
+          "checkpointAdvanced": true,
+          "durationMs": 7780.488400000002,
+          "modelCalls": 2,
+          "classifierCalls": 1,
+          "summarizerCalls": 1,
+          "missingRequired": [
+            "timeout не abort",
+            "тримають sockets",
+            "локально",
+            "на prod ще не"
+          ],
+          "forbiddenClaims": [],
+          "extractionMetrics": {
+            "requiredFactRecall": 0.5,
+            "unsupportedFactRate": 0,
+            "supersededFactLeakRate": 0,
+            "relationPreservation": 1,
+            "entityBindingAccuracy": 1,
+            "epistemicStateAccuracy": 0.6666666666666666
+          },
+          "propositionMetrics": {
+            "passed": 3,
+            "total": 3,
+            "score": 1,
+            "violations": [],
+            "errorsByType": {}
+          }
+        }
+      ],
+      "metrics": {
+        "accuracy": 1,
+        "acceptedActionRate": 1,
+        "stability": 1,
+        "actionDistribution": {
+          "SUMMARIZE": 1
+        },
+        "irreversibleLossRate": 0,
+        "unsupportedClaimRate": 0,
+        "checkpointCorrectness": 1
+      }
+    },
+    {
+      "fixtureId": "long-numeric-type-collision@front",
+      "scope": "semantic",
+      "status": "accepted",
+      "expectedAction": "SUMMARIZE",
+      "runs": [
+        {
+          "fixtureId": "long-numeric-type-collision@front",
+          "expectedAction": "SUMMARIZE",
+          "action": "SUMMARIZE",
+          "summary": "У продакшн запущено версію 1.8.4; планується залишити її до версії 2.0. Після rollback використовується 18 % CPU (раніше ~42 %). Error‑rate у продакшн 1.8 % (ціль <0.5 %), у staging 0.18 %. Canary‑розгортання зараз 10 %; якщо error‑rate залишиться <0.5 % протягом 15 хв, планується збільшити canary до 50 %.",
+          "checkpointAdvanced": true,
+          "durationMs": 12502.932700000005,
+          "modelCalls": 2,
+          "classifierCalls": 1,
+          "summarizerCalls": 1,
+          "missingRequired": [
+            "поточна версія 1.8.4",
+            "18 — це година",
+            "v2",
+            "error rate у продакшн 1.8%",
+            "нижче 0.5%",
+            "canary зараз 10%",
+            "протягом 15 хвилин"
+          ],
+          "forbiddenClaims": [],
+          "extractionMetrics": {
+            "requiredFactRecall": 0,
+            "unsupportedFactRate": 0,
+            "supersededFactLeakRate": 0,
+            "relationPreservation": 0,
+            "entityBindingAccuracy": 0.5,
+            "epistemicStateAccuracy": 1
+          },
+          "propositionMetrics": {
+            "passed": 4,
+            "total": 6,
+            "score": 0.6666666666666666,
+            "violations": [
+              {
+                "assertionId": "deadline-18",
+                "errorType": "NUMERIC_TYPE",
+                "description": "18 is a time/deadline, not version 1.8"
+              },
+              {
+                "assertionId": "rollback-v2",
+                "errorType": "ENTITY_BINDING",
+                "description": "v2 is the rollback target"
+              }
+            ],
+            "errorsByType": {
+              "NUMERIC_TYPE": 1,
+              "ENTITY_BINDING": 1
+            }
+          }
+        }
+      ],
+      "metrics": {
+        "accuracy": 1,
+        "acceptedActionRate": 1,
+        "stability": 1,
+        "actionDistribution": {
+          "SUMMARIZE": 1
+        },
+        "irreversibleLossRate": 0,
+        "unsupportedClaimRate": 0,
+        "checkpointCorrectness": 1
+      }
+    },
+    {
+      "fixtureId": "long-numeric-type-collision@middle",
+      "scope": "semantic",
+      "status": "accepted",
+      "expectedAction": "SUMMARIZE",
+      "runs": [
+        {
+          "fixtureId": "long-numeric-type-collision@middle",
+          "expectedAction": "SUMMARIZE",
+          "action": "SUMMARIZE",
+          "summary": "Учасники обговорювали стан продакшн‑деплойменту: версія продакшн – 1.8.4, rollback‑ціль – v2. Після rollback CPU використання знизилось з ~42 % до 18 %. Error rate у продакшн – 1.8 % (ціль <0.5 %), у staging – 0.18 %. Canary‑деплоймент зараз 10 %; якщо error rate залишиться нижче 0.5 % протягом 15 хвилин, його підвищать до 50 %. Наступний перегляд метрик заплановано на 18:30.",
+          "checkpointAdvanced": true,
+          "durationMs": 8792.108500000002,
+          "modelCalls": 2,
+          "classifierCalls": 1,
+          "summarizerCalls": 1,
+          "missingRequired": [
+            "поточна версія 1.8.4",
+            "18 — це година",
+            "error rate у продакшн 1.8%",
+            "нижче 0.5%",
+            "canary зараз 10%"
+          ],
+          "forbiddenClaims": [],
+          "extractionMetrics": {
+            "requiredFactRecall": 0.2857142857142857,
+            "unsupportedFactRate": 0,
+            "supersededFactLeakRate": 0,
+            "relationPreservation": 0.5,
+            "entityBindingAccuracy": 0.6,
+            "epistemicStateAccuracy": 1
+          },
+          "propositionMetrics": {
+            "passed": 6,
+            "total": 6,
+            "score": 1,
+            "violations": [],
+            "errorsByType": {}
+          }
+        }
+      ],
+      "metrics": {
+        "accuracy": 1,
+        "acceptedActionRate": 1,
+        "stability": 1,
+        "actionDistribution": {
+          "SUMMARIZE": 1
+        },
+        "irreversibleLossRate": 0,
+        "unsupportedClaimRate": 0,
+        "checkpointCorrectness": 1
+      }
+    },
+    {
+      "fixtureId": "long-numeric-type-collision@tail",
+      "scope": "semantic",
+      "status": "accepted",
+      "expectedAction": "SUMMARIZE",
+      "runs": [
+        {
+          "fixtureId": "long-numeric-type-collision@tail",
+          "expectedAction": "SUMMARIZE",
+          "action": "SUMMARIZE",
+          "summary": "Учасники обговорювали технічні питання: продакшн працює на версії 1.8.4, планується не оновлювати до 2.0; після rollback CPU навантаження знизилося з 42% до 18%. Error rate у продакшн 1.8% (ціль <0.5%), у staging 0.18%. Canary розгортка наразі 10%; якщо error rate залишиться нижче 0.5% протягом 15 хвилин, її підвищать до 50%. О 18:30 планують ще раз перевірити метрики.",
+          "checkpointAdvanced": true,
+          "durationMs": 7479.582700000014,
+          "modelCalls": 2,
+          "classifierCalls": 1,
+          "summarizerCalls": 1,
+          "missingRequired": [
+            "поточна версія 1.8.4",
+            "18 — це година",
+            "v2",
+            "canary зараз 10%"
+          ],
+          "forbiddenClaims": [],
+          "extractionMetrics": {
+            "requiredFactRecall": 0.42857142857142855,
+            "unsupportedFactRate": 0,
+            "supersededFactLeakRate": 0,
+            "relationPreservation": 1,
+            "entityBindingAccuracy": 0.6,
+            "epistemicStateAccuracy": 1
+          },
+          "propositionMetrics": {
+            "passed": 4,
+            "total": 6,
+            "score": 0.6666666666666666,
+            "violations": [
+              {
+                "assertionId": "deadline-18",
+                "errorType": "NUMERIC_TYPE",
+                "description": "18 is a time/deadline, not version 1.8"
+              },
+              {
+                "assertionId": "rollback-v2",
+                "errorType": "ENTITY_BINDING",
+                "description": "v2 is the rollback target"
+              }
+            ],
+            "errorsByType": {
+              "NUMERIC_TYPE": 1,
+              "ENTITY_BINDING": 1
+            }
+          }
+        }
+      ],
+      "metrics": {
+        "accuracy": 1,
+        "acceptedActionRate": 1,
+        "stability": 1,
+        "actionDistribution": {
+          "SUMMARIZE": 1
+        },
+        "irreversibleLossRate": 0,
+        "unsupportedClaimRate": 0,
+        "checkpointCorrectness": 1
+      }
+    },
+    {
+      "fixtureId": "long-quoted-message-provenance@front",
+      "scope": "semantic",
+      "status": "accepted",
+      "expectedAction": "SUMMARIZE",
+      "runs": [
+        {
+          "fixtureId": "long-quoted-message-provenance@front",
+          "expectedAction": "SUMMARIZE",
+          "action": "SUMMARIZE",
+          "summary": "Учасники обговорювали міграцію: staging‑міграція вже завершена, продакшн‑міграція запланована на завтра о 09:00 без змін. Репліка‑лаг становить максимум 1,2 секунди, що прийнятно; таблиця users займає найбільше часу, але час блокування в межах норми. Інші повідомлення складаються з повторюваних жартів і не містять додаткової інформації.",
+          "checkpointAdvanced": true,
+          "durationMs": 6965.092199999999,
+          "modelCalls": 2,
+          "classifierCalls": 1,
+          "summarizerCalls": 1,
+          "missingRequired": [
+            "staging migration заверш",
+            "продакшн запуск заплановано на завтра о 09 00",
+            "іншого проекту",
+            "не скасовуємо"
+          ],
+          "forbiddenClaims": [],
+          "extractionMetrics": {
+            "requiredFactRecall": 0.25,
+            "unsupportedFactRate": 0,
+            "supersededFactLeakRate": 0,
+            "relationPreservation": 1,
+            "entityBindingAccuracy": 0.5,
+            "epistemicStateAccuracy": 0.5
+          },
+          "propositionMetrics": {
+            "passed": 2,
+            "total": 3,
+            "score": 0.6666666666666666,
+            "violations": [
+              {
+                "assertionId": "other-project",
+                "errorType": "PROVENANCE",
+                "description": "The quoted cancellation belongs to another project/service"
+              }
+            ],
+            "errorsByType": {
+              "PROVENANCE": 1
+            }
+          }
+        }
+      ],
+      "metrics": {
+        "accuracy": 1,
+        "acceptedActionRate": 1,
+        "stability": 1,
+        "actionDistribution": {
+          "SUMMARIZE": 1
+        },
+        "irreversibleLossRate": 0,
+        "unsupportedClaimRate": 0,
+        "checkpointCorrectness": 1
+      }
+    },
+    {
+      "fixtureId": "long-quoted-message-provenance@middle",
+      "scope": "semantic",
+      "status": "accepted",
+      "expectedAction": "SUMMARIZE",
+      "runs": [
+        {
+          "fixtureId": "long-quoted-message-provenance@middle",
+          "expectedAction": "SUMMARIZE",
+          "action": "SUMMARIZE",
+          "summary": "Учасники обговорювали план міграції: у staging вона вже завершилась, продакшн‑запуск заплановано на завтра о 09:00, репліка‑лаг максимум 1.2 секунди, таблиця users займає найбільше часу, але lock‑time в межах норми. Інша інформація в чаті – лише жартівливі та повторювані репліки без суттєвого змісту.",
+          "checkpointAdvanced": true,
+          "durationMs": 5835.6889999999985,
+          "modelCalls": 2,
+          "classifierCalls": 1,
+          "summarizerCalls": 1,
+          "missingRequired": [
+            "staging migration заверш",
+            "продакшн запуск заплановано на завтра о 09 00",
+            "іншого проекту",
+            "не скасовуємо"
+          ],
+          "forbiddenClaims": [],
+          "extractionMetrics": {
+            "requiredFactRecall": 0.25,
+            "unsupportedFactRate": 0,
+            "supersededFactLeakRate": 0,
+            "relationPreservation": 1,
+            "entityBindingAccuracy": 0.5,
+            "epistemicStateAccuracy": 0.5
+          },
+          "propositionMetrics": {
+            "passed": 2,
+            "total": 3,
+            "score": 0.6666666666666666,
+            "violations": [
+              {
+                "assertionId": "other-project",
+                "errorType": "PROVENANCE",
+                "description": "The quoted cancellation belongs to another project/service"
+              }
+            ],
+            "errorsByType": {
+              "PROVENANCE": 1
+            }
+          }
+        }
+      ],
+      "metrics": {
+        "accuracy": 1,
+        "acceptedActionRate": 1,
+        "stability": 1,
+        "actionDistribution": {
+          "SUMMARIZE": 1
+        },
+        "irreversibleLossRate": 0,
+        "unsupportedClaimRate": 0,
+        "checkpointCorrectness": 1
+      }
+    },
+    {
+      "fixtureId": "long-quoted-message-provenance@tail",
+      "scope": "semantic",
+      "status": "accepted",
+      "expectedAction": "SUMMARIZE",
+      "runs": [
+        {
+          "fixtureId": "long-quoted-message-provenance@tail",
+          "expectedAction": "SUMMARIZE",
+          "action": "SUMMARIZE",
+          "summary": "Учасники обговорювали стан міграції: один повідомив, що міграцію скасували через навантаження на базу, інший заперечив, зазначивши, що це повідомлення не стосується їхнього проєкту. Далі повідомили, що staging‑міграція вже завершилась, продакшн‑запуск заплановано на завтра о 09:00. Таблиця users займає найбільше часу, але час блокування в межах норми, а затримка репліки максимум 1.2 секунди, що прийнятно. План міграції залишився без змін.",
+          "checkpointAdvanced": true,
+          "durationMs": 9115.963999999993,
+          "modelCalls": 2,
+          "classifierCalls": 1,
+          "summarizerCalls": 1,
+          "missingRequired": [
+            "staging migration заверш",
+            "продакшн запуск заплановано на завтра о 09 00",
+            "іншого проекту",
+            "не скасовуємо"
+          ],
+          "forbiddenClaims": [],
+          "extractionMetrics": {
+            "requiredFactRecall": 0.5,
+            "unsupportedFactRate": 0,
+            "supersededFactLeakRate": 0,
+            "relationPreservation": 1,
+            "entityBindingAccuracy": 1,
+            "epistemicStateAccuracy": 0.5
+          },
+          "propositionMetrics": {
+            "passed": 3,
+            "total": 3,
+            "score": 1,
+            "violations": [],
+            "errorsByType": {}
+          }
+        }
+      ],
+      "metrics": {
+        "accuracy": 1,
+        "acceptedActionRate": 1,
+        "stability": 1,
+        "actionDistribution": {
+          "SUMMARIZE": 1
+        },
+        "irreversibleLossRate": 0,
+        "unsupportedClaimRate": 0,
+        "checkpointCorrectness": 1
+      }
+    },
+    {
+      "fixtureId": "long-frequency-vs-final-state@front",
+      "scope": "semantic",
+      "status": "accepted",
+      "expectedAction": "SUMMARIZE",
+      "runs": [
+        {
+          "fixtureId": "long-frequency-vs-final-state@front",
+          "expectedAction": "SUMMARIZE",
+          "action": "SUMMARIZE",
+          "summary": "Учасники обговорювали ліміти запитів: спочатку пропонували 100 requests/min для free tier, але після уточнення від product вирішили встановити 150 requests/min. Для paid tier залишено ліміт 1000 requests/min.",
+          "checkpointAdvanced": true,
+          "durationMs": 7882.552899999995,
+          "modelCalls": 2,
+          "classifierCalls": 1,
+          "summarizerCalls": 1,
+          "missingRequired": [],
+          "forbiddenClaims": [],
+          "extractionMetrics": {
+            "requiredFactRecall": 1,
+            "unsupportedFactRate": 0,
+            "supersededFactLeakRate": 0,
+            "relationPreservation": 1,
+            "entityBindingAccuracy": 1,
+            "epistemicStateAccuracy": 1
+          },
+          "propositionMetrics": {
+            "passed": 3,
+            "total": 3,
+            "score": 1,
+            "violations": [],
+            "errorsByType": {}
+          }
+        }
+      ],
+      "metrics": {
+        "accuracy": 1,
+        "acceptedActionRate": 1,
+        "stability": 1,
+        "actionDistribution": {
+          "SUMMARIZE": 1
+        },
+        "irreversibleLossRate": 0,
+        "unsupportedClaimRate": 0,
+        "checkpointCorrectness": 1
+      }
+    },
+    {
+      "fixtureId": "long-frequency-vs-final-state@middle",
+      "scope": "semantic",
+      "status": "accepted",
+      "expectedAction": "SUMMARIZE",
+      "runs": [
+        {
+          "fixtureId": "long-frequency-vs-final-state@middle",
+          "expectedAction": "SUMMARIZE",
+          "action": "SUMMARIZE",
+          "summary": "У чаті три учасники обмінюються короткими фразами, які повторюються у вигляді жартівливих реплік (наприклад, про каву, зависання IDE, скріншоти, \"💀\", \"ахах\"). Після кількох таких обмінів учасники обговорюють ліміти запитів: спочатку пропонують 100 requests/min для free tier, потім згадують, що product вимагає 150, і остаточно встановлюють 150 requests/min для free tier, залишаючи 1000 requests/min для paid tier.",
+          "checkpointAdvanced": true,
+          "durationMs": 9036.951899999985,
+          "modelCalls": 2,
+          "classifierCalls": 1,
+          "summarizerCalls": 1,
+          "missingRequired": [],
+          "forbiddenClaims": [],
+          "extractionMetrics": {
+            "requiredFactRecall": 1,
+            "unsupportedFactRate": 0,
+            "supersededFactLeakRate": 0,
+            "relationPreservation": 1,
+            "entityBindingAccuracy": 1,
+            "epistemicStateAccuracy": 1
+          },
+          "propositionMetrics": {
+            "passed": 3,
+            "total": 3,
+            "score": 1,
+            "violations": [],
+            "errorsByType": {}
+          }
+        }
+      ],
+      "metrics": {
+        "accuracy": 1,
+        "acceptedActionRate": 1,
+        "stability": 1,
+        "actionDistribution": {
+          "SUMMARIZE": 1
+        },
+        "irreversibleLossRate": 0,
+        "unsupportedClaimRate": 0,
+        "checkpointCorrectness": 1
+      }
+    },
+    {
+      "fixtureId": "long-frequency-vs-final-state@tail",
+      "scope": "semantic",
+      "status": "accepted",
+      "expectedAction": "SUMMARIZE",
+      "runs": [
+        {
+          "fixtureId": "long-frequency-vs-final-state@tail",
+          "expectedAction": "SUMMARIZE",
+          "action": "SUMMARIZE",
+          "summary": "Учасники обговорювали ліміти запитів: спочатку пропонували 100 requests/min для free tier, потім згадали, що product вимагає 150, і остаточно встановили 150 requests/min для free tier, залишивши 1000 requests/min для paid tier.",
+          "checkpointAdvanced": true,
+          "durationMs": 5241.550900000002,
+          "modelCalls": 2,
+          "classifierCalls": 1,
+          "summarizerCalls": 1,
+          "missingRequired": [],
+          "forbiddenClaims": [],
+          "extractionMetrics": {
+            "requiredFactRecall": 1,
+            "unsupportedFactRate": 0,
+            "supersededFactLeakRate": 0,
+            "relationPreservation": 1,
+            "entityBindingAccuracy": 1,
+            "epistemicStateAccuracy": 1
+          },
+          "propositionMetrics": {
+            "passed": 3,
+            "total": 3,
+            "score": 1,
+            "violations": [],
+            "errorsByType": {}
+          }
+        }
+      ],
+      "metrics": {
+        "accuracy": 1,
+        "acceptedActionRate": 1,
+        "stability": 1,
+        "actionDistribution": {
+          "SUMMARIZE": 1
+        },
+        "irreversibleLossRate": 0,
+        "unsupportedClaimRate": 0,
+        "checkpointCorrectness": 1
+      }
+    },
+    {
+      "fixtureId": "long-two-similar-services@front",
+      "scope": "semantic",
+      "status": "accepted",
+      "expectedAction": "SUMMARIZE",
+      "runs": [
+        {
+          "fixtureId": "long-two-similar-services@front",
+          "expectedAction": "SUMMARIZE",
+          "action": "SUMMARIZE",
+          "summary": "Учасники обговорювали кешування: для auth‑service залишають Redis, оскільки його вимоги до консистентності високі; у profile‑service Redis є вузьким місцем, тому планується прибрати його для публічних метаданих і кешувати їх локально на 5 хв, а приватні поля взагалі не кешувати.",
+          "checkpointAdvanced": true,
+          "durationMs": 7427.405100000004,
+          "modelCalls": 2,
+          "classifierCalls": 1,
+          "summarizerCalls": 1,
+          "missingRequired": [
+            "public metadata",
+            "private profile fields"
+          ],
+          "forbiddenClaims": [],
+          "extractionMetrics": {
+            "requiredFactRecall": 0.75,
+            "unsupportedFactRate": 0,
+            "supersededFactLeakRate": 0,
+            "relationPreservation": 1,
+            "entityBindingAccuracy": 0.875,
+            "epistemicStateAccuracy": 1
+          },
+          "propositionMetrics": {
+            "passed": 4,
+            "total": 4,
+            "score": 1,
+            "violations": [],
+            "errorsByType": {}
+          }
+        }
+      ],
+      "metrics": {
+        "accuracy": 1,
+        "acceptedActionRate": 1,
+        "stability": 1,
+        "actionDistribution": {
+          "SUMMARIZE": 1
+        },
+        "irreversibleLossRate": 0,
+        "unsupportedClaimRate": 0,
+        "checkpointCorrectness": 1
+      }
+    },
+    {
+      "fixtureId": "long-two-similar-services@middle",
+      "scope": "semantic",
+      "status": "accepted",
+      "expectedAction": "SUMMARIZE",
+      "runs": [
+        {
+          "fixtureId": "long-two-similar-services@middle",
+          "expectedAction": "SUMMARIZE",
+          "action": "SUMMARIZE",
+          "summary": "Учасники обговорювали використання Redis у двох мікросервісах. Для auth‑service вирішено залишити Redis, оскільки кешування сесій критичне. Для profile‑service планується прибрати Redis для публічних метаданих і кешувати їх локально на 5 хвилин; приватні поля профілю не кешуються, а дані сесії не належать цьому сервісу.",
+          "checkpointAdvanced": true,
+          "durationMs": 6365.556199999992,
+          "modelCalls": 2,
+          "classifierCalls": 1,
+          "summarizerCalls": 1,
+          "missingRequired": [
+            "public metadata",
+            "private profile fields"
+          ],
+          "forbiddenClaims": [],
+          "extractionMetrics": {
+            "requiredFactRecall": 1,
+            "unsupportedFactRate": 0,
+            "supersededFactLeakRate": 0,
+            "relationPreservation": 1,
+            "entityBindingAccuracy": 1,
+            "epistemicStateAccuracy": 1
+          },
+          "propositionMetrics": {
+            "passed": 4,
+            "total": 4,
+            "score": 1,
+            "violations": [],
+            "errorsByType": {}
+          }
+        }
+      ],
+      "metrics": {
+        "accuracy": 1,
+        "acceptedActionRate": 1,
+        "stability": 1,
+        "actionDistribution": {
+          "SUMMARIZE": 1
+        },
+        "irreversibleLossRate": 0,
+        "unsupportedClaimRate": 0,
+        "checkpointCorrectness": 1
+      }
+    },
+    {
+      "fixtureId": "long-two-similar-services@tail",
+      "scope": "semantic",
+      "status": "accepted",
+      "expectedAction": "SUMMARIZE",
+      "runs": [
+        {
+          "fixtureId": "long-two-similar-services@tail",
+          "expectedAction": "SUMMARIZE",
+          "action": "SUMMARIZE",
+          "summary": "Учасники обговорювали використання Redis у мікросервісах. Для auth‑service залишають Redis, оскільки session cache невеликий, а його відсутність неприйнятна. У profile‑service Redis став вузьким місцем; вирішено прибрати його для public metadata, кешуючи ці дані локально на 5 хвилин, тоді як private поля профілю не кешуються, а session‑дані не належать до profile‑service.",
+          "checkpointAdvanced": true,
+          "durationMs": 4996.599799999996,
+          "modelCalls": 2,
+          "classifierCalls": 1,
+          "summarizerCalls": 1,
+          "missingRequired": [
+            "private profile fields"
+          ],
+          "forbiddenClaims": [],
+          "extractionMetrics": {
+            "requiredFactRecall": 1,
+            "unsupportedFactRate": 0,
+            "supersededFactLeakRate": 0,
+            "relationPreservation": 1,
+            "entityBindingAccuracy": 1,
+            "epistemicStateAccuracy": 1
+          },
+          "propositionMetrics": {
+            "passed": 4,
+            "total": 4,
+            "score": 1,
+            "violations": [],
+            "errorsByType": {}
+          }
+        }
+      ],
+      "metrics": {
+        "accuracy": 1,
+        "acceptedActionRate": 1,
+        "stability": 1,
+        "actionDistribution": {
+          "SUMMARIZE": 1
+        },
+        "irreversibleLossRate": 0,
+        "unsupportedClaimRate": 0,
+        "checkpointCorrectness": 1
+      }
+    }
+  ],
+  "totals": {
+    "fixtures": 21,
+    "runs": 21,
+    "modelCalls": 41,
+    "classifierCalls": 21,
+    "summarizerCalls": 20,
+    "telemetryInvariants": {
+      "callsBalance": true,
+      "summarizerMatchesActions": true
+    },
+    "errors": 0,
+    "accuracy": 0.9523809523809523,
+    "semanticHeadline": {
+      "fixtures": 21,
+      "runs": 21,
+      "correct": 20,
+      "accuracy": 0.9523809523809523
+    },
+    "policyBehaviorHeadline": {
+      "fixtures": 21,
+      "runs": 21,
+      "correct": 21,
+      "accuracy": 1
+    },
+    "stability": {
+      "mean": 1,
+      "min": 1,
+      "unstableFixtureCount": 0
+    },
+    "semanticPropositions": {
+      "evaluatedSummaries": 20,
+      "passed": 69,
+      "total": 75,
+      "score": 0.92,
+      "errorsByType": {
+        "FACT_OMISSION": 0,
+        "FACT_INVENTION": 0,
+        "ENTITY_BINDING": 2,
+        "NUMERIC_TYPE": 2,
+        "PROVENANCE": 2,
+        "SUPERSESSION": 0,
+        "EPISTEMIC_STATE": 0,
+        "CONDITION_PRESERVATION": 0
+      }
+    },
+    "excludedFromSemanticHeadline": {
+      "systemFixtures": 0,
+      "underReviewFixtures": 0
+    },
+    "weightedErrors": {
+      "totalCost": 0,
+      "critical": 0,
+      "medium": 0,
+      "low": 0,
+      "categories": {},
+      "costBySeverity": {
+        "critical": 0,
+        "medium": 0,
+        "low": 0
+      },
+      "costByCategory": {}
+    },
+    "irreversibleLosses": 0,
+    "lexicalConstraintDiagnostics": 71,
+    "releaseGate": {
+      "criticalErrors": true,
+      "irreversibleLosses": true,
+      "providerParseFailures": true,
+      "productSafeActionRate": true,
+      "semanticPropositionScore": true,
+      "passed": true,
+      "thresholds": {
+        "productSafeActionRate": 0.9,
+        "semanticPropositionScore": 0.9
+      }
+    }
+  }
+}
