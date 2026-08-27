@@ -7,6 +7,7 @@ contract against `gpt-oss:120b-cloud`, set `OLLAMA_HOST=https://ollama.com` and
 ```sh
 pnpm eval:live:smoke
 pnpm eval:live:stability
+pnpm eval:live:extraction
 pnpm eval:live -- --fixture durable-70k-pc-story --runs 20
 ```
 

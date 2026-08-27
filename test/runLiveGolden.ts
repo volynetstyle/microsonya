@@ -25,6 +25,15 @@ import {
   type E2EResult,
   type EvaluationMetrics,
 } from "./goldenEvaluation.js";
+import {
+  expandExtractionFixture,
+  EXTRACTION_PLACEMENTS,
+  extractionFixtures,
+} from "./extractionFixtures.js";
+import {
+  evaluateExtraction,
+  type ExtractionMetrics,
+} from "./extractionEvaluation.js";
 
 loadEnv({ quiet: true });
 
@@ -35,6 +44,7 @@ interface LiveResult extends E2EResult {
   readonly modelCalls: number;
   readonly missingRequired: readonly string[];
   readonly forbiddenClaims: readonly string[];
+  readonly extractionMetrics?: ExtractionMetrics;
   readonly error?: string;
 }
 
@@ -67,7 +77,7 @@ for (const fixture of selected) {
       const result = runs.at(-1)!;
       const marker = result.error
         ? "ERROR"
-        : result.action === result.expectedAction
+        : isPassingResult(result)
           ? "PASS"
           : "FAIL";
       process.stderr.write(
@@ -100,7 +110,8 @@ if (
       metrics.accuracy < args.minimumAccuracy ||
       metrics.irreversibleLossRate > 0 ||
       metrics.checkpointCorrectness < 1,
-  )
+  ) ||
+  reports.some(({ runs }) => runs.some((result) => !isPassingResult(result)))
 ) {
   process.exitCode = 1;
 }
@@ -154,6 +165,7 @@ async function runFixture(
         ? result.disposition.summary.text
         : undefined;
     const constraints = evaluateSummaryConstraints(fixture, summary);
+    const extractionFixture = findExtractionFixture(fixture.id);
 
     return {
       fixtureId: fixture.id,
@@ -164,6 +176,9 @@ async function runFixture(
       durationMs: performance.now() - startedAt,
       modelCalls,
       ...constraints,
+      ...(extractionFixture
+        ? { extractionMetrics: evaluateExtraction(extractionFixture, summary) }
+        : {}),
     };
   } catch (error) {
     return {
@@ -227,7 +242,9 @@ function parseArgs(argv: readonly string[]) {
     return index === -1 ? undefined : argv[index + 1];
   };
   const suite = read("--suite") ?? "smoke";
-  if (!["smoke", "adversarial", "stability", "all"].includes(suite)) {
+  if (
+    !["smoke", "adversarial", "stability", "extraction", "all"].includes(suite)
+  ) {
     throw new TypeError(`Unknown suite: ${suite}`);
   }
   const runs = positiveInteger(
@@ -243,7 +260,12 @@ function parseArgs(argv: readonly string[]) {
     throw new TypeError("minimum-accuracy must be between 0 and 1.");
   }
   return {
-    suite: suite as "smoke" | "adversarial" | "stability" | "all",
+    suite: suite as
+      | "smoke"
+      | "adversarial"
+      | "stability"
+      | "extraction"
+      | "all",
     runs,
     timeoutMs,
     minimumAccuracy,
@@ -253,7 +275,16 @@ function parseArgs(argv: readonly string[]) {
 }
 
 function selectFixtures(args: ReturnType<typeof parseArgs>): E2EFixture[] {
-  const byId = new Map(goldenFixtures.map((value) => [value.id, value]));
+  const extraction = extractionFixtures.flatMap((fixture) =>
+    EXTRACTION_PLACEMENTS.map((placement) =>
+      expandExtractionFixture(fixture, placement),
+    ),
+  );
+  const available =
+    args.suite === "extraction"
+      ? extraction
+      : [...goldenFixtures, ...extraction];
+  const byId = new Map(available.map((value) => [value.id, value]));
   const ids = args.fixtureId
     ? [args.fixtureId]
     : args.suite === "smoke"
@@ -266,12 +297,33 @@ function selectFixtures(args: ReturnType<typeof parseArgs>): E2EFixture[] {
               "durable-70k-pc-story",
               "banter-70k-pc",
             ]
-          : goldenFixtures.map(({ id }) => id);
+          : args.suite === "extraction"
+            ? extraction.map(({ id }) => id)
+            : available.map(({ id }) => id);
   return ids.map((id) => {
     const value = byId.get(id);
     if (!value) throw new TypeError(`Unknown fixture: ${id}`);
     return value;
   });
+}
+
+function findExtractionFixture(expandedId: string) {
+  const baseId = expandedId.split("@")[0];
+  return extractionFixtures.find(({ id }) => id === baseId);
+}
+
+function isPassingResult(result: LiveResult): boolean {
+  if (result.error || result.action !== result.expectedAction) return false;
+  const metrics = result.extractionMetrics;
+  return (
+    metrics === undefined ||
+    (metrics.requiredFactRecall === 1 &&
+      metrics.unsupportedFactRate === 0 &&
+      metrics.supersededFactLeakRate === 0 &&
+      metrics.relationPreservation === 1 &&
+      metrics.entityBindingAccuracy === 1 &&
+      metrics.epistemicStateAccuracy === 1)
+  );
 }
 
 function positiveInteger(raw: string, label: string): number {
