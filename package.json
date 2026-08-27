@@ -12,6 +12,8 @@
     "docker:up": "docker compose up -d",
     "docker:logs": "docker compose logs -f telegram-bot",
     "typecheck": "pnpm -r typecheck",
+    "typecheck:tests": "tsc -p tsconfig.json --noEmit",
+    "check": "pnpm typecheck && pnpm typecheck:tests && pnpm test",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "format:json": "prettier --write \"**/*.{json,jsonc}\"",

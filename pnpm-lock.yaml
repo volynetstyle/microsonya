@@ -44,9 +44,6 @@ importers:
 
   apps/telegram/bot:
     dependencies:
-      '@microsonya/db':
-        specifier: workspace:*
-        version: link:../../../packages/db
       '@microsonya/model':
         specifier: workspace:*
         version: link:../../../packages/model
@@ -92,9 +89,6 @@ importers:
 
   packages/summarize:
     dependencies:
-      '@microsonya/db':
-        specifier: workspace:*
-        version: link:../db
       '@microsonya/model':
         specifier: workspace:*
         version: link:../model

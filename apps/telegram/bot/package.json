@@ -16,7 +16,6 @@
     "start": "node dist/main.js"
   },
   "dependencies": {
-    "@microsonya/db": "workspace:*",
     "@microsonya/model": "workspace:*",
     "@microsonya/shared": "workspace:*",
     "@microsonya/summarize": "workspace:*",

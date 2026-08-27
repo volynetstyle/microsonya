@@ -4,15 +4,14 @@ import {
   isRetryableTelegramError,
 } from "./launchWithRetry.js";
 import { OllamaClient, withTelemetry } from "@microsonya/model";
+import { Telegraf } from "telegraf";
 import { createStorage } from "./storage.js";
-import { telegramCommands as summarizeCommands } from "./commands/summarize.js";
-import { createTelegramBot } from "./telegramBot.js";
+import { telegramCommands } from "./command.js";
+import { createMessageHandler } from "./telegramHandlers.js";
 import {
   createSummarizer,
   SummarizationTelemetryService,
 } from "@microsonya/summarize";
-
-const telegramCommands = summarizeCommands;
 
 const config = readConfig();
 const storage = createStorage();
@@ -28,10 +27,14 @@ const summarizer = createSummarizer({
   ollama,
   telemetry: new SummarizationTelemetryService(),
 });
-const bot = createTelegramBot(config, {
-  storage,
-  summarizer,
-});
+const bot = new Telegraf(config.telegramToken);
+bot.on(
+  "message",
+  createMessageHandler({
+    messages: storage.messages,
+    summarizer,
+  }),
+);
 const shutdown = new AbortController();
 
 function stop(reason: string): void {

@@ -5,6 +5,7 @@ declare global {
       TELEGRAM_BOT_TOKEN?: string;
       OLLAMA_HOST?: string;
       OLLAMA_API_KEY?: string;
+      SUMMARIZATION_LOG_PROMPT?: string;
     }
   }
 }

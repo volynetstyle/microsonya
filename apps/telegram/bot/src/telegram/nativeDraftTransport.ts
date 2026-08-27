@@ -1,6 +1,6 @@
 import { randomInt } from "node:crypto";
 import { TelegramError, type Context } from "telegraf";
-import type { DraftStreamTransport } from "./draftStream.js";
+import type { ReplyTransport } from "../replySession.js";
 
 const PEER_DRAFT_INTERVAL_MS = 800;
 const peerQueues = new Map<number, Promise<void>>();
@@ -19,7 +19,7 @@ type DraftCapableTelegram = {
   callApi(method: "sendMessage", payload: SendMessagePayload): Promise<unknown>;
 };
 
-export function createNativeDraftTransport(ctx: Context): DraftStreamTransport {
+export function createNativeDraftTransport(ctx: Context): ReplyTransport {
   const chat = ctx.chat;
   if (!chat || chat.type !== "private") {
     throw new Error("Native Telegram drafts require a private chat");
@@ -50,7 +50,7 @@ export function createNativeDraftTransport(ctx: Context): DraftStreamTransport {
         await telegram.callApi("sendMessageDraft", {
           chat_id: chat.id,
           draft_id: draftId,
-          text: state.type === "thinking" ? (state.text ?? "") : state.text,
+          text: state.text,
           ...thread,
         });
       });

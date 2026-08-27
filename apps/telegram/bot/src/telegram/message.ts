@@ -1,4 +1,10 @@
-import type { ChatMessage, MessageKind } from "@microsonya/shared";
+import {
+  asAuthorId,
+  asChatId,
+  asMessageId,
+  asTimestampMs,
+  type ChatMessage,
+} from "@microsonya/shared";
 
 type TelegramUser = {
   id: number;
@@ -52,27 +58,57 @@ export type TelegramMessageLike = {
   message_thread_id?: number;
 };
 
-export function toChatMessage(message: TelegramMessageLike): ChatMessage {
-  const source = toMessageSource(message);
-  const text = message.text ?? message.caption ?? "";
+export type TelegramMessageMappingOptions = {
+  /** Excludes this bot's own derived replies from future source evidence. */
+  selfAuthorId?: string;
+};
 
-  return {
-    id: message.message_id,
-    chatId: String(message.chat.id),
-    date: source.date * 1000,
-    authorId: source.authorId,
-    authorName: source.authorName,
+/** Converts one Telegram payload into canonical text conversation data. */
+export function fromTelegram(
+  message: TelegramMessageLike,
+  options: TelegramMessageMappingOptions = {},
+): ChatMessage | undefined {
+  if (isTelegramControlMessage(message)) {
+    return undefined;
+  }
+
+  const source = toMessageSource(message);
+  if (source.authorId === options.selfAuthorId) return undefined;
+  const text = message.text ?? message.caption;
+
+  if (text === undefined || text.trim() === "") {
+    return undefined;
+  }
+
+  const author = Object.freeze({
+    id: asAuthorId(source.authorId),
+    label: source.authorName,
+  });
+
+  return Object.freeze({
+    id: asMessageId(message.message_id),
+    chatId: asChatId(String(message.chat.id)),
+    author,
+    // Destination time defines the observable chat chronology. A forwarded
+    // origin's historical date must not move a newly observed message back in W.
+    time: asTimestampMs(message.date * 1000),
+    parentId:
+      message.reply_to_message === undefined
+        ? null
+        : asMessageId(message.reply_to_message.message_id),
     text,
-    replyToId: message.reply_to_message?.message_id,
-    kind: getMessageKind(message),
-    isCommand:
-      !isForwardedMessage(message) &&
-      Boolean(
-        message.entities?.some(
-          (entity) => entity.type === "bot_command" && entity.offset === 0,
-        ),
-      ),
-  };
+  });
+}
+
+/** Telegram commands are control input, including commands in imported history. */
+export function isTelegramControlMessage(
+  message: TelegramMessageLike,
+): boolean {
+  return Boolean(
+    message.entities?.some(
+      (entity) => entity.type === "bot_command" && entity.offset === 0,
+    ),
+  );
 }
 
 export function isForwardedMessage(message: TelegramMessageLike): boolean {
@@ -86,22 +122,17 @@ export function isForwardedMessage(message: TelegramMessageLike): boolean {
 }
 
 function toMessageSource(message: TelegramMessageLike): {
-  date: number;
   authorId: string;
   authorName: string;
 } {
   const origin = message.forward_origin;
 
   if (origin) {
-    return {
-      date: origin.date ?? message.date,
-      ...toForwardOriginAuthor(origin),
-    };
+    return toForwardOriginAuthor(origin);
   }
 
   if (message.forward_from) {
     return {
-      date: message.forward_date ?? message.date,
       authorId: String(message.forward_from.id),
       authorName: formatUserName(message.forward_from),
     };
@@ -109,7 +140,6 @@ function toMessageSource(message: TelegramMessageLike): {
 
   if (message.forward_sender_name) {
     return {
-      date: message.forward_date ?? message.date,
       authorId: message.forward_sender_name,
       authorName: message.forward_sender_name,
     };
@@ -117,7 +147,6 @@ function toMessageSource(message: TelegramMessageLike): {
 
   if (message.forward_from_chat) {
     return {
-      date: message.forward_date ?? message.date,
       authorId: String(message.forward_from_chat.id),
       authorName: formatChatName(message.forward_from_chat),
     };
@@ -126,7 +155,6 @@ function toMessageSource(message: TelegramMessageLike): {
   const from = message.from;
 
   return {
-    date: message.date,
     authorId: from ? String(from.id) : String(message.chat.id),
     authorName: from ? formatUserName(from) : formatChatName(message.chat),
   };
@@ -180,26 +208,6 @@ function toForwardOriginAuthor(origin: TelegramForwardOrigin): {
     authorId: "forwarded",
     authorName: "Forwarded",
   };
-}
-
-function getMessageKind(message: TelegramMessageLike): MessageKind {
-  if (message.text || message.caption) {
-    return "text";
-  }
-
-  if (message.photo) {
-    return "photo";
-  }
-
-  if (message.voice) {
-    return "voice";
-  }
-
-  if (message.sticker) {
-    return "sticker";
-  }
-
-  return "service";
 }
 
 function formatUserName(user: TelegramUser): string {
