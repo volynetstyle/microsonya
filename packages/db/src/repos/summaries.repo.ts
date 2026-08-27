@@ -1,7 +1,6 @@
 import { and, desc, eq, inArray } from "drizzle-orm";
 import {
   SUMMARY_ACTIONS,
-  asChatId,
   asMessageId,
   asSummaryId,
   asTimestampMs,
@@ -12,7 +11,7 @@ import {
   type SummaryRunAttempt,
 } from "@microsonya/shared";
 import type { MicrosonyaDb } from "../client.js";
-import type { LedgerEncryption } from "../encryption.js";
+import type { DataEncryption } from "../encryption.js";
 import {
   datasetCandidates,
   modelInvocations,
@@ -23,7 +22,7 @@ import {
 export class SummariesRepo {
   constructor(
     private readonly db: MicrosonyaDb,
-    private readonly encryption: LedgerEncryption,
+    private readonly encryption: DataEncryption,
   ) {}
 
   async findLastRun(chatId: ChatId): Promise<SummaryRun | undefined> {
@@ -33,7 +32,7 @@ export class SummariesRepo {
         .from(summaryRuns)
         .where(
           and(
-            eq(summaryRuns.chatId, chatId),
+            eq(summaryRuns.chatId, this.chatKey(chatId)),
             inArray(summaryRuns.status, ["summarized", "skipped"]),
           ),
         )
@@ -50,17 +49,18 @@ export class SummariesRepo {
 
     return Object.freeze({
       id: asSummaryId(row.id),
-      chatId: asChatId(row.chatId),
+      chatId,
       commandMessageId: asMessageId(row.commandMessageId),
       createdAt: asTimestampMs(row.createdAt),
       covers,
       mode: asSummaryMode(row.mode),
       status: asSummaryStatus(row.status),
       action: asSummaryAction(row.action),
-      finalText:
-        row.summaryTextCiphertext === null
-          ? (row.text ?? "")
-          : this.encryption.decrypt(row.summaryTextCiphertext),
+      finalText: decryptRequired(
+        this.encryption,
+        row.summaryTextCiphertext,
+        "Terminal summary text",
+      ),
     });
   }
 
@@ -71,7 +71,7 @@ export class SummariesRepo {
         .insert(summaryRuns)
         .values({
           id: attempt.id,
-          chatId: attempt.chatId,
+          chatId: this.chatKey(attempt.chatId),
           commandMessageId: attempt.commandMessageId,
           fromMessageId: attempt.messages.find(
             ({ role }) => role === "eligible",
@@ -90,11 +90,16 @@ export class SummariesRepo {
           mode: attempt.mode,
           status: attempt.status,
           action: attempt.action,
-          text: null,
           classifierModel: attempt.classifierModel,
           summarizerModel: attempt.summarizerModel,
-          classifierPromptHash: attempt.classifierPromptHash,
-          summaryPromptHash: attempt.summaryPromptHash,
+          classifierPromptHash: this.privateFingerprint(
+            attempt.classifierPromptHash,
+            "classifier-prompt-hash",
+          ),
+          summaryPromptHash: this.privateFingerprint(
+            attempt.summaryPromptHash,
+            "summary-prompt-hash",
+          ),
           policyHash: attempt.policyHash,
           classifierLatencyMs: rounded(attempt.classifierLatencyMs),
           summarizerLatencyMs: rounded(attempt.summarizerLatencyMs),
@@ -104,7 +109,10 @@ export class SummariesRepo {
               ? null
               : this.encryption.encrypt(attempt.summaryText),
           errorCode: attempt.errorCode,
-          inputHash: attempt.inputHash,
+          inputHash: this.encryption.lookup(
+            attempt.inputHash,
+            "summary-input-hash",
+          ),
         })
         .onConflictDoNothing()
         .returning({ id: summaryRuns.id });
@@ -116,11 +124,11 @@ export class SummariesRepo {
           attempt.messages.map((message) => ({
             runId: attempt.id,
             ordinal: message.ordinal,
-            chatId: message.chatId,
+            chatId: this.chatKey(message.chatId),
             messageId: message.messageId,
             role: message.role,
-            authorId: message.authorId,
-            authorName: message.authorName,
+            authorId: this.authorKey(message.authorId),
+            authorNameCiphertext: this.encryption.encrypt(message.authorName),
             textCiphertext: this.encryption.encrypt(message.text),
             sentAt: message.sentAt,
             replyToId: message.replyToId,
@@ -135,7 +143,10 @@ export class SummariesRepo {
             runId: attempt.id,
             stage: invocation.stage,
             model: invocation.model,
-            promptHash: invocation.promptHash,
+            promptHash: this.encryption.lookup(
+              invocation.promptHash,
+              `${invocation.stage}-prompt-hash`,
+            ),
             inputTokens: invocation.inputTokens,
             outputTokens: invocation.outputTokens,
             latencyMs:
@@ -171,7 +182,7 @@ export class SummariesRepo {
       .insert(summaryRuns)
       .values({
         id: run.id,
-        chatId: run.chatId,
+        chatId: this.chatKey(run.chatId),
         commandMessageId: run.commandMessageId,
         fromMessageId: run.covers.firstId,
         toMessageId: run.covers.lastId,
@@ -185,10 +196,9 @@ export class SummariesRepo {
         mode: run.mode,
         status: run.status,
         action: run.action,
-        text: null,
         policyHash: "legacy",
         summaryTextCiphertext: this.encryption.encrypt(run.finalText),
-        inputHash: "legacy",
+        inputHash: this.encryption.lookup(run.id, "legacy-summary-input"),
       })
       .onConflictDoUpdate({
         target: [summaryRuns.chatId, summaryRuns.commandMessageId],
@@ -204,16 +214,43 @@ export class SummariesRepo {
           mode: run.mode,
           status: run.status,
           action: run.action,
-          text: null,
           summaryTextCiphertext: this.encryption.encrypt(run.finalText),
         },
       })
       .execute();
   }
+
+  private chatKey(chatId: ChatId): string {
+    return this.encryption.lookup(chatId, "telegram-chat-id");
+  }
+
+  private authorKey(authorId: string): string {
+    return this.encryption.lookup(authorId, "telegram-author-id");
+  }
+
+  private privateFingerprint(
+    value: string | undefined,
+    namespace: string,
+  ): string | undefined {
+    return value === undefined
+      ? undefined
+      : this.encryption.lookup(value, namespace);
+  }
 }
 
 function rounded(value: number): number {
   return Math.max(0, Math.round(value));
+}
+
+function decryptRequired(
+  encryption: DataEncryption,
+  ciphertext: Buffer | null,
+  label: string,
+): string {
+  if (ciphertext === null) {
+    throw new TypeError(`${label} is missing ciphertext.`);
+  }
+  return encryption.decrypt(ciphertext);
 }
 
 function asMessageCount(value: unknown): number {

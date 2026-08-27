@@ -4,7 +4,7 @@ import { PGlite } from "@electric-sql/pglite";
 import { describe, expect, it } from "vitest";
 
 describe("database migrations", () => {
-  it("upgrades a non-empty v0.1 summary_runs table to the evidence ledger", async () => {
+  it("builds the encrypted v0.1 schema from an empty database", async () => {
     const client = new PGlite();
     const migrationsDirectory = resolve(
       process.cwd(),
@@ -23,44 +23,24 @@ describe("database migrations", () => {
         );
       }
 
-      await client.exec(`
-        INSERT INTO summary_runs (
-          id, chat_id, command_message_id, from_message_id, to_message_id,
-          message_count, created_at, mode, status, action, text
-        ) VALUES (
-          'legacy-run', 'chat-1', 100, 1, 2,
-          2, 1700000000000, 'recent', 'summarized', 'SUMMARIZE', 'legacy text'
-        );
-      `);
-
       await client.exec(
         await readFile(
           resolve(migrationsDirectory, "0004_optimal_blob.sql"),
           "utf8",
         ),
       );
-
-      const result = await client.query<{
-        started_at: number;
-        completed_at: number;
-        checkpoint_after: number;
-        eligible_count: number;
-        policy_hash: string;
-        input_hash: string;
-      }>(`
-        SELECT started_at, completed_at, checkpoint_after, eligible_count,
-               policy_hash, input_hash
-        FROM summary_runs
-        WHERE id = 'legacy-run'
-      `);
-      expect(result.rows[0]).toMatchObject({
-        started_at: 1_700_000_000_000,
-        completed_at: 1_700_000_000_000,
-        checkpoint_after: 2,
-        eligible_count: 2,
-        policy_hash: "legacy",
-        input_hash: "legacy:legacy-run",
-      });
+      await client.exec(
+        await readFile(
+          resolve(migrationsDirectory, "0005_clever_korath.sql"),
+          "utf8",
+        ),
+      );
+      await client.exec(
+        await readFile(
+          resolve(migrationsDirectory, "0006_good_apocalypse.sql"),
+          "utf8",
+        ),
+      );
 
       const tables = await client.query<{ table_name: string }>(`
         SELECT table_name
@@ -76,6 +56,22 @@ describe("database migrations", () => {
           "dataset_candidates",
         ]),
       );
+
+      const privatePlaintextColumns = await client.query<{
+        column_name: string;
+      }>(`
+        SELECT column_name
+        FROM information_schema.columns
+        WHERE table_schema = 'public'
+          AND (
+            (table_name = 'messages' AND column_name IN ('text', 'author_name'))
+            OR (table_name = 'summary_runs' AND column_name = 'text')
+            OR (table_name = 'summary_run_messages'
+                AND column_name IN ('author_name', 'forward_origin'))
+            OR (table_name = 'summary_feedback' AND column_name = 'comment')
+          )
+      `);
+      expect(privatePlaintextColumns.rows).toEqual([]);
     } finally {
       await client.close();
     }

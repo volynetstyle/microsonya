@@ -1,14 +1,23 @@
-import { createCipheriv, createDecipheriv, randomBytes } from "node:crypto";
+import {
+  createCipheriv,
+  createDecipheriv,
+  createHmac,
+  randomBytes,
+} from "node:crypto";
 
 const ALGORITHM = "aes-256-gcm";
 const IV_BYTES = 12;
 
-export type LedgerEncryption = {
+export type DataEncryption = {
   encrypt(plaintext: string): Buffer;
   decrypt(envelope: Buffer): string;
+  lookup(value: string, namespace: string): string;
 };
 
-export function createLedgerEncryption(key: Buffer): LedgerEncryption {
+/** @deprecated Use DataEncryption. Kept for source compatibility. */
+export type LedgerEncryption = DataEncryption;
+
+export function createDataEncryption(key: Buffer): DataEncryption {
   if (key.byteLength !== 32) {
     throw new TypeError("Summary ledger encryption key must be 32 bytes.");
   }
@@ -37,10 +46,23 @@ export function createLedgerEncryption(key: Buffer): LedgerEncryption {
         decipher.final(),
       ]).toString("utf8");
     },
+    lookup(value: string, namespace: string): string {
+      return `h1:${createHmac("sha256", key)
+        .update(namespace, "utf8")
+        .update("\0", "utf8")
+        .update(value, "utf8")
+        .digest("hex")}`;
+    },
   };
 }
 
-export function ledgerEncryptionFromBase64(value: string): LedgerEncryption {
+export function dataEncryptionFromBase64(value: string): DataEncryption {
   const key = Buffer.from(value, "base64");
-  return createLedgerEncryption(key);
+  return createDataEncryption(key);
 }
+
+/** @deprecated Use createDataEncryption. */
+export const createLedgerEncryption = createDataEncryption;
+
+/** @deprecated Use dataEncryptionFromBase64. */
+export const ledgerEncryptionFromBase64 = dataEncryptionFromBase64;

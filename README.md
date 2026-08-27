@@ -1,7 +1,7 @@
 # Microsonya 0.1
 
-Telegram bot that keeps canonical text messages in memory and creates on-demand
-Ukrainian summaries.
+Telegram bot that keeps canonical text messages and creates on-demand Ukrainian
+summaries.
 
 ```text
 Telegram payload
@@ -48,12 +48,23 @@ Production consists of `apps/telegram/bot` and the `shared`, `model`,
 `summarize`, and `db` packages. PostgreSQL stores canonical messages plus an
 immutable summary attempt ledger. Development may omit `DATABASE_URL` and use
 in-memory storage; production requires `DATABASE_URL` and a base64-encoded
-32-byte `SUMMARY_LEDGER_ENCRYPTION_KEY`.
+32-byte `MICROSONYA_DATA_ENCRYPTION_KEY`. The former
+`SUMMARY_LEDGER_ENCRYPTION_KEY` name remains accepted during migration.
+
+PostgreSQL never stores raw Telegram chat IDs, author IDs, author names, message
+text, summaries, model text output, feedback comments, or corrections. Chat and
+author identifiers use domain-separated keyed HMAC lookup values; private text
+uses randomized authenticated AES-256-GCM ciphertext. Message sequence numbers,
+timestamps, reply relationships, actions, statuses, and latency remain
+operational metadata, but cannot be joined back to a real Telegram chat without
+the application key. Keep the encryption key outside the database and its
+backups.
 
 Copy `.env.example` to `.env`, then run:
 
 ```bash
 pnpm install
+pnpm db:migrate
 pnpm check
 pnpm build
 pnpm start
@@ -64,4 +75,5 @@ supported.
 
 Set `SUMMARIZATION_LOG_PROMPT=1` temporarily to include the complete PIPECHAT
 window sent to the classifier and summarizer in telemetry. It contains chat
-content and should remain disabled outside diagnostics.
+content and should remain disabled outside diagnostics. Full prompt and model
+response logging is rejected when `NODE_ENV=production`.

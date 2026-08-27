@@ -1,13 +1,13 @@
 import { eq } from "drizzle-orm";
 import type { SummaryFeedback } from "@microsonya/shared";
 import type { MicrosonyaDb } from "../client.js";
-import type { LedgerEncryption } from "../encryption.js";
+import type { DataEncryption } from "../encryption.js";
 import { datasetCandidates, summaryFeedback } from "../schema.js";
 
 export class SummaryFeedbackRepo {
   constructor(
     private readonly db: MicrosonyaDb,
-    private readonly encryption: LedgerEncryption,
+    private readonly encryption: DataEncryption,
   ) {}
 
   async save(feedback: SummaryFeedback): Promise<void> {
@@ -17,7 +17,10 @@ export class SummaryFeedbackRepo {
         runId: feedback.runId,
         source: feedback.source,
         signal: feedback.signal,
-        comment: feedback.comment,
+        commentCiphertext:
+          feedback.comment === undefined
+            ? null
+            : this.encryption.encrypt(feedback.comment),
         correctedSummaryCiphertext:
           feedback.correctedSummary === undefined
             ? null

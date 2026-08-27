@@ -18,30 +18,39 @@ for (const envPath of [
 export type AppConfig = {
   telegramToken: string;
   databaseUrl?: string;
-  summaryLedgerEncryptionKey?: string;
+  dataEncryptionKey?: string;
   ollama: OllamaConfig;
 };
 
 export function readConfig(): AppConfig {
   const telegramToken = requiredEnv("TELEGRAM_BOT_TOKEN");
   const databaseUrl = optionalEnv("DATABASE_URL");
-  const summaryLedgerEncryptionKey = optionalEnv(
-    "SUMMARY_LEDGER_ENCRYPTION_KEY",
-  );
+  const dataEncryptionKey =
+    optionalEnv("MICROSONYA_DATA_ENCRYPTION_KEY") ??
+    optionalEnv("SUMMARY_LEDGER_ENCRYPTION_KEY");
 
   if (process.env.NODE_ENV === "production" && databaseUrl === undefined) {
     throw new Error("DATABASE_URL is required in production.");
   }
-  if (databaseUrl !== undefined && summaryLedgerEncryptionKey === undefined) {
+  if (
+    process.env.NODE_ENV === "production" &&
+    (process.env.SUMMARIZATION_LOG_PROMPT === "1" ||
+      process.env.SUMMARIZATION_LOG_MODEL_RESPONSE === "1")
+  ) {
     throw new Error(
-      "SUMMARY_LEDGER_ENCRYPTION_KEY is required when DATABASE_URL is set.",
+      "Full prompt/model-response logging is forbidden in production.",
+    );
+  }
+  if (databaseUrl !== undefined && dataEncryptionKey === undefined) {
+    throw new Error(
+      "MICROSONYA_DATA_ENCRYPTION_KEY is required when DATABASE_URL is set.",
     );
   }
 
   return {
     telegramToken,
     databaseUrl,
-    summaryLedgerEncryptionKey,
+    dataEncryptionKey,
     ollama: loadOllamaConfig(process.env),
   };
 }

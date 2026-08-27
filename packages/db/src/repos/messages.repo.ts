@@ -1,7 +1,6 @@
 import { and, asc, eq, gt, gte, lte } from "drizzle-orm";
 import {
   asAuthorId,
-  asChatId,
   asMessageId,
   asTimestampMs,
   type ChatId,
@@ -9,40 +8,48 @@ import {
   type MessageId,
 } from "@microsonya/shared";
 import type { MicrosonyaDb } from "../client.js";
+import type { DataEncryption } from "../encryption.js";
 import { messages } from "../schema.js";
 
 type MessageRow = typeof messages.$inferSelect;
 
-function mapMessageRow(row: MessageRow): ChatMessage {
+function mapMessageRow(
+  row: MessageRow,
+  requestedChatId: ChatId,
+  encryption: DataEncryption,
+): ChatMessage {
   const author = Object.freeze({
     id: asAuthorId(row.authorId),
-    label: row.authorName ?? row.authorId,
+    label: encryption.decrypt(row.authorNameCiphertext),
   });
 
   return Object.freeze({
     id: asMessageId(row.messageId),
-    chatId: asChatId(row.chatId),
+    chatId: requestedChatId,
     author,
     time: asTimestampMs(row.date),
     parentId:
       row.replyToMessageId === null ? null : asMessageId(row.replyToMessageId),
-    text: row.text ?? "",
+    text: encryption.decrypt(row.textCiphertext),
   });
 }
 
 export class MessagesRepo {
-  constructor(private readonly db: MicrosonyaDb) {}
+  constructor(
+    private readonly db: MicrosonyaDb,
+    private readonly encryption: DataEncryption,
+  ) {}
 
   async save(message: ChatMessage): Promise<void> {
     await this.db
       .insert(messages)
       .values({
-        chatId: message.chatId,
+        chatId: this.chatKey(message.chatId),
         messageId: message.id,
         date: message.time,
-        authorId: message.author.id,
-        authorName: message.author.label,
-        text: message.text,
+        authorId: this.authorKey(message.author.id),
+        authorNameCiphertext: this.encryption.encrypt(message.author.label),
+        textCiphertext: this.encryption.encrypt(message.text),
         replyToMessageId: message.parentId,
         kind: "text",
         isCommand: false,
@@ -51,9 +58,9 @@ export class MessagesRepo {
         target: [messages.chatId, messages.messageId],
         set: {
           date: message.time,
-          authorId: message.author.id,
-          authorName: message.author.label,
-          text: message.text,
+          authorId: this.authorKey(message.author.id),
+          authorNameCiphertext: this.encryption.encrypt(message.author.label),
+          textCiphertext: this.encryption.encrypt(message.text),
           replyToMessageId: message.parentId,
           kind: "text",
           isCommand: false,
@@ -69,13 +76,13 @@ export class MessagesRepo {
         .from(messages)
         .where(
           and(
-            eq(messages.chatId, chatId),
+            eq(messages.chatId, this.chatKey(chatId)),
             eq(messages.kind, "text"),
             eq(messages.isCommand, false),
           ),
         )
         .orderBy(asc(messages.date), asc(messages.messageId))
-    ).map(mapMessageRow);
+    ).map((row) => mapMessageRow(row, chatId, this.encryption));
   }
 
   async listRangeByChat(
@@ -89,7 +96,7 @@ export class MessagesRepo {
         .from(messages)
         .where(
           and(
-            eq(messages.chatId, chatId),
+            eq(messages.chatId, this.chatKey(chatId)),
             gte(messages.messageId, fromMessageId),
             lte(messages.messageId, toMessageId),
             eq(messages.kind, "text"),
@@ -97,7 +104,7 @@ export class MessagesRepo {
           ),
         )
         .orderBy(asc(messages.date), asc(messages.messageId))
-    ).map(mapMessageRow);
+    ).map((row) => mapMessageRow(row, chatId, this.encryption));
   }
 
   async listAfterByChat(
@@ -111,7 +118,7 @@ export class MessagesRepo {
         .from(messages)
         .where(
           and(
-            eq(messages.chatId, chatId),
+            eq(messages.chatId, this.chatKey(chatId)),
             gt(messages.messageId, afterMessageId),
             eq(messages.kind, "text"),
             eq(messages.isCommand, false),
@@ -119,7 +126,7 @@ export class MessagesRepo {
         )
         .orderBy(asc(messages.date), asc(messages.messageId))
         .limit(limit)
-    ).map(mapMessageRow);
+    ).map((row) => mapMessageRow(row, chatId, this.encryption));
   }
 
   async find(
@@ -132,7 +139,7 @@ export class MessagesRepo {
         .from(messages)
         .where(
           and(
-            eq(messages.chatId, chatId),
+            eq(messages.chatId, this.chatKey(chatId)),
             eq(messages.messageId, messageId),
             eq(messages.kind, "text"),
             eq(messages.isCommand, false),
@@ -141,6 +148,14 @@ export class MessagesRepo {
         .limit(1)
     ).at(0);
 
-    return row ? mapMessageRow(row) : undefined;
+    return row ? mapMessageRow(row, chatId, this.encryption) : undefined;
+  }
+
+  private chatKey(chatId: ChatId): string {
+    return this.encryption.lookup(chatId, "telegram-chat-id");
+  }
+
+  private authorKey(authorId: string): string {
+    return this.encryption.lookup(authorId, "telegram-author-id");
   }
 }

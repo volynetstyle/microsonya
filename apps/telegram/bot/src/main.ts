@@ -7,7 +7,7 @@ import { OllamaClient, withTelemetry } from "@microsonya/model";
 import {
   MessagesRepo,
   SummariesRepo,
-  ledgerEncryptionFromBase64,
+  dataEncryptionFromBase64,
   openDb,
 } from "@microsonya/db";
 import { Telegraf } from "telegraf";
@@ -22,15 +22,16 @@ import {
 const config = readConfig();
 const dbClient =
   config.databaseUrl === undefined ? undefined : openDb(config.databaseUrl);
+const dataEncryption =
+  config.dataEncryptionKey === undefined
+    ? undefined
+    : dataEncryptionFromBase64(config.dataEncryptionKey);
 const storage =
   dbClient === undefined
     ? createStorage()
     : {
-        messages: new MessagesRepo(dbClient.db),
-        summaries: new SummariesRepo(
-          dbClient.db,
-          ledgerEncryptionFromBase64(config.summaryLedgerEncryptionKey!),
-        ),
+        messages: new MessagesRepo(dbClient.db, dataEncryption!),
+        summaries: new SummariesRepo(dbClient.db, dataEncryption!),
       };
 const ollama = new OllamaClient({
   ...config.ollama,

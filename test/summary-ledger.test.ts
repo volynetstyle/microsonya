@@ -6,6 +6,7 @@ import {
   MessagesRepo,
   createLedgerEncryption,
   datasetCandidates,
+  messages as messageRows,
   modelInvocations,
   summaryFeedback,
   summaryRunMessages,
@@ -26,7 +27,7 @@ describe("production summary ledger", () => {
     const client = await openTestDb();
     const encryption = createLedgerEncryption(Buffer.alloc(32, 7));
     const summaries = new SummariesRepo(client.db, encryption);
-    const messages = new MessagesRepo(client.db);
+    const messages = new MessagesRepo(client.db, encryption);
     const feedback = new SummaryFeedbackRepo(client.db, encryption);
     const attempt = fixtureAttempt();
 
@@ -66,19 +67,34 @@ describe("production summary ledger", () => {
         .from(datasetCandidates)
         .where(eq(datasetCandidates.runId, attempt.id));
 
+      const [canonicalMessage] = await client.db
+        .select()
+        .from(messageRows)
+        .where(eq(messageRows.messageId, 11));
+      const [roundTrippedMessage] = await messages.listByChat(attempt.chatId);
+
       expect(run).toMatchObject({
         status: "summarized",
         checkpointBefore: 10,
         checkpointAfter: 12,
         eligibleCount: 2,
         contextCount: 1,
-        text: null,
-        inputHash: "input-sha256",
+        inputHash: encryption.lookup("input-sha256", "summary-input-hash"),
       });
+      expect(run!.chatId).toBe(
+        encryption.lookup("chat-ledger", "telegram-chat-id"),
+      );
       expect(encryption.decrypt(Buffer.from(run!.summaryTextCiphertext!))).toBe(
         "Final observed summary",
       );
       expect(snapshots).toHaveLength(3);
+      expect(snapshots[0]).toMatchObject({
+        chatId: encryption.lookup("chat-ledger", "telegram-chat-id"),
+        authorId: encryption.lookup("author-a", "telegram-author-id"),
+      });
+      expect(
+        encryption.decrypt(Buffer.from(snapshots[0]!.authorNameCiphertext)),
+      ).toBe("Alice");
       expect(
         snapshots.map((row) =>
           encryption.decrypt(Buffer.from(row.textCiphertext!)),
@@ -86,11 +102,49 @@ describe("production summary ledger", () => {
       ).toEqual(["Old parent", "Deploy at 18:00", "Rollback to v2"]);
       expect(invocations).toHaveLength(2);
       expect(invocations[0]!.outputJson).toMatchObject({ action: "SUMMARIZE" });
+      expect(invocations[0]!.promptHash).toBe(
+        encryption.lookup("classifier-sha256", "classifier-prompt-hash"),
+      );
+      expect(canonicalMessage).toMatchObject({
+        chatId: encryption.lookup("chat-ledger", "telegram-chat-id"),
+        authorId: encryption.lookup("author-b", "telegram-author-id"),
+      });
+      expect(
+        encryption.decrypt(Buffer.from(canonicalMessage!.textCiphertext)),
+      ).toBe("Deploy tomorrow");
+      expect(
+        encryption.decrypt(Buffer.from(canonicalMessage!.authorNameCiphertext)),
+      ).toBe("Bob");
+      expect(roundTrippedMessage).toMatchObject({
+        chatId: "chat-ledger",
+        text: "Deploy tomorrow",
+        author: {
+          id: encryption.lookup("author-b", "telegram-author-id"),
+          label: "Bob",
+        },
+      });
       expect(candidate).toMatchObject({
         priority: 10,
         reasons: ["REPLY_PROVENANCE", "NUMERIC_RICH"],
         status: "pending",
       });
+      const rawDatabaseEvidence = JSON.stringify({
+        canonicalMessage,
+        run,
+        snapshots,
+        invocations,
+      });
+      for (const privateValue of [
+        "chat-ledger",
+        "author-a",
+        "author-b",
+        "Alice",
+        "Bob",
+        "Deploy tomorrow",
+        "Final observed summary",
+      ]) {
+        expect(rawDatabaseEvidence).not.toContain(privateValue);
+      }
 
       await expect(summaries.saveAttempt(attempt)).resolves.toBeUndefined();
       const unchanged = await client.db
@@ -118,13 +172,21 @@ describe("production summary ledger", () => {
       expect(storedFeedback).toMatchObject({
         source: "user",
         signal: "corrected",
-        comment: "deadline was omitted",
       });
+      expect(
+        encryption.decrypt(Buffer.from(storedFeedback!.commentCiphertext!)),
+      ).toBe("deadline was omitted");
       expect(
         encryption.decrypt(
           Buffer.from(storedFeedback!.correctedSummaryCiphertext!),
         ),
       ).toBe("Deploy at 18:00; rollback to v2.");
+      expect(JSON.stringify(storedFeedback)).not.toContain(
+        "deadline was omitted",
+      );
+      expect(JSON.stringify(storedFeedback)).not.toContain(
+        "Deploy at 18:00; rollback to v2.",
+      );
       const [queuedAfterFeedback] = await client.db
         .select()
         .from(datasetCandidates)

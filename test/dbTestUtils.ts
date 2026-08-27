@@ -12,8 +12,8 @@ export async function openTestDb(): Promise<DbClient> {
       message_id INTEGER NOT NULL,
       date BIGINT NOT NULL,
       author_id TEXT NOT NULL,
-      author_name TEXT,
-      text TEXT,
+      author_name_ciphertext BYTEA NOT NULL,
+      text_ciphertext BYTEA NOT NULL,
       reply_to_message_id INTEGER,
       kind TEXT NOT NULL DEFAULT 'text',
       is_command BOOLEAN NOT NULL DEFAULT false,
@@ -40,7 +40,6 @@ export async function openTestDb(): Promise<DbClient> {
       mode TEXT NOT NULL,
       status TEXT NOT NULL,
       action TEXT,
-      text TEXT,
       classifier_model TEXT,
       summarizer_model TEXT,
       classifier_prompt_hash TEXT,
@@ -68,11 +67,11 @@ export async function openTestDb(): Promise<DbClient> {
       message_id INTEGER NOT NULL,
       role TEXT NOT NULL,
       author_id TEXT NOT NULL,
-      author_name TEXT,
-      text_ciphertext BYTEA,
+      author_name_ciphertext BYTEA NOT NULL,
+      text_ciphertext BYTEA NOT NULL,
       sent_at BIGINT NOT NULL,
       reply_to_id INTEGER,
-      forward_origin JSONB,
+      forward_origin_ciphertext BYTEA,
       PRIMARY KEY (run_id, ordinal)
     );
     CREATE INDEX idx_summary_run_messages_source
@@ -101,7 +100,7 @@ export async function openTestDb(): Promise<DbClient> {
       run_id TEXT NOT NULL REFERENCES summary_runs (id) ON DELETE CASCADE,
       source TEXT NOT NULL,
       signal TEXT NOT NULL,
-      comment TEXT,
+      comment_ciphertext BYTEA,
       corrected_summary_ciphertext BYTEA,
       created_at BIGINT NOT NULL
     );
