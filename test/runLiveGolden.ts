@@ -122,8 +122,8 @@ const report = {
 };
 
 const serializedReport = `${JSON.stringify(report, null, 2)}\n`;
-process.stdout.write(serializedReport);
 if (args.output) await writeFile(args.output, serializedReport, "utf8");
+if (!args.output || !args.json) process.stdout.write(serializedReport);
 
 if (!totals.releaseGate.passed) process.exitCode = 1;
 

@@ -69,7 +69,7 @@ const definitions: Readonly<Record<string, readonly PropositionAssertion[]>> = {
         /checkout/iu,
         /smoke/iu,
         /якщо|if|за умови/iu,
-        /зелен|успіш|green|pass/iu,
+        /зелен|успіш|пройд|green|pass/iu,
       ],
     ),
     forbidden(
@@ -85,10 +85,10 @@ const definitions: Readonly<Record<string, readonly PropositionAssertion[]>> = {
       "EPISTEMIC_STATE",
       "The confirmed cause is a timeout that did not abort the HTTP request",
       [
-        /timeout/iu,
-        /не\s+(?:abort|перерив)|did\s+not\s+abort/iu,
+        /timeout|таймаут/iu,
+        /не\s+(?:abort|аборт|перерив|заверш)|did\s+not\s+abort/iu,
         /http|request|запит/iu,
-        /причин|cause|підтверд/iu,
+        /причин|cause|підтверд|вияв|призвод/iu,
       ],
     ),
     required(
@@ -97,15 +97,15 @@ const definitions: Readonly<Record<string, readonly PropositionAssertion[]>> = {
       "The hotfix has not reached production",
       [
         /hotfix|виправлен/iu,
-        /prod|production|продакшн/iu,
-        /ще\s+не|not\s+yet/iu,
+        /prod|production|продакшн|прод(?:\s|[.,]|$)/iu,
+        /ще\s+(?:не|ні)|not\s+yet|не\s+(?:оновлен|випущ|викоч)/iu,
       ],
     ),
     forbidden(
       "hypothesis-promoted",
       "EPISTEMIC_STATE",
       "Redis, race condition, or connection pool must not be promoted to confirmed cause",
-      /(?:причин|cause|підтверд)[^.\n]*(?:redis|race condition|connection pool)|(?:redis|race condition|connection pool)[^.\n]*(?:був[а]?\s+причин|confirmed cause)/iu,
+      /(?:причиною\s+(?:був|була)|confirmed cause(?:\s+was)?)[^.\n]*(?:redis|race condition|connection pool)|(?:redis|race condition|connection pool)[^.\n]*(?:був[а]?\s+причин|was\s+the\s+cause)/iu,
     ),
   ],
   "long-numeric-type-collision": [
@@ -147,7 +147,7 @@ const definitions: Readonly<Record<string, readonly PropositionAssertion[]>> = {
       "version-2-planned",
       "FACT_INVENTION",
       "Version 2.0 must not be presented as the planned deployment",
-      /(?:deploy|деплой|розгор)[^.\n]*(?:версі|version)?\s*2[.]0|2[.]0[^.\n]*(?:план|залиш|deploy|розгор)/iu,
+      /(?:deploy|деплой|розгор)[^.\n]*(?:версі|version)?\s*2[.]0|2[.]0[^.\n]*(?:буде\s+(?:deploy|деплой|розгор)|планується|planned)/iu,
     ),
   ],
   "long-quoted-message-provenance": [
@@ -155,7 +155,11 @@ const definitions: Readonly<Record<string, readonly PropositionAssertion[]>> = {
       "our-plan",
       "FACT_OMISSION",
       "Our deployment remains planned for tomorrow",
-      [/наш|our/iu, /deploy|деплой/iu, /завтра|tomorrow/iu],
+      [
+        /наш|our|prod|production|продакшн/iu,
+        /міграц|migration|deploy|деплой/iu,
+        /завтра|наступн(?:ого|ий)\s+д(?:ня|ень)|tomorrow|next\s+day/iu,
+      ],
     ),
     required(
       "other-project",
@@ -163,7 +167,7 @@ const definitions: Readonly<Record<string, readonly PropositionAssertion[]>> = {
       "The quoted cancellation belongs to another project/service",
       [
         /скас|cancel/iu,
-        /інш(?:ого|ий|ому)\s+(?:проєкт|проект|сервіс)|another\s+(?:project|service)/iu,
+        /інш(?:ого|ий|ому)\s+(?:проєкт|проект|сервіс)|another\s+(?:project|service)|не\s+стосу(?:ється|валося)[^.\n]*(?:їхнього|нашого)\s+(?:проєкт|проект|сервіс)/iu,
       ],
     ),
     forbidden(
@@ -198,7 +202,7 @@ const definitions: Readonly<Record<string, readonly PropositionAssertion[]>> = {
       "free-old-final",
       "SUPERSESSION",
       "The old free-tier value 100 must not be stated as final/current",
-      /(?:free|безкоштов)[^.\n]*(?:остаточ|фіналь|поточн|залиш)[^.\n]*\b100\b|\b100\b[^.\n]*(?:остаточ|фіналь|поточн)[^.\n]*(?:free|безкоштов)/iu,
+      /(?:free|безкоштов)[^.\n]*(?:остаточ|фіналь|поточн|залиш)[^.\n]*\b100\b|(?:остаточ|фіналь|поточн)[^.\n]*(?:free|безкоштов)[^.\n]*\b100\b/iu,
     ),
   ],
   "long-two-similar-services": [
@@ -223,7 +227,7 @@ const definitions: Readonly<Record<string, readonly PropositionAssertion[]>> = {
       "auth-local",
       "ENTITY_BINDING",
       "Auth must not be bound to local cache",
-      /auth[^.\n]*(?:local|локальн)/iu,
+      /auth(?:(?!profile|профіл)[^.\n])*(?:local|локальн)/iu,
     ),
   ],
   "live-prod-version-vs-time": [
@@ -261,7 +265,7 @@ const definitions: Readonly<Record<string, readonly PropositionAssertion[]>> = {
       "live-race-confirmed",
       "EPISTEMIC_STATE",
       "Race condition remains a hypothesis",
-      /(?:race condition)[^.\n]*(?:підтверд|confirmed|причин)|(?:причин|confirmed)[^.\n]*race condition/iu,
+      /(?:race condition)[^.\n]*(?:підтверд|confirmed|була?\s+причин)|(?:причиною\s+(?:був|була)|confirmed cause)[^.\n]*race condition/iu,
     ),
   ],
 };
