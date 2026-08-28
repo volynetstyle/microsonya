@@ -49,7 +49,7 @@ export interface WindowProcessingResult {
   readonly disposition: WindowDisposition;
 }
 
-export async function decideWindow(
+export function decideWindow(
   window: ConversationWindow,
   classifier: SummaryDecisionClassifier,
   signal?: AbortSignal,
@@ -69,70 +69,18 @@ export async function decideWindow(
   });
 
   if (fast.kind === "resolved") {
-    return Object.freeze({
-      action: fast.action,
-      evidence: Object.freeze({
-        source: "deterministic" as const,
-        rule: fast.rule,
+    return Promise.resolve(
+      Object.freeze({
+        action: fast.action,
+        evidence: Object.freeze({
+          source: "deterministic" as const,
+          rule: fast.rule,
+        }),
       }),
-    });
+    );
   }
 
   return classifier.classify(window, signal, telemetry);
-}
-
-export async function applySummaryDecision(
-  window: ConversationWindow,
-  decision: SummaryDecision,
-  summarizer: ConversationSummarizer,
-  options: {
-    readonly createSummaryId?: () => SummaryId;
-    readonly now?: () => TimestampMs;
-    readonly telemetry?: SummarizationTelemetryTrace;
-  } = {},
-  signal?: AbortSignal,
-): Promise<WindowDisposition> {
-  signal?.throwIfAborted();
-
-  switch (decision.action) {
-    case "SUMMARIZE": {
-      const generated = await summarizer.summarize(
-        window,
-        signal,
-        options.telemetry,
-      );
-      signal?.throwIfAborted();
-      const messages = window.messages;
-      const summary = Object.freeze({
-        id: (options.createSummaryId ?? defaultSummaryId)(),
-        chatId: window.chatId,
-        covers: Object.freeze({
-          firstId: messages[0]!.id,
-          lastId: messages.at(-1)!.id,
-          count: messages.length,
-        }),
-        text: generated.text,
-        createdAt: (options.now ?? defaultNow)(),
-      });
-      return Object.freeze({ kind: "summarized", summary });
-    }
-
-    case "DEFER_COMPACT":
-    case "DEFER_INCOMPLETE":
-    case "DEFER_CONTEXT":
-      return Object.freeze({
-        kind: "deferred",
-        reason: decision.action,
-      });
-
-    case "SKIP_REACTIONS":
-    case "SKIP_BANTER":
-    case "SKIP_NO_VALUE":
-      return Object.freeze({
-        kind: "skipped",
-        reason: decision.action,
-      });
-  }
 }
 
 export async function processWindow(
@@ -157,17 +105,49 @@ export async function processWindow(
       ? { model: decision.evidence.model }
       : { rule: decision.evidence.rule }),
   });
-  const disposition = await applySummaryDecision(
-    window,
-    decision,
-    deps.summarizer,
-    {
-      createSummaryId: deps.createSummaryId,
-      now: deps.now,
-      telemetry: deps.telemetry,
-    },
-    signal,
-  );
+  let disposition: WindowDisposition;
+  if (decision.action === "SUMMARIZE") {
+    const generated = await deps.summarizer.summarize(
+      window,
+      signal,
+      deps.telemetry,
+    );
+    signal?.throwIfAborted();
+    const messages = window.messages;
+    disposition = Object.freeze({
+      kind: "summarized",
+      summary: Object.freeze({
+        id: (deps.createSummaryId ?? defaultSummaryId)(),
+        chatId: window.chatId,
+        covers: Object.freeze({
+          firstId: messages[0]!.id,
+          lastId: messages[messages.length - 1]!.id,
+          count: messages.length,
+        }),
+        text: generated.text,
+        createdAt: (deps.now ?? defaultNow)(),
+      }),
+    });
+  } else {
+    switch (decision.action) {
+      case "DEFER_COMPACT":
+      case "DEFER_INCOMPLETE":
+      case "DEFER_CONTEXT":
+        disposition = Object.freeze({
+          kind: "deferred",
+          reason: decision.action,
+        });
+        break;
+      case "SKIP_REACTIONS":
+      case "SKIP_BANTER":
+      case "SKIP_NO_VALUE":
+        disposition = Object.freeze({
+          kind: "skipped",
+          reason: decision.action,
+        });
+        break;
+    }
+  }
   deps.telemetry?.record({
     type: "window.disposition",
     kind: disposition.kind,

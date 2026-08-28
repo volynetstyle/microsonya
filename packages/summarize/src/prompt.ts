@@ -12,13 +12,5 @@ export function buildModelPrompt(
   policy: string,
   window: ConversationWindow,
 ): string {
-  return [
-    promptSection(policySection, policy),
-    promptSection("TRANSCRIPT_FORMAT", PIPE_GUIDE),
-    promptSection("TRANSCRIPT", encodePipeWindow(window)),
-  ].join("\n\n");
-}
-
-export function promptSection(name: string, content: string): string {
-  return [`${name}_BEGIN`, content, `${name}_END`].join("\n");
+  return `${policySection}_BEGIN\n${policy}\n${policySection}_END\n\nTRANSCRIPT_FORMAT_BEGIN\n${PIPE_GUIDE}\nTRANSCRIPT_FORMAT_END\n\nTRANSCRIPT_BEGIN\n${encodePipeWindow(window)}\nTRANSCRIPT_END`;
 }

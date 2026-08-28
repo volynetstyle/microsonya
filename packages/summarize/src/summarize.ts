@@ -181,7 +181,8 @@ async function run(
       messageCount: selected?.eligibleMessages.length ?? 0,
       contextMessageCount: selected?.contextMessages.length ?? 0,
       fromMessageId: selected?.eligibleMessages[0]?.id,
-      toMessageId: selected?.eligibleMessages.at(-1)?.id,
+      toMessageId:
+        selected?.eligibleMessages[selected.eligibleMessages.length - 1]?.id,
     });
 
     if (selected === null) {
@@ -476,28 +477,28 @@ export function selectMessages(
   command: SummaryCommand,
   lastId?: MessageId,
 ): ChatMessage[] {
-  const eligible = all
-    .filter(
-      (message) =>
-        message.id !== command.commandMessageId &&
-        (lastId === undefined || message.id > lastId) &&
-        message.text.trim().length > 0,
-    )
-    .sort(compareChronologically);
-
-  if (command.mode === "count") {
-    const count = Math.max(1, command.count ?? 100);
-    return eligible.slice(-count);
-  }
-
   const since =
     command.mode === "today"
       ? new Date(command.date).setHours(0, 0, 0, 0)
       : command.date - DAY_MS;
+  const eligible: ChatMessage[] = [];
 
-  return eligible
-    .filter((message) => message.time >= since)
-    .slice(-MAX_MESSAGES);
+  for (const message of all) {
+    if (
+      message.id === command.commandMessageId ||
+      (lastId !== undefined && message.id <= lastId) ||
+      message.text.trim().length === 0 ||
+      (command.mode !== "count" && message.time < since)
+    ) {
+      continue;
+    }
+    eligible.push(message);
+  }
+  eligible.sort(compareChronologically);
+
+  const limit =
+    command.mode === "count" ? Math.max(1, command.count ?? 100) : MAX_MESSAGES;
+  return eligible.length > limit ? eligible.slice(-limit) : eligible;
 }
 
 export function selectConversationWindow(
@@ -511,22 +512,27 @@ export function selectConversationWindow(
   // A reply may cross the checkpoint. Include its direct parent as read-only
   // context even though the parent itself was covered by an earlier run.
   const selectedIds = new Set(eligibleMessages.map(({ id }) => id));
-  const byId = new Map(all.map((message) => [message.id, message]));
-  const contextMessages = eligibleMessages.flatMap(({ parentId }) => {
-    if (parentId === null || selectedIds.has(parentId)) return [];
-    const parent = byId.get(parentId);
-    return parent === undefined ? [] : [parent];
-  });
-  const withReplyContext = [
-    ...new Map(
-      [...contextMessages, ...eligibleMessages].map((message) => [
-        message.id,
-        message,
-      ]),
-    ).values(),
-  ].sort(compareChronologically);
-
-  const contextIds = new Set(contextMessages.map(({ id }) => id));
+  const neededParentIds = new Set<MessageId>();
+  for (const { parentId } of eligibleMessages) {
+    if (parentId !== null && !selectedIds.has(parentId)) {
+      neededParentIds.add(parentId);
+    }
+  }
+  const contextIds = new Set<MessageId>();
+  const contextMessages: ChatMessage[] = [];
+  if (neededParentIds.size > 0) {
+    for (const message of all) {
+      if (!neededParentIds.has(message.id)) continue;
+      contextIds.add(message.id);
+      contextMessages.push(message);
+      if (contextIds.size === neededParentIds.size) break;
+    }
+    contextMessages.sort(compareChronologically);
+  }
+  const withReplyContext =
+    contextMessages.length === 0
+      ? eligibleMessages
+      : [...contextMessages, ...eligibleMessages].sort(compareChronologically);
   return Object.freeze({
     window: createConversationWindow(withReplyContext),
     messages: Object.freeze(
@@ -539,10 +545,8 @@ export function selectConversationWindow(
         }),
       ),
     ),
-    eligibleMessages: Object.freeze([...eligibleMessages]),
-    contextMessages: Object.freeze(
-      withReplyContext.filter(({ id }) => contextIds.has(id)),
-    ),
+    eligibleMessages: Object.freeze(eligibleMessages),
+    contextMessages: Object.freeze(contextMessages),
   });
 }
 
@@ -585,7 +589,7 @@ function toSummaryRun(
   const messages = selected.eligibleMessages;
   const covers = Object.freeze({
     firstId: messages[0]!.id,
-    lastId: messages.at(-1)!.id,
+    lastId: messages[messages.length - 1]!.id,
     count: messages.length,
   });
 
@@ -621,13 +625,21 @@ function withEligibleCoverage(
   eligibleMessages: readonly ChatMessage[],
 ): WindowDisposition {
   if (disposition.kind !== "summarized") return disposition;
+  const covers = disposition.summary.covers;
+  if (
+    covers.firstId === eligibleMessages[0]!.id &&
+    covers.lastId === eligibleMessages[eligibleMessages.length - 1]!.id &&
+    covers.count === eligibleMessages.length
+  ) {
+    return disposition;
+  }
   return Object.freeze({
     kind: "summarized" as const,
     summary: Object.freeze({
       ...disposition.summary,
       covers: Object.freeze({
         firstId: eligibleMessages[0]!.id,
-        lastId: eligibleMessages.at(-1)!.id,
+        lastId: eligibleMessages[eligibleMessages.length - 1]!.id,
         count: eligibleMessages.length,
       }),
     }),
