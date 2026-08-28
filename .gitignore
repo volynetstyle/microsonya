@@ -10,5 +10,6 @@ bot.log
 bot.err
 bot.err.log
 .ollama-serve.*.log
-research/
+research/*
+!research/bench-workers-local.ts
 packages/eval/results/

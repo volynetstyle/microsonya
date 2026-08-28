@@ -66,19 +66,21 @@ export class SummariesRepo {
 
   /** Inserts the attempt and every child evidence row in one transaction. */
   async saveAttempt(attempt: SummaryRunAttempt): Promise<void> {
+    const encryptedChatId = this.chatKey(attempt.chatId);
+    const firstEligible = attempt.messages.find(
+      ({ role }) => role === "eligible",
+    );
+    const lastEligible = findLastEligible(attempt.messages);
+
     await this.db.transaction(async (tx) => {
       const inserted = await tx
         .insert(summaryRuns)
         .values({
           id: attempt.id,
-          chatId: this.chatKey(attempt.chatId),
+          chatId: encryptedChatId,
           commandMessageId: attempt.commandMessageId,
-          fromMessageId: attempt.messages.find(
-            ({ role }) => role === "eligible",
-          )?.messageId,
-          toMessageId: [...attempt.messages]
-            .reverse()
-            .find(({ role }) => role === "eligible")?.messageId,
+          fromMessageId: firstEligible?.messageId,
+          toMessageId: lastEligible?.messageId,
           messageCount: attempt.eligibleCount,
           createdAt: attempt.completedAt,
           startedAt: attempt.startedAt,
@@ -120,19 +122,30 @@ export class SummariesRepo {
       if (inserted.length === 0) return;
 
       if (attempt.messages.length > 0) {
+        const authorKeys = new Map<string, string>();
         await tx.insert(summaryRunMessages).values(
-          attempt.messages.map((message) => ({
-            runId: attempt.id,
-            ordinal: message.ordinal,
-            chatId: this.chatKey(message.chatId),
-            messageId: message.messageId,
-            role: message.role,
-            authorId: this.authorKey(message.authorId),
-            authorNameCiphertext: this.encryption.encrypt(message.authorName),
-            textCiphertext: this.encryption.encrypt(message.text),
-            sentAt: message.sentAt,
-            replyToId: message.replyToId,
-          })),
+          attempt.messages.map((message) => {
+            let authorKey = authorKeys.get(message.authorId);
+            if (authorKey === undefined) {
+              authorKey = this.authorKey(message.authorId);
+              authorKeys.set(message.authorId, authorKey);
+            }
+            return {
+              runId: attempt.id,
+              ordinal: message.ordinal,
+              chatId:
+                message.chatId === attempt.chatId
+                  ? encryptedChatId
+                  : this.chatKey(message.chatId),
+              messageId: message.messageId,
+              role: message.role,
+              authorId: authorKey,
+              authorNameCiphertext: this.encryption.encrypt(message.authorName),
+              textCiphertext: this.encryption.encrypt(message.text),
+              sentAt: message.sentAt,
+              replyToId: message.replyToId,
+            };
+          }),
         );
       }
 
@@ -240,6 +253,16 @@ export class SummariesRepo {
 
 function rounded(value: number): number {
   return Math.max(0, Math.round(value));
+}
+
+function findLastEligible(
+  messages: SummaryRunAttempt["messages"],
+): SummaryRunAttempt["messages"][number] | undefined {
+  for (let index = messages.length - 1; index >= 0; index -= 1) {
+    const message = messages[index];
+    if (message?.role === "eligible") return message;
+  }
+  return undefined;
 }
 
 function decryptRequired(

@@ -13,6 +13,7 @@
   },
   "include": [
     "test/**/*.ts",
+    "research/**/*.ts",
     "packages/*/src/**/*.ts",
     "apps/telegram/bot/src/**/*.ts"
   ]
