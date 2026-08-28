@@ -154,7 +154,9 @@ async function run(
   let attemptPersisted = false;
 
   try {
-    telemetry?.record({ type: "summary.start", mode: command.mode });
+    if (telemetry?.emitsEvents) {
+      telemetry.record({ type: "summary.start", mode: command.mode });
+    }
     signal?.throwIfAborted();
     stage = "messages.load";
 
@@ -163,11 +165,13 @@ async function run(
       deps.summaries.findLastRun(command.chatId),
     ]);
 
-    telemetry?.record({
-      type: "messages.loaded",
-      messageCount: all.length,
-      hasPreviousRun: previous !== undefined,
-    });
+    if (telemetry?.emitsEvents) {
+      telemetry.record({
+        type: "messages.loaded",
+        messageCount: all.length,
+        hasPreviousRun: previous !== undefined,
+      });
+    }
     signal?.throwIfAborted();
     stage = "messages.select";
 
@@ -176,22 +180,26 @@ async function run(
     messageCount = selected?.eligibleMessages.length ?? 0;
     contextMessageCount = selected?.contextMessages.length ?? 0;
 
-    telemetry?.record({
-      type: "messages.selected",
-      messageCount: selected?.eligibleMessages.length ?? 0,
-      contextMessageCount: selected?.contextMessages.length ?? 0,
-      fromMessageId: selected?.eligibleMessages[0]?.id,
-      toMessageId:
-        selected?.eligibleMessages[selected.eligibleMessages.length - 1]?.id,
-    });
+    if (telemetry?.emitsEvents) {
+      telemetry.record({
+        type: "messages.selected",
+        messageCount: selected?.eligibleMessages.length ?? 0,
+        contextMessageCount: selected?.contextMessages.length ?? 0,
+        fromMessageId: selected?.eligibleMessages[0]?.id,
+        toMessageId:
+          selected?.eligibleMessages[selected.eligibleMessages.length - 1]?.id,
+      });
+    }
 
     if (selected === null) {
       deferStreakByChat.delete(command.chatId);
-      telemetry?.record({
-        type: "summary.finish",
-        durationMs: performance.now() - startedAt,
-        status: "empty",
-      });
+      if (telemetry?.emitsEvents) {
+        telemetry.record({
+          type: "summary.finish",
+          durationMs: performance.now() - startedAt,
+          status: "empty",
+        });
+      }
       stage = "attempt.save";
       await persistAttempt("empty");
       attemptPersisted = true;
@@ -235,7 +243,7 @@ async function run(
       shouldAdvanceCheckpoint(result.decision.action)
     ) {
       stage = "disposition.save";
-      const saveStartedAt = performance.now();
+      const saveStartedAt = telemetry?.emitsEvents ? performance.now() : 0;
       const terminalRun = toSummaryRun(
         selected,
         command,
@@ -248,17 +256,21 @@ async function run(
       attemptPersisted = true;
       checkpointAdvanced = true;
       deferStreakByChat.delete(command.chatId);
-      telemetry?.record({
-        type: "summary.saved",
-        durationMs: performance.now() - saveStartedAt,
-      });
+      if (telemetry?.emitsEvents) {
+        telemetry.record({
+          type: "summary.saved",
+          durationMs: performance.now() - saveStartedAt,
+        });
+      }
     }
 
-    telemetry?.record({
-      type: "summary.finish",
-      durationMs: performance.now() - startedAt,
-      status: disposition.kind,
-    });
+    if (telemetry?.emitsEvents) {
+      telemetry.record({
+        type: "summary.finish",
+        durationMs: performance.now() - startedAt,
+        status: disposition.kind,
+      });
+    }
     if (!attemptPersisted) {
       stage = "attempt.save";
       await persistAttempt(disposition.kind);
@@ -268,12 +280,14 @@ async function run(
     return disposition;
   } catch (error) {
     const errorCode = classifySummaryError(error, stage);
-    telemetry?.record({
-      type: "summary.error",
-      durationMs: performance.now() - startedAt,
-      stage: error instanceof ModelOutputError ? error.stage : stage,
-      error: serializeError(error, errorCode),
-    });
+    if (telemetry?.emitsEvents) {
+      telemetry.record({
+        type: "summary.error",
+        durationMs: performance.now() - startedAt,
+        stage: error instanceof ModelOutputError ? error.stage : stage,
+        error: serializeError(error, errorCode),
+      });
+    }
     if (!attemptPersisted && stage !== "attempt.save") {
       try {
         await persistAttempt("error", errorCode);
@@ -372,12 +386,13 @@ async function run(
     status: "summarized" | "deferred" | "skipped" | "empty" | "error",
     errorCode?: SummaryErrorCode,
   ): void {
+    if (!telemetry?.emitsEvents) return;
     const model = telemetry?.modelMetrics() ?? {
       modelCalls: 0,
       classifierMs: 0,
       summarizerMs: 0,
     };
-    telemetry?.record({
+    telemetry.record({
       type: "summary.run",
       action,
       messageCount,

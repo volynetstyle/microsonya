@@ -158,7 +158,7 @@ function createRunner(scenario: Scenario, messageCount: number) {
     },
     summaries,
     ollama,
-    telemetry: new SummarizationTelemetryService(() => undefined),
+    telemetry: new SummarizationTelemetryService(null),
   });
   const bot = new Telegraf("benchmark-token");
   bot.botInfo = {

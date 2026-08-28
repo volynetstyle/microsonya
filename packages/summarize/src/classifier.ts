@@ -136,14 +136,16 @@ export function createClassifier(
             (error.code === "MODEL_OUTPUT_EMPTY" ||
               response.done_reason === "length");
           if (retryableOutputFailure && attempt === 1) {
-            telemetry?.record({
-              type: "model.request.retry",
-              stage: "classifier",
-              model: CLASSIFIER_PROFILE.model,
-              failedAttempt: attempt,
-              nextAttempt: attempt + 1,
-              reason: error.code,
-            });
+            if (telemetry?.emitsEvents) {
+              telemetry.record({
+                type: "model.request.retry",
+                stage: "classifier",
+                model: CLASSIFIER_PROFILE.model,
+                failedAttempt: attempt,
+                nextAttempt: attempt + 1,
+                reason: error.code,
+              });
+            }
             continue;
           }
           throw error;

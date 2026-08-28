@@ -38,15 +38,17 @@ export function parseModelOutput<T>(options: {
   readonly telemetry?: SummarizationTelemetryTrace;
 }): T {
   const { raw, schema, stage, model, durationMs, attempt, telemetry } = options;
-  telemetry?.record({
-    type: "model.response.raw",
-    stage,
-    model,
-    attempt,
-    durationMs,
-    responseChars: raw.length,
-    response: raw,
-  });
+  if (telemetry?.emitsEvents) {
+    telemetry.record({
+      type: "model.response.raw",
+      stage,
+      model,
+      attempt,
+      durationMs,
+      responseChars: raw.length,
+      response: raw,
+    });
+  }
 
   if (raw.trim().length === 0) {
     throw invalidOutput("MODEL_OUTPUT_EMPTY");

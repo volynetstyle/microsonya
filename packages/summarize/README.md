@@ -8,7 +8,10 @@ Reply parents behind the checkpoint are selected as typed `context`; only
 `eligible` messages contribute to `SummaryRecord.covers` and the persisted run.
 The model can see both groups in its canonical window.
 
-Production telemetry emits one aggregate `summary.run` event per command with:
+Production evidence is persisted in the summary ledger. Verbose per-stage event
+emission is disabled when `NODE_ENV=production`; development runs additionally
+emit the per-stage stream, including one aggregate `summary.run` event per
+command with:
 
 - action and final status;
 - eligible and context message counts;

@@ -184,7 +184,9 @@ export type SummarizationTelemetryOptions = {
 
 export class SummarizationTelemetryService {
   constructor(
-    private readonly sink: (event: SummarizationTelemetryEvent) => void = log,
+    private readonly sink:
+      | ((event: SummarizationTelemetryEvent) => void)
+      | null = process.env.NODE_ENV === "production" ? null : log,
     private readonly options: SummarizationTelemetryOptions = {
       includePrompt: process.env.SUMMARIZATION_LOG_PROMPT === "1",
       includeModelResponse:
@@ -199,7 +201,8 @@ export class SummarizationTelemetryService {
 }
 
 export class SummarizationTelemetryTrace {
-  private readonly startedAt = performance.now();
+  readonly emitsEvents: boolean;
+  private readonly startedAt: number;
   private modelCalls = 0;
   private classifierMs = 0;
   private summarizerMs = 0;
@@ -207,9 +210,14 @@ export class SummarizationTelemetryTrace {
 
   constructor(
     private readonly context: SummarizationTelemetryContext,
-    private readonly sink: (event: SummarizationTelemetryEvent) => void,
+    private readonly sink:
+      | ((event: SummarizationTelemetryEvent) => void)
+      | null,
     private readonly options: SummarizationTelemetryOptions,
-  ) {}
+  ) {
+    this.emitsEvents = sink !== null;
+    this.startedAt = this.emitsEvents ? performance.now() : 0;
+  }
 
   record(payload: SummarizationTelemetryPayload): void {
     if (payload.type === "model.request") {
@@ -261,6 +269,9 @@ export class SummarizationTelemetryTrace {
         }
       }
     }
+    // Evidence capture above is production-critical. Everything below only
+    // prepares and emits the verbose development event stream.
+    if (this.sink === null) return;
     if (payload.type === "model.request" && !this.options.includePrompt) {
       const { prompt: _, ...withoutPrompt } = payload;
 
@@ -322,6 +333,7 @@ export class SummarizationTelemetryTrace {
   }
 
   private emit(payload: SummarizationTelemetryPayload): void {
+    if (this.sink === null) return;
     this.sink({
       ...this.context,
       ...payload,

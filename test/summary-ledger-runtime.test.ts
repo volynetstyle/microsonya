@@ -13,6 +13,53 @@ import {
 } from "../packages/summarize/src/index.js";
 
 describe("summary runtime ledger evidence", () => {
+  it("captures ledger evidence when verbose event emission is disabled", () => {
+    const trace = new SummarizationTelemetryService(null).start({
+      traceId: "production-trace",
+      chatId: asChatId("chat-1"),
+      commandMessageId: asMessageId(100),
+    });
+
+    expect(trace.emitsEvents).toBe(false);
+    trace.record({
+      type: "model.request",
+      stage: "classifier",
+      model: "gpt-oss:120b-cloud",
+      attempt: 1,
+      messageCount: 1,
+      promptChars: 7,
+      prompt: "private",
+    });
+    trace.record({
+      type: "model.response.envelope",
+      stage: "classifier",
+      model: "gpt-oss:120b-cloud",
+      attempt: 1,
+      durationMs: 4,
+      done: true,
+      contentChars: 2,
+      thinkingChars: 0,
+      content: "{}",
+    });
+    trace.record({
+      type: "model.response",
+      stage: "classifier",
+      model: "gpt-oss:120b-cloud",
+      attempt: 1,
+      durationMs: 4,
+      responseChars: 2,
+      action: "SKIP_NO_VALUE",
+    });
+
+    expect(trace.modelMetrics()).toMatchObject({
+      modelCalls: 1,
+      classifierMs: 4,
+    });
+    expect(trace.modelInvocations()).toMatchObject([
+      { status: "succeeded", outputText: "{}" },
+    ]);
+  });
+
   it("persists a deferred attempt without moving its checkpoint", async () => {
     const attempts: SummaryRunAttempt[] = [];
     const saveRun = vi.fn();
