@@ -33,7 +33,7 @@ export function createMessageHandler(services: BotServices) {
 
       if (!command || !reply) return;
 
-      await reply.progress("Аналізую…");
+      await reply.progress("Аналізую");
       const disposition = await services.summarizer.process(command);
       finalText = disposition
         ? presentDisposition(disposition)
