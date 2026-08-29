@@ -10,6 +10,16 @@ export type DbClient = {
   close(): Promise<void>;
 };
 
+/**
+ * Request-scoped connection for edge runtimes such as Cloudflare Workers.
+ * Hyperdrive owns the durable connection pool; retaining a pg.Pool in a
+ * Worker global can leave a dead socket attached to a later invocation.
+ */
+export type WorkerDbClient = {
+  db: MicrosonyaDb;
+  close(): Promise<void>;
+};
+
 export function openDb(connectionString = requiredDatabaseUrl()): DbClient {
   const pool = new pg.Pool({ connectionString });
 
@@ -18,6 +28,17 @@ export function openDb(connectionString = requiredDatabaseUrl()): DbClient {
     db: drizzle(pool, { schema }),
     close: () => pool.end(),
   } satisfies DbClient;
+}
+
+export async function openWorkerDb(
+  connectionString: string,
+): Promise<WorkerDbClient> {
+  const client = new pg.Client({ connectionString });
+  await client.connect();
+  return {
+    db: drizzle(client, { schema }),
+    close: () => client.end(),
+  } satisfies WorkerDbClient;
 }
 
 function requiredDatabaseUrl(): string {

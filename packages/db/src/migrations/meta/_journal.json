@@ -64,6 +64,13 @@
       "when": 1788000538927,
       "tag": "0008_green_arachne",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1788022861457,
+      "tag": "0009_unknown_dragon_lord",
+      "breakpoints": true
     }
   ]
 }

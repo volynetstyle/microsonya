@@ -12,6 +12,14 @@ export async function handleSummaryQueue(
       span.setAttribute("microsonya.run_id", message.body.runId);
       try {
         const result = await env.SUMMARY_PROCESSOR.process(message.body.runId);
+        console.info("summary.queue.disposition", {
+          runId: message.body.runId,
+          disposition: result.disposition,
+          retryAfterSeconds:
+            result.disposition === "retry"
+              ? result.retryAfterSeconds
+              : undefined,
+        });
         switch (result.disposition) {
           case "completed":
             recordQueueSignal(env, message.body.runId, "completed");
@@ -30,7 +38,14 @@ export async function handleSummaryQueue(
             );
             break;
         }
-      } catch {
+      } catch (error) {
+        // Do not log the raw error: database drivers may include query
+        // parameters, including encrypted values. The run id remains enough
+        // to recover the authoritative state from PostgreSQL.
+        console.error("summary.queue.processor_rpc_error", {
+          runId: message.body.runId,
+          errorName: error instanceof Error ? error.name : "UNKNOWN_ERROR",
+        });
         recordQueueSignal(env, message.body.runId, "rpc_error");
         message.retry();
       }

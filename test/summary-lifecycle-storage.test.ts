@@ -207,10 +207,23 @@ describe("SummaryRun authoritative storage", () => {
         ),
       ).rejects.toThrow();
 
+      await expect(
+        client.db.execute(
+          sql`insert into ${summaryRunLifecycle} (
+            id, idempotency_key, chat_id, chat_id_ciphertext,
+            command_message_id, command_date, mode, requested_count, status,
+            created_at, updated_at, attempt
+          ) values (
+            'invalid-count', 'invalid-count-key', 'chat', ${Buffer.from("cipher")},
+            1, 1, 'count', null, 'created', 1, 1, 0
+          )`,
+        ),
+      ).rejects.toThrow();
+
       const rows = await client.db
         .select()
         .from(summaryRunLifecycle)
-        .where(eq(summaryRunLifecycle.id, "invalid"));
+        .where(eq(summaryRunLifecycle.id, "invalid-count"));
       expect(rows).toEqual([]);
     } finally {
       await client.close();

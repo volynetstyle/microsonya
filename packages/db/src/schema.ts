@@ -126,7 +126,7 @@ export const summaryRunLifecycle = pgTable(
     check("summary_run_lifecycle_attempt_check", sql`${table.attempt} >= 0`),
     check(
       "summary_run_lifecycle_count_check",
-      sql`(${table.mode} = 'count' and ${table.requestedCount} > 0) or (${table.mode} <> 'count' and ${table.requestedCount} is null)`,
+      sql`(${table.mode} = 'count' and ${table.requestedCount} is not null and ${table.requestedCount} > 0) or (${table.mode} <> 'count' and ${table.requestedCount} is null)`,
     ),
   ],
 );

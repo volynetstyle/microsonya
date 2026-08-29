@@ -1,9 +1,7 @@
 import { existsSync } from "node:fs";
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { resolve } from "node:path";
 import { config as loadEnv } from "dotenv";
-import { migrate } from "drizzle-orm/node-postgres/migrator";
-import { openDb } from "./client.js";
+import { applyMigrations } from "./migrateRunner.js";
 
 for (const envPath of [
   resolve(process.cwd(), ".env"),
@@ -12,14 +10,8 @@ for (const envPath of [
   if (existsSync(envPath)) loadEnv({ path: envPath, override: false });
 }
 
-const directory = dirname(fileURLToPath(import.meta.url));
-const client = openDb();
+const databaseUrl = process.env.DATABASE_URL;
+if (!databaseUrl) throw new Error("DATABASE_URL is required.");
 
-try {
-  await migrate(client.db, {
-    migrationsFolder: resolve(directory, "migrations"),
-  });
-  console.info("Database migrations applied successfully.");
-} finally {
-  await client.close();
-}
+await applyMigrations(databaseUrl);
+console.info("Database migrations applied successfully.");

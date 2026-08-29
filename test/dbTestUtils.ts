@@ -83,7 +83,7 @@ export async function openTestDb(): Promise<DbClient> {
       summary_ciphertext BYTEA,
       delivered_at BIGINT,
       telegram_message_id INTEGER,
-      CHECK ((mode = 'count' AND requested_count > 0) OR (mode <> 'count' AND requested_count IS NULL))
+      CHECK ((mode = 'count' AND requested_count IS NOT NULL AND requested_count > 0) OR (mode <> 'count' AND requested_count IS NULL))
     );
     CREATE INDEX idx_summary_run_lifecycle_status_updated
       ON summary_run_lifecycle (status, updated_at);

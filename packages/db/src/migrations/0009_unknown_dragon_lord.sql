@@ -1,0 +1,2 @@
+ALTER TABLE "summary_run_lifecycle" DROP CONSTRAINT "summary_run_lifecycle_count_check";--> statement-breakpoint
+ALTER TABLE "summary_run_lifecycle" ADD CONSTRAINT "summary_run_lifecycle_count_check" CHECK (("summary_run_lifecycle"."mode" = 'count' and "summary_run_lifecycle"."requested_count" is not null and "summary_run_lifecycle"."requested_count" > 0) or ("summary_run_lifecycle"."mode" <> 'count' and "summary_run_lifecycle"."requested_count" is null));

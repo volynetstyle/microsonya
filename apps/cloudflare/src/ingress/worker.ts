@@ -2,7 +2,11 @@ import type {
   CreateSummaryRunRequest,
   SummaryJob,
 } from "@microsonya/contracts";
-import { MessagesRepo, dataEncryptionFromBase64, openDb } from "@microsonya/db";
+import {
+  MessagesRepo,
+  dataEncryptionFromBase64,
+  openWorkerDb,
+} from "@microsonya/db";
 import {
   parseSummaryCommandUpdate,
   parseTelegramChatMessageUpdate,
@@ -14,21 +18,21 @@ const TELEGRAM_WEBHOOK_PATH = "/telegram";
 type CloudflareEnv = Omit<Env, "SUMMARY_JOBS"> & {
   readonly SUMMARY_JOBS: Queue<SummaryJob>;
 };
-let cachedMessages:
-  | { readonly connectionString: string; readonly repo: MessagesRepo }
-  | undefined;
-
-function messages(env: CloudflareEnv): MessagesRepo {
-  if (cachedMessages?.connectionString === env.HYPERDRIVE.connectionString) {
-    return cachedMessages.repo;
+async function withMessages<T>(
+  env: CloudflareEnv,
+  operation: (repo: MessagesRepo) => Promise<T>,
+): Promise<T> {
+  const client = await openWorkerDb(env.HYPERDRIVE.connectionString);
+  try {
+    return await operation(
+      new MessagesRepo(
+        client.db,
+        dataEncryptionFromBase64(env.MICROSONYA_DATA_ENCRYPTION_KEY),
+      ),
+    );
+  } finally {
+    await client.close();
   }
-  const client = openDb(env.HYPERDRIVE.connectionString);
-  const repo = new MessagesRepo(
-    client.db,
-    dataEncryptionFromBase64(env.MICROSONYA_DATA_ENCRYPTION_KEY),
-  );
-  cachedMessages = { connectionString: env.HYPERDRIVE.connectionString, repo };
-  return repo;
 }
 
 const worker = {
@@ -65,18 +69,29 @@ async function handleTelegramIngress(
     return new Response("Unauthorized", { status: 401 });
   }
 
+  console.info("telegram.ingress.parse.start");
   const update: unknown = await request.json();
+  console.info("telegram.ingress.parse.done");
   const chatMessage = parseTelegramChatMessageUpdate(update);
   if (chatMessage !== undefined) {
+    console.info("telegram.message.persist.start", {
+      messageId: chatMessage.id,
+    });
     await tracing.enterSpan("telegram.message.persist", (persistSpan) => {
       persistSpan.setAttribute("microsonya.chat_id", chatMessage.chatId);
       persistSpan.setAttribute("microsonya.message_id", chatMessage.id);
-      return messages(env).save(chatMessage);
+      return withMessages(env, (repo) => repo.save(chatMessage));
+    });
+    console.info("telegram.message.persist.done", {
+      messageId: chatMessage.id,
     });
   }
 
   const command = parseSummaryCommandUpdate(update, env.BOT_USERNAME);
   if (command === undefined) return new Response("OK");
+  console.info("summary_run.create.start", {
+    commandMessageId: command.commandMessageId,
+  });
   span.setAttribute("microsonya.command_mode", command.mode);
 
   const createRequest: CreateSummaryRunRequest = {
@@ -87,9 +102,12 @@ async function handleTelegramIngress(
     createSpan.setAttribute("microsonya.command_mode", command.mode);
     return env.SUMMARY_RUNS.create(createRequest);
   });
+  console.info("summary_run.create.done", { runId: run.runId });
   span.setAttribute("microsonya.run_id", run.runId);
   await env.SUMMARY_JOBS.send({ runId: run.runId } satisfies SummaryJob);
+  console.info("summary_run.enqueue.done", { runId: run.runId });
   await env.SUMMARY_RUNS.markQueued(run.runId);
+  console.info("summary_run.queued.done", { runId: run.runId });
   recordRunSignal(env, run.runId, "created");
 
   // Telegram is acknowledged only after the durable run exists and Queue

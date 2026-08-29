@@ -3,7 +3,7 @@ import {
   MessagesRepo,
   SummariesRepo,
   dataEncryptionFromBase64,
-  openDb,
+  openWorkerDb,
 } from "@microsonya/db";
 import { OllamaClient, OllamaError } from "@microsonya/model";
 import type { ProcessSummaryRunResult } from "@microsonya/contracts";
@@ -15,31 +15,31 @@ const MAX_ATTEMPTS = 4;
 const TELEGRAM_TEXT_LIMIT = 4_096;
 
 type Services = {
-  readonly connectionString: string;
   readonly messages: MessagesRepo;
   readonly summaries: SummariesRepo;
   readonly ollama: OllamaClient;
 };
 
-let cached: Services | undefined;
-
-function services(env: Env): Services {
-  if (cached?.connectionString === env.HYPERDRIVE.connectionString)
-    return cached;
-  const client = openDb(env.HYPERDRIVE.connectionString);
+async function withServices<T>(
+  env: Env,
+  operation: (services: Services) => Promise<T>,
+): Promise<T> {
+  const client = await openWorkerDb(env.HYPERDRIVE.connectionString);
   const encryption = dataEncryptionFromBase64(
     env.MICROSONYA_DATA_ENCRYPTION_KEY,
   );
-  cached = {
-    connectionString: env.HYPERDRIVE.connectionString,
-    messages: new MessagesRepo(client.db, encryption),
-    summaries: new SummariesRepo(client.db, encryption),
-    ollama: new OllamaClient({
-      baseUrl: env.OLLAMA_BASE_URL,
-      apiKey: env.OLLAMA_API_KEY,
-    }),
-  };
-  return cached;
+  try {
+    return await operation({
+      messages: new MessagesRepo(client.db, encryption),
+      summaries: new SummariesRepo(client.db, encryption),
+      ollama: new OllamaClient({
+        baseUrl: env.OLLAMA_BASE_URL,
+        apiKey: env.OLLAMA_API_KEY,
+      }),
+    });
+  } finally {
+    await client.close();
+  }
 }
 
 export class SummaryProcessorEntrypoint extends WorkerEntrypoint<Env> {
@@ -96,23 +96,21 @@ export class SummaryProcessorEntrypoint extends WorkerEntrypoint<Env> {
       return { disposition: "retry", retryAfterSeconds: 5 };
 
     try {
-      const deps = services(this.env);
-      const summarizer = createSummarizer({
-        messages: deps.messages,
-        summaries: deps.summaries,
-        ollama: deps.ollama,
-        createSummaryId: () => runId,
-        now: () => asTimestampMs(Date.now()),
-      });
-      const disposition = await tracing.enterSpan(
-        "summary.generate",
-        (span) => {
+      const disposition = await withServices(this.env, (deps) => {
+        const summarizer = createSummarizer({
+          messages: deps.messages,
+          summaries: deps.summaries,
+          ollama: deps.ollama,
+          createSummaryId: () => runId,
+          now: () => asTimestampMs(Date.now()),
+        });
+        return tracing.enterSpan("summary.generate", (span) => {
           span.setAttribute("microsonya.run_id", runId);
           span.setAttribute("microsonya.attempt", claimed.attempt);
           span.setAttribute("microsonya.command_mode", claimed.command.mode);
           return summarizer.process(claimed.command);
-        },
-      );
+        });
+      });
       const summary =
         disposition === null
           ? "Немає нових повідомлень для підсумку."
@@ -319,4 +317,11 @@ function telegramRetryAfter(payload: unknown): number {
     : DEFAULT_RETRY_SECONDS;
 }
 
-export default {} satisfies ExportedHandler<Env>;
+// The processor is invoked through its Service Binding entrypoint. Cloudflare
+// still requires a module Worker to register an event handler at deployment;
+// reject every public HTTP request rather than exposing a second transport.
+export default {
+  fetch(): Response {
+    return new Response("Not found", { status: 404 });
+  },
+} satisfies ExportedHandler<Env>;

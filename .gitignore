@@ -3,6 +3,8 @@ node_modules/
 dist/
 .env
 .env.local
+.env.staging
+.env.staging.local
 *.sqlite
 *.sqlite-shm
 *.sqlite-wal
