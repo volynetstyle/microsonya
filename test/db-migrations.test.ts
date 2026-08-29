@@ -41,6 +41,18 @@ describe("database migrations", () => {
           "utf8",
         ),
       );
+      await client.exec(
+        await readFile(
+          resolve(migrationsDirectory, "0007_early_captain_cross.sql"),
+          "utf8",
+        ),
+      );
+      await client.exec(
+        await readFile(
+          resolve(migrationsDirectory, "0008_green_arachne.sql"),
+          "utf8",
+        ),
+      );
 
       const tables = await client.query<{ table_name: string }>(`
         SELECT table_name
@@ -54,6 +66,7 @@ describe("database migrations", () => {
           "model_invocations",
           "summary_feedback",
           "dataset_candidates",
+          "summary_run_lifecycle",
         ]),
       );
 

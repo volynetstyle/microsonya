@@ -12,9 +12,10 @@
     "docker:build": "docker compose build",
     "docker:up": "docker compose up -d",
     "docker:logs": "docker compose logs -f telegram-bot",
-    "typecheck": "pnpm -r typecheck",
+    "typecheck": "pnpm -r --filter \"./packages/**\" build && pnpm -r typecheck",
     "typecheck:tests": "tsc -p tsconfig.json --noEmit",
     "check": "pnpm typecheck && pnpm typecheck:tests && pnpm test",
+    "release:gate": "pnpm typecheck && pnpm typecheck:tests && pnpm exec vitest run test && pnpm --filter @microsonya/telegram-wma test && pnpm --filter @microsonya/cloudflare test:workers && pnpm --filter @microsonya/summary-runs-worker types:check && pnpm --filter @microsonya/summary-processor-worker types:check && pnpm --filter @microsonya/cloudflare types:check",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "format:json": "prettier --write \"**/*.{json,jsonc}\"",
@@ -38,7 +39,7 @@
     "prettier": "^3.8.4",
     "tsx": "^4.20.3",
     "typescript": "^5.8.3",
-    "vitest": "^3.2.4",
+    "vitest": "^4.1.0",
     "zod": "^3.25.76"
   },
   "pnpm": {

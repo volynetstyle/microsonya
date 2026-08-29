@@ -5,6 +5,7 @@ import {
   asTimestampMs,
   type ChatMessage,
 } from "@microsonya/shared";
+import type { TelegramSummaryCommandMessage } from "@microsonya/telegram";
 
 type TelegramUser = {
   id: number;
@@ -32,11 +33,9 @@ type TelegramForwardOrigin = {
   message_id?: number;
 };
 
-type TelegramMessageEntity = {
-  type: string;
-  offset: number;
-  length: number;
-};
+type TelegramMessageEntity = NonNullable<
+  TelegramSummaryCommandMessage["entities"]
+>[number];
 
 export type TelegramMessageLike = {
   message_id: number;

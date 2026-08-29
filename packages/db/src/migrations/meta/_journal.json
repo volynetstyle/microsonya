@@ -50,6 +50,20 @@
       "when": 1787850905922,
       "tag": "0006_good_apocalypse",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1788000142692,
+      "tag": "0007_early_captain_cross",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1788000538927,
+      "tag": "0008_green_arachne",
+      "breakpoints": true
     }
   ]
 }

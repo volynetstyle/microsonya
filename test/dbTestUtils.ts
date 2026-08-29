@@ -60,6 +60,36 @@ export async function openTestDb(): Promise<DbClient> {
     CREATE INDEX idx_summary_runs_chat_range
       ON summary_runs (chat_id, from_message_id, to_message_id);
 
+    CREATE TABLE summary_run_lifecycle (
+      id TEXT PRIMARY KEY,
+      idempotency_key TEXT NOT NULL UNIQUE,
+      chat_id TEXT NOT NULL,
+      chat_id_ciphertext BYTEA NOT NULL,
+      command_message_id INTEGER NOT NULL,
+      command_date BIGINT NOT NULL,
+      mode TEXT NOT NULL CHECK (mode IN ('recent', 'today', 'count')),
+      requested_count INTEGER,
+      status TEXT NOT NULL CHECK (status IN ('created', 'queued', 'processing', 'summary_ready', 'delivering', 'completed', 'retry_wait', 'failed_permanent')),
+      created_at BIGINT NOT NULL,
+      updated_at BIGINT NOT NULL,
+      attempt INTEGER NOT NULL DEFAULT 0 CHECK (attempt >= 0),
+      lease_expires_at BIGINT,
+      next_retry_at BIGINT,
+      last_error_code TEXT,
+      last_error_at BIGINT,
+      processor_version TEXT,
+      model TEXT,
+      prompt_version TEXT,
+      summary_ciphertext BYTEA,
+      delivered_at BIGINT,
+      telegram_message_id INTEGER,
+      CHECK ((mode = 'count' AND requested_count > 0) OR (mode <> 'count' AND requested_count IS NULL))
+    );
+    CREATE INDEX idx_summary_run_lifecycle_status_updated
+      ON summary_run_lifecycle (status, updated_at);
+    CREATE INDEX idx_summary_run_lifecycle_retry
+      ON summary_run_lifecycle (status, next_retry_at);
+
     CREATE TABLE summary_run_messages (
       run_id TEXT NOT NULL REFERENCES summary_runs (id) ON DELETE CASCADE,
       ordinal INTEGER NOT NULL,

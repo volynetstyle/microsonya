@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   parseSummaryArgs,
   parseSummaryCommand,
+  parseSummaryCommandUpdate,
   SUMMARY_COMMAND_NAME,
   telegramCommands,
 } from "../apps/telegram/bot/src/command.js";
@@ -74,5 +75,49 @@ describe("summary command arguments", () => {
 
   it.each(["0", "1025", "hello", "today extra"])("rejects '%s'", (raw) => {
     expect(parseSummaryArgs(raw)).toBeUndefined();
+  });
+});
+
+describe("untrusted Telegram update boundary", () => {
+  it("projects a valid update directly into a domain command", () => {
+    expect(
+      parseSummaryCommandUpdate(
+        {
+          update_id: 42,
+          message: {
+            message_id: 5,
+            date: 1_700,
+            text: "/summary 20",
+            chat: { id: 42 },
+            entities: [{ type: "bot_command", offset: 0, length: 8 }],
+          },
+        },
+        "microsonya_bot",
+      ),
+    ).toEqual({
+      chatId: "42",
+      commandMessageId: 5,
+      date: 1_700_000,
+      mode: "count",
+      count: 20,
+    });
+  });
+
+  it.each([
+    undefined,
+    { update_id: 1 },
+    { update_id: 1, message: { text: "/summary" } },
+    {
+      update_id: 1,
+      message: {
+        message_id: 1,
+        date: 1,
+        text: "/summary",
+        chat: {},
+        entities: [{ type: "bot_command", offset: "0", length: 8 }],
+      },
+    },
+  ])("rejects malformed input %#", (input) => {
+    expect(parseSummaryCommandUpdate(input, "microsonya_bot")).toBeUndefined();
   });
 });
