@@ -28,6 +28,7 @@ import { DAY_MS, MAX_MESSAGES } from "./constants.js";
 import { processWindow, type FastClassifier } from "./orchestrator.js";
 import type {
   SummarizationTelemetryService,
+  SummarizationTelemetryTrace,
   SummaryErrorCode,
 } from "./telemetry.js";
 import { ModelOutputError } from "./modelOutput.js";
@@ -77,6 +78,12 @@ export interface SelectedConversation {
   readonly eligibleMessages: readonly ChatMessage[];
   readonly contextMessages: readonly ChatMessage[];
 }
+
+const EMPTY_MODEL_METRICS = Object.freeze({
+  modelCalls: 0,
+  classifierMs: 0,
+  summarizerMs: 0,
+});
 
 export function createSummarizer(deps: SummarizerDeps): Summarizer {
   const classifier =
@@ -137,7 +144,10 @@ async function run(
   signal?: AbortSignal,
 ): Promise<WindowDisposition | null> {
   const startedAt = performance.now();
-  const startedWallClock = asTimestampMs(Date.now());
+  const now = deps.now ?? defaultNow;
+  const createSummaryId = deps.createSummaryId ?? defaultSummaryId;
+  const startedWallClock = now();
+  const elapsed = () => performance.now() - startedAt;
   const telemetry = deps.telemetry?.start({
     traceId: `${command.chatId}:${command.commandMessageId}:${randomUUID()}`,
     chatId: command.chatId,
@@ -154,9 +164,7 @@ async function run(
   let attemptPersisted = false;
 
   try {
-    if (telemetry?.emitsEvents) {
-      telemetry.record({ type: "summary.start", mode: command.mode });
-    }
+    telemetry?.record({ type: "summary.start", mode: command.mode });
     signal?.throwIfAborted();
     stage = "messages.load";
 
@@ -165,13 +173,11 @@ async function run(
       deps.summaries.findLastRun(command.chatId),
     ]);
 
-    if (telemetry?.emitsEvents) {
-      telemetry.record({
-        type: "messages.loaded",
-        messageCount: all.length,
-        hasPreviousRun: previous !== undefined,
-      });
-    }
+    telemetry?.record({
+      type: "messages.loaded",
+      messageCount: all.length,
+      hasPreviousRun: previous !== undefined,
+    });
     signal?.throwIfAborted();
     stage = "messages.select";
 
@@ -180,26 +186,22 @@ async function run(
     messageCount = selected?.eligibleMessages.length ?? 0;
     contextMessageCount = selected?.contextMessages.length ?? 0;
 
-    if (telemetry?.emitsEvents) {
-      telemetry.record({
-        type: "messages.selected",
-        messageCount: selected?.eligibleMessages.length ?? 0,
-        contextMessageCount: selected?.contextMessages.length ?? 0,
-        fromMessageId: selected?.eligibleMessages[0]?.id,
-        toMessageId:
-          selected?.eligibleMessages[selected.eligibleMessages.length - 1]?.id,
-      });
-    }
+    telemetry?.record({
+      type: "messages.selected",
+      messageCount: selected?.eligibleMessages.length ?? 0,
+      contextMessageCount: selected?.contextMessages.length ?? 0,
+      fromMessageId: selected?.eligibleMessages[0]?.id,
+      toMessageId:
+        selected?.eligibleMessages[selected.eligibleMessages.length - 1]?.id,
+    });
 
     if (selected === null) {
       deferStreakByChat.delete(command.chatId);
-      if (telemetry?.emitsEvents) {
-        telemetry.record({
-          type: "summary.finish",
-          durationMs: performance.now() - startedAt,
-          status: "empty",
-        });
-      }
+      telemetry?.record({
+        type: "summary.finish",
+        durationMs: elapsed(),
+        status: "empty",
+      });
       stage = "attempt.save";
       await persistAttempt("empty");
       attemptPersisted = true;
@@ -243,7 +245,7 @@ async function run(
       shouldAdvanceCheckpoint(result.decision.action)
     ) {
       stage = "disposition.save";
-      const saveStartedAt = telemetry?.emitsEvents ? performance.now() : 0;
+      const saveStartedAt = performance.now();
       const terminalRun = toSummaryRun(
         selected,
         command,
@@ -256,21 +258,17 @@ async function run(
       attemptPersisted = true;
       checkpointAdvanced = true;
       deferStreakByChat.delete(command.chatId);
-      if (telemetry?.emitsEvents) {
-        telemetry.record({
-          type: "summary.saved",
-          durationMs: performance.now() - saveStartedAt,
-        });
-      }
-    }
-
-    if (telemetry?.emitsEvents) {
-      telemetry.record({
-        type: "summary.finish",
-        durationMs: performance.now() - startedAt,
-        status: disposition.kind,
+      telemetry?.record({
+        type: "summary.saved",
+        durationMs: performance.now() - saveStartedAt,
       });
     }
+
+    telemetry?.record({
+      type: "summary.finish",
+      durationMs: elapsed(),
+      status: disposition.kind,
+    });
     if (!attemptPersisted) {
       stage = "attempt.save";
       await persistAttempt(disposition.kind);
@@ -280,14 +278,12 @@ async function run(
     return disposition;
   } catch (error) {
     const errorCode = classifySummaryError(error, stage);
-    if (telemetry?.emitsEvents) {
-      telemetry.record({
-        type: "summary.error",
-        durationMs: performance.now() - startedAt,
-        stage: error instanceof ModelOutputError ? error.stage : stage,
-        error: serializeError(error, errorCode),
-      });
-    }
+    telemetry?.record({
+      type: "summary.error",
+      durationMs: elapsed(),
+      stage: error instanceof ModelOutputError ? error.stage : stage,
+      error: serializeError(error, errorCode),
+    });
     if (!attemptPersisted && stage !== "attempt.save") {
       try {
         await persistAttempt("error", errorCode);
@@ -313,27 +309,10 @@ async function run(
       return;
     }
 
-    const completedAt = asTimestampMs(Date.now());
-    const model = telemetry?.modelMetrics() ?? {
-      modelCalls: 0,
-      classifierMs: 0,
-      summarizerMs: 0,
-    };
+    const completedAt = now();
+    const model = modelMetrics(telemetry);
     const modelInvocations = telemetry?.modelInvocations(errorCode) ?? [];
-    const snapshots = (selected?.messages ?? []).map(
-      ({ message, role }, ordinal) =>
-        Object.freeze({
-          ordinal,
-          chatId: message.chatId,
-          messageId: message.id,
-          role,
-          authorId: message.author.id,
-          authorName: message.author.label,
-          text: message.text,
-          sentAt: message.time,
-          replyToId: message.parentId,
-        }),
-    );
+    const snapshots = snapshotMessages(selected?.messages ?? []);
     const inputHash = hashInput(snapshots);
     const classifierInvocation = [...modelInvocations]
       .reverse()
@@ -346,7 +325,7 @@ async function run(
 
     await deps.summaries.saveAttempt(
       Object.freeze({
-        id: terminalRun?.id ?? (deps.createSummaryId ?? defaultSummaryId)(),
+        id: terminalRun?.id ?? createSummaryId(),
         chatId: command.chatId,
         commandMessageId: command.commandMessageId,
         startedAt: startedWallClock,
@@ -365,11 +344,11 @@ async function run(
         policyHash: sha256(CHECKPOINT_POLICY_VERSION),
         classifierLatencyMs: model.classifierMs,
         summarizerLatencyMs: model.summarizerMs,
-        totalLatencyMs: performance.now() - startedAt,
+        totalLatencyMs: elapsed(),
         summaryText,
         errorCode,
         inputHash,
-        messages: Object.freeze(snapshots),
+        messages: snapshots,
         modelInvocations,
         candidate: mineDatasetCandidate({
           action,
@@ -386,20 +365,15 @@ async function run(
     status: "summarized" | "deferred" | "skipped" | "empty" | "error",
     errorCode?: SummaryErrorCode,
   ): void {
-    if (!telemetry?.emitsEvents) return;
-    const model = telemetry?.modelMetrics() ?? {
-      modelCalls: 0,
-      classifierMs: 0,
-      summarizerMs: 0,
-    };
-    telemetry.record({
+    const model = modelMetrics(telemetry);
+    telemetry?.record({
       type: "summary.run",
       action,
       messageCount,
       contextMessageCount,
       classifierMs: model.classifierMs,
       summarizerMs: model.summarizerMs,
-      totalMs: performance.now() - startedAt,
+      totalMs: elapsed(),
       modelCalls: model.modelCalls,
       checkpointAdvanced,
       consecutiveDeferCount,
@@ -410,21 +384,31 @@ async function run(
 }
 
 function hashInput(snapshots: SummaryRunAttempt["messages"]): string {
-  return sha256(
-    JSON.stringify(
-      snapshots.map((message) => ({
-        ordinal: message.ordinal,
+  return sha256(JSON.stringify(snapshots));
+}
+
+function snapshotMessages(
+  messages: readonly WindowMessage[],
+): SummaryRunAttempt["messages"] {
+  return Object.freeze(
+    messages.map(({ message, role }, ordinal) =>
+      Object.freeze({
+        ordinal,
         chatId: message.chatId,
-        messageId: message.messageId,
-        role: message.role,
-        authorId: message.authorId,
-        authorName: message.authorName,
+        messageId: message.id,
+        role,
+        authorId: message.author.id,
+        authorName: message.author.label,
         text: message.text,
-        sentAt: message.sentAt,
-        replyToId: message.replyToId,
-      })),
+        sentAt: message.time,
+        replyToId: message.parentId,
+      }),
     ),
   );
+}
+
+function modelMetrics(telemetry?: SummarizationTelemetryTrace) {
+  return telemetry?.modelMetrics() ?? EMPTY_MODEL_METRICS;
 }
 
 function mineDatasetCandidate(input: {
@@ -533,14 +517,12 @@ export function selectConversationWindow(
       neededParentIds.add(parentId);
     }
   }
-  const contextIds = new Set<MessageId>();
   const contextMessages: ChatMessage[] = [];
   if (neededParentIds.size > 0) {
     for (const message of all) {
       if (!neededParentIds.has(message.id)) continue;
-      contextIds.add(message.id);
       contextMessages.push(message);
-      if (contextIds.size === neededParentIds.size) break;
+      if (contextMessages.length === neededParentIds.size) break;
     }
     contextMessages.sort(compareChronologically);
   }
@@ -554,7 +536,7 @@ export function selectConversationWindow(
       withReplyContext.map((message) =>
         Object.freeze({
           message,
-          role: contextIds.has(message.id)
+          role: neededParentIds.has(message.id)
             ? ("context" as const)
             : ("eligible" as const),
         }),
@@ -602,11 +584,7 @@ function toSummaryRun(
   deps: Pick<SummarizerDeps, "createSummaryId" | "now">,
 ): SummaryRun {
   const messages = selected.eligibleMessages;
-  const covers = Object.freeze({
-    firstId: messages[0]!.id,
-    lastId: messages[messages.length - 1]!.id,
-    count: messages.length,
-  });
+  const covers = coverageOf(messages);
 
   if (disposition.kind === "summarized") {
     return Object.freeze({
@@ -640,25 +618,34 @@ function withEligibleCoverage(
   eligibleMessages: readonly ChatMessage[],
 ): WindowDisposition {
   if (disposition.kind !== "summarized") return disposition;
-  const covers = disposition.summary.covers;
-  if (
-    covers.firstId === eligibleMessages[0]!.id &&
-    covers.lastId === eligibleMessages[eligibleMessages.length - 1]!.id &&
-    covers.count === eligibleMessages.length
-  ) {
-    return disposition;
-  }
+  const covers = coverageOf(eligibleMessages);
+  if (sameCoverage(disposition.summary.covers, covers)) return disposition;
   return Object.freeze({
     kind: "summarized" as const,
     summary: Object.freeze({
       ...disposition.summary,
-      covers: Object.freeze({
-        firstId: eligibleMessages[0]!.id,
-        lastId: eligibleMessages[eligibleMessages.length - 1]!.id,
-        count: eligibleMessages.length,
-      }),
+      covers,
     }),
   });
+}
+
+function coverageOf(messages: readonly ChatMessage[]) {
+  return Object.freeze({
+    firstId: messages[0]!.id,
+    lastId: messages.at(-1)!.id,
+    count: messages.length,
+  });
+}
+
+function sameCoverage(
+  left: ReturnType<typeof coverageOf>,
+  right: ReturnType<typeof coverageOf>,
+): boolean {
+  return (
+    left.firstId === right.firstId &&
+    left.lastId === right.lastId &&
+    left.count === right.count
+  );
 }
 
 function compareChronologically(left: ChatMessage, right: ChatMessage): number {

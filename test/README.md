@@ -9,6 +9,7 @@ pnpm eval:live:smoke
 pnpm eval:live:stability
 pnpm eval:live:extraction
 pnpm eval:live -- --fixture durable-70k-pc-story --runs 20
+pnpm eval:live -- --suite all --model gpt-oss:20b-cloud --output .data/e2e-20b.json
 ```
 
 The stability suite runs each known decision-boundary fixture five times and
@@ -21,4 +22,5 @@ means the release gate failed: a critical or irreversible error occurred, a
 provider/parse call failed, product-safe action rate fell below 90%, or semantic
 proposition score fell below 90%. Preferred-label accuracy is diagnostic only.
 Use `--timeout-ms`, `--suite`, `--runs`, and `--output` to override defaults and
-persist a report.
+persist a report. Use `--model` to run the frozen fixture contract against a
+different Ollama model without changing the runtime model profiles.

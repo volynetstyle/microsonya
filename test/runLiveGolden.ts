@@ -84,7 +84,7 @@ const reports: FixtureReport[] = [];
 for (const fixture of selected) {
   const runs: LiveResult[] = [];
   for (let index = 0; index < args.runs; index += 1) {
-    runs.push(await runFixture(fixture, client, args.timeoutMs));
+    runs.push(await runFixture(fixture, client, args.timeoutMs, args.model));
     if (!args.json) {
       const result = runs.at(-1)!;
       const marker = result.error
@@ -114,7 +114,7 @@ for (const fixture of selected) {
 const totals = aggregate(reports);
 const report = {
   generatedAt: new Date().toISOString(),
-  model: "gpt-oss:120b-cloud",
+  model: args.model,
   endpoint: redactEndpoint(endpoint),
   suite: args.suite,
   reports,
@@ -131,6 +131,7 @@ async function runFixture(
   fixture: E2EFixture,
   ollama: OllamaClient,
   timeoutMs: number,
+  model: string,
 ): Promise<LiveResult> {
   const startedAt = performance.now();
   let modelCalls = 0;
@@ -141,7 +142,8 @@ async function runFixture(
       modelCalls += 1;
       if (kind === "classifier") classifierCalls += 1;
       else summarizerCalls += 1;
-      return ollama.chat(...(chatArgs as [never, never])) as never;
+      const [request, options] = chatArgs;
+      return ollama.chat({ ...request, model }, options) as never;
     },
   });
 
@@ -300,6 +302,7 @@ function parseArgs(argv: readonly string[]) {
     fixtureId: read("--fixture"),
     output: read("--output"),
     json: argv.includes("--json"),
+    model: read("--model") ?? "gpt-oss:120b-cloud",
   };
 }
 
