@@ -4,21 +4,31 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "wrangler dev",
-    "deploy": "wrangler deploy",
+    "dev": "wrangler dev -c workers/ingress/wrangler.jsonc -c workers/lifecycle/wrangler.jsonc -c workers/processor/wrangler.jsonc",
+    "dev:ingress": "wrangler dev -c workers/ingress/wrangler.jsonc",
+    "dev:lifecycle": "wrangler dev -c workers/lifecycle/wrangler.jsonc",
+    "dev:processor": "wrangler dev -c workers/processor/wrangler.jsonc -c workers/lifecycle/wrangler.jsonc",
+    "deploy:ingress": "wrangler deploy -c workers/ingress/wrangler.jsonc",
+    "deploy:lifecycle": "wrangler deploy -c workers/lifecycle/wrangler.jsonc",
+    "deploy:processor": "wrangler deploy -c workers/processor/wrangler.jsonc",
     "test:workers": "vitest run --config vitest.config.ts",
-    "types": "cross-env WRANGLER_LOG_PATH=../../.wrangler/logs wrangler types --config wrangler.jsonc --config ../summary-runs/wrangler.jsonc --config ../summary-processor/wrangler.jsonc",
-    "types:check": "cross-env WRANGLER_LOG_PATH=../../.wrangler/logs wrangler types --config wrangler.jsonc --config ../summary-runs/wrangler.jsonc --config ../summary-processor/wrangler.jsonc --check",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "types": "cross-env WRANGLER_LOG_PATH=../../.wrangler/logs wrangler types types/ingress.d.ts -c workers/ingress/wrangler.jsonc -c workers/lifecycle/wrangler.jsonc -c workers/processor/wrangler.jsonc && cross-env WRANGLER_LOG_PATH=../../.wrangler/logs wrangler types types/lifecycle.d.ts -c workers/lifecycle/wrangler.jsonc && cross-env WRANGLER_LOG_PATH=../../.wrangler/logs wrangler types types/processor.d.ts -c workers/processor/wrangler.jsonc -c workers/lifecycle/wrangler.jsonc",
+    "types:check": "cross-env WRANGLER_LOG_PATH=../../.wrangler/logs wrangler types types/ingress.d.ts -c workers/ingress/wrangler.jsonc -c workers/lifecycle/wrangler.jsonc -c workers/processor/wrangler.jsonc --check && cross-env WRANGLER_LOG_PATH=../../.wrangler/logs wrangler types types/lifecycle.d.ts -c workers/lifecycle/wrangler.jsonc --check && cross-env WRANGLER_LOG_PATH=../../.wrangler/logs wrangler types types/processor.d.ts -c workers/processor/wrangler.jsonc -c workers/lifecycle/wrangler.jsonc --check",
+    "typecheck": "tsc -p tsconfig.ingress.json --noEmit && tsc -p tsconfig.lifecycle.json --noEmit && tsc -p tsconfig.processor.json --noEmit"
   },
   "dependencies": {
     "@microsonya/contracts": "workspace:*",
+    "@microsonya/db": "workspace:*",
+    "@microsonya/model": "workspace:*",
+    "@microsonya/run-lifecycle": "workspace:*",
     "@microsonya/shared": "workspace:*",
+    "@microsonya/summarize": "workspace:*",
     "@microsonya/telegram": "workspace:*",
     "@telegraf/types": "^7.1.0"
   },
   "devDependencies": {
     "@cloudflare/vitest-plugin": "1.1.2",
+    "vitest": "4.1.0",
     "wrangler": "^4.127.1"
   }
 }

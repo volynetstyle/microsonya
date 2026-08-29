@@ -91,11 +91,10 @@ describe("SummaryRun authoritative storage", () => {
           { model: "test-model", promptVersion: "v1" },
         ),
       ).toBe(true);
-      await repo.transition(
+      await repo.beginDelivery(
         created.id,
-        "summary_ready",
-        "delivering",
         asTimestampMs(1_800_000_000_500),
+        60_000,
       );
       expect(
         await repo.markCompleted(
@@ -111,6 +110,81 @@ describe("SummaryRun authoritative storage", () => {
         attempt: 1,
         summary: "Durable result",
         telegramMessageId: 777,
+      });
+    } finally {
+      await client.close();
+    }
+  });
+
+  it("makes crashed processing and delivery leases recoverable", async () => {
+    const client = await openTestDb();
+    const repo = new SummaryLifecycleRepo(
+      client.db,
+      createDataEncryption(Buffer.alloc(32, 25)),
+    );
+
+    try {
+      const created = await repo.create(
+        { idempotencyKey: "telegram:-100123456:42", command },
+        asTimestampMs(1_000),
+      );
+      await repo.transition(
+        created.id,
+        "created",
+        "queued",
+        asTimestampMs(2_000),
+      );
+      await repo.claim(
+        created.id,
+        asTimestampMs(3_000),
+        1_000,
+        "processor-test",
+      );
+
+      expect(
+        await repo.listStale(asTimestampMs(0), asTimestampMs(3_999)),
+      ).toEqual([]);
+      expect(
+        (await repo.listStale(asTimestampMs(0), asTimestampMs(4_000))).map(
+          ({ status }) => status,
+        ),
+      ).toEqual(["processing"]);
+
+      await repo.markRetry(
+        created.id,
+        "processing",
+        "LEASE_EXPIRED",
+        asTimestampMs(4_000),
+        asTimestampMs(4_000),
+      );
+      await repo.transition(
+        created.id,
+        "retry_wait",
+        "queued",
+        asTimestampMs(4_000),
+      );
+      await repo.claim(
+        created.id,
+        asTimestampMs(4_001),
+        1_000,
+        "processor-test",
+      );
+      await repo.saveSummary(created.id, "Persisted", asTimestampMs(4_100), {});
+      await repo.beginDelivery(created.id, asTimestampMs(4_200), 1_000);
+
+      expect(
+        (await repo.listStale(asTimestampMs(0), asTimestampMs(5_200))).map(
+          ({ status, summary }) => ({ status, summary }),
+        ),
+      ).toEqual([{ status: "delivering", summary: "Persisted" }]);
+
+      expect(
+        await repo.health(asTimestampMs(5_000), asTimestampMs(5_200)),
+      ).toEqual({
+        stuckRuns: 1,
+        deliveryStuck: 1,
+        retryOverdue: 0,
+        permanentFailures: 0,
       });
     } finally {
       await client.close();

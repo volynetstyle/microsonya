@@ -1,4 +1,4 @@
-import { WorkerEntrypoint } from "cloudflare:workers";
+import { tracing, WorkerEntrypoint } from "cloudflare:workers";
 import {
   MessagesRepo,
   SummariesRepo,
@@ -44,6 +44,31 @@ function services(env: Env): Services {
 
 export class SummaryProcessorEntrypoint extends WorkerEntrypoint<Env> {
   async process(runId: SummaryId): Promise<ProcessSummaryRunResult> {
+    return tracing.enterSpan("summary.process", async (span) => {
+      const startedAt = Date.now();
+      span.setAttribute("microsonya.run_id", runId);
+      span.setAttribute(
+        "microsonya.processor_version",
+        this.env.PROCESSOR_VERSION,
+      );
+      const result = await this.processRun(runId);
+      span.setAttribute("microsonya.status", result.disposition);
+      this.env.ANALYTICS.writeDataPoint({
+        indexes: [this.env.PROCESSOR_VERSION],
+        blobs: [
+          "summary.process",
+          result.disposition,
+          "configured-profile",
+          "",
+          "summarize-package",
+        ],
+        doubles: [Date.now() - startedAt],
+      });
+      return result;
+    });
+  }
+
+  private async processRun(runId: SummaryId): Promise<ProcessSummaryRunResult> {
     const existing = await this.env.SUMMARY_RUNS.get(runId);
     if (existing === undefined) return { disposition: "permanent-failure" };
     if (
@@ -63,10 +88,10 @@ export class SummaryProcessorEntrypoint extends WorkerEntrypoint<Env> {
       return this.deliver(runId, existing.command.chatId, existing.summary);
     }
 
-    const claimed = await this.env.SUMMARY_RUNS.claim(
-      runId,
-      this.env.PROCESSOR_VERSION,
-    );
+    const claimed = await tracing.enterSpan("summary_run.claim", (span) => {
+      span.setAttribute("microsonya.run_id", runId);
+      return this.env.SUMMARY_RUNS.claim(runId, this.env.PROCESSOR_VERSION);
+    });
     if (claimed === undefined)
       return { disposition: "retry", retryAfterSeconds: 5 };
 
@@ -79,19 +104,35 @@ export class SummaryProcessorEntrypoint extends WorkerEntrypoint<Env> {
         createSummaryId: () => runId,
         now: () => asTimestampMs(Date.now()),
       });
-      const disposition = await summarizer.process(claimed.command);
+      const disposition = await tracing.enterSpan(
+        "summary.generate",
+        (span) => {
+          span.setAttribute("microsonya.run_id", runId);
+          span.setAttribute("microsonya.attempt", claimed.attempt);
+          span.setAttribute("microsonya.command_mode", claimed.command.mode);
+          return summarizer.process(claimed.command);
+        },
+      );
       const summary =
         disposition === null
           ? "Немає нових повідомлень для підсумку."
           : presentDisposition(disposition);
-      const validationError = validateSummary(summary);
+      const validationError = tracing.enterSpan("summary.validate", (span) => {
+        span.setAttribute("microsonya.run_id", runId);
+        return validateSummary(summary);
+      });
       if (validationError !== undefined) {
         await this.env.SUMMARY_RUNS.markFailed(runId, validationError);
         return { disposition: "permanent-failure" };
       }
-      const saved = await this.env.SUMMARY_RUNS.saveSummary(runId, summary, {
-        model: "configured-profile",
-        promptVersion: "summarize-package",
+      const saved = await tracing.enterSpan("summary.persist", (span) => {
+        span.setAttribute("microsonya.run_id", runId);
+        span.setAttribute("microsonya.model", "configured-profile");
+        span.setAttribute("microsonya.prompt_version", "summarize-package");
+        return this.env.SUMMARY_RUNS.saveSummary(runId, summary, {
+          model: "configured-profile",
+          promptVersion: "summarize-package",
+        });
       });
       if (!saved) return { disposition: "retry", retryAfterSeconds: 5 };
       return this.deliver(runId, claimed.command.chatId, summary);
@@ -105,15 +146,24 @@ export class SummaryProcessorEntrypoint extends WorkerEntrypoint<Env> {
     chatId: string,
     summary: string | undefined,
   ): Promise<ProcessSummaryRunResult> {
+    return tracing.enterSpan("telegram.deliver", async (span) => {
+      span.setAttribute("microsonya.run_id", runId);
+      const result = await this.deliverInsideSpan(runId, chatId, summary);
+      span.setAttribute("microsonya.status", result.disposition);
+      return result;
+    });
+  }
+
+  private async deliverInsideSpan(
+    runId: SummaryId,
+    chatId: string,
+    summary: string | undefined,
+  ): Promise<ProcessSummaryRunResult> {
     if (summary === undefined) {
       await this.env.SUMMARY_RUNS.markFailed(runId, "SUMMARY_MISSING");
       return { disposition: "permanent-failure" };
     }
-    const delivering = await this.env.SUMMARY_RUNS.transition(
-      runId,
-      "summary_ready",
-      "delivering",
-    );
+    const delivering = await this.env.SUMMARY_RUNS.beginDelivery(runId);
     if (!delivering) {
       const current = await this.env.SUMMARY_RUNS.get(runId);
       if (current?.status === "completed") return { disposition: "completed" };

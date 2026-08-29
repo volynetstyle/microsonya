@@ -6,7 +6,7 @@ import {
 import { describe, expect, it, vi } from "vitest";
 import type { SummaryJob } from "@microsonya/contracts";
 import { asSummaryId } from "@microsonya/shared";
-import { handleSummaryQueue } from "../src/worker.js";
+import { handleSummaryQueue } from "../src/ingress/queue.js";
 
 type ProcessorResult = Awaited<ReturnType<Env["SUMMARY_PROCESSOR"]["process"]>>;
 

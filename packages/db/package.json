@@ -16,7 +16,7 @@
     "migrate": "tsx src/migrate.ts"
   },
   "dependencies": {
-    "@microsonya/production-readiness": "workspace:*",
+    "@microsonya/run-lifecycle": "workspace:*",
     "@microsonya/shared": "workspace:*",
     "drizzle-orm": "^0.44.7",
     "pg": "^8.22.0"

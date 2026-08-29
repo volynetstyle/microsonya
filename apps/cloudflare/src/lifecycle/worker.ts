@@ -10,7 +10,10 @@ import type {
   CreateSummaryRunResponse,
   SummaryJob,
 } from "@microsonya/contracts";
-import type { SummaryRunLifecycleStatus } from "@microsonya/production-readiness";
+import {
+  decideReconciliation,
+  type SummaryRunLifecycleStatus,
+} from "@microsonya/run-lifecycle";
 
 const STALE_AFTER_MS = 5 * 60_000;
 const DEFAULT_LEASE_MS = 2 * 60_000;
@@ -52,6 +55,13 @@ export class SummaryRunsEntrypoint extends WorkerEntrypoint<Env> {
     );
   }
 
+  async touch(
+    runId: SummaryId,
+    status: "queued" | "summary_ready",
+  ): Promise<boolean> {
+    return repository(this.env).touch(runId, status, asTimestampMs(Date.now()));
+  }
+
   async get(runId: SummaryId) {
     return repository(this.env).get(runId);
   }
@@ -91,6 +101,14 @@ export class SummaryRunsEntrypoint extends WorkerEntrypoint<Env> {
     );
   }
 
+  async beginDelivery(runId: SummaryId): Promise<boolean> {
+    return repository(this.env).beginDelivery(
+      runId,
+      asTimestampMs(Date.now()),
+      DEFAULT_LEASE_MS,
+    );
+  }
+
   async markCompleted(
     runId: SummaryId,
     telegramMessageId: number,
@@ -125,6 +143,14 @@ export class SummaryRunsEntrypoint extends WorkerEntrypoint<Env> {
       asTimestampMs(Date.now()),
     );
   }
+
+  async health() {
+    const now = asTimestampMs(Date.now());
+    return repository(this.env).health(
+      asTimestampMs(now - STALE_AFTER_MS),
+      now,
+    );
+  }
 }
 
 export default {
@@ -134,27 +160,67 @@ export default {
       asTimestampMs(now - STALE_AFTER_MS),
       now,
     );
+    const health = await repository(env).health(
+      asTimestampMs(now - STALE_AFTER_MS),
+      now,
+    );
+    env.ANALYTICS.writeDataPoint({
+      indexes: ["production-health"],
+      blobs: ["lifecycle.health"],
+      doubles: [
+        health.stuckRuns,
+        health.deliveryStuck,
+        health.retryOverdue,
+        health.permanentFailures,
+      ],
+    });
 
     for (const run of stale) {
-      if (run.status === "created") {
-        await env.SUMMARY_JOBS.send({ runId: run.id } satisfies SummaryJob);
-        await repository(env).transition(run.id, "created", "queued", now);
-        continue;
-      }
-      if (run.status === "queued" || run.status === "summary_ready") {
-        await env.SUMMARY_JOBS.send({ runId: run.id } satisfies SummaryJob);
-        continue;
-      }
-      if (run.status === "processing" || run.status === "delivering") {
-        await repository(env).markRetry(
+      const action = decideReconciliation(
+        run,
+        asTimestampMs(now - STALE_AFTER_MS),
+        now,
+      );
+      if (action === "none") continue;
+      if (action === "enqueue-created") {
+        const queued = await repository(env).transition(
+          run.id,
+          "created",
+          "queued",
+          now,
+        );
+        if (!queued) continue;
+      } else if (action === "reenqueue") {
+        if (run.status !== "queued" && run.status !== "summary_ready") continue;
+        const touched = await repository(env).touch(run.id, run.status, now);
+        if (!touched) continue;
+      } else if (action === "expire-lease-and-enqueue") {
+        if (run.status !== "processing" && run.status !== "delivering") {
+          continue;
+        }
+        const retrying = await repository(env).markRetry(
           run.id,
           run.status,
           "LEASE_EXPIRED",
           now,
           now,
         );
-      } else if (run.status === "retry_wait") {
-        await repository(env).transition(run.id, "retry_wait", "queued", now);
+        if (!retrying) continue;
+        const queued = await repository(env).transition(
+          run.id,
+          "retry_wait",
+          "queued",
+          now,
+        );
+        if (!queued) continue;
+      } else {
+        const queued = await repository(env).transition(
+          run.id,
+          "retry_wait",
+          "queued",
+          now,
+        );
+        if (!queued) continue;
       }
       await env.SUMMARY_JOBS.send({ runId: run.id } satisfies SummaryJob);
     }

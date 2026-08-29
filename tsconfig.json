@@ -8,7 +8,11 @@
       "@microsonya/shared": ["packages/shared/src/index.ts"],
       "@microsonya/model": ["packages/model/src/index.ts"],
       "@microsonya/db": ["packages/db/src/index.ts"],
-      "@microsonya/summarize": ["packages/summarize/src/index.ts"]
+      "@microsonya/summarize": ["packages/summarize/src/index.ts"],
+      "@microsonya/production-readiness": [
+        "packages/production-readiness/src/index.ts"
+      ],
+      "@microsonya/run-lifecycle": ["packages/run-lifecycle/src/index.ts"]
     }
   },
   "include": [

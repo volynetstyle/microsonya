@@ -15,7 +15,7 @@
     "typecheck": "pnpm -r --filter \"./packages/**\" build && pnpm -r typecheck",
     "typecheck:tests": "tsc -p tsconfig.json --noEmit",
     "check": "pnpm typecheck && pnpm typecheck:tests && pnpm test",
-    "release:gate": "pnpm typecheck && pnpm typecheck:tests && pnpm exec vitest run test && pnpm --filter @microsonya/telegram-wma test && pnpm --filter @microsonya/cloudflare test:workers && pnpm --filter @microsonya/summary-runs-worker types:check && pnpm --filter @microsonya/summary-processor-worker types:check && pnpm --filter @microsonya/cloudflare types:check",
+    "release:gate": "pnpm typecheck && pnpm typecheck:tests && pnpm exec vitest run test && pnpm --filter @microsonya/telegram-wma test && pnpm --filter @microsonya/cloudflare test:workers && pnpm --filter @microsonya/cloudflare types:check",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "format:json": "prettier --write \"**/*.{json,jsonc}\"",
@@ -23,6 +23,8 @@
     "start": "pnpm bot:start",
     "bot:start": "pnpm --filter @microsonya/telegram-bot start",
     "test": "vitest run",
+    "test:pipeline": "cross-env MICROSONYA_PIPELINE_INTEGRATION=1 vitest run --config vitest.pipeline.config.ts",
+    "test:faults": "vitest run test/reconciler-matrix.test.ts test/summary-lifecycle-storage.test.ts test/production-readiness.test.ts",
     "eval:live": "tsx test/runLiveGolden.ts",
     "bench:workers": "tsx research/bench-workers-local.ts",
     "eval:live:smoke": "tsx test/runLiveGolden.ts --suite smoke",
@@ -32,17 +34,22 @@
   "devDependencies": {
     "@electric-sql/pglite": "^0.5.3",
     "@types/node": "^22.15.34",
+    "@types/pg": "8.20.0",
     "cross-env": "^7.0.3",
     "dotenv": "^16.5.0",
     "drizzle-orm": "^0.44.7",
+    "msw": "2.11.0",
     "pg": "^8.22.0",
     "prettier": "^3.8.4",
     "tsx": "^4.20.3",
     "typescript": "^5.8.3",
     "vitest": "^4.1.0",
+    "wrangler": "4.127.1",
     "zod": "^3.25.76"
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["esbuild"]
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
   }
 }

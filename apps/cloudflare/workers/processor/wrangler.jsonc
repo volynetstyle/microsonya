@@ -1,7 +1,7 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
+  "$schema": "../../node_modules/wrangler/config-schema.json",
   "name": "microsonya-summary-processor",
-  "main": "src/worker.ts",
+  "main": "../../src/processor/worker.ts",
   "compatibility_date": "2026-08-29",
   "compatibility_flags": ["nodejs_compat"],
   "vars": {
@@ -27,6 +27,12 @@
       "binding": "SUMMARY_RUNS",
       "service": "microsonya-summary-runs",
       "entrypoint": "SummaryRunsEntrypoint",
+    },
+  ],
+  "analytics_engine_datasets": [
+    {
+      "binding": "ANALYTICS",
+      "dataset": "microsonya_runs",
     },
   ],
   "observability": {

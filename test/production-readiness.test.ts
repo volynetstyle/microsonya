@@ -1,13 +1,12 @@
 import { describe, expect, it } from "vitest";
-import {
-  asSummaryId,
-  asTimestampMs,
-} from "../packages/shared/src/index.js";
+import { asSummaryId, asTimestampMs } from "../packages/shared/src/index.js";
 import {
   EXTERNAL_DELIVERY_GUARANTEE,
-  PROCESSOR_CRASH_MATRIX,
   assessRunHealth,
   canTransitionSummaryRun,
+} from "../packages/run-lifecycle/src/index.js";
+import {
+  PROCESSOR_CRASH_MATRIX,
   evaluatePipelineSnapshot,
 } from "../packages/production-readiness/src/index.js";
 

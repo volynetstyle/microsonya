@@ -1,7 +1,5 @@
 packages:
   - "apps/cloudflare"
-  - "apps/summary-runs"
-  - "apps/summary-processor"
   - "apps/telegram/bot"
   - "apps/telegram/wma"
   - "packages/*"

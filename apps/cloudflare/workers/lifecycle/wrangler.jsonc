@@ -1,7 +1,7 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
+  "$schema": "../../node_modules/wrangler/config-schema.json",
   "name": "microsonya-summary-runs",
-  "main": "src/worker.ts",
+  "main": "../../src/lifecycle/worker.ts",
   "compatibility_date": "2026-08-29",
   "compatibility_flags": ["nodejs_compat"],
   "secrets": {
@@ -25,6 +25,12 @@
   "triggers": {
     "crons": ["*/1 * * * *"],
   },
+  "analytics_engine_datasets": [
+    {
+      "binding": "ANALYTICS",
+      "dataset": "microsonya_runs",
+    },
+  ],
   "observability": {
     "enabled": true,
     "logs": {

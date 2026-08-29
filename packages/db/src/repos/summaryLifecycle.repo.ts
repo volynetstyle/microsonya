@@ -1,5 +1,15 @@
 import { randomUUID } from "node:crypto";
-import { and, eq, inArray, isNull, lte, or, sql } from "drizzle-orm";
+import {
+  and,
+  count,
+  eq,
+  inArray,
+  isNull,
+  lte,
+  notInArray,
+  or,
+  sql,
+} from "drizzle-orm";
 import {
   asChatId,
   asMessageId,
@@ -10,10 +20,11 @@ import {
   type TimestampMs,
 } from "@microsonya/shared";
 import type {
+  LifecycleHealthSnapshot,
   OperationalSummaryRun,
   SummaryRunLifecycleStatus,
-} from "@microsonya/production-readiness";
-import { assertSummaryRunTransition } from "@microsonya/production-readiness";
+} from "@microsonya/run-lifecycle";
+import { assertSummaryRunTransition } from "@microsonya/run-lifecycle";
 import type { MicrosonyaDb } from "../client.js";
 import type { DataEncryption } from "../encryption.js";
 import { summaryRunLifecycle } from "../schema.js";
@@ -104,6 +115,25 @@ export class SummaryLifecycleRepo {
     return rows.length === 1;
   }
 
+  /** Moves the stale threshold after a deliberate re-enqueue. */
+  async touch(
+    id: SummaryId,
+    status: "queued" | "summary_ready",
+    now: TimestampMs,
+  ): Promise<boolean> {
+    const rows = await this.db
+      .update(summaryRunLifecycle)
+      .set({ updatedAt: now })
+      .where(
+        and(
+          eq(summaryRunLifecycle.id, id),
+          eq(summaryRunLifecycle.status, status),
+        ),
+      )
+      .returning({ id: summaryRunLifecycle.id });
+    return rows.length === 1;
+  }
+
   async claim(
     id: SummaryId,
     now: TimestampMs,
@@ -164,6 +194,28 @@ export class SummaryLifecycleRepo {
         and(
           eq(summaryRunLifecycle.id, id),
           eq(summaryRunLifecycle.status, "processing"),
+        ),
+      )
+      .returning({ id: summaryRunLifecycle.id });
+    return rows.length === 1;
+  }
+
+  async beginDelivery(
+    id: SummaryId,
+    now: TimestampMs,
+    leaseMs: number,
+  ): Promise<boolean> {
+    const rows = await this.db
+      .update(summaryRunLifecycle)
+      .set({
+        status: "delivering",
+        updatedAt: now,
+        leaseExpiresAt: asTimestampMs(now + leaseMs),
+      })
+      .where(
+        and(
+          eq(summaryRunLifecycle.id, id),
+          eq(summaryRunLifecycle.status, "summary_ready"),
         ),
       )
       .returning({ id: summaryRunLifecycle.id });
@@ -280,6 +332,54 @@ export class SummaryLifecycleRepo {
         ),
       );
     return rows.map((row) => this.map(row));
+  }
+
+  async health(
+    staleBefore: TimestampMs,
+    now: TimestampMs,
+  ): Promise<LifecycleHealthSnapshot> {
+    const [stuck, delivery, retry, failed] = await Promise.all([
+      this.db
+        .select({ value: count() })
+        .from(summaryRunLifecycle)
+        .where(
+          and(
+            notInArray(summaryRunLifecycle.status, [
+              "completed",
+              "failed_permanent",
+            ]),
+            lte(summaryRunLifecycle.updatedAt, staleBefore),
+          ),
+        ),
+      this.db
+        .select({ value: count() })
+        .from(summaryRunLifecycle)
+        .where(
+          and(
+            eq(summaryRunLifecycle.status, "delivering"),
+            lte(summaryRunLifecycle.leaseExpiresAt, now),
+          ),
+        ),
+      this.db
+        .select({ value: count() })
+        .from(summaryRunLifecycle)
+        .where(
+          and(
+            eq(summaryRunLifecycle.status, "retry_wait"),
+            lte(summaryRunLifecycle.nextRetryAt, now),
+          ),
+        ),
+      this.db
+        .select({ value: count() })
+        .from(summaryRunLifecycle)
+        .where(eq(summaryRunLifecycle.status, "failed_permanent")),
+    ]);
+    return {
+      stuckRuns: stuck[0]?.value ?? 0,
+      deliveryStuck: delivery[0]?.value ?? 0,
+      retryOverdue: retry[0]?.value ?? 0,
+      permanentFailures: failed[0]?.value ?? 0,
+    };
   }
 
   private async findRowByIdempotencyKey(
