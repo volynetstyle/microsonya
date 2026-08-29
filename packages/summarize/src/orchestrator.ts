@@ -49,7 +49,7 @@ export interface WindowProcessingResult {
   readonly disposition: WindowDisposition;
 }
 
-export function decideWindow(
+export async function decideWindow(
   window: ConversationWindow,
   classifier: SummaryDecisionClassifier,
   signal?: AbortSignal,
@@ -58,30 +58,24 @@ export function decideWindow(
 ): Promise<SummaryDecision> {
   signal?.throwIfAborted();
   const analysis = analyzeStructure(window);
-  if (telemetry?.emitsEvents) {
-    telemetry.record({ type: "window.analyzed", analysis });
-  }
+  telemetry?.record({ type: "window.analyzed", analysis });
   const fast = fastClassifier.classify(window, analysis);
-  if (telemetry?.emitsEvents) {
-    telemetry.record({
-      type: "window.fast-classifier",
-      result: fast.kind === "abstain" ? "abstain" : "resolved",
-      ...(fast.kind === "resolved"
-        ? { action: fast.action, rule: fast.rule }
-        : {}),
-    });
-  }
+  telemetry?.record({
+    type: "window.fast-classifier",
+    result: fast.kind === "abstain" ? "abstain" : "resolved",
+    ...(fast.kind === "resolved"
+      ? { action: fast.action, rule: fast.rule }
+      : {}),
+  });
 
   if (fast.kind === "resolved") {
-    return Promise.resolve(
-      Object.freeze({
-        action: fast.action,
-        evidence: Object.freeze({
-          source: "deterministic" as const,
-          rule: fast.rule,
-        }),
+    return Object.freeze({
+      action: fast.action,
+      evidence: Object.freeze({
+        source: "deterministic" as const,
+        rule: fast.rule,
       }),
-    );
+    });
   }
 
   return classifier.classify(window, signal, telemetry);
@@ -92,7 +86,7 @@ export async function processWindow(
   deps: WindowProcessorDeps,
   signal?: AbortSignal,
 ): Promise<WindowProcessingResult> {
-  const startedAt = deps.telemetry?.emitsEvents ? performance.now() : 0;
+  const startedAt = performance.now();
   const decision = await decideWindow(
     window,
     deps.classifier,
@@ -101,16 +95,14 @@ export async function processWindow(
     deps.telemetry,
   );
   signal?.throwIfAborted();
-  if (deps.telemetry?.emitsEvents) {
-    deps.telemetry.record({
-      type: "window.decision",
-      action: decision.action,
-      source: decision.evidence.source,
-      ...(decision.evidence.source === "model"
-        ? { model: decision.evidence.model }
-        : { rule: decision.evidence.rule }),
-    });
-  }
+  deps.telemetry?.record({
+    type: "window.decision",
+    action: decision.action,
+    source: decision.evidence.source,
+    ...(decision.evidence.source === "model"
+      ? { model: decision.evidence.model }
+      : { rule: decision.evidence.rule }),
+  });
   let disposition: WindowDisposition;
   if (decision.action === "SUMMARIZE") {
     const generated = await deps.summarizer.summarize(
@@ -154,16 +146,14 @@ export async function processWindow(
         break;
     }
   }
-  if (deps.telemetry?.emitsEvents) {
-    deps.telemetry.record({
-      type: "window.disposition",
-      kind: disposition.kind,
-      ...(disposition.kind === "summarized"
-        ? {}
-        : { reason: disposition.reason }),
-      durationMs: performance.now() - startedAt,
-    });
-  }
+  deps.telemetry?.record({
+    type: "window.disposition",
+    kind: disposition.kind,
+    ...(disposition.kind === "summarized"
+      ? {}
+      : { reason: disposition.reason }),
+    durationMs: performance.now() - startedAt,
+  });
 
   return Object.freeze({ decision, disposition });
 }

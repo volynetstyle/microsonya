@@ -390,21 +390,24 @@ function hashInput(snapshots: SummaryRunAttempt["messages"]): string {
 function snapshotMessages(
   messages: readonly WindowMessage[],
 ): SummaryRunAttempt["messages"] {
-  return Object.freeze(
-    messages.map(({ message, role }, ordinal) =>
-      Object.freeze({
-        ordinal,
-        chatId: message.chatId,
-        messageId: message.id,
-        role,
-        authorId: message.author.id,
-        authorName: message.author.label,
-        text: message.text,
-        sentAt: message.time,
-        replyToId: message.parentId,
-      }),
-    ),
+  const snapshots = new Array<SummaryRunAttempt["messages"][number]>(
+    messages.length,
   );
+  for (let ordinal = 0; ordinal < messages.length; ordinal += 1) {
+    const { message, role } = messages[ordinal]!;
+    snapshots[ordinal] = Object.freeze({
+      ordinal,
+      chatId: message.chatId,
+      messageId: message.id,
+      role,
+      authorId: message.author.id,
+      authorName: message.author.label,
+      text: message.text,
+      sentAt: message.time,
+      replyToId: message.parentId,
+    });
+  }
+  return Object.freeze(snapshots);
 }
 
 function modelMetrics(telemetry?: SummarizationTelemetryTrace) {
@@ -420,10 +423,13 @@ function mineDatasetCandidate(input: {
 }): SummaryRunAttempt["candidate"] {
   const reasons = new Set<string>();
   let priority = 0;
-  const eligibleText = input.snapshots
-    .filter(({ role }) => role === "eligible")
-    .map(({ text }) => text)
-    .join("\n");
+  const eligibleText: string[] = [];
+  let hasReplyContext = false;
+  for (const snapshot of input.snapshots) {
+    if (snapshot.role === "eligible") eligibleText.push(snapshot.text);
+    else hasReplyContext = true;
+  }
+  const joinedEligibleText = eligibleText.join("\n");
 
   if (input.status === "error") {
     reasons.add("RUN_ERROR");
@@ -434,18 +440,18 @@ function mineDatasetCandidate(input: {
     reasons.add("DEFER_STREAK");
     priority += input.consecutiveDeferCount * 10;
   }
-  if (input.snapshots.some(({ role }) => role === "context")) {
+  if (hasReplyContext) {
     reasons.add("REPLY_PROVENANCE");
     priority += 5;
   }
-  const numericTokens = eligibleText.match(/\b\d+(?:[.:,]\d+)?\b/g) ?? [];
+  const numericTokens = joinedEligibleText.match(/\b\d+(?:[.:,]\d+)?\b/g) ?? [];
   if (numericTokens.length >= 3) {
     reasons.add("NUMERIC_RICH");
     priority += 5;
   }
   if (
     input.action?.startsWith("SKIP_") &&
-    (eligibleText.length >= 500 || numericTokens.length >= 3)
+    (joinedEligibleText.length >= 500 || numericTokens.length >= 3)
   ) {
     reasons.add("SKIP_HIGH_INFORMATION");
     priority += 100;
@@ -510,7 +516,8 @@ export function selectConversationWindow(
 
   // A reply may cross the checkpoint. Include its direct parent as read-only
   // context even though the parent itself was covered by an earlier run.
-  const selectedIds = new Set(eligibleMessages.map(({ id }) => id));
+  const selectedIds = new Set<MessageId>();
+  for (const message of eligibleMessages) selectedIds.add(message.id);
   const neededParentIds = new Set<MessageId>();
   for (const { parentId } of eligibleMessages) {
     if (parentId !== null && !selectedIds.has(parentId)) {
@@ -530,18 +537,19 @@ export function selectConversationWindow(
     contextMessages.length === 0
       ? eligibleMessages
       : [...contextMessages, ...eligibleMessages].sort(compareChronologically);
+  const windowMessages = new Array<WindowMessage>(withReplyContext.length);
+  for (let index = 0; index < withReplyContext.length; index += 1) {
+    const message = withReplyContext[index]!;
+    windowMessages[index] = Object.freeze({
+      message,
+      role: neededParentIds.has(message.id)
+        ? ("context" as const)
+        : ("eligible" as const),
+    });
+  }
   return Object.freeze({
     window: createConversationWindow(withReplyContext),
-    messages: Object.freeze(
-      withReplyContext.map((message) =>
-        Object.freeze({
-          message,
-          role: neededParentIds.has(message.id)
-            ? ("context" as const)
-            : ("eligible" as const),
-        }),
-      ),
-    ),
+    messages: Object.freeze(windowMessages),
     eligibleMessages: Object.freeze(eligibleMessages),
     contextMessages: Object.freeze(contextMessages),
   });

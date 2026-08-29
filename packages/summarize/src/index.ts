@@ -1,6 +1,5 @@
 export * from "./summarize.js";
 export * from "./telemetry.js";
-export * from "./pipe.js";
 export * from "./prompt.js";
 export * from "./classifier.js";
 export * from "./conversationSummarizer.js";

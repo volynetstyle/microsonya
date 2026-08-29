@@ -38,50 +38,67 @@ export function parseModelOutput<T>(options: {
   readonly telemetry?: SummarizationTelemetryTrace;
 }): T {
   const { raw, schema, stage, model, durationMs, attempt, telemetry } = options;
-  if (telemetry?.emitsEvents) {
-    telemetry.record({
-      type: "model.response.raw",
-      stage,
-      model,
-      attempt,
-      durationMs,
-      responseChars: raw.length,
-      response: raw,
-    });
-  }
+  telemetry?.record({
+    type: "model.response.raw",
+    stage,
+    model,
+    attempt,
+    durationMs,
+    responseChars: raw.length,
+    response: raw,
+  });
 
   if (raw.trim().length === 0) {
-    throw invalidOutput("MODEL_OUTPUT_EMPTY");
+    throw invalidModelOutput(options, "MODEL_OUTPUT_EMPTY");
   }
 
   let value: unknown;
   try {
     value = JSON.parse(raw);
   } catch (cause) {
-    throw invalidOutput("MODEL_OUTPUT_INVALID_JSON", cause);
+    throw invalidModelOutput(options, "MODEL_OUTPUT_INVALID_JSON", cause);
   }
 
   const result = schema.safeParse(value);
   if (!result.success) {
-    throw invalidOutput("MODEL_OUTPUT_SCHEMA_MISMATCH", result.error);
+    throw invalidModelOutput(
+      options,
+      "MODEL_OUTPUT_SCHEMA_MISMATCH",
+      result.error,
+    );
   }
   return result.data;
+}
 
-  function invalidOutput(
-    reason: ModelOutputFailure,
-    cause?: unknown,
-  ): ModelOutputError {
-    telemetry?.record({
-      type: "model.response.invalid",
-      stage,
-      model,
-      attempt,
-      durationMs,
-      responseChars: raw.length,
-      reason,
-    });
-    return new ModelOutputError({ code: reason, stage, raw, cause });
-  }
+function invalidModelOutput<T>(
+  {
+    raw,
+    stage,
+    model,
+    durationMs,
+    attempt,
+    telemetry,
+  }: {
+    readonly raw: string;
+    readonly stage: ModelStage;
+    readonly model: string;
+    readonly durationMs: number;
+    readonly attempt?: number;
+    readonly telemetry?: SummarizationTelemetryTrace;
+  },
+  reason: ModelOutputFailure,
+  cause?: unknown,
+): ModelOutputError {
+  telemetry?.record({
+    type: "model.response.invalid",
+    stage,
+    model,
+    attempt,
+    durationMs,
+    responseChars: raw.length,
+    reason,
+  });
+  return new ModelOutputError({ code: reason, stage, raw, cause });
 }
 
 function messageFor(code: ModelOutputFailure, stage: ModelStage): string {
