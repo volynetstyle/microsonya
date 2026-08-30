@@ -18,7 +18,7 @@
   "hyperdrive": [
     {
       "binding": "HYPERDRIVE",
-      "id": "8d2c145ca49e4254861ff56a9e4a93b5",
+      "id": "00000000-0000-0000-0000-000000000000",
       "localConnectionString": "postgresql://microsonya:microsonya@localhost:5432/microsonya",
     },
   ],
