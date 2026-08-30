@@ -1,4 +1,4 @@
-import { and, desc, eq, gt, inArray } from "drizzle-orm";
+import { and, desc, eq, gt, inArray, sql } from "drizzle-orm";
 import {
   SUMMARY_ACTIONS,
   asMessageId,
@@ -20,6 +20,7 @@ import {
   summaryRunMessages,
   summaryRunLifecycle,
   summaryRuns,
+  wmaChatCatalog,
 } from "../schema.js";
 
 export interface PersistedSummaryAttempt {
@@ -266,6 +267,16 @@ export class SummariesRepo {
           createdAt: attempt.completedAt,
         });
       }
+
+      if (attempt.status === "summarized") {
+        await this.upsertWmaCatalog(
+          tx,
+          encryptedChatId,
+          this.encryption.encrypt(attempt.chatId),
+          attempt.eligibleCount,
+          attempt.completedAt,
+        );
+      }
     });
   }
 
@@ -327,6 +338,34 @@ export class SummariesRepo {
     return value === undefined
       ? undefined
       : this.encryption.lookup(value, namespace);
+  }
+
+  private async upsertWmaCatalog(
+    db: Pick<MicrosonyaDb, "insert">,
+    chatId: string,
+    chatIdCiphertext: Buffer,
+    messageCount: number,
+    completedAt: number,
+  ): Promise<void> {
+    await db
+      .insert(wmaChatCatalog)
+      .values({
+        chatId,
+        chatIdCiphertext,
+        summaryCount: 1,
+        messageCount,
+        lastSummaryAt: completedAt,
+        updatedAt: completedAt,
+      })
+      .onConflictDoUpdate({
+        target: wmaChatCatalog.chatId,
+        set: {
+          summaryCount: sql`${wmaChatCatalog.summaryCount} + 1`,
+          messageCount: sql`${wmaChatCatalog.messageCount} + ${messageCount}`,
+          lastSummaryAt: sql`greatest(${wmaChatCatalog.lastSummaryAt}, ${completedAt})`,
+          updatedAt: completedAt,
+        },
+      });
   }
 }
 

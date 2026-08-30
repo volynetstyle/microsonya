@@ -1,4 +1,4 @@
-export type TelemetryComponent = "ingress" | "lifecycle" | "processor";
+export type TelemetryComponent = "ingress" | "lifecycle" | "processor" | "wma";
 
 export type TelemetryOutcome =
   | "completed"
@@ -15,6 +15,12 @@ type LogFields = Readonly<{
   retryAfterSeconds?: number;
   errorName?: string;
   staleCount?: number;
+  totalMs?: number;
+  dbMs?: number;
+  telegramMs?: number;
+  rows?: number;
+  responseBytes?: number;
+  cacheHit?: boolean;
 }>;
 
 /**

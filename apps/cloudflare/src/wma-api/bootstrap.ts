@@ -1,152 +1,50 @@
-import { and, desc, eq, inArray } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import {
   dataEncryptionFromBase64,
   openWorkerDb,
-  summaryRuns,
   summaryRunMessages,
-  summaryRunLifecycle,
+  summaryRuns,
+  wmaChatCatalog,
 } from "@microsonya/db";
 import type { TelegramIdentity } from "./auth.js";
 
-export type WmaBootstrap = {
-  viewer: { id: string; name: string };
-  chat: { id: string; title: string };
-  date: string;
-  totalMessages: number;
-  topics: readonly WmaTopic[];
-  capabilities: { canRequestSummary: boolean };
-};
-type WmaTopic = {
-  id: string;
+export type WmaChat = {
+  ref: string;
   title: string;
+  summaryCount: number;
+  lastSummaryAt: number | null;
+};
+export type WmaChatOverview = {
+  chat: { ref: string; title: string };
+  stats: { summaryCount: number; messageCount: number };
+  summaries: readonly WmaSummaryCard[];
+};
+export type WmaSummaryCard = {
+  id: string;
+  createdAt: number;
   messageCount: number;
-  timeRange: string;
+  summary: string;
   preview: string;
-  keyPointsCount: number;
+};
+export type WmaSummaryDetail = {
+  id: string;
+  summary: string;
   moments: readonly {
-    type: "text";
     id: string;
-    time: string;
-    title: string;
+    sentAt: number;
+    author: string;
     body: string;
   }[];
 };
+type WmaEnv = {
+  HYPERDRIVE: Hyperdrive;
+  MICROSONYA_DATA_ENCRYPTION_KEY: string;
+  TELEGRAM_BOT_TOKEN: string;
+};
 
-export async function loadWmaBootstrap(
-  env: { HYPERDRIVE: Hyperdrive; MICROSONYA_DATA_ENCRYPTION_KEY: string },
-  identity: TelegramIdentity,
-  requestedChatId = identity.chat?.id,
-  timeZone?: string,
-): Promise<WmaBootstrap> {
-  if (!requestedChatId) throw new TypeError("A chat must be selected.");
-  const chat =
-    identity.chat?.id === requestedChatId
-      ? identity.chat
-      : { id: requestedChatId, title: "Microsonya" };
-  const encryption = dataEncryptionFromBase64(
-    env.MICROSONYA_DATA_ENCRYPTION_KEY,
-  );
-  const client = await openWorkerDb(env.HYPERDRIVE.connectionString);
-  try {
-    const rows = await client.db
-      .select()
-      .from(summaryRuns)
-      .where(
-        and(
-          eq(
-            summaryRuns.chatId,
-            encryption.lookup(chat.id, "telegram-chat-id"),
-          ),
-          inArray(summaryRuns.status, ["summarized", "skipped"]),
-        ),
-      )
-      .orderBy(desc(summaryRuns.createdAt))
-      .limit(20);
-    const sourceMessages =
-      rows.length === 0
-        ? []
-        : await client.db
-            .select()
-            .from(summaryRunMessages)
-            .where(
-              inArray(
-                summaryRunMessages.runId,
-                rows.map((row) => row.id),
-              ),
-            )
-            .orderBy(summaryRunMessages.runId, summaryRunMessages.ordinal);
-    const messagesByRun = new Map<string, typeof sourceMessages>();
-    for (const message of sourceMessages) {
-      const messages = messagesByRun.get(message.runId) ?? [];
-      messages.push(message);
-      messagesByRun.set(message.runId, messages);
-    }
-    const topics = rows.flatMap((row) => {
-      if (!row.summaryTextCiphertext) return [];
-      const summary = encryption.decrypt(row.summaryTextCiphertext);
-      const time = new Date(row.createdAt).toLocaleTimeString("uk-UA", {
-        hour: "2-digit",
-        minute: "2-digit",
-        timeZone,
-      });
-      if (isNonSummary(summary)) return [];
-      return [
-        {
-          id: row.id,
-          title: "Підсумок",
-          messageCount: row.messageCount,
-          timeRange: time,
-          preview: summary.slice(0, 180),
-          keyPointsCount: 1,
-          moments: (messagesByRun.get(row.id) ?? []).map((message) => ({
-            type: "text" as const,
-            id: `${row.id}:${message.ordinal}`,
-            time: new Date(message.sentAt).toLocaleTimeString("uk-UA", {
-              hour: "2-digit",
-              minute: "2-digit",
-              timeZone,
-            }),
-            title: encryption.decrypt(message.authorNameCiphertext),
-            body: encryption.decrypt(message.textCiphertext),
-          })) /*
-            {
-              type: "text" as const,
-              id: `${row.id}:summary`,
-              time,
-              title: "Підсумок розмови",
-              body: summary,
-            },
-          ], */,
-        },
-      ];
-    });
-    return {
-      viewer: identity.user,
-      chat,
-      date: "сьогодні",
-      totalMessages: rows.reduce((total, row) => total + row.messageCount, 0),
-      topics,
-      capabilities: { canRequestSummary: false },
-    };
-  } finally {
-    await client.close();
-  }
-}
-
-function isNonSummary(summary: string): boolean {
-  return /(?:окремий\s+підсумок\s+не\s+створюю|не\s+створюю\s+окремий\s+підсумок)/iu.test(
-    summary,
-  );
-}
-
-export type WmaChat = { id: string; title: string; summaryCount: number };
-
+/** Home is backed by the WMA projection, never by lifecycle history. */
 export async function listWmaChats(
-  env: {
-    HYPERDRIVE: Hyperdrive;
-    MICROSONYA_DATA_ENCRYPTION_KEY: string;
-    TELEGRAM_BOT_TOKEN: string;
-  },
+  env: WmaEnv,
   identity: TelegramIdentity,
 ): Promise<readonly WmaChat[]> {
   const encryption = dataEncryptionFromBase64(
@@ -154,35 +52,26 @@ export async function listWmaChats(
   );
   const client = await openWorkerDb(env.HYPERDRIVE.connectionString);
   try {
-    const rows = await client.db
-      .select({ chatIdCiphertext: summaryRunLifecycle.chatIdCiphertext })
-      .from(summaryRunLifecycle)
-      .limit(100);
-    const chatIds = [
-      ...new Set(
-        rows.map(({ chatIdCiphertext }) =>
-          encryption.decrypt(chatIdCiphertext),
-        ),
-      ),
-    ];
+    const catalog = await client.db
+      .select()
+      .from(wmaChatCatalog)
+      .orderBy(desc(wmaChatCatalog.lastSummaryAt));
     const chats = await Promise.all(
-      chatIds.map(async (id) => {
-        if (
-          !(await telegramMember(env.TELEGRAM_BOT_TOKEN, id, identity.user.id))
-        )
-          return;
-        const title = await telegramChatTitle(env.TELEGRAM_BOT_TOKEN, id);
-        if (!title) return;
-        const summaries = await client.db
-          .select({ id: summaryRuns.id })
-          .from(summaryRuns)
-          .where(
-            and(
-              eq(summaryRuns.chatId, encryption.lookup(id, "telegram-chat-id")),
-              inArray(summaryRuns.status, ["summarized", "skipped"]),
-            ),
-          );
-        return { id, title, summaryCount: summaries.length };
+      catalog.map(async (entry) => {
+        const chatId = encryption.decrypt(entry.chatIdCiphertext);
+        const title = await accessibleChatTitle(
+          env.TELEGRAM_BOT_TOKEN,
+          chatId,
+          identity.user.id,
+        );
+        return title === undefined
+          ? undefined
+          : {
+              ref: chatId,
+              title,
+              summaryCount: entry.summaryCount,
+              lastSummaryAt: entry.lastSummaryAt,
+            };
       }),
     );
     return chats.filter((chat): chat is WmaChat => chat !== undefined);
@@ -191,26 +80,151 @@ export async function listWmaChats(
   }
 }
 
-async function telegramMember(
+/** Overview returns headers only. Source messages are fetched by detail(). */
+export async function getChatOverview(
+  env: WmaEnv,
+  identity: TelegramIdentity,
+  chatRef?: string,
+): Promise<WmaChatOverview> {
+  const chat = await authorizeChat(env, identity, chatRef);
+  const encryption = dataEncryptionFromBase64(
+    env.MICROSONYA_DATA_ENCRYPTION_KEY,
+  );
+  const chatId = encryption.lookup(chat.id, "telegram-chat-id");
+  const client = await openWorkerDb(env.HYPERDRIVE.connectionString);
+  try {
+    const [rows, catalog] = await Promise.all([
+      client.db
+        .select({
+          id: summaryRuns.id,
+          createdAt: summaryRuns.createdAt,
+          messageCount: summaryRuns.messageCount,
+          summaryTextCiphertext: summaryRuns.summaryTextCiphertext,
+        })
+        .from(summaryRuns)
+        .where(
+          and(
+            eq(summaryRuns.chatId, chatId),
+            eq(summaryRuns.status, "summarized"),
+          ),
+        )
+        .orderBy(desc(summaryRuns.createdAt))
+        .limit(20),
+      client.db
+        .select()
+        .from(wmaChatCatalog)
+        .where(eq(wmaChatCatalog.chatId, chatId))
+        .limit(1),
+    ]);
+    return {
+      chat: { ref: chat.id, title: chat.title },
+      stats: {
+        summaryCount: catalog[0]?.summaryCount ?? 0,
+        messageCount: catalog[0]?.messageCount ?? 0,
+      },
+      summaries: rows.flatMap((row) => {
+        if (row.summaryTextCiphertext === null) return [];
+        const summary = encryption.decrypt(row.summaryTextCiphertext);
+        return [
+          {
+            id: row.id,
+            createdAt: row.createdAt,
+            messageCount: row.messageCount,
+            summary,
+            preview: summary.slice(0, 180),
+          },
+        ];
+      }),
+    };
+  } finally {
+    await client.close();
+  }
+}
+
+export async function getSummaryDetail(
+  env: WmaEnv,
+  identity: TelegramIdentity,
+  chatRef?: string,
+  summaryId?: string,
+): Promise<WmaSummaryDetail> {
+  const chat = await authorizeChat(env, identity, chatRef);
+  if (!summaryId) throw new TypeError("A summary must be selected.");
+  const encryption = dataEncryptionFromBase64(
+    env.MICROSONYA_DATA_ENCRYPTION_KEY,
+  );
+  const client = await openWorkerDb(env.HYPERDRIVE.connectionString);
+  try {
+    const run = (
+      await client.db
+        .select({
+          id: summaryRuns.id,
+          summaryTextCiphertext: summaryRuns.summaryTextCiphertext,
+        })
+        .from(summaryRuns)
+        .where(
+          and(
+            eq(summaryRuns.id, summaryId),
+            eq(
+              summaryRuns.chatId,
+              encryption.lookup(chat.id, "telegram-chat-id"),
+            ),
+            eq(summaryRuns.status, "summarized"),
+          ),
+        )
+        .limit(1)
+    ).at(0);
+    if (!run?.summaryTextCiphertext) throw new TypeError("Summary not found.");
+    const rows = await client.db
+      .select()
+      .from(summaryRunMessages)
+      .where(eq(summaryRunMessages.runId, run.id))
+      .orderBy(summaryRunMessages.ordinal);
+    return {
+      id: run.id,
+      summary: encryption.decrypt(run.summaryTextCiphertext),
+      moments: rows.map((row) => ({
+        id: `${run.id}:${row.ordinal}`,
+        sentAt: row.sentAt,
+        author: encryption.decrypt(row.authorNameCiphertext),
+        body: encryption.decrypt(row.textCiphertext),
+      })),
+    };
+  } finally {
+    await client.close();
+  }
+}
+
+async function authorizeChat(
+  env: WmaEnv,
+  identity: TelegramIdentity,
+  chatRef?: string,
+): Promise<{ id: string; title: string }> {
+  const chatId = chatRef ?? identity.chat?.id;
+  if (!chatId) throw new TypeError("A chat must be selected.");
+  const title = await accessibleChatTitle(
+    env.TELEGRAM_BOT_TOKEN,
+    chatId,
+    identity.user.id,
+  );
+  if (!title) throw new TypeError("The requested chat is not authorized.");
+  return { id: chatId, title };
+}
+
+async function accessibleChatTitle(
   token: string,
   chatId: string,
   userId: string,
-): Promise<boolean> {
-  const response = await fetch(
+): Promise<string | undefined> {
+  const member = await fetch(
     `https://api.telegram.org/bot${token}/getChatMember?chat_id=${encodeURIComponent(chatId)}&user_id=${encodeURIComponent(userId)}`,
   );
-  return (
-    response.ok && ((await response.json()) as { ok?: boolean }).ok === true
-  );
-}
-async function telegramChatTitle(
-  token: string,
-  chatId: string,
-): Promise<string | undefined> {
-  const response = await fetch(
+  if (!member.ok) return;
+  if (!((await member.json()) as { ok?: boolean }).ok) return;
+  const chat = await fetch(
     `https://api.telegram.org/bot${token}/getChat?chat_id=${encodeURIComponent(chatId)}`,
   );
-  const body = (await response.json()) as {
+  if (!chat.ok) return;
+  const body = (await chat.json()) as {
     ok?: boolean;
     result?: { title?: string; first_name?: string };
   };

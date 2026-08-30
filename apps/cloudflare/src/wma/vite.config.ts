@@ -8,14 +8,16 @@ export default defineConfig({
   // dist/client/index.html and emits a purely static dist/client.
   plugins: [solid({ start: true })],
   server: {
-    // Keep the dev server and scripts/dev-webapp-tunnel.mjs readiness probe
-    // on the same address. On Windows, localhost may resolve to IPv6 ::1
-    // while the supervisor probes IPv4 127.0.0.1.
     host: "127.0.0.1",
     port: 3000,
-    // Quick `cloudflared tunnel` runs (see pnpm dev:webapp:tunnel) get a
-    // random *.trycloudflare.com host each time, which Vite's dev-server
-    // host check rejects by default.
+
+    proxy: {
+      "/api": {
+        target: "http://127.0.0.1:8787",
+        changeOrigin: true,
+      },
+    },
+
     allowedHosts: [".trycloudflare.com"],
   },
   test: {

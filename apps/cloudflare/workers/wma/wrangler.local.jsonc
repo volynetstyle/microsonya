@@ -1,0 +1,26 @@
+{
+  "$schema": "../../../node_modules/wrangler/config-schema.json",
+  "name": "microsonya-wma-local",
+  "main": "../../src/wma-api/worker.local.ts",
+  "compatibility_date": "2026-08-30",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "vars": {
+    "WMA_DEV_BYPASS_AUTH": "true",
+    "WMA_DEV_USER_ID": "816986628",
+    "WMA_DEV_USER_NAME": "Andrii",
+    "WMA_DEV_CHAT_ID": "-2124665273",
+    "WMA_DEV_CHAT_TITLE": "Microsonya Dev"
+  },
+  "assets": {
+    "directory": "../../src/wma/dist/client",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"]
+  },
+  "hyperdrive": [{
+    "binding": "HYPERDRIVE",
+    "id": "00000000-0000-0000-0000-000000000000",
+    "localConnectionString": "postgres://postgres:1984microsonya%23@db.jfpduxtalqrteltsrsls.supabase.co:5432/postgres?sslmode=require"
+  }]
+}

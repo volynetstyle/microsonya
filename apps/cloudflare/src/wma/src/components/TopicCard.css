@@ -138,3 +138,112 @@
   border-radius: 0.75rem;
   background: var(--surface-secondary);
 }
+
+.summary-screen {
+  padding: var(--accordion-padding-y) var(--accordion-padding-x);
+}
+
+.summary-text {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 0.9375rem;
+  white-space: pre-wrap;
+  line-height: 1.6;
+}
+
+.summary-messages-link,
+.summary-messages-back {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--accent, #4991e5);
+  font: inherit;
+  font-weight: 600;
+  padding: 0;
+}
+
+.summary-messages-link {
+  margin-block-start: 1rem;
+}
+
+.summary-messages-screen {
+  min-block-size: 14rem;
+  overflow: hidden;
+}
+
+.summary-messages-screen .moment-list {
+  margin-block-start: 0.75rem;
+  padding: 0 0 0.25rem;
+  border: 0;
+  scroll-padding-inline: 0.125rem;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x pan-y;
+}
+
+/* A message rail is deliberately horizontal: a source-message list is a
+ * distinct screen in the summary card, not a tall continuation of it. */
+.summary-messages-screen .moment-list .moment {
+  display: grid;
+  grid-template-columns: 3.1rem minmax(0, 1fr);
+  align-content: start;
+  flex: 0 0 clamp(17rem, 84vw, 23rem);
+  min-block-size: 15rem;
+  margin: 0;
+  padding: 1rem;
+  border: 1px solid var(--separator);
+  border-radius: calc(var(--section-radius) - 2px);
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--surface-primary) 88%, var(--accent) 12%),
+    var(--surface-secondary)
+  );
+  box-shadow: 0 0.25rem 0.875rem color-mix(in srgb, #000 10%, transparent);
+  scroll-snap-stop: always;
+}
+
+.summary-messages-screen .moment-time {
+  padding-top: 0.15rem;
+  color: var(--text-hint);
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.summary-messages-screen .moment-body {
+  min-inline-size: 0;
+}
+
+.summary-messages-screen .moment-title {
+  overflow: hidden;
+  color: var(--text-primary);
+  font-size: 0.9375rem;
+  font-weight: var(--font-weight-semibold);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.summary-messages-screen .moment-text {
+  display: -webkit-box;
+  margin: 0.35rem 0 0;
+  overflow: hidden;
+  color: var(--text-secondary);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 7;
+}
+
+@media (pointer: fine) {
+  .summary-messages-screen .moment-list {
+    scrollbar-width: thin;
+  }
+
+  .summary-messages-screen .moment-list::-webkit-scrollbar {
+    display: block;
+    height: 0.25rem;
+  }
+
+  .summary-messages-screen .moment-list::-webkit-scrollbar-thumb {
+    border-radius: 1rem;
+    background: var(--scrollbar);
+  }
+}

@@ -1,32 +1,52 @@
 import { TelegramInitDataError, validateTelegramInitData } from "./auth.js";
-import { listWmaChats, loadWmaBootstrap } from "./bootstrap.js";
+import {
+  getChatOverview,
+  getSummaryDetail,
+  listWmaChats,
+} from "./bootstrap.js";
 
 export interface Env {
   ASSETS: Fetcher;
   HYPERDRIVE: Hyperdrive;
   TELEGRAM_BOT_TOKEN: string;
   MICROSONYA_DATA_ENCRYPTION_KEY: string;
+  WMA_DEV_BYPASS_AUTH?: string;
+  WMA_DEV_USER_ID?: string;
+  WMA_DEV_USER_NAME?: string;
+  WMA_DEV_CHAT_ID?: string;
+  WMA_DEV_CHAT_TITLE?: string;
 }
 export default {
-  async fetch(request, env): Promise<Response> {
+  async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
     if (!url.pathname.startsWith("/api/wma/")) return env.ASSETS.fetch(request);
     if (request.method !== "POST")
       return json({ error: "METHOD_NOT_ALLOWED" }, 405);
     try {
-      const identity = await validateTelegramInitData(
-        request.headers.get("X-Telegram-Init-Data") ?? "",
-        env.TELEGRAM_BOT_TOKEN,
-      );
+      const identity =
+        env.WMA_DEV_BYPASS_AUTH === "true"
+          ? devIdentity(env)
+          : await validateTelegramInitData(
+              request.headers.get("X-Telegram-Init-Data") ?? "",
+              env.TELEGRAM_BOT_TOKEN,
+            );
       if (url.pathname === "/api/wma/chats")
         return json(await listWmaChats(env, identity));
-      if (url.pathname === "/api/wma/bootstrap")
+      if (url.pathname === "/api/wma/chat-overview")
         return json(
-          await loadWmaBootstrap(
+          await getChatOverview(
             env,
             identity,
-            url.searchParams.get("chatId") ?? undefined,
-            request.headers.get("X-Time-Zone") ?? undefined,
+            url.searchParams.get("chatRef") ?? undefined,
+          ),
+        );
+      if (url.pathname === "/api/wma/summary-detail")
+        return json(
+          await getSummaryDetail(
+            env,
+            identity,
+            url.searchParams.get("chatRef") ?? undefined,
+            url.searchParams.get("summaryId") ?? undefined,
           ),
         );
       return json({ error: "NOT_FOUND" }, 404);
@@ -43,4 +63,18 @@ function json(body: unknown, status = 200): Response {
     status,
     headers: { "Cache-Control": "no-store" },
   });
+}
+
+function devIdentity(env: Env) {
+  if (
+    !env.WMA_DEV_USER_ID ||
+    !env.WMA_DEV_USER_NAME ||
+    !env.WMA_DEV_CHAT_ID ||
+    !env.WMA_DEV_CHAT_TITLE
+  )
+    throw new Error("WMA dev identity is not configured.");
+  return {
+    user: { id: env.WMA_DEV_USER_ID, name: env.WMA_DEV_USER_NAME },
+    chat: { id: env.WMA_DEV_CHAT_ID, title: env.WMA_DEV_CHAT_TITLE },
+  };
 }

@@ -1,32 +1,28 @@
-export type WmaMoment =
-  | { type: "text"; id: string; time: string; title: string; body: string }
-  | {
-      type: "quote";
-      id: string;
-      time: string;
-      title: string;
-      body: string;
-      author: string;
-      quote: string;
-    };
-
-export type WmaTopic = {
-  id: string;
+export type WmaChat = {
+  ref: string;
   title: string;
+  summaryCount: number;
+  lastSummaryAt: number | null;
+};
+export type WmaSummaryCard = {
+  id: string;
+  createdAt: number;
   messageCount: number;
-  timeRange: string;
+  summary: string;
   preview: string;
-  keyPointsCount: number;
-  moments: readonly WmaMoment[];
 };
-
-export type WmaBootstrap = {
-  viewer: { id: string; name: string };
-  chat: { id: string; title: string };
-  date: string;
-  totalMessages: number;
-  topics: readonly WmaTopic[];
-  capabilities: { canRequestSummary: boolean };
+export type WmaChatOverview = {
+  chat: { ref: string; title: string };
+  stats: { summaryCount: number; messageCount: number };
+  summaries: readonly WmaSummaryCard[];
 };
-
-export type WmaChat = { id: string; title: string; summaryCount: number };
+export type WmaSummaryDetail = {
+  id: string;
+  summary: string;
+  moments: readonly {
+    id: string;
+    sentAt: number;
+    author: string;
+    body: string;
+  }[];
+};

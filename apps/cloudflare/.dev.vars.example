@@ -1,3 +1,0 @@
-TELEGRAM_WEBHOOK_SECRET="replace-with-telegram-secret-token"
-TELEGRAM_BOT_TOKEN="replace-with-the-bot-token-used-to-validate-wma-initdata"
-MICROSONYA_DATA_ENCRYPTION_KEY="replace-with-the-existing-base64-data-encryption-key"

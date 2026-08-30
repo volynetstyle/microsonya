@@ -1,11 +1,16 @@
-import type { WmaBootstrap, WmaChat } from "./contracts";
+import type { WmaChat, WmaChatOverview, WmaSummaryDetail } from "./contracts";
 import { postJson } from "./http";
-export function loadBootstrap(chatId: string): Promise<WmaBootstrap> {
-  return postJson(
-    `/api/wma/bootstrap?chatId=${encodeURIComponent(chatId)}`,
-    window.Telegram?.WebApp?.initData ?? "",
+
+const initData = () => window.Telegram?.WebApp?.initData ?? "";
+export const loadChats = () =>
+  postJson<readonly WmaChat[]>("/api/wma/chats", initData());
+export const loadChatOverview = (chatRef: string) =>
+  postJson<WmaChatOverview>(
+    `/api/wma/chat-overview?chatRef=${encodeURIComponent(chatRef)}`,
+    initData(),
   );
-}
-export function loadChats(): Promise<readonly WmaChat[]> {
-  return postJson("/api/wma/chats", window.Telegram?.WebApp?.initData ?? "");
-}
+export const loadSummaryDetail = (chatRef: string, summaryId: string) =>
+  postJson<WmaSummaryDetail>(
+    `/api/wma/summary-detail?chatRef=${encodeURIComponent(chatRef)}&summaryId=${encodeURIComponent(summaryId)}`,
+    initData(),
+  );

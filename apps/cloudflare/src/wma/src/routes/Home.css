@@ -2,10 +2,11 @@
   margin: 0 auto;
   min-height: var(--tg-viewport-stable-height, 100dvh);
   padding-bottom: calc(
-    1rem + max(
-      var(--tg-content-safe-area-inset-bottom, 0px),
-      env(safe-area-inset-bottom, 0px)
-    )
+    1rem +
+      max(
+        var(--tg-content-safe-area-inset-bottom, 0px),
+        env(safe-area-inset-bottom, 0px)
+      )
   );
 }
 
@@ -15,11 +16,13 @@
   justify-content: space-between;
   gap: 0.75rem;
   padding: calc(
-      0.625rem + max(
-        var(--tg-content-safe-area-inset-top, 0px),
-        env(safe-area-inset-top, 0px)
-      )
-    ) var(--spacing-screen) 0.625rem;
+      0.625rem +
+        max(
+          var(--tg-content-safe-area-inset-top, 0px),
+          env(safe-area-inset-top, 0px)
+        )
+    )
+    var(--spacing-screen) 0.625rem;
   border-bottom: 1px solid var(--separator);
   position: sticky;
   top: 0;
@@ -57,7 +60,9 @@
   white-space: nowrap;
 }
 
-.demo-link:hover { text-decoration: underline; }
+.demo-link:hover {
+  text-decoration: underline;
+}
 
 .topic-list {
   list-style: none;
@@ -76,7 +81,31 @@
   text-align: center;
 }
 
-.chat-list { padding: 0.5rem 0; }
-.chat-row { display: flex; inline-size: 100%; justify-content: space-between; gap: 1rem; padding: 1rem var(--spacing-screen); border: 0; border-bottom: 1px solid var(--separator); background: var(--surface-primary); color: var(--text-primary); font: inherit; text-align: start; }
-.chat-row small { color: var(--text-hint); white-space: nowrap; }
-.back-button { border: 0; background: transparent; color: var(--accent); font: inherit; font-size: 2rem; line-height: 1; }
+.chat-list {
+  padding: 0.5rem 0;
+}
+.chat-row {
+  display: flex;
+  inline-size: 100%;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem var(--spacing-screen);
+  border: 0;
+  border-bottom: 1px solid var(--separator);
+  background: var(--surface-primary);
+  color: var(--text-primary);
+  font: inherit;
+  text-align: start;
+}
+.chat-row small {
+  color: var(--text-hint);
+  white-space: nowrap;
+}
+.back-button {
+  border: 0;
+  background: transparent;
+  color: var(--accent);
+  font: inherit;
+  font-size: 2rem;
+  line-height: 1;
+}

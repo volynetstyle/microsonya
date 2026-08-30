@@ -67,8 +67,19 @@ Workers Logs and traces start at 100% sampling for the initial production
 period. This is operational evidence only; it never substitutes for durable
 `SummaryRun` lifecycle state.
 
-For local development, copy `.dev.vars.example` to `.dev.vars`, replace the
-placeholder, then run `pnpm --filter @microsonya/cloudflare dev`. For deployment,
+For local WMA development, copy `.dev.vars.example` to
+`workers/wma/.dev.vars` (Wrangler resolves local secrets next to the WMA
+configuration), replace the Telegram token and encryption key placeholders,
+ensure PostgreSQL is available at `localhost:5432/microsonya`, then run:
+
+```sh
+pnpm --dir apps/cloudflare dev:wma
+```
+
+The local WMA API listens on `http://127.0.0.1:8787`, and the built static app
+is served from the same Worker. `worker.local.ts` generates valid Telegram
+`initData` from the `WMA_DEV_*` values, so the app can be opened directly in a
+browser during development. For deployment,
 store the same value as a Cloudflare secret:
 
 ```sh

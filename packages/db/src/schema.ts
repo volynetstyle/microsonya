@@ -183,6 +183,23 @@ export const summaryRunMessages = pgTable(
   ],
 );
 
+/** Read projection for the Web Mini App; never reconstruct the home screen
+ * from mutable lifecycle/orchestration history. */
+export const wmaChatCatalog = pgTable(
+  "wma_chat_catalog",
+  {
+    chatId: text("chat_id").primaryKey(),
+    chatIdCiphertext: bytea("chat_id_ciphertext").notNull(),
+    summaryCount: integer("summary_count").notNull().default(0),
+    messageCount: integer("message_count").notNull().default(0),
+    lastSummaryAt: bigint("last_summary_at", { mode: "number" }),
+    updatedAt: bigint("updated_at", { mode: "number" }).notNull(),
+  },
+  (table) => [
+    index("idx_wma_chat_catalog_last_summary").on(table.lastSummaryAt),
+  ],
+);
+
 export const modelInvocations = pgTable(
   "model_invocations",
   {
