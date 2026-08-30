@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "idx_summary_run_lifecycle_one_processing_per_chat" ON "summary_run_lifecycle" USING btree ("chat_id") WHERE "summary_run_lifecycle"."status" = 'processing';

@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray } from "drizzle-orm";
+import { and, desc, eq, gt, inArray } from "drizzle-orm";
 import {
   SUMMARY_ACTIONS,
   asMessageId,
@@ -7,8 +7,10 @@ import {
   type ChatId,
   type SummaryAction,
   type SummaryMode,
+  type SummaryId,
   type SummaryRun,
   type SummaryRunAttempt,
+  type SummaryRunAttemptStatus,
 } from "@microsonya/shared";
 import type { MicrosonyaDb } from "../client.js";
 import type { DataEncryption } from "../encryption.js";
@@ -16,8 +18,23 @@ import {
   datasetCandidates,
   modelInvocations,
   summaryRunMessages,
+  summaryRunLifecycle,
   summaryRuns,
 } from "../schema.js";
+
+export interface PersistedSummaryAttempt {
+  readonly id: SummaryId;
+  readonly status: Exclude<SummaryRunAttemptStatus, "error">;
+  readonly action?: SummaryAction;
+  readonly summaryText?: string;
+}
+
+export interface OrchestrationAttemptRef {
+  readonly runId: SummaryId;
+  readonly attempt: number;
+  readonly leaseToken: string;
+  readonly acceptedAt: ReturnType<typeof asTimestampMs>;
+}
 
 export class SummariesRepo {
   constructor(
@@ -36,7 +53,11 @@ export class SummariesRepo {
             inArray(summaryRuns.status, ["summarized", "skipped"]),
           ),
         )
-        .orderBy(desc(summaryRuns.createdAt))
+        .orderBy(
+          desc(summaryRuns.commandMessageId),
+          desc(summaryRuns.orchestrationAttempt),
+          desc(summaryRuns.createdAt),
+        )
         .limit(1)
     ).at(0);
     if (!row) return undefined;
@@ -64,8 +85,48 @@ export class SummariesRepo {
     });
   }
 
+  async findOrchestratedOutcome(
+    orchestrationRunId: SummaryId,
+  ): Promise<PersistedSummaryAttempt | undefined> {
+    const row = (
+      await this.db
+        .select({
+          id: summaryRuns.id,
+          status: summaryRuns.status,
+          action: summaryRuns.action,
+          summaryTextCiphertext: summaryRuns.summaryTextCiphertext,
+        })
+        .from(summaryRuns)
+        .where(
+          and(
+            eq(summaryRuns.orchestrationRunId, orchestrationRunId),
+            inArray(summaryRuns.status, [
+              "summarized",
+              "deferred",
+              "skipped",
+              "empty",
+            ]),
+          ),
+        )
+        .orderBy(desc(summaryRuns.orchestrationAttempt))
+        .limit(1)
+    ).at(0);
+    if (row === undefined) return undefined;
+    return Object.freeze({
+      id: asSummaryId(row.id),
+      status: asCompletedAttemptStatus(row.status),
+      ...(row.action === null ? {} : { action: asSummaryAction(row.action) }),
+      ...(row.summaryTextCiphertext === null
+        ? {}
+        : { summaryText: this.encryption.decrypt(row.summaryTextCiphertext) }),
+    });
+  }
+
   /** Inserts the attempt and every child evidence row in one transaction. */
-  async saveAttempt(attempt: SummaryRunAttempt): Promise<void> {
+  async saveAttempt(
+    attempt: SummaryRunAttempt,
+    orchestration?: OrchestrationAttemptRef,
+  ): Promise<void> {
     const encryptedChatId = this.chatKey(attempt.chatId);
     const firstEligible = attempt.messages.find(
       ({ role }) => role === "eligible",
@@ -73,10 +134,28 @@ export class SummariesRepo {
     const lastEligible = findLastEligible(attempt.messages);
 
     await this.db.transaction(async (tx) => {
+      if (orchestration !== undefined) {
+        const accepted = await tx
+          .update(summaryRunLifecycle)
+          .set({ updatedAt: orchestration.acceptedAt })
+          .where(
+            and(
+              eq(summaryRunLifecycle.id, orchestration.runId),
+              eq(summaryRunLifecycle.status, "processing"),
+              eq(summaryRunLifecycle.attempt, orchestration.attempt),
+              eq(summaryRunLifecycle.leaseToken, orchestration.leaseToken),
+              gt(summaryRunLifecycle.leaseExpiresAt, orchestration.acceptedAt),
+            ),
+          )
+          .returning({ id: summaryRunLifecycle.id });
+        if (accepted.length !== 1) return;
+      }
       const inserted = await tx
         .insert(summaryRuns)
         .values({
           id: attempt.id,
+          orchestrationRunId: orchestration?.runId,
+          orchestrationAttempt: orchestration?.attempt,
           chatId: encryptedChatId,
           commandMessageId: attempt.commandMessageId,
           fromMessageId: firstEligible?.messageId,
@@ -297,6 +376,20 @@ function asSummaryMode(value: string): SummaryMode {
 function asSummaryStatus(value: string): SummaryRun["status"] {
   if (value === "summarized" || value === "skipped") return value;
   throw new TypeError(`Unknown summary status: ${value}`);
+}
+
+function asCompletedAttemptStatus(
+  value: string,
+): PersistedSummaryAttempt["status"] {
+  if (
+    value === "summarized" ||
+    value === "deferred" ||
+    value === "skipped" ||
+    value === "empty"
+  ) {
+    return value;
+  }
+  throw new TypeError(`Unknown completed summary attempt status: ${value}`);
 }
 
 function asSummaryAction(value: string | null): SummaryAction {

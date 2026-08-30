@@ -7,6 +7,10 @@ import { describe, expect, it, vi } from "vitest";
 import type { SummaryJob } from "@microsonya/contracts";
 import { asSummaryId } from "@microsonya/shared";
 import { handleSummaryQueue } from "../src/ingress/queue.js";
+import {
+  EMPTY_SUMMARY_MESSAGE,
+  classifyUnknownFailure,
+} from "../src/processor/policy.js";
 
 type ProcessorResult = Awaited<ReturnType<Env["SUMMARY_PROCESSOR"]["process"]>>;
 
@@ -21,14 +25,23 @@ function message(id: string): ServiceBindingQueueMessage<SummaryJob> {
 
 function environment(
   process: (runId: string) => Promise<ProcessorResult>,
-): Pick<Env, "SUMMARY_PROCESSOR" | "ANALYTICS"> {
+): Pick<Env, "SUMMARY_PROCESSOR" | "SUMMARY_JOBS" | "ANALYTICS"> {
+  const send = vi.fn(async () => undefined);
   return {
     SUMMARY_PROCESSOR: { process } as Env["SUMMARY_PROCESSOR"],
+    SUMMARY_JOBS: { send } as unknown as Queue<SummaryJob>,
     ANALYTICS: { writeDataPoint: vi.fn() } as unknown as AnalyticsEngineDataset,
   };
 }
 
 describe("summary Queue protocol in Workers runtime", () => {
+  it("renders the empty result in valid Ukrainian and does not retry code bugs", () => {
+    expect(EMPTY_SUMMARY_MESSAGE).toBe("Немає нових повідомлень для підсумку.");
+    expect(classifyUnknownFailure(new TypeError("bug"))).toMatchObject({
+      code: "TypeError",
+      retryable: false,
+    });
+  });
   it("ACKs completed and permanent work and RETRYs transient work", async () => {
     const batch = createMessageBatch("summary-jobs", [
       message("completed"),
@@ -50,7 +63,11 @@ describe("summary Queue protocol in Workers runtime", () => {
     expect(result.explicitAcks).toEqual(
       expect.arrayContaining(["completed", "permanent"]),
     );
-    expect(result.retryMessages).toContainEqual({ msgId: "retry" });
+    expect(result.explicitAcks).toContain("retry");
+    expect(env.SUMMARY_JOBS.send).toHaveBeenCalledWith(
+      { runId: "run-retry" },
+      { delaySeconds: 30 },
+    );
   });
 
   it("RETRYs an RPC exception without losing other batch outcomes", async () => {

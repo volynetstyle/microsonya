@@ -12,6 +12,7 @@ export const SUMMARY_RUN_LIFECYCLE_STATUSES = [
 ] as const;
 export type SummaryRunLifecycleStatus =
   (typeof SUMMARY_RUN_LIFECYCLE_STATUSES)[number];
+export type SummaryRunRetryStage = "processing" | "delivery";
 export interface OperationalSummaryRun {
   readonly id: SummaryId;
   readonly idempotencyKey: string;
@@ -19,6 +20,8 @@ export interface OperationalSummaryRun {
   readonly createdAt: TimestampMs;
   readonly updatedAt: TimestampMs;
   readonly attempt: number;
+  readonly deliveryAttempt: number;
+  readonly retryStage?: SummaryRunRetryStage;
   readonly lastErrorCode?: string;
   readonly lastErrorAt?: TimestampMs;
   readonly nextRetryAt?: TimestampMs;

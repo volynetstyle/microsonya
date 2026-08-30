@@ -4,20 +4,37 @@ import {
   SummariesRepo,
   dataEncryptionFromBase64,
   openWorkerDb,
+  type PersistedSummaryAttempt,
 } from "@microsonya/db";
 import { OllamaClient, OllamaError } from "@microsonya/model";
 import type { ProcessSummaryRunResult } from "@microsonya/contracts";
-import { asTimestampMs, type SummaryId } from "@microsonya/shared";
+import {
+  asSummaryId,
+  asTimestampMs,
+  type DeferReason,
+  type SummaryId,
+} from "@microsonya/shared";
 import { createSummarizer, presentDisposition } from "@microsonya/summarize";
+import { EMPTY_SUMMARY_MESSAGE, classifyUnknownFailure } from "./policy.js";
 
 const DEFAULT_RETRY_SECONDS = 30;
 const MAX_ATTEMPTS = 4;
+const MAX_DELIVERY_ATTEMPTS = 4;
 const TELEGRAM_TEXT_LIMIT = 4_096;
+const LEASE_HEARTBEAT_MS = 30_000;
 
 type Services = {
   readonly messages: MessagesRepo;
   readonly summaries: SummariesRepo;
   readonly ollama: OllamaClient;
+};
+
+type DeliveryClaim = {
+  readonly runId: SummaryId;
+  readonly leaseToken: string;
+  readonly deliveryAttempt: number;
+  readonly chatId: string;
+  readonly summary?: string;
 };
 
 async function withServices<T>(
@@ -40,6 +57,31 @@ async function withServices<T>(
   } finally {
     await client.close();
   }
+}
+
+function presentPersistedAttempt(attempt: PersistedSummaryAttempt): string {
+  if (attempt.summaryText !== undefined) return attempt.summaryText;
+  if (attempt.status === "empty") {
+    return EMPTY_SUMMARY_MESSAGE;
+  }
+  if (attempt.status === "deferred" && attempt.action?.startsWith("DEFER_")) {
+    return presentDisposition({
+      kind: "deferred",
+      reason: attempt.action as DeferReason,
+    });
+  }
+  throw new TypeError("Persisted summary attempt has no presentation.");
+}
+
+export function presentGeneratedDisposition(
+  disposition:
+    | Awaited<ReturnType<ReturnType<typeof createSummarizer>["process"]>>
+    | string,
+): string {
+  if (typeof disposition === "string") return disposition;
+  return disposition === null
+    ? EMPTY_SUMMARY_MESSAGE
+    : presentDisposition(disposition);
 }
 
 export class SummaryProcessorEntrypoint extends WorkerEntrypoint<Env> {
@@ -69,115 +111,162 @@ export class SummaryProcessorEntrypoint extends WorkerEntrypoint<Env> {
   }
 
   private async processRun(runId: SummaryId): Promise<ProcessSummaryRunResult> {
-    const existing = await this.env.SUMMARY_RUNS.get(runId);
-    if (existing === undefined) return { disposition: "permanent-failure" };
-    if (
-      existing.status === "completed" ||
-      existing.status === "failed_permanent"
-    ) {
+    const status = await this.env.SUMMARY_RUNS.status(runId);
+    if (status === "missing") return { disposition: "permanent-failure" };
+    if (status === "completed" || status === "failed_permanent") {
       return {
-        disposition:
-          existing.status === "completed" ? "completed" : "permanent-failure",
+        disposition: status === "completed" ? "completed" : "permanent-failure",
       };
     }
-
-    if (
-      existing.status === "summary_ready" ||
-      existing.status === "delivering"
-    ) {
-      return this.deliver(runId, existing.command.chatId, existing.summary);
-    }
+    const delivery = await this.env.SUMMARY_RUNS.claimDelivery(runId);
+    if (delivery !== undefined) return this.deliver(delivery);
 
     const claimed = await tracing.enterSpan("summary_run.claim", (span) => {
       span.setAttribute("microsonya.run_id", runId);
-      return this.env.SUMMARY_RUNS.claim(runId, this.env.PROCESSOR_VERSION);
+      return this.env.SUMMARY_RUNS.claimProcessing(
+        runId,
+        this.env.PROCESSOR_VERSION,
+      );
     });
     if (claimed === undefined)
       return { disposition: "retry", retryAfterSeconds: 5 };
+    if (claimed.attempt > MAX_ATTEMPTS) {
+      const failed = await this.env.SUMMARY_RUNS.markFailed(
+        runId,
+        claimed.leaseToken,
+        "processing",
+        "PROCESSING_ATTEMPTS_EXHAUSTED",
+      );
+      return failed
+        ? { disposition: "permanent-failure" }
+        : { disposition: "retry", retryAfterSeconds: 5 };
+    }
 
     try {
-      const disposition = await withServices(this.env, (deps) => {
-        const summarizer = createSummarizer({
-          messages: deps.messages,
-          summaries: deps.summaries,
-          ollama: deps.ollama,
-          createSummaryId: () => runId,
-          now: () => asTimestampMs(Date.now()),
-        });
-        return tracing.enterSpan("summary.generate", (span) => {
-          span.setAttribute("microsonya.run_id", runId);
-          span.setAttribute("microsonya.attempt", claimed.attempt);
-          span.setAttribute("microsonya.command_mode", claimed.command.mode);
-          return summarizer.process(claimed.command);
-        });
-      });
-      const summary =
-        disposition === null
-          ? "Немає нових повідомлень для підсумку."
-          : presentDisposition(disposition);
+      const disposition = await this.withProcessingLeaseHeartbeat(
+        runId,
+        claimed.leaseToken,
+        () =>
+          withServices(this.env, async (deps) => {
+            const persisted =
+              await deps.summaries.findOrchestratedOutcome(runId);
+            if (persisted !== undefined)
+              return presentPersistedAttempt(persisted);
+            const attemptId = asSummaryId(
+              `${runId}:attempt:${claimed.attempt}`,
+            );
+            const summarizer = createSummarizer({
+              messages: deps.messages,
+              summaries: {
+                findLastRun: (chatId) => deps.summaries.findLastRun(chatId),
+                saveRun: (run) => deps.summaries.saveRun(run),
+                saveAttempt: (attempt) =>
+                  deps.summaries.saveAttempt(attempt, {
+                    runId,
+                    attempt: claimed.attempt,
+                    leaseToken: claimed.leaseToken,
+                    acceptedAt: asTimestampMs(Date.now()),
+                  }),
+              },
+              ollama: deps.ollama,
+              createSummaryId: () => attemptId,
+              now: () => asTimestampMs(Date.now()),
+            });
+            return tracing.enterSpan("summary.generate", (span) => {
+              span.setAttribute("microsonya.run_id", runId);
+              span.setAttribute("microsonya.attempt", claimed.attempt);
+              span.setAttribute(
+                "microsonya.command_mode",
+                claimed.command.mode,
+              );
+              return summarizer.process(claimed.command);
+            });
+          }),
+      );
+      const summary = presentGeneratedDisposition(disposition);
       const validationError = tracing.enterSpan("summary.validate", (span) => {
         span.setAttribute("microsonya.run_id", runId);
         return validateSummary(summary);
       });
       if (validationError !== undefined) {
-        await this.env.SUMMARY_RUNS.markFailed(runId, validationError);
-        return { disposition: "permanent-failure" };
+        const failed = await this.env.SUMMARY_RUNS.markFailed(
+          runId,
+          claimed.leaseToken,
+          "processing",
+          validationError,
+        );
+        return failed
+          ? { disposition: "permanent-failure" }
+          : { disposition: "retry", retryAfterSeconds: 5 };
       }
       const saved = await tracing.enterSpan("summary.persist", (span) => {
         span.setAttribute("microsonya.run_id", runId);
         span.setAttribute("microsonya.model", "configured-profile");
         span.setAttribute("microsonya.prompt_version", "summarize-package");
-        return this.env.SUMMARY_RUNS.saveSummary(runId, summary, {
-          model: "configured-profile",
-          promptVersion: "summarize-package",
-        });
+        return this.env.SUMMARY_RUNS.saveSummary(
+          runId,
+          claimed.leaseToken,
+          summary,
+          {
+            model: "configured-profile",
+            promptVersion: "summarize-package",
+          },
+        );
       });
       if (!saved) return { disposition: "retry", retryAfterSeconds: 5 };
-      return this.deliver(runId, claimed.command.chatId, summary);
+      const ready = await this.env.SUMMARY_RUNS.claimDelivery(runId);
+      return ready === undefined
+        ? { disposition: "retry", retryAfterSeconds: 5 }
+        : this.deliver(ready);
     } catch (error) {
-      return this.handleProcessingError(runId, claimed.attempt, error);
+      return this.handleProcessingError(
+        runId,
+        claimed.leaseToken,
+        claimed.attempt,
+        error,
+      );
     }
   }
 
   private async deliver(
-    runId: SummaryId,
-    chatId: string,
-    summary: string | undefined,
+    claim: DeliveryClaim,
   ): Promise<ProcessSummaryRunResult> {
     return tracing.enterSpan("telegram.deliver", async (span) => {
-      span.setAttribute("microsonya.run_id", runId);
-      const result = await this.deliverInsideSpan(runId, chatId, summary);
+      span.setAttribute("microsonya.run_id", claim.runId);
+      span.setAttribute("microsonya.delivery_attempt", claim.deliveryAttempt);
+      const result = await this.deliverInsideSpan(claim);
       span.setAttribute("microsonya.status", result.disposition);
       return result;
     });
   }
 
   private async deliverInsideSpan(
-    runId: SummaryId,
-    chatId: string,
-    summary: string | undefined,
+    claim: DeliveryClaim,
   ): Promise<ProcessSummaryRunResult> {
-    if (summary === undefined) {
-      await this.env.SUMMARY_RUNS.markFailed(runId, "SUMMARY_MISSING");
-      return { disposition: "permanent-failure" };
-    }
-    const delivering = await this.env.SUMMARY_RUNS.beginDelivery(runId);
-    if (!delivering) {
-      const current = await this.env.SUMMARY_RUNS.get(runId);
-      if (current?.status === "completed") return { disposition: "completed" };
-      if (current?.status !== "delivering") {
-        return { disposition: "retry", retryAfterSeconds: 5 };
-      }
+    const { runId, leaseToken, deliveryAttempt, summary } = claim;
+    if (summary === undefined || deliveryAttempt > MAX_DELIVERY_ATTEMPTS) {
+      const failed = await this.env.SUMMARY_RUNS.markFailed(
+        runId,
+        leaseToken,
+        "delivering",
+        summary === undefined
+          ? "SUMMARY_MISSING"
+          : "DELIVERY_ATTEMPTS_EXHAUSTED",
+      );
+      return failed
+        ? { disposition: "permanent-failure" }
+        : { disposition: "retry", retryAfterSeconds: 5 };
     }
 
     try {
       const messageId = await sendTelegramMessage(
         this.env.TELEGRAM_BOT_TOKEN,
-        chatId,
+        claim.chatId,
         summary,
       );
       const persisted = await this.env.SUMMARY_RUNS.markCompleted(
         runId,
+        leaseToken,
         messageId,
       );
       return persisted
@@ -186,42 +275,105 @@ export class SummaryProcessorEntrypoint extends WorkerEntrypoint<Env> {
     } catch (error) {
       const failure = classifyFailure(error);
       if (!failure.retryable) {
-        await this.env.SUMMARY_RUNS.markFailed(runId, failure.code);
-        return { disposition: "permanent-failure" };
+        const failed = await this.env.SUMMARY_RUNS.markFailed(
+          runId,
+          leaseToken,
+          "delivering",
+          failure.code,
+        );
+        return failed
+          ? { disposition: "permanent-failure" }
+          : { disposition: "retry", retryAfterSeconds: 5 };
       }
-      await this.env.SUMMARY_RUNS.markRetry(
+      const retrying = await this.env.SUMMARY_RUNS.markRetry(
         runId,
+        leaseToken,
         "delivering",
         failure.code,
         failure.retryAfterSeconds,
       );
-      return {
-        disposition: "retry",
-        retryAfterSeconds: failure.retryAfterSeconds,
-      };
+      return retrying
+        ? {
+            disposition: "retry",
+            retryAfterSeconds: failure.retryAfterSeconds,
+          }
+        : { disposition: "retry", retryAfterSeconds: 5 };
     }
   }
 
   private async handleProcessingError(
     runId: SummaryId,
+    leaseToken: string,
     attempt: number,
     error: unknown,
   ): Promise<ProcessSummaryRunResult> {
     const failure = classifyFailure(error);
     if (!failure.retryable || attempt >= MAX_ATTEMPTS) {
-      await this.env.SUMMARY_RUNS.markFailed(runId, failure.code);
-      return { disposition: "permanent-failure" };
+      const failed = await this.env.SUMMARY_RUNS.markFailed(
+        runId,
+        leaseToken,
+        "processing",
+        failure.code,
+      );
+      return failed
+        ? { disposition: "permanent-failure" }
+        : { disposition: "retry", retryAfterSeconds: 5 };
     }
-    await this.env.SUMMARY_RUNS.markRetry(
+    const retrying = await this.env.SUMMARY_RUNS.markRetry(
       runId,
+      leaseToken,
       "processing",
       failure.code,
       failure.retryAfterSeconds,
     );
-    return {
-      disposition: "retry",
-      retryAfterSeconds: failure.retryAfterSeconds,
-    };
+    return retrying
+      ? {
+          disposition: "retry",
+          retryAfterSeconds: failure.retryAfterSeconds,
+        }
+      : { disposition: "retry", retryAfterSeconds: 5 };
+  }
+
+  private async withProcessingLeaseHeartbeat<T>(
+    runId: SummaryId,
+    leaseToken: string,
+    operation: () => Promise<T>,
+  ): Promise<T> {
+    let renewal = Promise.resolve(true);
+    let leaseLost = false;
+    const timer = setInterval(() => {
+      renewal = renewal.then(async (previous) => {
+        if (!previous) return false;
+        const renewed = await this.env.SUMMARY_RUNS.renewLease(
+          runId,
+          leaseToken,
+          "processing",
+        );
+        if (!renewed) leaseLost = true;
+        return renewed;
+      });
+    }, LEASE_HEARTBEAT_MS);
+    try {
+      const result = await operation();
+      await renewal;
+      const renewed = await this.env.SUMMARY_RUNS.renewLease(
+        runId,
+        leaseToken,
+        "processing",
+      );
+      if (leaseLost || !renewed) throw new LeaseLostError();
+      return result;
+    } finally {
+      clearInterval(timer);
+      await renewal;
+    }
+  }
+}
+
+class LeaseLostError extends Error {
+  constructor() {
+    super("Processing lease was lost.");
+    this.name = "LeaseLostError";
   }
 }
 
@@ -274,12 +426,19 @@ class DeliveryError extends Error {
   }
 }
 
-function classifyFailure(error: unknown): {
+export function classifyFailure(error: unknown): {
   readonly code: string;
   readonly retryable: boolean;
   readonly retryAfterSeconds: number;
 } {
   if (error instanceof DeliveryError) return error;
+  if (error instanceof LeaseLostError) {
+    return {
+      code: error.name,
+      retryable: true,
+      retryAfterSeconds: 5,
+    };
+  }
   if (error instanceof OllamaError) {
     return {
       code: `MODEL_HTTP_${error.status ?? "UNKNOWN"}`,
@@ -287,11 +446,7 @@ function classifyFailure(error: unknown): {
       retryAfterSeconds: DEFAULT_RETRY_SECONDS,
     };
   }
-  return {
-    code: error instanceof Error ? error.name : "UNKNOWN_ERROR",
-    retryable: true,
-    retryAfterSeconds: DEFAULT_RETRY_SECONDS,
-  };
+  return classifyUnknownFailure(error);
 }
 
 function telegramMessageId(payload: unknown): number | undefined {

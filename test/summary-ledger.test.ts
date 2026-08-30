@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   SummaryFeedbackRepo,
   SummariesRepo,
+  SummaryLifecycleRepo,
   MessagesRepo,
   createLedgerEncryption,
   datasetCandidates,
@@ -23,6 +24,49 @@ import {
 import { openTestDb } from "./dbTestUtils.js";
 
 describe("production summary ledger", () => {
+  it("does not accept orchestration evidence from an expired lease", async () => {
+    const client = await openTestDb();
+    const encryption = createLedgerEncryption(Buffer.alloc(32, 6));
+    const summaries = new SummariesRepo(client.db, encryption);
+    const lifecycle = new SummaryLifecycleRepo(client.db, encryption);
+    const attempt = fixtureAttempt();
+    try {
+      const run = await lifecycle.create(
+        {
+          idempotencyKey: "ledger-stale-evidence",
+          command: {
+            chatId: attempt.chatId,
+            commandMessageId: attempt.commandMessageId,
+            date: attempt.completedAt,
+            mode: attempt.mode,
+          },
+        },
+        asTimestampMs(1_000),
+      );
+      await lifecycle.transition(
+        run.id,
+        "created",
+        "queued",
+        asTimestampMs(1_001),
+      );
+      const claim = await lifecycle.claimProcessing(
+        run.id,
+        asTimestampMs(1_002),
+        10,
+        "processor",
+      );
+      await summaries.saveAttempt(attempt, {
+        runId: run.id,
+        attempt: claim!.attempt,
+        leaseToken: claim!.leaseToken,
+        acceptedAt: asTimestampMs(1_013),
+      });
+      expect(await summaries.findOrchestratedOutcome(run.id)).toBeUndefined();
+    } finally {
+      await client.close();
+    }
+  });
+
   it("atomically stores encrypted immutable evidence and a review candidate", async () => {
     const client = await openTestDb();
     const encryption = createLedgerEncryption(Buffer.alloc(32, 7));

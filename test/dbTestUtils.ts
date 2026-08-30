@@ -25,6 +25,8 @@ export async function openTestDb(): Promise<DbClient> {
 
     CREATE TABLE summary_runs (
       id TEXT PRIMARY KEY,
+      orchestration_run_id TEXT,
+      orchestration_attempt INTEGER,
       chat_id TEXT NOT NULL,
       command_message_id INTEGER NOT NULL,
       from_message_id INTEGER,
@@ -53,8 +55,10 @@ export async function openTestDb(): Promise<DbClient> {
       input_hash TEXT NOT NULL
     );
 
-    CREATE UNIQUE INDEX idx_summary_runs_command
+    CREATE INDEX idx_summary_runs_command
       ON summary_runs (chat_id, command_message_id);
+    CREATE UNIQUE INDEX idx_summary_runs_orchestration_attempt
+      ON summary_runs (orchestration_run_id, orchestration_attempt);
     CREATE INDEX idx_summary_runs_chat_created
       ON summary_runs (chat_id, created_at);
     CREATE INDEX idx_summary_runs_chat_range
@@ -73,8 +77,11 @@ export async function openTestDb(): Promise<DbClient> {
       created_at BIGINT NOT NULL,
       updated_at BIGINT NOT NULL,
       attempt INTEGER NOT NULL DEFAULT 0 CHECK (attempt >= 0),
+      delivery_attempt INTEGER NOT NULL DEFAULT 0 CHECK (delivery_attempt >= 0),
       lease_expires_at BIGINT,
+      lease_token TEXT,
       next_retry_at BIGINT,
+      retry_stage TEXT,
       last_error_code TEXT,
       last_error_at BIGINT,
       processor_version TEXT,
@@ -83,12 +90,17 @@ export async function openTestDb(): Promise<DbClient> {
       summary_ciphertext BYTEA,
       delivered_at BIGINT,
       telegram_message_id INTEGER,
+      CHECK ((status IN ('processing', 'delivering') AND lease_token IS NOT NULL AND lease_expires_at IS NOT NULL) OR (status NOT IN ('processing', 'delivering') AND lease_token IS NULL AND lease_expires_at IS NULL)),
+      CHECK ((status = 'retry_wait' AND retry_stage IN ('processing', 'delivery')) OR (status = 'queued' AND (retry_stage IS NULL OR retry_stage IN ('processing', 'delivery'))) OR (status NOT IN ('retry_wait', 'queued') AND retry_stage IS NULL)),
+      CHECK ((status NOT IN ('summary_ready', 'delivering', 'completed') AND retry_stage IS DISTINCT FROM 'delivery') OR summary_ciphertext IS NOT NULL),
       CHECK ((mode = 'count' AND requested_count IS NOT NULL AND requested_count > 0) OR (mode <> 'count' AND requested_count IS NULL))
     );
     CREATE INDEX idx_summary_run_lifecycle_status_updated
       ON summary_run_lifecycle (status, updated_at);
     CREATE INDEX idx_summary_run_lifecycle_retry
       ON summary_run_lifecycle (status, next_retry_at);
+    CREATE UNIQUE INDEX idx_summary_run_lifecycle_one_processing_per_chat
+      ON summary_run_lifecycle (chat_id) WHERE status = 'processing';
 
     CREATE TABLE summary_run_messages (
       run_id TEXT NOT NULL REFERENCES summary_runs (id) ON DELETE CASCADE,

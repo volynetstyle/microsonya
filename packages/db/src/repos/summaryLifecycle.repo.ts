@@ -1,15 +1,20 @@
 import { randomUUID } from "node:crypto";
 import {
   and,
+  asc,
   count,
   eq,
+  gt,
   inArray,
+  isNotNull,
   isNull,
   lte,
+  notExists,
   notInArray,
   or,
   sql,
 } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 import {
   asChatId,
   asMessageId,
@@ -23,6 +28,7 @@ import type {
   LifecycleHealthSnapshot,
   OperationalSummaryRun,
   SummaryRunLifecycleStatus,
+  SummaryRunRetryStage,
 } from "@microsonya/run-lifecycle";
 import { assertSummaryRunTransition } from "@microsonya/run-lifecycle";
 import type { MicrosonyaDb } from "../client.js";
@@ -40,6 +46,10 @@ export interface LifecycleRun extends OperationalSummaryRun {
   readonly command: SummaryCommand;
   readonly leaseExpiresAt?: TimestampMs;
   readonly summary?: string;
+}
+
+export interface LifecycleLease extends LifecycleRun {
+  readonly leaseToken: string;
 }
 
 export class SummaryLifecycleRepo {
@@ -134,19 +144,23 @@ export class SummaryLifecycleRepo {
     return rows.length === 1;
   }
 
-  async claim(
+  async claimProcessing(
     id: SummaryId,
     now: TimestampMs,
     leaseMs: number,
     processorVersion: string,
-  ): Promise<LifecycleRun | undefined> {
+  ): Promise<LifecycleLease | undefined> {
+    const leaseToken = randomUUID();
+    const earlierRun = alias(summaryRunLifecycle, "earlier_summary_run");
     const rows = await this.db
       .update(summaryRunLifecycle)
       .set({
         status: "processing",
         updatedAt: now,
         leaseExpiresAt: asTimestampMs(now + leaseMs),
+        leaseToken,
         nextRetryAt: null,
+        retryStage: null,
         processorVersion,
         attempt: sql`${summaryRunLifecycle.attempt} + 1`,
       })
@@ -154,9 +168,16 @@ export class SummaryLifecycleRepo {
         and(
           eq(summaryRunLifecycle.id, id),
           or(
-            eq(summaryRunLifecycle.status, "queued"),
+            and(
+              eq(summaryRunLifecycle.status, "queued"),
+              or(
+                isNull(summaryRunLifecycle.retryStage),
+                eq(summaryRunLifecycle.retryStage, "processing"),
+              ),
+            ),
             and(
               eq(summaryRunLifecycle.status, "retry_wait"),
+              eq(summaryRunLifecycle.retryStage, "processing"),
               or(
                 isNull(summaryRunLifecycle.nextRetryAt),
                 lte(summaryRunLifecycle.nextRetryAt, now),
@@ -167,15 +188,42 @@ export class SummaryLifecycleRepo {
               lte(summaryRunLifecycle.leaseExpiresAt, now),
             ),
           ),
+          notExists(
+            this.db
+              .select({ id: earlierRun.id })
+              .from(earlierRun)
+              .where(
+                and(
+                  eq(earlierRun.chatId, summaryRunLifecycle.chatId),
+                  sql`${earlierRun.commandMessageId} <= ${summaryRunLifecycle.commandMessageId}`,
+                  sql`${earlierRun.id} <> ${summaryRunLifecycle.id}`,
+                  or(
+                    inArray(earlierRun.status, ["created", "processing"]),
+                    and(
+                      eq(earlierRun.status, "queued"),
+                      or(
+                        isNull(earlierRun.retryStage),
+                        eq(earlierRun.retryStage, "processing"),
+                      ),
+                    ),
+                    and(
+                      eq(earlierRun.status, "retry_wait"),
+                      eq(earlierRun.retryStage, "processing"),
+                    ),
+                  ),
+                ),
+              ),
+          ),
         ),
       )
       .returning();
     const row = rows.at(0);
-    return row === undefined ? undefined : this.map(row);
+    return row === undefined ? undefined : { ...this.map(row), leaseToken };
   }
 
   async saveSummary(
     id: SummaryId,
+    leaseToken: string,
     summary: string,
     now: TimestampMs,
     metadata: { readonly model?: string; readonly promptVersion?: string },
@@ -189,41 +237,70 @@ export class SummaryLifecycleRepo {
         promptVersion: metadata.promptVersion,
         updatedAt: now,
         leaseExpiresAt: null,
+        leaseToken: null,
       })
       .where(
         and(
           eq(summaryRunLifecycle.id, id),
           eq(summaryRunLifecycle.status, "processing"),
+          eq(summaryRunLifecycle.leaseToken, leaseToken),
+          gt(summaryRunLifecycle.leaseExpiresAt, now),
         ),
       )
       .returning({ id: summaryRunLifecycle.id });
     return rows.length === 1;
   }
 
-  async beginDelivery(
+  async claimDelivery(
     id: SummaryId,
     now: TimestampMs,
     leaseMs: number,
-  ): Promise<boolean> {
+  ): Promise<LifecycleLease | undefined> {
+    const leaseToken = randomUUID();
     const rows = await this.db
       .update(summaryRunLifecycle)
       .set({
         status: "delivering",
         updatedAt: now,
         leaseExpiresAt: asTimestampMs(now + leaseMs),
+        leaseToken,
+        nextRetryAt: null,
+        retryStage: null,
+        deliveryAttempt: sql`${summaryRunLifecycle.deliveryAttempt} + 1`,
       })
       .where(
         and(
           eq(summaryRunLifecycle.id, id),
-          eq(summaryRunLifecycle.status, "summary_ready"),
+          isNotNull(summaryRunLifecycle.summaryCiphertext),
+          or(
+            eq(summaryRunLifecycle.status, "summary_ready"),
+            and(
+              eq(summaryRunLifecycle.status, "queued"),
+              eq(summaryRunLifecycle.retryStage, "delivery"),
+            ),
+            and(
+              eq(summaryRunLifecycle.status, "retry_wait"),
+              eq(summaryRunLifecycle.retryStage, "delivery"),
+              or(
+                isNull(summaryRunLifecycle.nextRetryAt),
+                lte(summaryRunLifecycle.nextRetryAt, now),
+              ),
+            ),
+            and(
+              eq(summaryRunLifecycle.status, "delivering"),
+              lte(summaryRunLifecycle.leaseExpiresAt, now),
+            ),
+          ),
         ),
       )
-      .returning({ id: summaryRunLifecycle.id });
-    return rows.length === 1;
+      .returning();
+    const row = rows.at(0);
+    return row === undefined ? undefined : { ...this.map(row), leaseToken };
   }
 
   async markCompleted(
     id: SummaryId,
+    leaseToken: string,
     telegramMessageId: number,
     now: TimestampMs,
   ): Promise<boolean> {
@@ -235,11 +312,14 @@ export class SummaryLifecycleRepo {
         deliveredAt: now,
         updatedAt: now,
         leaseExpiresAt: null,
+        leaseToken: null,
       })
       .where(
         and(
           eq(summaryRunLifecycle.id, id),
           eq(summaryRunLifecycle.status, "delivering"),
+          eq(summaryRunLifecycle.leaseToken, leaseToken),
+          gt(summaryRunLifecycle.leaseExpiresAt, now),
         ),
       )
       .returning({ id: summaryRunLifecycle.id });
@@ -248,6 +328,7 @@ export class SummaryLifecycleRepo {
 
   async markRetry(
     id: SummaryId,
+    leaseToken: string,
     from: "processing" | "delivering",
     errorCode: string,
     now: TimestampMs,
@@ -257,16 +338,20 @@ export class SummaryLifecycleRepo {
       .update(summaryRunLifecycle)
       .set({
         status: "retry_wait",
+        retryStage: from === "processing" ? "processing" : "delivery",
         lastErrorCode: errorCode,
         lastErrorAt: now,
         nextRetryAt,
         updatedAt: now,
         leaseExpiresAt: null,
+        leaseToken: null,
       })
       .where(
         and(
           eq(summaryRunLifecycle.id, id),
           eq(summaryRunLifecycle.status, from),
+          eq(summaryRunLifecycle.leaseToken, leaseToken),
+          gt(summaryRunLifecycle.leaseExpiresAt, now),
         ),
       )
       .returning({ id: summaryRunLifecycle.id });
@@ -275,6 +360,8 @@ export class SummaryLifecycleRepo {
 
   async markFailed(
     id: SummaryId,
+    leaseToken: string,
+    from: "processing" | "delivering",
     errorCode: string,
     now: TimestampMs,
   ): Promise<boolean> {
@@ -286,18 +373,70 @@ export class SummaryLifecycleRepo {
         lastErrorAt: now,
         updatedAt: now,
         leaseExpiresAt: null,
+        leaseToken: null,
+        nextRetryAt: null,
+        retryStage: null,
       })
       .where(
         and(
           eq(summaryRunLifecycle.id, id),
-          inArray(summaryRunLifecycle.status, [
-            "created",
-            "queued",
-            "processing",
-            "summary_ready",
-            "delivering",
-            "retry_wait",
-          ]),
+          eq(summaryRunLifecycle.status, from),
+          eq(summaryRunLifecycle.leaseToken, leaseToken),
+          gt(summaryRunLifecycle.leaseExpiresAt, now),
+        ),
+      )
+      .returning({ id: summaryRunLifecycle.id });
+    return rows.length === 1;
+  }
+
+  async renewLease(
+    id: SummaryId,
+    leaseToken: string,
+    stage: "processing" | "delivering",
+    now: TimestampMs,
+    leaseMs: number,
+  ): Promise<boolean> {
+    const rows = await this.db
+      .update(summaryRunLifecycle)
+      .set({
+        updatedAt: now,
+        leaseExpiresAt: asTimestampMs(now + leaseMs),
+      })
+      .where(
+        and(
+          eq(summaryRunLifecycle.id, id),
+          eq(summaryRunLifecycle.status, stage),
+          eq(summaryRunLifecycle.leaseToken, leaseToken),
+          gt(summaryRunLifecycle.leaseExpiresAt, now),
+        ),
+      )
+      .returning({ id: summaryRunLifecycle.id });
+    return rows.length === 1;
+  }
+
+  async expireLease(
+    id: SummaryId,
+    from: "processing" | "delivering",
+    errorCode: string,
+    now: TimestampMs,
+  ): Promise<boolean> {
+    const rows = await this.db
+      .update(summaryRunLifecycle)
+      .set({
+        status: "retry_wait",
+        retryStage: from === "processing" ? "processing" : "delivery",
+        lastErrorCode: errorCode,
+        lastErrorAt: now,
+        nextRetryAt: now,
+        updatedAt: now,
+        leaseExpiresAt: null,
+        leaseToken: null,
+      })
+      .where(
+        and(
+          eq(summaryRunLifecycle.id, id),
+          eq(summaryRunLifecycle.status, from),
+          lte(summaryRunLifecycle.leaseExpiresAt, now),
         ),
       )
       .returning({ id: summaryRunLifecycle.id });
@@ -307,6 +446,7 @@ export class SummaryLifecycleRepo {
   async listStale(
     staleBefore: TimestampMs,
     dueAt: TimestampMs,
+    limit = 100,
   ): Promise<LifecycleRun[]> {
     const rows = await this.db
       .select()
@@ -330,7 +470,9 @@ export class SummaryLifecycleRepo {
             lte(summaryRunLifecycle.nextRetryAt, dueAt),
           ),
         ),
-      );
+      )
+      .orderBy(asc(summaryRunLifecycle.updatedAt))
+      .limit(limit);
     return rows.map((row) => this.map(row));
   }
 
@@ -403,6 +545,7 @@ export class SummaryLifecycleRepo {
       createdAt: asTimestampMs(row.createdAt),
       updatedAt: asTimestampMs(row.updatedAt),
       attempt: row.attempt,
+      deliveryAttempt: row.deliveryAttempt,
       command: Object.freeze({
         chatId,
         commandMessageId: asMessageId(row.commandMessageId),
@@ -416,6 +559,9 @@ export class SummaryLifecycleRepo {
       ...(row.nextRetryAt === null
         ? {}
         : { nextRetryAt: asTimestampMs(row.nextRetryAt) }),
+      ...(row.retryStage === null
+        ? {}
+        : { retryStage: asRetryStage(row.retryStage) }),
       ...(row.lastErrorCode === null
         ? {}
         : { lastErrorCode: row.lastErrorCode }),
@@ -464,4 +610,9 @@ function asMode(value: string): SummaryCommand["mode"] {
   if (value === "recent" || value === "today" || value === "count")
     return value;
   throw new TypeError(`Unknown SummaryCommand mode: ${value}`);
+}
+
+function asRetryStage(value: string): SummaryRunRetryStage {
+  if (value === "processing" || value === "delivery") return value;
+  throw new TypeError(`Unknown SummaryRun retry stage: ${value}`);
 }
