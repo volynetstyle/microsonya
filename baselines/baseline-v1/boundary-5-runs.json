@@ -1,0 +1,1223 @@
+{
+  "generatedAt": "2026-08-27T16:23:36.695Z",
+  "model": "gpt-oss:120b-cloud",
+  "endpoint": "https://ollama.com/api",
+  "suite": "stability",
+  "reports": [
+    {
+      "fixtureId": "live-casual-high-information-minecraft",
+      "scope": "semantic",
+      "status": "accepted",
+      "expectedAction": "SUMMARIZE",
+      "runs": [
+        {
+          "fixtureId": "live-casual-high-information-minecraft",
+          "expectedAction": "SUMMARIZE",
+          "action": "DEFER_COMPACT",
+          "checkpointAdvanced": false,
+          "durationMs": 5917.9874,
+          "modelCalls": 1,
+          "classifierCalls": 1,
+          "summarizerCalls": 0,
+          "missingRequired": [
+            "Notion AI",
+            "4 ГБ",
+            "3 ГБ",
+            "інфраструктурою"
+          ],
+          "forbiddenClaims": []
+        },
+        {
+          "fixtureId": "live-casual-high-information-minecraft",
+          "expectedAction": "SUMMARIZE",
+          "action": "SUMMARIZE",
+          "summary": "Notion AI створив і налаштував таблицю для класифікації Minecraft‑модів. Після видалення двох dimension‑модів використання RAM зменшилось приблизно з 4 ГБ до 3 ГБ. Після відходу технічного лідера команда зайнялася інфраструктурою.",
+          "checkpointAdvanced": true,
+          "durationMs": 7255.5347,
+          "modelCalls": 2,
+          "classifierCalls": 1,
+          "summarizerCalls": 1,
+          "missingRequired": [
+            "4 ГБ",
+            "3 ГБ"
+          ],
+          "forbiddenClaims": []
+        },
+        {
+          "fixtureId": "live-casual-high-information-minecraft",
+          "expectedAction": "SUMMARIZE",
+          "action": "DEFER_COMPACT",
+          "checkpointAdvanced": false,
+          "durationMs": 2782.6075999999994,
+          "modelCalls": 1,
+          "classifierCalls": 1,
+          "summarizerCalls": 0,
+          "missingRequired": [
+            "Notion AI",
+            "4 ГБ",
+            "3 ГБ",
+            "інфраструктурою"
+          ],
+          "forbiddenClaims": []
+        },
+        {
+          "fixtureId": "live-casual-high-information-minecraft",
+          "expectedAction": "SUMMARIZE",
+          "action": "DEFER_COMPACT",
+          "checkpointAdvanced": false,
+          "durationMs": 4827.836499999999,
+          "modelCalls": 1,
+          "classifierCalls": 1,
+          "summarizerCalls": 0,
+          "missingRequired": [
+            "Notion AI",
+            "4 ГБ",
+            "3 ГБ",
+            "інфраструктурою"
+          ],
+          "forbiddenClaims": []
+        },
+        {
+          "fixtureId": "live-casual-high-information-minecraft",
+          "expectedAction": "SUMMARIZE",
+          "action": "SUMMARIZE",
+          "summary": "Учасники повідомляють про технічні оновлення: Notion AI створив таблицю для класифікації модів Minecraft; після видалення двох dimension‑модів використання RAM знизилось з 4 ГБ до 3 ГБ; після відходу технічного спеціаліста команда зосередилась на інфраструктурі.",
+          "checkpointAdvanced": true,
+          "durationMs": 5775.410899999999,
+          "modelCalls": 2,
+          "classifierCalls": 1,
+          "summarizerCalls": 1,
+          "missingRequired": [
+            "4 ГБ",
+            "3 ГБ",
+            "інфраструктурою"
+          ],
+          "forbiddenClaims": []
+        }
+      ],
+      "metrics": {
+        "accuracy": 0.4,
+        "acceptedActionRate": 1,
+        "stability": 0.6,
+        "actionDistribution": {
+          "DEFER_COMPACT": 3,
+          "SUMMARIZE": 2
+        },
+        "irreversibleLossRate": 0,
+        "unsupportedClaimRate": 0,
+        "checkpointCorrectness": 0.4
+      }
+    },
+    {
+      "fixtureId": "summarize-schema-fallback-lifecycle",
+      "scope": "semantic",
+      "status": "accepted",
+      "expectedAction": "SUMMARIZE",
+      "runs": [
+        {
+          "fixtureId": "summarize-schema-fallback-lifecycle",
+          "expectedAction": "SUMMARIZE",
+          "action": "DEFER_COMPACT",
+          "checkpointAdvanced": false,
+          "durationMs": 3690.3338000000003,
+          "modelCalls": 1,
+          "classifierCalls": 1,
+          "summarizerCalls": 0,
+          "missingRequired": [
+            "schemaVersion",
+            "quarantine",
+            "v1",
+            "replayed",
+            "old lag is zero"
+          ],
+          "forbiddenClaims": []
+        },
+        {
+          "fixtureId": "summarize-schema-fallback-lifecycle",
+          "expectedAction": "SUMMARIZE",
+          "action": "SUMMARIZE",
+          "summary": "Учасники обговорювали вимоги до схеми: споживачі потребують поля schemaVersion, а невідомі версії слід поміщати у карантин; старі події тимчасово отримують v1 на шлюзі та відтворюються; після усунення затримки старих подій і порожнього карантину планується видалити резервний варіант.",
+          "checkpointAdvanced": true,
+          "durationMs": 4428.248200000002,
+          "modelCalls": 2,
+          "classifierCalls": 1,
+          "summarizerCalls": 1,
+          "missingRequired": [
+            "quarantine",
+            "replayed",
+            "old lag is zero"
+          ],
+          "forbiddenClaims": []
+        },
+        {
+          "fixtureId": "summarize-schema-fallback-lifecycle",
+          "expectedAction": "SUMMARIZE",
+          "action": "DEFER_COMPACT",
+          "checkpointAdvanced": false,
+          "durationMs": 3585.665799999995,
+          "modelCalls": 1,
+          "classifierCalls": 1,
+          "summarizerCalls": 0,
+          "missingRequired": [
+            "schemaVersion",
+            "quarantine",
+            "v1",
+            "replayed",
+            "old lag is zero"
+          ],
+          "forbiddenClaims": []
+        },
+        {
+          "fixtureId": "summarize-schema-fallback-lifecycle",
+          "expectedAction": "SUMMARIZE",
+          "action": "SUMMARIZE",
+          "summary": "Учасники обговорювали вимоги до схеми: споживачі потребують поля schemaVersion, а невідомі версії слід поміщати у карантин. Старі події тимчасово отримують v1 на шлюзі та відтворюються. Пропонується видалити резервний варіант після того, як затримка старих подій стане нульовою і карантин залишиться порожнім.",
+          "checkpointAdvanced": true,
+          "durationMs": 6347.378799999999,
+          "modelCalls": 2,
+          "classifierCalls": 1,
+          "summarizerCalls": 1,
+          "missingRequired": [
+            "quarantine",
+            "replayed",
+            "old lag is zero"
+          ],
+          "forbiddenClaims": []
+        },
+        {
+          "fixtureId": "summarize-schema-fallback-lifecycle",
+          "expectedAction": "SUMMARIZE",
+          "action": "SUMMARIZE",
+          "summary": "Учасники обговорювали вимоги до схеми: споживачі потребують поля schemaVersion, а невідомі версії слід поміщати у карантин; старі події тимчасово отримують v1 на шлюзі та відтворюються; після усунення затримки старих подій і порожнього карантину планується видалити резервний варіант.",
+          "checkpointAdvanced": true,
+          "durationMs": 8395.478800000004,
+          "modelCalls": 2,
+          "classifierCalls": 1,
+          "summarizerCalls": 1,
+          "missingRequired": [
+            "quarantine",
+            "replayed",
+            "old lag is zero"
+          ],
+          "forbiddenClaims": []
+        }
+      ],
+      "metrics": {
+        "accuracy": 0.6,
+        "acceptedActionRate": 1,
+        "stability": 0.6,
+        "actionDistribution": {
+          "DEFER_COMPACT": 2,
+          "SUMMARIZE": 3
+        },
+        "irreversibleLossRate": 0,
+        "unsupportedClaimRate": 0,
+        "checkpointCorrectness": 0.6
+      }
+    },
+    {
+      "fixtureId": "live-prod-version-vs-time",
+      "scope": "semantic",
+      "status": "accepted",
+      "expectedAction": "SUMMARIZE",
+      "runs": [
+        {
+          "fixtureId": "live-prod-version-vs-time",
+          "expectedAction": "SUMMARIZE",
+          "action": "DEFER_INCOMPLETE",
+          "checkpointAdvanced": false,
+          "durationMs": 2562.866799999996,
+          "modelCalls": 1,
+          "classifierCalls": 1,
+          "summarizerCalls": 0,
+          "missingRequired": [
+            "1.8.4",
+            "до 18",
+            "v2",
+            "міграцію"
+          ],
+          "forbiddenClaims": [],
+          "propositionMetrics": {
+            "passed": 2,
+            "total": 5,
+            "score": 0.4,
+            "violations": [
+              {
+                "assertionId": "live-current-version",
+                "errorType": "NUMERIC_TYPE",
+                "description": "Rollback/current production version is 1.8.4"
+              },
+              {
+                "assertionId": "live-deadline",
+                "errorType": "NUMERIC_TYPE",
+                "description": "Deploy deadline is 18, not version 1.8"
+              },
+              {
+                "assertionId": "live-conditional-plan",
+                "errorType": "CONDITION_PRESERVATION",
+                "description": "Failure rolls back to v2; success schedules migration tomorrow"
+              }
+            ],
+            "errorsByType": {
+              "NUMERIC_TYPE": 2,
+              "CONDITION_PRESERVATION": 1
+            }
+          }
+        },
+        {
+          "fixtureId": "live-prod-version-vs-time",
+          "expectedAction": "SUMMARIZE",
+          "action": "DEFER_INCOMPLETE",
+          "checkpointAdvanced": false,
+          "durationMs": 5156.365400000002,
+          "modelCalls": 1,
+          "classifierCalls": 1,
+          "summarizerCalls": 0,
+          "missingRequired": [
+            "1.8.4",
+            "до 18",
+            "v2",
+            "міграцію"
+          ],
+          "forbiddenClaims": [],
+          "propositionMetrics": {
+            "passed": 2,
+            "total": 5,
+            "score": 0.4,
+            "violations": [
+              {
+                "assertionId": "live-current-version",
+                "errorType": "NUMERIC_TYPE",
+                "description": "Rollback/current production version is 1.8.4"
+              },
+              {
+                "assertionId": "live-deadline",
+                "errorType": "NUMERIC_TYPE",
+                "description": "Deploy deadline is 18, not version 1.8"
+              },
+              {
+                "assertionId": "live-conditional-plan",
+                "errorType": "CONDITION_PRESERVATION",
+                "description": "Failure rolls back to v2; success schedules migration tomorrow"
+              }
+            ],
+            "errorsByType": {
+              "NUMERIC_TYPE": 2,
+              "CONDITION_PRESERVATION": 1
+            }
+          }
+        },
+        {
+          "fixtureId": "live-prod-version-vs-time",
+          "expectedAction": "SUMMARIZE",
+          "action": "SUMMARIZE",
+          "summary": "Учасник 2 повідомив, що виявив причину падіння продакшн і перевіряє можливу race condition. Учасник 3 зазначив, що rollback виконали на версії 1.8.4 і продакшн працює. Учасник 1 уточнив, що якщо deploy до 1.8 не вдасться, буде rollback на v2, а якщо вдасться, міграцію запустять наступного дня.",
+          "checkpointAdvanced": true,
+          "durationMs": 7183.852300000006,
+          "modelCalls": 2,
+          "classifierCalls": 1,
+          "summarizerCalls": 1,
+          "missingRequired": [
+            "до 18"
+          ],
+          "forbiddenClaims": [],
+          "propositionMetrics": {
+            "passed": 2,
+            "total": 5,
+            "score": 0.4,
+            "violations": [
+              {
+                "assertionId": "live-deadline",
+                "errorType": "NUMERIC_TYPE",
+                "description": "Deploy deadline is 18, not version 1.8"
+              },
+              {
+                "assertionId": "live-conditional-plan",
+                "errorType": "CONDITION_PRESERVATION",
+                "description": "Failure rolls back to v2; success schedules migration tomorrow"
+              },
+              {
+                "assertionId": "live-deadline-as-version",
+                "errorType": "NUMERIC_TYPE",
+                "description": "Deploy deadline must not be rendered as 1.8"
+              }
+            ],
+            "errorsByType": {
+              "NUMERIC_TYPE": 2,
+              "CONDITION_PRESERVATION": 1
+            }
+          }
+        },
+        {
+          "fixtureId": "live-prod-version-vs-time",
+          "expectedAction": "SUMMARIZE",
+          "action": "DEFER_INCOMPLETE",
+          "checkpointAdvanced": false,
+          "durationMs": 3240.86069999999,
+          "modelCalls": 1,
+          "classifierCalls": 1,
+          "summarizerCalls": 0,
+          "missingRequired": [
+            "1.8.4",
+            "до 18",
+            "v2",
+            "міграцію"
+          ],
+          "forbiddenClaims": [],
+          "propositionMetrics": {
+            "passed": 2,
+            "total": 5,
+            "score": 0.4,
+            "violations": [
+              {
+                "assertionId": "live-current-version",
+                "errorType": "NUMERIC_TYPE",
+                "description": "Rollback/current production version is 1.8.4"
+              },
+              {
+                "assertionId": "live-deadline",
+                "errorType": "NUMERIC_TYPE",
+                "description": "Deploy deadline is 18, not version 1.8"
+              },
+              {
+                "assertionId": "live-conditional-plan",
+                "errorType": "CONDITION_PRESERVATION",
+                "description": "Failure rolls back to v2; success schedules migration tomorrow"
+              }
+            ],
+            "errorsByType": {
+              "NUMERIC_TYPE": 2,
+              "CONDITION_PRESERVATION": 1
+            }
+          }
+        },
+        {
+          "fixtureId": "live-prod-version-vs-time",
+          "expectedAction": "SUMMARIZE",
+          "action": "DEFER_INCOMPLETE",
+          "checkpointAdvanced": false,
+          "durationMs": 2241.790500000003,
+          "modelCalls": 1,
+          "classifierCalls": 1,
+          "summarizerCalls": 0,
+          "missingRequired": [
+            "1.8.4",
+            "до 18",
+            "v2",
+            "міграцію"
+          ],
+          "forbiddenClaims": [],
+          "propositionMetrics": {
+            "passed": 2,
+            "total": 5,
+            "score": 0.4,
+            "violations": [
+              {
+                "assertionId": "live-current-version",
+                "errorType": "NUMERIC_TYPE",
+                "description": "Rollback/current production version is 1.8.4"
+              },
+              {
+                "assertionId": "live-deadline",
+                "errorType": "NUMERIC_TYPE",
+                "description": "Deploy deadline is 18, not version 1.8"
+              },
+              {
+                "assertionId": "live-conditional-plan",
+                "errorType": "CONDITION_PRESERVATION",
+                "description": "Failure rolls back to v2; success schedules migration tomorrow"
+              }
+            ],
+            "errorsByType": {
+              "NUMERIC_TYPE": 2,
+              "CONDITION_PRESERVATION": 1
+            }
+          }
+        }
+      ],
+      "metrics": {
+        "accuracy": 0.2,
+        "acceptedActionRate": 0.2,
+        "stability": 0.8,
+        "actionDistribution": {
+          "DEFER_INCOMPLETE": 4,
+          "SUMMARIZE": 1
+        },
+        "irreversibleLossRate": 0,
+        "unsupportedClaimRate": 0,
+        "checkpointCorrectness": 0.2
+      }
+    },
+    {
+      "fixtureId": "banter-with-durable-technical-island",
+      "scope": "semantic",
+      "status": "accepted",
+      "expectedAction": "SUMMARIZE",
+      "runs": [
+        {
+          "fixtureId": "banter-with-durable-technical-island",
+          "expectedAction": "SUMMARIZE",
+          "action": "DEFER_COMPACT",
+          "checkpointAdvanced": false,
+          "durationMs": 3165.5659000000014,
+          "modelCalls": 1,
+          "classifierCalls": 1,
+          "summarizerCalls": 0,
+          "missingRequired": [
+            "userId",
+            "shared entries",
+            "stale"
+          ],
+          "forbiddenClaims": []
+        },
+        {
+          "fixtureId": "banter-with-durable-technical-island",
+          "expectedAction": "SUMMARIZE",
+          "action": "DEFER_COMPACT",
+          "checkpointAdvanced": false,
+          "durationMs": 2662.0531000000046,
+          "modelCalls": 1,
+          "classifierCalls": 1,
+          "summarizerCalls": 0,
+          "missingRequired": [
+            "userId",
+            "shared entries",
+            "stale"
+          ],
+          "forbiddenClaims": []
+        },
+        {
+          "fixtureId": "banter-with-durable-technical-island",
+          "expectedAction": "SUMMARIZE",
+          "action": "DEFER_COMPACT",
+          "checkpointAdvanced": false,
+          "durationMs": 2969.4073999999964,
+          "modelCalls": 1,
+          "classifierCalls": 1,
+          "summarizerCalls": 0,
+          "missingRequired": [
+            "userId",
+            "shared entries",
+            "stale"
+          ],
+          "forbiddenClaims": []
+        },
+        {
+          "fixtureId": "banter-with-durable-technical-island",
+          "expectedAction": "SUMMARIZE",
+          "action": "DEFER_COMPACT",
+          "checkpointAdvanced": false,
+          "durationMs": 3018.771299999993,
+          "modelCalls": 1,
+          "classifierCalls": 1,
+          "summarizerCalls": 0,
+          "missingRequired": [
+            "userId",
+            "shared entries",
+            "stale"
+          ],
+          "forbiddenClaims": []
+        },
+        {
+          "fixtureId": "banter-with-durable-technical-island",
+          "expectedAction": "SUMMARIZE",
+          "action": "DEFER_COMPACT",
+          "checkpointAdvanced": false,
+          "durationMs": 2452.9600000000064,
+          "modelCalls": 1,
+          "classifierCalls": 1,
+          "summarizerCalls": 0,
+          "missingRequired": [
+            "userId",
+            "shared entries",
+            "stale"
+          ],
+          "forbiddenClaims": []
+        }
+      ],
+      "metrics": {
+        "accuracy": 0,
+        "acceptedActionRate": 1,
+        "stability": 1,
+        "actionDistribution": {
+          "DEFER_COMPACT": 5
+        },
+        "irreversibleLossRate": 0,
+        "unsupportedClaimRate": 0,
+        "checkpointCorrectness": 1
+      }
+    },
+    {
+      "fixtureId": "long-frequency-vs-final-state@front",
+      "scope": "semantic",
+      "status": "accepted",
+      "expectedAction": "SUMMARIZE",
+      "runs": [
+        {
+          "fixtureId": "long-frequency-vs-final-state@front",
+          "expectedAction": "SUMMARIZE",
+          "action": "SUMMARIZE",
+          "summary": "Учасники обговорювали ліміт запитів. Спочатку пропонували 100 requests/min для free tier, але продуктова команда вимагала 150. Після розрахунків та погодження з безпекою було затверджено фінальне значення: free tier – 150 requests/min, paid tier – 1000 requests/min.",
+          "checkpointAdvanced": true,
+          "durationMs": 7228.193599999999,
+          "modelCalls": 2,
+          "classifierCalls": 1,
+          "summarizerCalls": 1,
+          "missingRequired": [],
+          "forbiddenClaims": [],
+          "extractionMetrics": {
+            "requiredFactRecall": 1,
+            "unsupportedFactRate": 0,
+            "supersededFactLeakRate": 0,
+            "relationPreservation": 1,
+            "entityBindingAccuracy": 1,
+            "epistemicStateAccuracy": 1
+          },
+          "propositionMetrics": {
+            "passed": 3,
+            "total": 3,
+            "score": 1,
+            "violations": [],
+            "errorsByType": {}
+          }
+        },
+        {
+          "fixtureId": "long-frequency-vs-final-state@front",
+          "expectedAction": "SUMMARIZE",
+          "action": "DEFER_COMPACT",
+          "checkpointAdvanced": false,
+          "durationMs": 3477.5656000000017,
+          "modelCalls": 1,
+          "classifierCalls": 1,
+          "summarizerCalls": 0,
+          "missingRequired": [
+            "free tier",
+            "paid tier"
+          ],
+          "forbiddenClaims": [],
+          "extractionMetrics": {
+            "requiredFactRecall": 0,
+            "unsupportedFactRate": 0,
+            "supersededFactLeakRate": 0,
+            "relationPreservation": 1,
+            "entityBindingAccuracy": 0.5,
+            "epistemicStateAccuracy": 1
+          },
+          "propositionMetrics": {
+            "passed": 1,
+            "total": 3,
+            "score": 0.3333333333333333,
+            "violations": [
+              {
+                "assertionId": "free-final",
+                "errorType": "SUPERSESSION",
+                "description": "Final free-tier limit is 150 requests per minute"
+              },
+              {
+                "assertionId": "paid-final",
+                "errorType": "ENTITY_BINDING",
+                "description": "Paid-tier limit is 1000 requests per minute"
+              }
+            ],
+            "errorsByType": {
+              "SUPERSESSION": 1,
+              "ENTITY_BINDING": 1
+            }
+          }
+        },
+        {
+          "fixtureId": "long-frequency-vs-final-state@front",
+          "expectedAction": "SUMMARIZE",
+          "action": "SUMMARIZE",
+          "summary": "Учасники обговорювали ліміт запитів. Спочатку пропонували 100 req/min для free tier, але продукт попросив 150. Після розрахунків та погодження з безпекою, остаточно встановлено ліміт free tier — 150 запитів за хвилину, а для paid tier — 1000 запитів за хвилину.",
+          "checkpointAdvanced": true,
+          "durationMs": 7579.830400000006,
+          "modelCalls": 2,
+          "classifierCalls": 1,
+          "summarizerCalls": 1,
+          "missingRequired": [],
+          "forbiddenClaims": [],
+          "extractionMetrics": {
+            "requiredFactRecall": 1,
+            "unsupportedFactRate": 0,
+            "supersededFactLeakRate": 0,
+            "relationPreservation": 1,
+            "entityBindingAccuracy": 1,
+            "epistemicStateAccuracy": 1
+          },
+          "propositionMetrics": {
+            "passed": 3,
+            "total": 3,
+            "score": 1,
+            "violations": [],
+            "errorsByType": {}
+          }
+        },
+        {
+          "fixtureId": "long-frequency-vs-final-state@front",
+          "expectedAction": "SUMMARIZE",
+          "action": "DEFER_COMPACT",
+          "checkpointAdvanced": false,
+          "durationMs": 3483.4900000000052,
+          "modelCalls": 1,
+          "classifierCalls": 1,
+          "summarizerCalls": 0,
+          "missingRequired": [
+            "free tier",
+            "paid tier"
+          ],
+          "forbiddenClaims": [],
+          "extractionMetrics": {
+            "requiredFactRecall": 0,
+            "unsupportedFactRate": 0,
+            "supersededFactLeakRate": 0,
+            "relationPreservation": 1,
+            "entityBindingAccuracy": 0.5,
+            "epistemicStateAccuracy": 1
+          },
+          "propositionMetrics": {
+            "passed": 1,
+            "total": 3,
+            "score": 0.3333333333333333,
+            "violations": [
+              {
+                "assertionId": "free-final",
+                "errorType": "SUPERSESSION",
+                "description": "Final free-tier limit is 150 requests per minute"
+              },
+              {
+                "assertionId": "paid-final",
+                "errorType": "ENTITY_BINDING",
+                "description": "Paid-tier limit is 1000 requests per minute"
+              }
+            ],
+            "errorsByType": {
+              "SUPERSESSION": 1,
+              "ENTITY_BINDING": 1
+            }
+          }
+        },
+        {
+          "fixtureId": "long-frequency-vs-final-state@front",
+          "expectedAction": "SUMMARIZE",
+          "action": "DEFER_COMPACT",
+          "checkpointAdvanced": false,
+          "durationMs": 8498.011199999994,
+          "modelCalls": 1,
+          "classifierCalls": 1,
+          "summarizerCalls": 0,
+          "missingRequired": [
+            "free tier",
+            "paid tier"
+          ],
+          "forbiddenClaims": [],
+          "extractionMetrics": {
+            "requiredFactRecall": 0,
+            "unsupportedFactRate": 0,
+            "supersededFactLeakRate": 0,
+            "relationPreservation": 1,
+            "entityBindingAccuracy": 0.5,
+            "epistemicStateAccuracy": 1
+          },
+          "propositionMetrics": {
+            "passed": 1,
+            "total": 3,
+            "score": 0.3333333333333333,
+            "violations": [
+              {
+                "assertionId": "free-final",
+                "errorType": "SUPERSESSION",
+                "description": "Final free-tier limit is 150 requests per minute"
+              },
+              {
+                "assertionId": "paid-final",
+                "errorType": "ENTITY_BINDING",
+                "description": "Paid-tier limit is 1000 requests per minute"
+              }
+            ],
+            "errorsByType": {
+              "SUPERSESSION": 1,
+              "ENTITY_BINDING": 1
+            }
+          }
+        }
+      ],
+      "metrics": {
+        "accuracy": 0.4,
+        "acceptedActionRate": 1,
+        "stability": 0.6,
+        "actionDistribution": {
+          "SUMMARIZE": 2,
+          "DEFER_COMPACT": 3
+        },
+        "irreversibleLossRate": 0,
+        "unsupportedClaimRate": 0,
+        "checkpointCorrectness": 0.4
+      }
+    },
+    {
+      "fixtureId": "long-frequency-vs-final-state@middle",
+      "scope": "semantic",
+      "status": "accepted",
+      "expectedAction": "SUMMARIZE",
+      "runs": [
+        {
+          "fixtureId": "long-frequency-vs-final-state@middle",
+          "expectedAction": "SUMMARIZE",
+          "action": "SUMMARIZE",
+          "summary": "Учасники обговорювали ліміти запитів: спочатку запропонували 100 requests/min для free tier, потім вирішили підвищити до 150 requests/min за вимогою product; для paid tier залишився ліміт 1000 requests/min.",
+          "checkpointAdvanced": true,
+          "durationMs": 6485.106199999995,
+          "modelCalls": 2,
+          "classifierCalls": 1,
+          "summarizerCalls": 1,
+          "missingRequired": [],
+          "forbiddenClaims": [],
+          "extractionMetrics": {
+            "requiredFactRecall": 1,
+            "unsupportedFactRate": 0,
+            "supersededFactLeakRate": 0,
+            "relationPreservation": 1,
+            "entityBindingAccuracy": 1,
+            "epistemicStateAccuracy": 1
+          },
+          "propositionMetrics": {
+            "passed": 3,
+            "total": 3,
+            "score": 1,
+            "violations": [],
+            "errorsByType": {}
+          }
+        },
+        {
+          "fixtureId": "long-frequency-vs-final-state@middle",
+          "expectedAction": "SUMMARIZE",
+          "action": "DEFER_COMPACT",
+          "checkpointAdvanced": false,
+          "durationMs": 3572.285799999998,
+          "modelCalls": 1,
+          "classifierCalls": 1,
+          "summarizerCalls": 0,
+          "missingRequired": [
+            "free tier",
+            "paid tier"
+          ],
+          "forbiddenClaims": [],
+          "extractionMetrics": {
+            "requiredFactRecall": 0,
+            "unsupportedFactRate": 0,
+            "supersededFactLeakRate": 0,
+            "relationPreservation": 1,
+            "entityBindingAccuracy": 0.5,
+            "epistemicStateAccuracy": 1
+          },
+          "propositionMetrics": {
+            "passed": 1,
+            "total": 3,
+            "score": 0.3333333333333333,
+            "violations": [
+              {
+                "assertionId": "free-final",
+                "errorType": "SUPERSESSION",
+                "description": "Final free-tier limit is 150 requests per minute"
+              },
+              {
+                "assertionId": "paid-final",
+                "errorType": "ENTITY_BINDING",
+                "description": "Paid-tier limit is 1000 requests per minute"
+              }
+            ],
+            "errorsByType": {
+              "SUPERSESSION": 1,
+              "ENTITY_BINDING": 1
+            }
+          }
+        },
+        {
+          "fixtureId": "long-frequency-vs-final-state@middle",
+          "expectedAction": "SUMMARIZE",
+          "action": "SUMMARIZE",
+          "summary": "Учасники обговорювали ліміти запитів: для free tier остаточно встановлено 150 запитів за хвилину (раніше планувалося 100), а для paid tier залишаються 1000 запитів за хвилину.",
+          "checkpointAdvanced": true,
+          "durationMs": 8556.753800000006,
+          "modelCalls": 2,
+          "classifierCalls": 1,
+          "summarizerCalls": 1,
+          "missingRequired": [],
+          "forbiddenClaims": [],
+          "extractionMetrics": {
+            "requiredFactRecall": 1,
+            "unsupportedFactRate": 0,
+            "supersededFactLeakRate": 0,
+            "relationPreservation": 1,
+            "entityBindingAccuracy": 1,
+            "epistemicStateAccuracy": 1
+          },
+          "propositionMetrics": {
+            "passed": 2,
+            "total": 3,
+            "score": 0.6666666666666666,
+            "violations": [
+              {
+                "assertionId": "free-old-final",
+                "errorType": "SUPERSESSION",
+                "description": "The old free-tier value 100 must not be stated as final/current"
+              }
+            ],
+            "errorsByType": {
+              "SUPERSESSION": 1
+            }
+          }
+        },
+        {
+          "fixtureId": "long-frequency-vs-final-state@middle",
+          "expectedAction": "SUMMARIZE",
+          "action": "SUMMARIZE",
+          "summary": "Учасники обговорювали технічні питання: встановили ліміт 150 запитів/хв для безкоштовного тарифу (раніше планували 100) і залишили 1000 запитів/хв для платного тарифу. Інші повідомлення складаються з повторюваних жартів і фраз без суттєвого змісту.",
+          "checkpointAdvanced": true,
+          "durationMs": 6879.282999999996,
+          "modelCalls": 2,
+          "classifierCalls": 1,
+          "summarizerCalls": 1,
+          "missingRequired": [
+            "free tier",
+            "paid tier"
+          ],
+          "forbiddenClaims": [],
+          "extractionMetrics": {
+            "requiredFactRecall": 0,
+            "unsupportedFactRate": 0,
+            "supersededFactLeakRate": 0,
+            "relationPreservation": 1,
+            "entityBindingAccuracy": 0.5,
+            "epistemicStateAccuracy": 1
+          },
+          "propositionMetrics": {
+            "passed": 3,
+            "total": 3,
+            "score": 1,
+            "violations": [],
+            "errorsByType": {}
+          }
+        },
+        {
+          "fixtureId": "long-frequency-vs-final-state@middle",
+          "expectedAction": "SUMMARIZE",
+          "action": "SUMMARIZE",
+          "summary": "Учасники обговорювали ліміти запитів: спочатку пропонували 100 запитів/хв для free tier, потім product вимагав 150, що було схвалено. Остаточне рішення: free tier – 150 запитів/хв, paid tier – 1000 запитів/хв.",
+          "checkpointAdvanced": true,
+          "durationMs": 8056.025200000004,
+          "modelCalls": 2,
+          "classifierCalls": 1,
+          "summarizerCalls": 1,
+          "missingRequired": [],
+          "forbiddenClaims": [],
+          "extractionMetrics": {
+            "requiredFactRecall": 1,
+            "unsupportedFactRate": 0,
+            "supersededFactLeakRate": 0,
+            "relationPreservation": 1,
+            "entityBindingAccuracy": 1,
+            "epistemicStateAccuracy": 1
+          },
+          "propositionMetrics": {
+            "passed": 3,
+            "total": 3,
+            "score": 1,
+            "violations": [],
+            "errorsByType": {}
+          }
+        }
+      ],
+      "metrics": {
+        "accuracy": 0.8,
+        "acceptedActionRate": 1,
+        "stability": 0.8,
+        "actionDistribution": {
+          "SUMMARIZE": 4,
+          "DEFER_COMPACT": 1
+        },
+        "irreversibleLossRate": 0,
+        "unsupportedClaimRate": 0,
+        "checkpointCorrectness": 0.8
+      }
+    },
+    {
+      "fixtureId": "long-frequency-vs-final-state@tail",
+      "scope": "semantic",
+      "status": "accepted",
+      "expectedAction": "SUMMARIZE",
+      "runs": [
+        {
+          "fixtureId": "long-frequency-vs-final-state@tail",
+          "expectedAction": "SUMMARIZE",
+          "action": "DEFER_COMPACT",
+          "checkpointAdvanced": false,
+          "durationMs": 3922.908599999995,
+          "modelCalls": 1,
+          "classifierCalls": 1,
+          "summarizerCalls": 0,
+          "missingRequired": [
+            "free tier",
+            "paid tier"
+          ],
+          "forbiddenClaims": [],
+          "extractionMetrics": {
+            "requiredFactRecall": 0,
+            "unsupportedFactRate": 0,
+            "supersededFactLeakRate": 0,
+            "relationPreservation": 1,
+            "entityBindingAccuracy": 0.5,
+            "epistemicStateAccuracy": 1
+          },
+          "propositionMetrics": {
+            "passed": 1,
+            "total": 3,
+            "score": 0.3333333333333333,
+            "violations": [
+              {
+                "assertionId": "free-final",
+                "errorType": "SUPERSESSION",
+                "description": "Final free-tier limit is 150 requests per minute"
+              },
+              {
+                "assertionId": "paid-final",
+                "errorType": "ENTITY_BINDING",
+                "description": "Paid-tier limit is 1000 requests per minute"
+              }
+            ],
+            "errorsByType": {
+              "SUPERSESSION": 1,
+              "ENTITY_BINDING": 1
+            }
+          }
+        },
+        {
+          "fixtureId": "long-frequency-vs-final-state@tail",
+          "expectedAction": "SUMMARIZE",
+          "action": "SUMMARIZE",
+          "summary": "Учасники обговорювали ліміти запитів: спочатку пропонували 100 запитів/хв для free tier, потім вирішили встановити 150 запитів/хв за вимогою product, а для paid tier залишити 1000 запитів/хв.",
+          "checkpointAdvanced": true,
+          "durationMs": 7213.322899999999,
+          "modelCalls": 2,
+          "classifierCalls": 1,
+          "summarizerCalls": 1,
+          "missingRequired": [],
+          "forbiddenClaims": [],
+          "extractionMetrics": {
+            "requiredFactRecall": 1,
+            "unsupportedFactRate": 0,
+            "supersededFactLeakRate": 0,
+            "relationPreservation": 1,
+            "entityBindingAccuracy": 1,
+            "epistemicStateAccuracy": 1
+          },
+          "propositionMetrics": {
+            "passed": 3,
+            "total": 3,
+            "score": 1,
+            "violations": [],
+            "errorsByType": {}
+          }
+        },
+        {
+          "fixtureId": "long-frequency-vs-final-state@tail",
+          "expectedAction": "SUMMARIZE",
+          "action": "DEFER_COMPACT",
+          "checkpointAdvanced": false,
+          "durationMs": 5794.442999999999,
+          "modelCalls": 1,
+          "classifierCalls": 1,
+          "summarizerCalls": 0,
+          "missingRequired": [
+            "free tier",
+            "paid tier"
+          ],
+          "forbiddenClaims": [],
+          "extractionMetrics": {
+            "requiredFactRecall": 0,
+            "unsupportedFactRate": 0,
+            "supersededFactLeakRate": 0,
+            "relationPreservation": 1,
+            "entityBindingAccuracy": 0.5,
+            "epistemicStateAccuracy": 1
+          },
+          "propositionMetrics": {
+            "passed": 1,
+            "total": 3,
+            "score": 0.3333333333333333,
+            "violations": [
+              {
+                "assertionId": "free-final",
+                "errorType": "SUPERSESSION",
+                "description": "Final free-tier limit is 150 requests per minute"
+              },
+              {
+                "assertionId": "paid-final",
+                "errorType": "ENTITY_BINDING",
+                "description": "Paid-tier limit is 1000 requests per minute"
+              }
+            ],
+            "errorsByType": {
+              "SUPERSESSION": 1,
+              "ENTITY_BINDING": 1
+            }
+          }
+        },
+        {
+          "fixtureId": "long-frequency-vs-final-state@tail",
+          "expectedAction": "SUMMARIZE",
+          "action": "SUMMARIZE",
+          "summary": "Учасники обговорювали ліміти запитів для різних тарифних планів. Спочатку пропонували 100 запитів/хв для безкоштовного tier, але потім продуктова команда попросила підвищити до 150. Після розрахунків і погодження з безпекою, остаточно встановлено ліміт 150 запитів/хв для free tier, а для платного tier залишиться 1000 запитів/хв.",
+          "checkpointAdvanced": true,
+          "durationMs": 4707.5697999999975,
+          "modelCalls": 2,
+          "classifierCalls": 1,
+          "summarizerCalls": 1,
+          "missingRequired": [
+            "paid tier"
+          ],
+          "forbiddenClaims": [],
+          "extractionMetrics": {
+            "requiredFactRecall": 0.5,
+            "unsupportedFactRate": 0,
+            "supersededFactLeakRate": 0,
+            "relationPreservation": 1,
+            "entityBindingAccuracy": 0.75,
+            "epistemicStateAccuracy": 1
+          },
+          "propositionMetrics": {
+            "passed": 3,
+            "total": 3,
+            "score": 1,
+            "violations": [],
+            "errorsByType": {}
+          }
+        },
+        {
+          "fixtureId": "long-frequency-vs-final-state@tail",
+          "expectedAction": "SUMMARIZE",
+          "action": "SUMMARIZE",
+          "summary": "Учасники обговорювали ліміти запитів: спочатку пропонували 100 requests/min для free tier, потім product вимагав 150, що було схвалено security. Остаточне рішення: free tier – 150 requests/min, paid tier – 1000 requests/min.",
+          "checkpointAdvanced": true,
+          "durationMs": 7070.179000000004,
+          "modelCalls": 2,
+          "classifierCalls": 1,
+          "summarizerCalls": 1,
+          "missingRequired": [],
+          "forbiddenClaims": [],
+          "extractionMetrics": {
+            "requiredFactRecall": 1,
+            "unsupportedFactRate": 0,
+            "supersededFactLeakRate": 0,
+            "relationPreservation": 1,
+            "entityBindingAccuracy": 1,
+            "epistemicStateAccuracy": 1
+          },
+          "propositionMetrics": {
+            "passed": 3,
+            "total": 3,
+            "score": 1,
+            "violations": [],
+            "errorsByType": {}
+          }
+        }
+      ],
+      "metrics": {
+        "accuracy": 0.6,
+        "acceptedActionRate": 1,
+        "stability": 0.6,
+        "actionDistribution": {
+          "DEFER_COMPACT": 2,
+          "SUMMARIZE": 3
+        },
+        "irreversibleLossRate": 0,
+        "unsupportedClaimRate": 0,
+        "checkpointCorrectness": 0.6
+      }
+    }
+  ],
+  "totals": {
+    "fixtures": 7,
+    "runs": 35,
+    "modelCalls": 50,
+    "classifierCalls": 35,
+    "summarizerCalls": 15,
+    "telemetryInvariants": {
+      "callsBalance": true,
+      "summarizerMatchesActions": true
+    },
+    "errors": 0,
+    "accuracy": 0.42857142857142855,
+    "semanticHeadline": {
+      "fixtures": 7,
+      "runs": 35,
+      "correct": 15,
+      "accuracy": 0.42857142857142855
+    },
+    "policyBehaviorHeadline": {
+      "fixtures": 7,
+      "runs": 35,
+      "correct": 31,
+      "accuracy": 0.8857142857142857
+    },
+    "stability": {
+      "mean": 0.7142857142857143,
+      "min": 0.6,
+      "unstableFixtureCount": 6
+    },
+    "semanticPropositions": {
+      "evaluatedSummaries": 10,
+      "passed": 28,
+      "total": 32,
+      "score": 0.875,
+      "errorsByType": {
+        "FACT_OMISSION": 0,
+        "FACT_INVENTION": 0,
+        "ENTITY_BINDING": 0,
+        "NUMERIC_TYPE": 2,
+        "PROVENANCE": 0,
+        "SUPERSESSION": 1,
+        "EPISTEMIC_STATE": 0,
+        "CONDITION_PRESERVATION": 1
+      }
+    },
+    "excludedFromSemanticHeadline": {
+      "systemFixtures": 0,
+      "underReviewFixtures": 0
+    },
+    "weightedErrors": {
+      "totalCost": 280,
+      "critical": 0,
+      "medium": 14,
+      "low": 0,
+      "categories": {
+        "rich_content_deferred": 14,
+        "correct": 6
+      },
+      "costBySeverity": {
+        "critical": 0,
+        "medium": 280,
+        "low": 0
+      },
+      "costByCategory": {
+        "rich_content_deferred": 280,
+        "correct": 0
+      }
+    },
+    "irreversibleLosses": 0,
+    "lexicalConstraintDiagnostics": 83,
+    "releaseGate": {
+      "criticalErrors": true,
+      "irreversibleLosses": true,
+      "providerParseFailures": true,
+      "productSafeActionRate": false,
+      "semanticPropositionScore": false,
+      "passed": false,
+      "thresholds": {
+        "productSafeActionRate": 0.9,
+        "semanticPropositionScore": 0.9
+      }
+    }
+  }
+}

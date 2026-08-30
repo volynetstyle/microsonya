@@ -1,0 +1,28 @@
+{
+  "name": "@microsonya/telegram-wma",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Telegram Web Mini App for Microsonya",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@solidjs/testing-library": "1.0.0-beta.2",
+    "@solidjs/vite-plugin": "^3.0.0-next.29",
+    "@testing-library/jest-dom": "^6.6.3",
+    "jsdom": "^25.0.1",
+    "typescript": "^5.9.2",
+    "vite": "^8.1.5",
+    "vitest": "^4.0.0"
+  },
+  "dependencies": {
+    "@solidjs/web": "2.0.0-rc.0",
+    "solid-js": "2.0.0-rc.0"
+  }
+}

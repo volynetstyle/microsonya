@@ -1,0 +1,85 @@
+.moment {
+  display: flex;
+  gap: 0.75rem;
+  padding-left: 0.6rem;
+  border-left: 2px solid var(--separator);
+}
+
+.moment-time {
+  flex-shrink: 0;
+  width: 2.8rem;
+  padding-top: 0.15rem;
+  color: var(--text-hint);
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.moment-body {
+  min-width: 0;
+}
+
+.moment-title {
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+
+.moment-text {
+  margin: 0.2rem 0 0;
+  color: var(--text-hint);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.quote-card {
+  margin-top: 0.6rem;
+  padding: 0;
+  background: var(--accent-soft);
+  border-radius: var(--control-radius);
+  border: 1px solid var(--accent-border);
+}
+
+.quote-card-content {
+  padding: 0.6rem 0.75rem;
+}
+
+.quote-card-expandable {
+  contain: layout paint style;
+}
+
+.quote-text {
+  margin: 0;
+  font-size: 0.88rem;
+  font-style: italic;
+  line-height: 1.4;
+}
+.quote-author {
+  display: block;
+  margin-top: 0.3rem;
+  color: var(--text-hint);
+  font-size: 0.78rem;
+}
+.quote-toggle {
+  display: block;
+  min-block-size: 44px;
+  margin: -0.25rem 0.75rem 0.25rem;
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--accent);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.quote-toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+@media (hover: none), (pointer: coarse) {
+  .quote-toggle:active {
+    opacity: 0.72;
+  }
+}

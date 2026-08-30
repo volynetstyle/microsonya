@@ -1,0 +1,14 @@
+# Cloudflare / Wrangler
+.wrangler/
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
+
+# Local environment files
+.env
+.env.*
+!.env.example
+
+# Worker build output
+dist/
+.worker-dist/

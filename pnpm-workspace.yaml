@@ -1,3 +1,5 @@
 packages:
-  - "apps/**/*"
+  - "apps/cloudflare"
+  - "apps/telegram/bot"
+  - "apps/telegram/wma"
   - "packages/*"

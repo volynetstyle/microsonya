@@ -1,90 +1,84 @@
-import { summarize } from "@microsonya/summarize";
+import { presentDisposition, type Summarizer } from "@microsonya/summarize";
+import type { ChatMessage } from "@microsonya/shared";
 import type { Context } from "telegraf";
-import { parseSummaryCommand } from "./commands/summarize.js";
-import type { AppServices } from "./services.js";
-import { ingestMessage } from "./telegram/ingest.js";
-import {
-  isForwardedMessage,
-  toChatMessage,
-  type TelegramMessageLike,
-} from "./telegram/message.js";
-import {
-  formatErrorForLog,
-  formatRateLimitMessage,
-  isModelRateLimitError,
-  safeStringify,
-} from "./errors.js";
+import { parseSummaryCommand } from "./command.js";
+import { formatRateLimitMessage, isModelRateLimitError } from "./errors.js";
+import { ReplySession } from "./replySession.js";
+import { fromTelegram, type TelegramMessageLike } from "./telegram/message.js";
+import { createNativeDraftTransport } from "./telegram/nativeDraftTransport.js";
 
-export function createMessageHandler(services: AppServices) {
+export type BotServices = {
+  messages: { save(message: ChatMessage): Promise<void> };
+  summarizer: Pick<Summarizer, "process">;
+  onError?: (event: {
+    readonly code: "DELIVERY_ERROR";
+    readonly error: unknown;
+  }) => void;
+};
+
+export function createMessageHandler(services: BotServices) {
   return async function handleMessage(ctx: Context): Promise<void> {
+    const telegramMessage = ctx.message as TelegramMessageLike;
+
+    const command = parseSummaryCommand(telegramMessage, ctx.me);
+    const reply = command ? createReplySession(ctx) : undefined;
+    let finalText: string;
+
     try {
-      const telegramMessage = ctx.message as TelegramMessageLike;
-      const chatMessage = toChatMessage(telegramMessage);
+      const message = fromTelegram(telegramMessage, {
+        selfAuthorId:
+          ctx.botInfo === undefined ? undefined : String(ctx.botInfo.id),
+      });
+      if (message) await services.messages.save(message);
 
-      await ingestMessage(services.storage.messages, chatMessage);
+      if (!command || !reply) return;
 
-      const text = telegramMessage.text;
-
-      if (!text || isForwardedMessage(telegramMessage)) {
-        return;
-      }
-
-      const command = parseSummaryCommand(
-        chatMessage.chatId,
-        chatMessage.id,
-        telegramMessage.date * 1000,
-        text,
-      );
-
-      if (!command) {
-        return;
-      }
-
-      if (!services.models) {
-        await ctx.reply("Підсумки вимкнені, бо MODELS_MODE=disabled.");
-        return;
-      }
-
-      const startedAt = Date.now();
-
-      const summaryText = await summarize(
-        {
-          messages: services.storage.messages,
-          summaries: services.storage.summaries,
-          models: services.models,
-        },
-        command,
-      );
-
-      const summarizeMs = Date.now() - startedAt;
-
-      const replyStartedAt = Date.now();
-      await ctx.reply(summaryText);
-
-      console.log(
-        "Summary command completed",
-        safeStringify({
-          chatId: command.chatId,
-          commandMessageId: command.commandMessageId,
-          summarizeMs,
-          replyMs: Date.now() - replyStartedAt,
-          totalMs: Date.now() - startedAt,
-        }),
-      );
+      await reply.progress("Аналізую");
+      const disposition = await services.summarizer.process(command);
+      finalText = disposition
+        ? presentDisposition(disposition)
+        : "Немає нових повідомлень для підсумку.";
     } catch (error) {
-      console.error(
-        "Failed to process Telegram update",
-        formatErrorForLog(error),
-      );
+      // An ordinary message must never receive a summary-specific error reply.
+      if (!reply) throw error;
+      finalText = formatSummaryFailure(error);
+    }
 
-      if (isModelRateLimitError(error)) {
-        await ctx.reply(formatRateLimitMessage(error));
-        return;
-      }
-
-      await ctx.reply(
-        "Не вдалося підготувати підсумок. Я вже зафіксував помилку. Спробуй ще раз трохи пізніше.",
-      );
+    // Delivery errors are infrastructure failures, not summary failures.
+    try {
+      await reply.finish(finalText);
+    } catch (error) {
+      const event = {
+        code: "DELIVERY_ERROR",
+        error,
+      } as const;
+      if (services.onError) services.onError(event);
+      else console.error("[summary:delivery-error]", event);
+      throw error;
     }
   };
+}
+
+export function formatSummaryFailure(error: unknown): string {
+  if (isAbortError(error)) return "Скасовано.";
+  if (isModelRateLimitError(error)) return formatRateLimitMessage(error);
+  return "Не вдалося підготувати підсумок. Я вже зафіксував помилку. Спробуй ще раз трохи пізніше.";
+}
+
+function createReplySession(ctx: Context): ReplySession {
+  return new ReplySession({
+    draft:
+      ctx.chat?.type === "private"
+        ? createNativeDraftTransport(ctx)
+        : undefined,
+    send: async (text) => {
+      await ctx.reply(text);
+    },
+  });
+}
+
+function isAbortError(error: unknown): boolean {
+  return error instanceof DOMException
+    ? error.name === "AbortError"
+    : error instanceof Error && error.name === "AbortError";
 }

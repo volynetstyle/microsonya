@@ -1,0 +1,88 @@
+.toc {
+  --toc-rail-width: 2px;
+  --toc-indent: 16px;
+  --toc-rail-hover: color-mix(in srgb, var(--accent) 60%, transparent);
+
+  inline-size: min(100%, 340px);
+  color: var(--text-secondary);
+}
+
+.toc__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.toc__item {
+  --toc-depth: 0;
+  --toc-offset: calc(var(--toc-depth) * var(--toc-indent));
+
+  margin: 0;
+  padding: 0;
+}
+
+.toc__link {
+  display: block;
+
+  inline-size: calc(100% - var(--toc-offset));
+  min-block-size: 26px;
+
+  margin: 0;
+  margin-inline-start: var(--toc-offset);
+
+  border: 0;
+  border-inline-start: var(--toc-rail-width) solid transparent;
+
+  padding: 4px 20px 4px 16px;
+
+  overflow: hidden;
+
+  color: inherit;
+  background: transparent;
+
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 18px;
+
+  text-align: start;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  cursor: pointer;
+
+  transition:
+    border-color var(--motion-duration-fast) ease,
+    color var(--motion-duration-fast) ease;
+}
+
+.toc__item[data-nested] > .toc__link {
+  min-block-size: 22px;
+  padding-block: 1px;
+
+  font-size: 0.76rem;
+  font-weight: 400;
+}
+
+.toc__link:hover {
+  border-inline-start-color: var(--toc-rail-hover);
+  color: var(--text-primary);
+}
+
+.toc__link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+  border-radius: 4px;
+}
+
+.toc__item--active > .toc__link {
+  border-inline-start-color: var(--accent);
+  color: var(--accent);
+}
+
+.toc__label {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

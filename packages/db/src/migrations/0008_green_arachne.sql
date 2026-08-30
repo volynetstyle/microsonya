@@ -1,0 +1,4 @@
+ALTER TABLE "summary_run_lifecycle" ADD CONSTRAINT "summary_run_lifecycle_status_check" CHECK ("summary_run_lifecycle"."status" in ('created', 'queued', 'processing', 'summary_ready', 'delivering', 'completed', 'retry_wait', 'failed_permanent'));--> statement-breakpoint
+ALTER TABLE "summary_run_lifecycle" ADD CONSTRAINT "summary_run_lifecycle_mode_check" CHECK ("summary_run_lifecycle"."mode" in ('recent', 'today', 'count'));--> statement-breakpoint
+ALTER TABLE "summary_run_lifecycle" ADD CONSTRAINT "summary_run_lifecycle_attempt_check" CHECK ("summary_run_lifecycle"."attempt" >= 0);--> statement-breakpoint
+ALTER TABLE "summary_run_lifecycle" ADD CONSTRAINT "summary_run_lifecycle_count_check" CHECK (("summary_run_lifecycle"."mode" = 'count' and "summary_run_lifecycle"."requested_count" > 0) or ("summary_run_lifecycle"."mode" <> 'count' and "summary_run_lifecycle"."requested_count" is null));

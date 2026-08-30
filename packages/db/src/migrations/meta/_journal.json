@@ -8,6 +8,69 @@
       "when": 1782377067266,
       "tag": "0000_married_randall",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1786731938101,
+      "tag": "0001_public_lila_cheney",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1787326587690,
+      "tag": "0002_cooing_robbie_robertson",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1787674552049,
+      "tag": "0003_sad_supernaut",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1787849882336,
+      "tag": "0004_optimal_blob",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1787850853501,
+      "tag": "0005_clever_korath",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1787850905922,
+      "tag": "0006_good_apocalypse",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1788000142692,
+      "tag": "0007_early_captain_cross",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1788000538927,
+      "tag": "0008_green_arachne",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1788022861457,
+      "tag": "0009_unknown_dragon_lord",
+      "breakpoints": true
     }
   ]
 }

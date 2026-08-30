@@ -1,38 +1,125 @@
-import { MessagesRepo, openDb, SummariesRepo } from "@microsonya/db";
-import type { AppConfig } from "./config.js";
-import {
-  InMemoryMessagesRepo,
-  InMemorySummariesRepo,
-} from "./runtime/inMemoryStorage.js";
-import { requiredConfigValue } from "./errors.js";
+import type {
+  ChatId,
+  ChatMessage,
+  MessageId,
+  SummaryRun,
+  SummaryRunAttempt,
+} from "@microsonya/shared";
 
 export type Storage = {
-  messages: MessagesRepo | InMemoryMessagesRepo;
-  summaries: SummariesRepo | InMemorySummariesRepo;
+  messages: InMemoryMessagesRepo;
+  summaries: InMemorySummariesRepo;
 };
 
-export function createStorage(config: AppConfig): Storage {
-  if (config.storageMode === "memory") {
-    return createInMemoryStorage();
-  }
-
-  return createPostgresStorage(
-    requiredConfigValue(config.databaseUrl, "DATABASE_URL"),
-  );
-}
-
-function createInMemoryStorage(): Storage {
+export function createStorage(): Storage {
   return {
     messages: new InMemoryMessagesRepo(),
     summaries: new InMemorySummariesRepo(),
   };
 }
 
-function createPostgresStorage(databaseUrl: string): Storage {
-  const { db } = openDb(databaseUrl);
+export class InMemoryMessagesRepo {
+  private readonly messagesByChat = new Map<
+    ChatId,
+    Map<MessageId, ChatMessage>
+  >();
 
-  return {
-    messages: new MessagesRepo(db),
-    summaries: new SummariesRepo(db),
-  };
+  async save(message: ChatMessage): Promise<void> {
+    const messages = this.messagesByChat.get(message.chatId) ?? new Map();
+    messages.set(message.id, copyMessage(message));
+    this.messagesByChat.set(message.chatId, messages);
+  }
+
+  async listByChat(chatId: ChatId): Promise<readonly ChatMessage[]> {
+    return Object.freeze(
+      [...(this.messagesByChat.get(chatId)?.values() ?? [])]
+        .sort((left, right) => left.id - right.id)
+        .map(copyMessage),
+    );
+  }
+}
+
+export class InMemorySummariesRepo {
+  private readonly runsByCommand = new Map<string, SummaryRun>();
+  private readonly attemptsByCommand = new Map<string, SummaryRunAttempt>();
+
+  async findLastRun(chatId: ChatId): Promise<SummaryRun | undefined> {
+    const run = [...this.runsByCommand.values()]
+      .filter((candidate) => candidate.chatId === chatId)
+      .sort((left, right) => right.createdAt - left.createdAt)
+      .at(0);
+
+    return run === undefined ? undefined : copySummaryRun(run);
+  }
+
+  async saveRun(run: SummaryRun): Promise<void> {
+    this.runsByCommand.set(
+      `${run.chatId}:${run.commandMessageId}`,
+      copySummaryRun(run),
+    );
+  }
+
+  async saveAttempt(attempt: SummaryRunAttempt): Promise<void> {
+    const key = `${attempt.chatId}:${attempt.commandMessageId}`;
+    if (this.attemptsByCommand.has(key)) return;
+    this.attemptsByCommand.set(key, attempt);
+
+    if (
+      (attempt.status === "summarized" || attempt.status === "skipped") &&
+      attempt.checkpointAfter !== null &&
+      attempt.action !== undefined &&
+      attempt.summaryText !== undefined
+    ) {
+      const eligible = attempt.messages.filter(
+        ({ role }) => role === "eligible",
+      );
+      await this.saveRun({
+        id: attempt.id,
+        chatId: attempt.chatId,
+        commandMessageId: attempt.commandMessageId,
+        createdAt: attempt.completedAt,
+        covers: {
+          firstId: eligible[0]!.messageId,
+          lastId: eligible.at(-1)!.messageId,
+          count: eligible.length,
+        },
+        mode: attempt.mode,
+        status: attempt.status,
+        action: attempt.action,
+        finalText: attempt.summaryText,
+      });
+    }
+  }
+}
+
+function copyMessage(message: ChatMessage): ChatMessage {
+  return Object.freeze({
+    id: message.id,
+    chatId: message.chatId,
+    author: Object.freeze({
+      id: message.author.id,
+      label: message.author.label,
+    }),
+    time: message.time,
+    parentId: message.parentId,
+    text: message.text,
+  });
+}
+
+function copySummaryRun(run: SummaryRun): SummaryRun {
+  return Object.freeze({
+    id: run.id,
+    chatId: run.chatId,
+    commandMessageId: run.commandMessageId,
+    createdAt: run.createdAt,
+    covers: Object.freeze({
+      firstId: run.covers.firstId,
+      lastId: run.covers.lastId,
+      count: run.covers.count,
+    }),
+    mode: run.mode,
+    status: run.status,
+    action: run.action,
+    finalText: run.finalText,
+  });
 }

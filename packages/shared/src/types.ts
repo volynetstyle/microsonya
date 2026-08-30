@@ -1,73 +1,242 @@
-export type MessageKind = "text" | "photo" | "sticker" | "voice" | "service";
-
-export type ChatMessage = {
-  id: number;
-  chatId: string;
-  date: number;
-  authorId: string;
-  authorName: string;
-  text: string;
-  replyToId?: number;
-  kind: MessageKind;
-  isCommand?: boolean;
+export type Brand<T, Name extends string> = T & {
+  readonly __brand: Name;
 };
+
+export type ChatId = Brand<string, "ChatId">;
+export type MessageId = Brand<number, "MessageId">;
+export type AuthorId = Brand<string, "AuthorId">;
+export type TimestampMs = Brand<number, "TimestampMs">;
+export type SummaryId = Brand<string, "SummaryId">;
+
+export function asChatId(value: unknown): ChatId {
+  return asNonEmptyString(value, "ChatId") as ChatId;
+}
+
+export function asMessageId(value: unknown): MessageId {
+  if (!Number.isSafeInteger(value) || (value as number) <= 0) {
+    throw new TypeError("MessageId must be a positive safe integer.");
+  }
+
+  return value as MessageId;
+}
+
+export function asAuthorId(value: unknown): AuthorId {
+  return asNonEmptyString(value, "AuthorId") as AuthorId;
+}
+
+export function asTimestampMs(value: unknown): TimestampMs {
+  if (
+    !Number.isSafeInteger(value) ||
+    Number.isNaN(new Date(value as number).getTime())
+  ) {
+    throw new TypeError(
+      "TimestampMs must be a safe integer in the JavaScript Date range.",
+    );
+  }
+
+  return value as TimestampMs;
+}
+
+export function asSummaryId(value: unknown): SummaryId {
+  return asNonEmptyString(value, "SummaryId") as SummaryId;
+}
+
+export interface AuthorRef {
+  readonly id: AuthorId;
+  readonly label: string;
+}
+
+/** Canonical, source-independent text message used throughout the domain. */
+export interface ChatMessage {
+  readonly id: MessageId;
+  readonly chatId: ChatId;
+  readonly author: AuthorRef;
+  readonly time: TimestampMs;
+  readonly parentId: MessageId | null;
+  readonly text: string;
+}
+
+export const SUMMARY_ACTIONS = [
+  "SUMMARIZE",
+  "DEFER_COMPACT",
+  "DEFER_INCOMPLETE",
+  "DEFER_CONTEXT",
+  "SKIP_REACTIONS",
+  "SKIP_BANTER",
+  "SKIP_NO_VALUE",
+] as const;
+
+export type SummaryAction = (typeof SUMMARY_ACTIONS)[number];
+
+/**
+ * Identifier reported by deterministic classifiers.
+ *
+ * The shared domain intentionally does not own the concrete rule registry.
+ */
+export type FastRule = string;
+
+export type DecisionEvidence =
+  | {
+      readonly source: "deterministic";
+      readonly rule: FastRule;
+    }
+  | {
+      readonly source: "model";
+      readonly model: string;
+    };
+
+export interface SummaryDecision {
+  readonly action: SummaryAction;
+  readonly evidence: DecisionEvidence;
+}
+
+export interface Summary {
+  readonly text: string;
+}
+
+export interface MessageRange {
+  readonly firstId: MessageId;
+  readonly lastId: MessageId;
+  readonly count: number;
+}
+
+export interface SummaryRecord {
+  readonly id: SummaryId;
+  readonly chatId: ChatId;
+  readonly covers: MessageRange;
+  readonly text: string;
+  readonly createdAt: TimestampMs;
+}
+
+export type DeferReason = Extract<SummaryAction, `DEFER_${string}`>;
+export type SkipReason = Extract<SummaryAction, `SKIP_${string}`>;
+
+export type WindowDisposition =
+  | {
+      readonly kind: "summarized";
+      readonly summary: SummaryRecord;
+    }
+  | {
+      readonly kind: "deferred";
+      readonly reason: DeferReason;
+    }
+  | {
+      readonly kind: "skipped";
+      readonly reason: SkipReason;
+    };
 
 export type SummaryMode = "recent" | "today" | "count";
 
-export type SummaryCommand = {
-  chatId: string;
-  commandMessageId: number;
-  date: number;
-  mode: SummaryMode;
-  count?: number;
-};
+export interface SummaryCommand {
+  readonly chatId: ChatId;
+  readonly commandMessageId: MessageId;
+  readonly date: TimestampMs;
+  readonly mode: SummaryMode;
+  readonly count?: number;
+}
 
-export type SummaryRun = {
-  id: string;
-  chatId: string;
-  commandMessageId: number;
-  createdAt: number;
-  fromMessageId: number;
-  toMessageId: number;
-  mode: SummaryMode;
-  status: "ok" | "empty" | "too_much" | "error";
-  finalText: string;
-};
+/** Persisted result of a terminal summarized or skipped workflow. */
+export interface SummaryRun {
+  readonly id: SummaryId;
+  readonly chatId: ChatId;
+  readonly commandMessageId: MessageId;
+  readonly createdAt: TimestampMs;
+  readonly covers: MessageRange;
+  readonly mode: SummaryMode;
+  readonly status: "summarized" | "skipped";
+  readonly action: SummaryAction;
+  readonly finalText: string;
+}
 
-export type SegmentReason =
-  | "time_gap"
-  | "reply_cluster"
-  | "topic_shift"
-  | "size_limit";
+export type SummaryRunAttemptStatus =
+  | "summarized"
+  | "deferred"
+  | "skipped"
+  | "empty"
+  | "error";
 
-export type DiscussionSegment = {
-  id: string;
-  chatId: string;
-  fromMessageId: number;
-  toMessageId: number;
-  startDate: number;
-  endDate: number;
-  participants: string[];
-  messageCount: number;
-  reason: SegmentReason;
-  messages: ChatMessage[];
-};
+export type SummaryRunMessageRole = "eligible" | "context";
 
-export type SegmentSummary = {
-  segmentId: string;
-  chatId: string;
-  fromMessageId: number;
-  toMessageId: number;
-  hash: string;
-  title: string;
-  summary: string[];
-  decisions: string[];
-  openQuestions: string[];
-  jokes: string[];
-  mentionedPeople: string[];
-  importance: 0 | 1 | 2 | 3;
-};
+/** Immutable copy of the exact message state visible to one production run. */
+export interface SummaryRunMessageSnapshot {
+  readonly ordinal: number;
+  readonly chatId: ChatId;
+  readonly messageId: MessageId;
+  readonly role: SummaryRunMessageRole;
+  readonly authorId: AuthorId;
+  readonly authorName: string;
+  readonly text: string;
+  readonly sentAt: TimestampMs;
+  readonly replyToId: MessageId | null;
+}
 
-export type FinalSummary = {
-  text: string;
-};
+export interface ModelInvocationEvidence {
+  readonly id: SummaryId;
+  readonly stage: "classifier" | "summarizer";
+  readonly model: string;
+  readonly promptHash: string;
+  readonly inputTokens?: number;
+  readonly outputTokens?: number;
+  readonly latencyMs?: number;
+  readonly outputJson?: unknown;
+  readonly outputText?: string;
+  readonly status: "pending" | "succeeded" | "failed";
+  readonly errorCode?: string;
+  readonly createdAt: TimestampMs;
+}
+
+export interface DatasetCandidateEvidence {
+  readonly priority: number;
+  readonly reasons: readonly string[];
+}
+
+/**
+ * Observed evidence for exactly one /summary attempt. It is deliberately not
+ * a label: production output becomes ground truth only after human review.
+ */
+export interface SummaryRunAttempt {
+  readonly id: SummaryId;
+  readonly chatId: ChatId;
+  readonly commandMessageId: MessageId;
+  readonly startedAt: TimestampMs;
+  readonly completedAt: TimestampMs;
+  readonly checkpointBefore: MessageId | null;
+  readonly checkpointAfter: MessageId | null;
+  readonly eligibleCount: number;
+  readonly contextCount: number;
+  readonly mode: SummaryMode;
+  readonly action?: SummaryAction;
+  readonly status: SummaryRunAttemptStatus;
+  readonly classifierModel?: string;
+  readonly summarizerModel?: string;
+  readonly classifierPromptHash?: string;
+  readonly summaryPromptHash?: string;
+  readonly policyHash: string;
+  readonly classifierLatencyMs: number;
+  readonly summarizerLatencyMs: number;
+  readonly totalLatencyMs: number;
+  readonly summaryText?: string;
+  readonly errorCode?: string;
+  readonly inputHash: string;
+  readonly messages: readonly SummaryRunMessageSnapshot[];
+  readonly modelInvocations: readonly ModelInvocationEvidence[];
+  readonly candidate?: DatasetCandidateEvidence;
+}
+
+export interface SummaryFeedback {
+  readonly id: SummaryId;
+  readonly runId: SummaryId;
+  readonly source: "user" | "moderator" | "developer" | "automatic";
+  readonly signal: "good" | "bad" | "corrected" | "rerun" | "ignored";
+  readonly comment?: string;
+  readonly correctedSummary?: string;
+  readonly createdAt: TimestampMs;
+}
+
+function asNonEmptyString(value: unknown, label: string): string {
+  if (typeof value !== "string" || value.trim().length === 0) {
+    throw new TypeError(`${label} must be a non-empty string.`);
+  }
+
+  return value;
+}

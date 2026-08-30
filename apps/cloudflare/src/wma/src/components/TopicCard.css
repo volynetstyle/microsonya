@@ -1,0 +1,77 @@
+.topic-card {
+  --accordion-radius: var(--section-radius);
+  --accordion-gap: 0.5rem;
+}
+
+.accordion > .topic-card > .topic-trigger,
+.accordion > .topic-card > .accordion-content {
+  padding: 0;
+}
+
+.accordion > .topic-card > .topic-trigger {
+  display: block;
+  cursor: pointer;
+}
+
+.topic-header {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: var(--accordion-padding-y) var(--accordion-padding-x);
+  background: none;
+  border: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  min-block-size: var(--row-min-height);
+}
+
+.topic-chevron {
+  color: var(--accent);
+  font-size: 0.75rem;
+  line-height: 1.6;
+  flex-shrink: 0;
+  transition: transform var(--motion-duration-fast) ease;
+}
+
+.topic-card[open] .topic-chevron { transform: rotate(90deg); }
+
+.topic-heading { display: flex; flex-direction: column; gap: 0.15rem; min-width: 0; }
+.topic-title { font-weight: 500; font-size: 1rem; }
+.topic-meta { color: var(--text-hint); font-size: 0.8rem; }
+
+.topic-summary {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  background: none;
+  border: none;
+  border-top: 1px solid var(--separator);
+  padding: var(--accordion-padding-y) var(--accordion-padding-x);
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+@supports (interpolate-size: allow-keywords) {
+  .topic-trigger { interpolate-size: allow-keywords; }
+  .topic-summary {
+    height: auto; overflow: clip; opacity: 1;
+    transition: height var(--accordion-duration) var(--accordion-easing), opacity var(--accordion-opacity-in-duration) linear, border-color var(--accordion-opacity-in-duration) linear;
+  }
+  .topic-card[open] .topic-summary {
+    height: 0; opacity: 0; border-color: transparent; pointer-events: none;
+    transition: height var(--accordion-duration) var(--accordion-easing), opacity var(--accordion-opacity-out-duration) linear, border-color var(--accordion-opacity-out-duration) linear;
+  }
+}
+
+.topic-preview { display: block; margin: 0 0 0.5rem; color: var(--text-hint); font-size: 0.9rem; line-height: 1.5; }
+.topic-key-points { color: var(--accent); font-size: 0.85rem; font-weight: 500; }
+
+.moment-list {
+  list-style: none; margin: 0; padding: var(--accordion-padding-y) var(--accordion-padding-x);
+  border-top: 1px solid var(--separator); display: flex; flex-direction: column; gap: 0.9rem;
+}

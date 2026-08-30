@@ -5,40 +5,10 @@ services:
       dockerfile: Dockerfile
     image: microsonya/telegram-bot:local
     restart: unless-stopped
+    # All configuration (storage, models, router) is read from .env by the
+    # app itself (packages/model-gateway/src/config.ts is the single source
+    # of defaults) — copy .env.docker.example to .env rather than overriding
+    # values here, so there's one place to look, not two.
     env_file:
       - path: .env
         required: false
-    environment:
-      DATABASE_URL: ${DATABASE_URL:-postgresql://microsonya:${POSTGRES_PASSWORD:-microsonya}@postgres:5432/microsonya}
-      LLM_BASE_URL: ${LLM_BASE_URL:-https://openrouter.ai/api/v1}
-      LLM_MODEL: ${LLM_MODEL:-}
-      LLM_MODELS: ${LLM_MODELS:-nvidia/nemotron-3-super-120b-a12b:free,openai/gpt-oss-20b:free,google/gemma-4-26b-a4b-it:free,nvidia/nemotron-nano-9b-v2:free,openrouter/free}
-      LLM_MERGE_MODEL: ${LLM_MERGE_MODEL:-openrouter/free}
-      LLM_QUARANTINE_MODELS: ${LLM_QUARANTINE_MODELS:-}
-    depends_on:
-      postgres:
-        condition: service_healthy
-
-  postgres:
-    image: postgres:16-alpine
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB:-microsonya}
-      POSTGRES_USER: ${POSTGRES_USER:-microsonya}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-microsonya}
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "pg_isready -U $${POSTGRES_USER:-microsonya} -d $${POSTGRES_DB:-microsonya}",
-        ]
-      interval: 5s
-      timeout: 3s
-      retries: 10
-    ports:
-      - "${POSTGRES_PORT:-5432}:5432"
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-
-volumes:
-  postgres-data:
