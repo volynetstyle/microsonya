@@ -167,16 +167,7 @@ alreadyCompact
 
 alreadyCompact=true when the durable payload is already expressed in a form
 that a future reader would not understand materially faster or more clearly
-after summarization.
-
-Examples:
-- one self-contained decision;
-- one status update;
-- one result;
-- one action with an optional deadline;
-- a compact list of invariants.
-
-alreadyCompact is about semantic compression, not message count or raw length.
+after summarization. alreadyCompact is about semantic compression, not message count or raw length.
 
 A multi-stage plan, fragmented story, causal chain, or interaction spread across
 several semantic units is not already compact merely because each individual

@@ -62,11 +62,19 @@ export async function loadWmaBootstrap(
       )
       .orderBy(desc(summaryRuns.createdAt))
       .limit(20);
-    const sourceMessages = rows.length === 0 ? [] : await client.db
-      .select()
-      .from(summaryRunMessages)
-      .where(inArray(summaryRunMessages.runId, rows.map((row) => row.id)))
-      .orderBy(summaryRunMessages.runId, summaryRunMessages.ordinal);
+    const sourceMessages =
+      rows.length === 0
+        ? []
+        : await client.db
+            .select()
+            .from(summaryRunMessages)
+            .where(
+              inArray(
+                summaryRunMessages.runId,
+                rows.map((row) => row.id),
+              ),
+            )
+            .orderBy(summaryRunMessages.runId, summaryRunMessages.ordinal);
     const messagesByRun = new Map<string, typeof sourceMessages>();
     for (const message of sourceMessages) {
       const messages = messagesByRun.get(message.runId) ?? [];
@@ -93,10 +101,14 @@ export async function loadWmaBootstrap(
           moments: (messagesByRun.get(row.id) ?? []).map((message) => ({
             type: "text" as const,
             id: `${row.id}:${message.ordinal}`,
-            time: new Date(message.sentAt).toLocaleTimeString("uk-UA", { hour: "2-digit", minute: "2-digit", timeZone }),
+            time: new Date(message.sentAt).toLocaleTimeString("uk-UA", {
+              hour: "2-digit",
+              minute: "2-digit",
+              timeZone,
+            }),
             title: encryption.decrypt(message.authorNameCiphertext),
             body: encryption.decrypt(message.textCiphertext),
-          })), /*
+          })) /*
             {
               type: "text" as const,
               id: `${row.id}:summary`,
@@ -104,7 +116,7 @@ export async function loadWmaBootstrap(
               title: "Підсумок розмови",
               body: summary,
             },
-          ], */
+          ], */,
         },
       ];
     });

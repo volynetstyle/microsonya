@@ -48,7 +48,9 @@ export async function validateTelegramInitData(
       : {}),
   };
 }
+
 export class TelegramInitDataError extends Error {}
+
 function parseJson(
   value: string | null,
   field: string,
@@ -60,6 +62,7 @@ function parseJson(
   } catch {}
   throw new TelegramInitDataError(`Telegram ${field} is malformed.`);
 }
+
 async function hmacBytes(
   key: string | Uint8Array,
   value: string,
@@ -80,6 +83,7 @@ async function hmacBytes(
     ),
   );
 }
+
 async function hmacHex(
   key: string | Uint8Array,
   value: string,

@@ -10,13 +10,16 @@ const routes = [
   { path: "/", depth: 0 },
   { path: "/summary", depth: 1 },
 ] as const;
+
 export default function App() {
   const pathname = useViewTransitionRouter({ routes });
   const [chats, setChats] = createSignal<readonly WmaChat[]>();
+
   onSettled(() => {
     void loadChats().then(setChats);
     return initTelegramRuntime();
   });
+
   const selected = () => {
     try {
       return JSON.parse(
@@ -26,6 +29,7 @@ export default function App() {
       return undefined;
     }
   };
+
   return (
     <div class="view-transition-viewport">
       <Switch

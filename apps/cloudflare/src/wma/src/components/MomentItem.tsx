@@ -93,7 +93,7 @@ function QuoteCard(props: { moment: Extract<WmaMoment, { type: "quote" }> }) {
         quote={
           expanded()
             ? props.moment.quote
-            : `${props.moment.quote.slice(0, QUOTE_PREVIEW_LENGTH)}…`
+            : `${props.moment.quote.slice(0, QUOTE_PREVIEW_LENGTH)}...`
         }
       />
       <button

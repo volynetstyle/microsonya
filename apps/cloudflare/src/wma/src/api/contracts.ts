@@ -9,6 +9,7 @@ export type WmaMoment =
       author: string;
       quote: string;
     };
+
 export type WmaTopic = {
   id: string;
   title: string;
@@ -18,6 +19,7 @@ export type WmaTopic = {
   keyPointsCount: number;
   moments: readonly WmaMoment[];
 };
+
 export type WmaBootstrap = {
   viewer: { id: string; name: string };
   chat: { id: string; title: string };
@@ -26,4 +28,5 @@ export type WmaBootstrap = {
   topics: readonly WmaTopic[];
   capabilities: { canRequestSummary: boolean };
 };
+
 export type WmaChat = { id: string; title: string; summaryCount: number };
