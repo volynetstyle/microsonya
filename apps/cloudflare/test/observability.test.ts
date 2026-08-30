@@ -4,6 +4,8 @@ import {
   logTelemetry,
   recordTelemetryMetric,
 } from "../src/observability.js";
+import { recordSummarizationEvent } from "../src/processor/telemetry.js";
+import type { SummarizationTelemetryEvent } from "@microsonya/summarize";
 
 describe("Worker observability contract", () => {
   it("emits queryable JSON without arbitrary error text", () => {
@@ -36,7 +38,7 @@ describe("Worker observability contract", () => {
 
     expect(writeDataPoint).toHaveBeenCalledWith({
       indexes: ["ingress:completed"],
-      blobs: ["summary.queue"],
+      blobs: ["summary.queue", "completed"],
       doubles: [42],
     });
   });
@@ -68,5 +70,45 @@ describe("Worker observability contract", () => {
       "Error",
     );
     expect(errorName("untrusted failure text")).toBe("UNKNOWN_ERROR");
+  });
+
+  it("projects model telemetry without conversation or model text", () => {
+    const writeDataPoint = vi.fn();
+    const secretPrompt = "PRIVATE CONVERSATION WINDOW";
+    const secretResponse = "PRIVATE MODEL RESPONSE";
+    const event = {
+      traceId: "private-trace-id",
+      chatId: "private-chat-id",
+      commandMessageId: 42,
+      offsetMs: 12,
+      type: "model.response.envelope",
+      stage: "summarizer",
+      model: "model-name",
+      attempt: 1,
+      durationMs: 100,
+      done: true,
+      promptEvalCount: 200,
+      evalCount: 20,
+      contentChars: secretResponse.length,
+      thinkingChars: 0,
+      content: secretResponse,
+      thinking: secretPrompt,
+    } as SummarizationTelemetryEvent;
+
+    recordSummarizationEvent(
+      { writeDataPoint } as unknown as AnalyticsEngineDataset,
+      event,
+    );
+
+    const serialized = JSON.stringify(writeDataPoint.mock.calls);
+    expect(serialized).not.toContain(secretPrompt);
+    expect(serialized).not.toContain(secretResponse);
+    expect(serialized).not.toContain("private-chat-id");
+    expect(serialized).not.toContain("private-trace-id");
+    expect(writeDataPoint).toHaveBeenCalledWith({
+      indexes: ["processor:summary"],
+      blobs: ["model.response.envelope", "done", "summarizer", "", "", ""],
+      doubles: [100, 0, 0, 200, 20, secretResponse.length, 0],
+    });
   });
 });

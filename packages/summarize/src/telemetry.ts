@@ -334,11 +334,17 @@ export class SummarizationTelemetryTrace {
 
   private emit(payload: SummarizationTelemetryPayload): void {
     if (this.sink === null) return;
-    this.sink({
-      ...this.context,
-      ...payload,
-      offsetMs: performance.now() - this.startedAt,
-    });
+    try {
+      this.sink({
+        ...this.context,
+        ...payload,
+        offsetMs: performance.now() - this.startedAt,
+      });
+    } catch {
+      // Telemetry is auxiliary. A sink owned by an adapter or test harness
+      // must never break classification, generation, persistence, or the
+      // evidence ledger.
+    }
   }
 }
 

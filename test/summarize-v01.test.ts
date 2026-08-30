@@ -6,6 +6,7 @@ import {
   asSummaryId,
   asTimestampMs,
   type ChatMessage,
+  type ConversationWindow,
   type SummaryCommand,
   type SummaryRun,
 } from "../packages/shared/src/index.js";
@@ -408,6 +409,61 @@ describe("summarizer 0.1 workflow", () => {
       kind: "summarized",
     });
     expect(ollama.callCount).toBe(2);
+  });
+
+  it("keeps a useful one-window result correct when telemetry completely fails", async () => {
+    const saveRun = vi.fn(async () => undefined);
+    const sink = vi.fn(() => {
+      throw new Error("telemetry backend is down");
+    });
+    const summarize = vi.fn(async (window: ConversationWindow) => {
+      expect(window.messages.map(({ text }) => text)).toEqual([
+        "Release is Friday at 15:00 UTC.",
+        "Deploy owner is Olia; rollback is plan B.",
+      ]);
+      return {
+        text: "Release: Friday 15:00 UTC. Owner: Olia. Rollback: plan B.",
+      };
+    });
+    const summarizer = createSummarizer({
+      messages: {
+        listByChat: async () => [
+          message(1, "Release is Friday at 15:00 UTC."),
+          message(2, "Deploy owner is Olia; rollback is plan B."),
+        ],
+      },
+      summaries: { findLastRun: async () => undefined, saveRun },
+      classifier: {
+        classify: async () => ({
+          action: "SUMMARIZE",
+          evidence: { source: "model", model: "test" },
+        }),
+      },
+      conversationSummarizer: { summarize },
+      telemetry: new SummarizationTelemetryService(sink),
+      createSummaryId: () => asSummaryId("proof-summary"),
+      now: () => asTimestampMs(200_000_001),
+    });
+
+    await expect(summarizer.process(command())).resolves.toEqual({
+      kind: "summarized",
+      summary: {
+        id: "proof-summary",
+        chatId: "chat",
+        covers: { firstId: 1, lastId: 2, count: 2 },
+        text: "Release: Friday 15:00 UTC. Owner: Olia. Rollback: plan B.",
+        createdAt: 200_000_001,
+      },
+    });
+    expect(sink).toHaveBeenCalled();
+    expect(saveRun).toHaveBeenCalledWith(
+      expect.objectContaining({
+        covers: { firstId: 1, lastId: 2, count: 2 },
+        action: "SUMMARIZE",
+        status: "summarized",
+        finalText: "Release: Friday 15:00 UTC. Owner: Olia. Rollback: plan B.",
+      }),
+    );
   });
 });
 

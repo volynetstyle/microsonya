@@ -11,10 +11,6 @@ import {
   type SummaryRun,
 } from "../packages/shared/src/index.js";
 import { createSummarizer } from "../packages/summarize/src/index.js";
-import {
-  InMemoryMessagesRepo,
-  InMemorySummariesRepo,
-} from "../apps/telegram/bot/src/storage.js";
 
 describe("runtime summary invariants", () => {
   it("does not persist or advance after a provider failure", async () => {
@@ -39,8 +35,8 @@ describe("runtime summary invariants", () => {
   });
 
   it("stores only the latest edit for one Telegram message id", async () => {
-    const messages = new InMemoryMessagesRepo();
-    const summaries = new InMemorySummariesRepo();
+    const messages = new TestMessagesRepo();
+    const summaries = new TestSummariesRepo();
     await messages.save(message(200, "Deploy буде о 18:00."));
     await messages.save(message(200, "Deploy переносимо на завтра."));
 
@@ -118,8 +114,8 @@ describe("runtime summary invariants", () => {
   });
 
   it("makes a parent across the checkpoint available as reply context without advancing on DEFER", async () => {
-    const messages = new InMemoryMessagesRepo();
-    const summaries = new InMemorySummariesRepo();
+    const messages = new TestMessagesRepo();
+    const summaries = new TestSummariesRepo();
     await messages.save(
       message(100, "Backend deploy is blocked by migration 42."),
     );
@@ -194,4 +190,37 @@ function message(
     parentId: parentId === null ? null : asMessageId(parentId),
     text,
   };
+}
+
+class TestMessagesRepo {
+  readonly #messages = new Map<number, ChatMessage>();
+
+  async save(value: ChatMessage): Promise<void> {
+    this.#messages.set(value.id, structuredClone(value));
+  }
+
+  async listByChat(
+    chatId: ReturnType<typeof asChatId>,
+  ): Promise<ChatMessage[]> {
+    return [...this.#messages.values()]
+      .filter((value) => value.chatId === chatId)
+      .sort((left, right) => left.id - right.id)
+      .map((value) => structuredClone(value));
+  }
+}
+
+class TestSummariesRepo {
+  readonly #runs: SummaryRun[] = [];
+
+  async saveRun(run: SummaryRun): Promise<void> {
+    this.#runs.push(structuredClone(run));
+  }
+
+  async findLastRun(
+    chatId: ReturnType<typeof asChatId>,
+  ): Promise<SummaryRun | undefined> {
+    return structuredClone(
+      this.#runs.filter((run) => run.chatId === chatId).at(-1),
+    );
+  }
 }

@@ -5,8 +5,8 @@ import {
   parseSummaryCommandUpdate,
   SUMMARY_COMMAND_NAME,
   telegramCommands,
-} from "../apps/telegram/bot/src/command.js";
-import { fromTelegram } from "../apps/telegram/bot/src/telegram/message.js";
+  parseTelegramChatMessageUpdate,
+} from "../packages/telegram/src/index.js";
 
 describe("Telegram summary command", () => {
   it("parses a targeted command directly into the application request", () => {
@@ -30,7 +30,7 @@ describe("Telegram summary command", () => {
     });
   });
 
-  it("does not infer control input from slash-prefixed ordinary text", () => {
+  it("keeps slash-prefixed control input out of semantic evidence", () => {
     const message = {
       message_id: 5,
       date: 1_700,
@@ -40,7 +40,7 @@ describe("Telegram summary command", () => {
     };
 
     expect(parseSummaryCommand(message)).toBeUndefined();
-    expect(fromTelegram(message)?.text).toBe("/summary today");
+    expect(parseTelegramChatMessageUpdate({ message })?.text).toBeUndefined();
   });
 
   it("ignores commands addressed to another bot", () => {

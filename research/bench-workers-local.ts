@@ -7,16 +7,13 @@ import {
   asMessageId,
   asTimestampMs,
   type ChatMessage,
+  type SummaryCommand,
   type SummaryRunAttempt,
 } from "../packages/shared/src/index.js";
 import {
   createSummarizer,
   SummarizationTelemetryService,
 } from "../packages/summarize/src/index.js";
-import { createMessageHandler } from "../apps/telegram/bot/src/telegramHandlers.js";
-// Telegraf is intentionally owned by the bot workspace, not the root package.
-// @ts-expect-error TypeScript does not follow declarations through this package-local path.
-import { Telegraf } from "../apps/telegram/bot/node_modules/telegraf/lib/index.js";
 
 type Scenario = "skip" | "summarize";
 
@@ -58,7 +55,6 @@ async function benchmarkScenario(
 function createRunner(scenario: Scenario, messageCount: number) {
   let sequence = 0;
   let modelCalls = 0;
-  let telegramCalls = 0;
   const encryption = createDataEncryption(Buffer.alloc(32, 0x2a));
   const classifierOutput = JSON.stringify(
     scenario === "skip"
@@ -160,63 +156,24 @@ function createRunner(scenario: Scenario, messageCount: number) {
     ollama,
     telemetry: new SummarizationTelemetryService(null),
   });
-  const bot = new Telegraf("benchmark-token");
-  bot.botInfo = {
-    id: 1,
-    is_bot: true,
-    first_name: "Microsonya",
-    username: "microsonya_benchmark_bot",
-    can_join_groups: true,
-    can_read_all_group_messages: false,
-    supports_inline_queries: false,
-  };
-  Object.assign(bot.context, {
-    telegram: {
-      callApi: async () => {
-        telegramCalls += 1;
-        return true;
-      },
-    },
-  });
-  bot.on(
-    "message",
-    createMessageHandler({
-      messages: { save: async () => undefined },
-      summarizer,
-    }),
-  );
-
   return {
     async run(): Promise<void> {
       sequence += 1;
       const chatId = -(1_000_000 + sequence);
       const commandMessageId = 10_000 + sequence;
-      await bot.handleUpdate({
-        update_id: sequence,
-        message: {
-          message_id: commandMessageId,
-          date: 1_788_000_000,
-          chat: {
-            id: chatId,
-            type: "private",
-            first_name: "Benchmark",
-          },
-          from: {
-            id: Math.abs(chatId),
-            is_bot: false,
-            first_name: "Benchmark",
-          },
-          text: "/summary",
-          entities: [{ type: "bot_command", offset: 0, length: 8 }],
-        },
-      });
+      await summarizer.process({
+        chatId: asChatId(String(chatId)),
+        commandMessageId: asMessageId(commandMessageId),
+        date: asTimestampMs(1_788_000_000_000),
+        mode: "recent",
+      } satisfies SummaryCommand);
     },
     assertCallCounts(runs: number): void {
       const expectedModelCalls = runs * (scenario === "summarize" ? 2 : 1);
-      if (modelCalls !== expectedModelCalls || telegramCalls !== runs) {
+      if (modelCalls !== expectedModelCalls) {
         throw new Error(
-          `Incomplete E2E path: expected ${expectedModelCalls}/${runs} ` +
-            `model/Telegram calls, got ${modelCalls}/${telegramCalls}.`,
+          `Incomplete summarization path: expected ${expectedModelCalls} ` +
+            `model calls, got ${modelCalls}.`,
         );
       }
     },

@@ -4,6 +4,7 @@ import {
   getSummaryDetail,
   listWmaChats,
 } from "./bootstrap.js";
+import { errorName, logTelemetry } from "../observability.js";
 
 export interface Env {
   ASSETS: Fetcher;
@@ -53,7 +54,9 @@ export default {
     } catch (error) {
       if (error instanceof TelegramInitDataError)
         return json({ error: "UNAUTHORIZED" }, 401);
-      console.error("wma.api.failed", error);
+      logTelemetry("error", "wma", "wma.api.failed", {
+        errorName: errorName(error),
+      });
       return json({ error: "INTERNAL_ERROR" }, 500);
     }
   },

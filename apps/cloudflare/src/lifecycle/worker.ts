@@ -12,8 +12,10 @@ import type {
 } from "@microsonya/contracts";
 import {
   decideReconciliation,
+  type ReconciliationAction,
   type SummaryRunLifecycleStatus,
 } from "@microsonya/run-lifecycle";
+import { errorName, logTelemetry } from "../observability.js";
 
 const STALE_AFTER_MS = 5 * 60_000;
 const DEFAULT_LEASE_MS = 2 * 60_000;
@@ -213,15 +215,9 @@ export default {
         asTimestampMs(now - STALE_AFTER_MS),
         now,
       );
-      env.ANALYTICS.writeDataPoint({
-        indexes: ["production-health"],
-        blobs: ["lifecycle.health"],
-        doubles: [
-          health.stuckRuns,
-          health.deliveryStuck,
-          health.retryOverdue,
-          health.permanentFailures,
-        ],
+      recordLifecycleHealth(env.ANALYTICS, health);
+      logTelemetry("info", "lifecycle", "summary.reconcile.scan", {
+        staleCount: stale.length,
       });
 
       for (const run of stale) {
@@ -231,37 +227,92 @@ export default {
           now,
         );
         if (action === "none") continue;
+
         try {
+          // Claim the reconciliation action in PostgreSQL before enqueueing.
+          // A concurrent cron invocation that loses the CAS must not publish
+          // a duplicate job from the same stale snapshot.
+          const prepared = await prepareRunForEnqueue(
+            repository,
+            run,
+            action,
+            now,
+          );
+          if (!prepared) continue;
+
           await env.SUMMARY_JOBS.send({ runId: run.id } satisfies SummaryJob);
         } catch (error) {
-          console.error("summary.reconcile.enqueue_error", {
+          // The run remains in a recoverable queued state. A later cron scan
+          // will retry it if the Queue binding is temporarily unavailable.
+          logTelemetry("error", "lifecycle", "summary.reconcile.error", {
             runId: run.id,
-            errorName: error instanceof Error ? error.name : "UNKNOWN_ERROR",
+            errorName: errorName(error),
           });
-          continue;
-        }
-        if (action === "enqueue-created") {
-          await repository.transition(run.id, "created", "queued", now);
-        } else if (action === "reenqueue") {
-          if (run.status === "queued" || run.status === "summary_ready") {
-            await repository.touch(run.id, run.status, now);
-          }
-        } else if (action === "expire-lease-and-enqueue") {
-          if (run.status === "processing" || run.status === "delivering") {
-            const expired = await repository.expireLease(
-              run.id,
-              run.status,
-              "LEASE_EXPIRED",
-              now,
-            );
-            if (expired) {
-              await repository.transition(run.id, "retry_wait", "queued", now);
-            }
-          }
-        } else {
-          await repository.transition(run.id, "retry_wait", "queued", now);
         }
       }
     });
   },
 } satisfies ExportedHandler<Env, unknown>;
+
+async function prepareRunForEnqueue(
+  repository: SummaryLifecycleRepo,
+  run: {
+    readonly id: SummaryId;
+    readonly status: SummaryRunLifecycleStatus;
+  },
+  action: ReconciliationAction,
+  now: ReturnType<typeof asTimestampMs>,
+): Promise<boolean> {
+  switch (action) {
+    case "none":
+      return false;
+    case "enqueue-created":
+      return repository.transition(run.id, "created", "queued", now);
+    case "reenqueue":
+      return run.status === "queued" || run.status === "summary_ready"
+        ? repository.touch(run.id, run.status, now)
+        : false;
+    case "enqueue-retry":
+      return repository.transition(run.id, "retry_wait", "queued", now);
+    case "expire-lease-and-enqueue": {
+      if (run.status !== "processing" && run.status !== "delivering") {
+        return false;
+      }
+      const expired = await repository.expireLease(
+        run.id,
+        run.status,
+        "LEASE_EXPIRED",
+        now,
+      );
+      if (!expired) return false;
+      return repository.transition(run.id, "retry_wait", "queued", now);
+    }
+  }
+}
+
+function recordLifecycleHealth(
+  analytics: AnalyticsEngineDataset,
+  health: {
+    readonly stuckRuns: number;
+    readonly deliveryStuck: number;
+    readonly retryOverdue: number;
+    readonly permanentFailures: number;
+  },
+): void {
+  try {
+    analytics.writeDataPoint({
+      indexes: ["lifecycle:health"],
+      blobs: ["lifecycle.health"],
+      doubles: [
+        health.stuckRuns,
+        health.deliveryStuck,
+        health.retryOverdue,
+        health.permanentFailures,
+      ],
+    });
+  } catch (error) {
+    logTelemetry("warn", "lifecycle", "telemetry.metric_write_failed", {
+      errorName: errorName(error),
+    });
+  }
+}

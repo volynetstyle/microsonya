@@ -12,14 +12,14 @@
       "@microsonya/production-readiness": [
         "packages/production-readiness/src/index.ts"
       ],
-      "@microsonya/run-lifecycle": ["packages/run-lifecycle/src/index.ts"]
+      "@microsonya/run-lifecycle": ["packages/run-lifecycle/src/index.ts"],
+      "@microsonya/telegram": ["packages/telegram/src/index.ts"]
     }
   },
   "include": [
     "test/**/*.ts",
     "research/**/*.ts",
     "scripts/**/*.ts",
-    "packages/*/src/**/*.ts",
-    "apps/telegram/bot/src/**/*.ts"
+    "packages/*/src/**/*.ts"
   ]
 }

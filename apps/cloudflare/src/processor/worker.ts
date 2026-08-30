@@ -16,6 +16,8 @@ import {
 } from "@microsonya/shared";
 import { createSummarizer, presentDisposition } from "@microsonya/summarize";
 import { EMPTY_SUMMARY_MESSAGE, classifyUnknownFailure } from "./policy.js";
+import { logTelemetry, recordTelemetryMetric } from "../observability.js";
+import { createProcessorTelemetry } from "./telemetry.js";
 
 const DEFAULT_RETRY_SECONDS = 30;
 const MAX_ATTEMPTS = 4;
@@ -95,16 +97,22 @@ export class SummaryProcessorEntrypoint extends WorkerEntrypoint<Env> {
       );
       const result = await this.processRun(runId);
       span.setAttribute("microsonya.status", result.disposition);
-      this.env.ANALYTICS.writeDataPoint({
-        indexes: [this.env.PROCESSOR_VERSION],
-        blobs: [
-          "summary.process",
-          result.disposition,
-          "configured-profile",
-          "",
-          "summarize-package",
-        ],
-        doubles: [Date.now() - startedAt],
+      const durationMs = Date.now() - startedAt;
+      const outcome =
+        result.disposition === "permanent-failure"
+          ? "failed_permanent"
+          : result.disposition;
+      recordTelemetryMetric(
+        this.env.ANALYTICS,
+        "processor",
+        "summary.process",
+        outcome,
+        durationMs,
+      );
+      logTelemetry("info", "processor", "summary.process.finish", {
+        runId,
+        disposition: result.disposition,
+        totalMs: durationMs,
       });
       return result;
     });
@@ -171,6 +179,7 @@ export class SummaryProcessorEntrypoint extends WorkerEntrypoint<Env> {
               ollama: deps.ollama,
               createSummaryId: () => attemptId,
               now: () => asTimestampMs(Date.now()),
+              telemetry: createProcessorTelemetry(this.env.ANALYTICS),
             });
             return tracing.enterSpan("summary.generate", (span) => {
               span.setAttribute("microsonya.run_id", runId);

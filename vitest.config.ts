@@ -7,7 +7,7 @@ export default defineConfig({
     // workspace script. Root tests stay in the Node environment.
     exclude: [
       ...configDefaults.exclude,
-      "apps/telegram/wma/**",
+      "apps/cloudflare/src/wma/**",
       "apps/cloudflare/**",
       "test/production-pipeline.integration.test.ts",
     ],

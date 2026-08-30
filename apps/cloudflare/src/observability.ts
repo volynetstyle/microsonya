@@ -1,6 +1,7 @@
 export type TelemetryComponent = "ingress" | "lifecycle" | "processor" | "wma";
 
 export type TelemetryOutcome =
+  | "created"
   | "completed"
   | "failed_permanent"
   | "malformed"
@@ -21,6 +22,13 @@ type LogFields = Readonly<{
   rows?: number;
   responseBytes?: number;
   cacheHit?: boolean;
+  messageCount?: number;
+  contextMessageCount?: number;
+  modelCalls?: number;
+  checkpointAdvanced?: boolean;
+  action?: string;
+  stage?: string;
+  errorCode?: string;
 }>;
 
 /**
@@ -53,17 +61,34 @@ export function recordTelemetryMetric(
   outcome: TelemetryOutcome,
   durationMs?: number,
 ): void {
+  recordAnalyticsPoint(analytics, {
+    component,
+    index: `${component}:${outcome}`,
+    blobs: [event, outcome],
+    doubles: durationMs === undefined ? [] : [durationMs],
+  });
+}
+
+export function recordAnalyticsPoint(
+  analytics: AnalyticsEngineDataset,
+  point: Readonly<{
+    component: TelemetryComponent;
+    index: string;
+    blobs: readonly string[];
+    doubles?: readonly number[];
+  }>,
+): void {
   try {
     analytics.writeDataPoint({
-      // Analytics Engine accepts at most one index. Combining these bounded
-      // dimensions keeps the existing query semantics without making
-      // observability capable of failing a business operation.
-      indexes: [`${component}:${outcome}`],
-      blobs: [event],
-      doubles: durationMs === undefined ? [] : [durationMs],
+      indexes: [point.index],
+      blobs: [...point.blobs],
+      doubles: [...(point.doubles ?? [])],
     });
   } catch (error) {
-    logTelemetry("warn", component, "telemetry.metric_write_failed", {
+    // Analytics Engine writes are non-blocking and auxiliary. A rejected
+    // point must never alter request, Queue, model, persistence, or delivery
+    // control flow.
+    logTelemetry("warn", point.component, "telemetry.metric_write_failed", {
       errorName: errorName(error),
     });
   }

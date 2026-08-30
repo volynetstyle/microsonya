@@ -64,6 +64,17 @@ export async function openTestDb(): Promise<DbClient> {
     CREATE INDEX idx_summary_runs_chat_range
       ON summary_runs (chat_id, from_message_id, to_message_id);
 
+    CREATE TABLE wma_chat_catalog (
+      chat_id TEXT PRIMARY KEY,
+      chat_id_ciphertext BYTEA NOT NULL,
+      summary_count INTEGER NOT NULL DEFAULT 0,
+      message_count INTEGER NOT NULL DEFAULT 0,
+      last_summary_at BIGINT,
+      updated_at BIGINT NOT NULL
+    );
+    CREATE INDEX idx_wma_chat_catalog_last_summary
+      ON wma_chat_catalog (last_summary_at);
+
     CREATE TABLE summary_run_lifecycle (
       id TEXT PRIMARY KEY,
       idempotency_key TEXT NOT NULL UNIQUE,

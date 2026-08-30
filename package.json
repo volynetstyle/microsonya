@@ -6,7 +6,6 @@
   "packageManager": "pnpm@10.12.1",
   "scripts": {
     "build": "pnpm -r build",
-    "bundle:bot": "pnpm --filter @microsonya/telegram-bot build",
     "db:generate": "pnpm --filter @microsonya/db generate",
     "db:migrate": "pnpm --filter @microsonya/db migrate",
     "db:staging:verify": "tsx scripts/staging/verify.ts",
@@ -26,8 +25,7 @@
     "format:check": "prettier --check .",
     "format:json": "prettier --write \"**/*.{json,jsonc}\"",
     "format:json:check": "prettier --check \"**/*.{json,jsonc}\"",
-    "start": "pnpm bot:start",
-    "bot:start": "pnpm --filter @microsonya/telegram-bot start",
+    "start": "pnpm --filter @microsonya/cloudflare dev",
     "test": "vitest run",
     "test:pipeline": "cross-env MICROSONYA_PIPELINE_INTEGRATION=1 vitest run --config vitest.pipeline.config.ts",
     "test:pipeline:staging": "tsx scripts/run-staging-pipeline.ts",

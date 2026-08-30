@@ -23,7 +23,7 @@
     ],
   },
   "triggers": {
-    "crons": ["*/1 * * * *"],
+    "crons": ["*/5 * * * *"],
   },
   "analytics_engine_datasets": [
     {

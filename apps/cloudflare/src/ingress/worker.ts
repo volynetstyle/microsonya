@@ -13,6 +13,7 @@ import {
 } from "@microsonya/telegram";
 import { tracing } from "cloudflare:workers";
 import { handleSummaryQueue } from "./queue.js";
+import { logTelemetry, recordTelemetryMetric } from "../observability.js";
 
 const TELEGRAM_WEBHOOK_PATH = "/telegram";
 type CloudflareEnv = Omit<Env, "SUMMARY_JOBS"> & {
@@ -55,6 +56,7 @@ async function handleTelegramIngress(
   env: CloudflareEnv,
   span: Span,
 ): Promise<Response> {
+  const startedAt = Date.now();
   const url = new URL(request.url);
   if (url.pathname !== TELEGRAM_WEBHOOK_PATH) {
     return new Response("Not found", { status: 404 });
@@ -69,29 +71,17 @@ async function handleTelegramIngress(
     return new Response("Unauthorized", { status: 401 });
   }
 
-  console.info("telegram.ingress.parse.start");
   const update: unknown = await request.json();
-  console.info("telegram.ingress.parse.done");
   const chatMessage = parseTelegramChatMessageUpdate(update);
   if (chatMessage !== undefined) {
-    console.info("telegram.message.persist.start", {
-      messageId: chatMessage.id,
-    });
     await tracing.enterSpan("telegram.message.persist", (persistSpan) => {
-      persistSpan.setAttribute("microsonya.chat_id", chatMessage.chatId);
-      persistSpan.setAttribute("microsonya.message_id", chatMessage.id);
+      persistSpan.setAttribute("microsonya.message_kind", "chat_message");
       return withMessages(env, (repo) => repo.save(chatMessage));
-    });
-    console.info("telegram.message.persist.done", {
-      messageId: chatMessage.id,
     });
   }
 
   const command = parseSummaryCommandUpdate(update, env.BOT_USERNAME);
   if (command === undefined) return new Response("OK");
-  console.info("summary_run.create.start", {
-    commandMessageId: command.commandMessageId,
-  });
   span.setAttribute("microsonya.command_mode", command.mode);
 
   const createRequest: CreateSummaryRunRequest = {
@@ -102,13 +92,22 @@ async function handleTelegramIngress(
     createSpan.setAttribute("microsonya.command_mode", command.mode);
     return env.SUMMARY_RUNS.create(createRequest);
   });
-  console.info("summary_run.create.done", { runId: run.runId });
   span.setAttribute("microsonya.run_id", run.runId);
   await env.SUMMARY_JOBS.send({ runId: run.runId } satisfies SummaryJob);
-  console.info("summary_run.enqueue.done", { runId: run.runId });
   await env.SUMMARY_RUNS.markQueued(run.runId);
-  console.info("summary_run.queued.done", { runId: run.runId });
-  recordRunSignal(env, run.runId, "created");
+  const durationMs = Date.now() - startedAt;
+  logTelemetry("info", "ingress", "summary.run.accepted", {
+    runId: run.runId,
+    disposition: "created",
+    totalMs: durationMs,
+  });
+  recordTelemetryMetric(
+    env.ANALYTICS,
+    "ingress",
+    "summary.run.accepted",
+    "created",
+    durationMs,
+  );
 
   // Telegram is acknowledged only after the durable run exists and Queue
   // has accepted the job. Repeated updates resolve to the same logical run.
@@ -120,16 +119,4 @@ function hasTelegramWebhookSecret(request: Request, expected: string): boolean {
     expected.length > 0 &&
     request.headers.get("X-Telegram-Bot-Api-Secret-Token") === expected
   );
-}
-
-function recordRunSignal(
-  env: Pick<CloudflareEnv, "ANALYTICS">,
-  runId: string,
-  signal: "created",
-): void {
-  env.ANALYTICS.writeDataPoint({
-    indexes: [runId],
-    blobs: [signal],
-    doubles: [Date.now()],
-  });
 }
