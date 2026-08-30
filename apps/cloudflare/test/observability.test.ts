@@ -35,10 +35,32 @@ describe("Worker observability contract", () => {
     );
 
     expect(writeDataPoint).toHaveBeenCalledWith({
-      indexes: ["ingress", "completed"],
+      indexes: ["ingress:completed"],
       blobs: ["summary.queue"],
       doubles: [42],
     });
+  });
+
+  it("keeps telemetry failures from escaping into business logic", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const writeDataPoint = vi.fn(() => {
+      throw new TypeError("Analytics Engine unavailable");
+    });
+
+    expect(() =>
+      recordTelemetryMetric(
+        { writeDataPoint } as unknown as AnalyticsEngineDataset,
+        "ingress",
+        "summary.queue",
+        "completed",
+      ),
+    ).not.toThrow();
+    expect(JSON.parse(String(warn.mock.calls[0]?.[0]))).toEqual({
+      component: "ingress",
+      event: "telemetry.metric_write_failed",
+      errorName: "TypeError",
+    });
+    warn.mockRestore();
   });
 
   it("reduces failures to their safe error name", () => {

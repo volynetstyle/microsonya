@@ -53,11 +53,20 @@ export function recordTelemetryMetric(
   outcome: TelemetryOutcome,
   durationMs?: number,
 ): void {
-  analytics.writeDataPoint({
-    indexes: [component, outcome],
-    blobs: [event],
-    doubles: durationMs === undefined ? [] : [durationMs],
-  });
+  try {
+    analytics.writeDataPoint({
+      // Analytics Engine accepts at most one index. Combining these bounded
+      // dimensions keeps the existing query semantics without making
+      // observability capable of failing a business operation.
+      indexes: [`${component}:${outcome}`],
+      blobs: [event],
+      doubles: durationMs === undefined ? [] : [durationMs],
+    });
+  } catch (error) {
+    logTelemetry("warn", component, "telemetry.metric_write_failed", {
+      errorName: errorName(error),
+    });
+  }
 }
 
 export function errorName(error: unknown): string {

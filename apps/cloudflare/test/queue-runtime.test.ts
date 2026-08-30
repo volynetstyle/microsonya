@@ -25,12 +25,13 @@ function message(id: string): ServiceBindingQueueMessage<SummaryJob> {
 
 function environment(
   process: (runId: string) => Promise<ProcessorResult>,
+  writeDataPoint: ReturnType<typeof vi.fn> = vi.fn(),
 ): Pick<Env, "SUMMARY_PROCESSOR" | "SUMMARY_JOBS" | "ANALYTICS"> {
   const send = vi.fn(async () => undefined);
   return {
     SUMMARY_PROCESSOR: { process } as Env["SUMMARY_PROCESSOR"],
     SUMMARY_JOBS: { send } as unknown as Queue<SummaryJob>,
-    ANALYTICS: { writeDataPoint: vi.fn() } as unknown as AnalyticsEngineDataset,
+    ANALYTICS: { writeDataPoint } as unknown as AnalyticsEngineDataset,
   };
 }
 
@@ -86,5 +87,25 @@ describe("summary Queue protocol in Workers runtime", () => {
 
     expect(result.explicitAcks).toContain("success");
     expect(result.retryMessages).toContainEqual({ msgId: "throws" });
+  });
+
+  it("ACKs completed work even when Analytics Engine rejects a metric", async () => {
+    const batch = createMessageBatch("summary-jobs", [message("completed")]);
+    const ctx = createExecutionContext();
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const env = environment(
+      async () => ({ disposition: "completed" }),
+      vi.fn(() => {
+        throw new TypeError("writeDataPoint failed");
+      }),
+    );
+
+    await expect(handleSummaryQueue(batch, env)).resolves.toBeUndefined();
+    const result = await getQueueResult(batch, ctx);
+
+    expect(result.explicitAcks).toContain("completed");
+    expect(result.retryMessages).toEqual([]);
+    expect(warn).toHaveBeenCalledOnce();
+    warn.mockRestore();
   });
 });
