@@ -1,0 +1,20 @@
+{
+  "$schema": "../../../node_modules/wrangler/config-schema.json",
+  "name": "microsonya-wma",
+  "main": "../../src/wma-api/worker.ts",
+  "compatibility_date": "2026-08-30",
+  "compatibility_flags": ["nodejs_compat"],
+  "workers_dev": true,
+  "assets": {
+    "directory": "../../src/wma/dist/client",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"]
+  },
+  "hyperdrive": [{
+    "binding": "HYPERDRIVE",
+    "id": "00000000-0000-0000-0000-000000000000",
+    "localConnectionString": "postgresql://microsonya:microsonya@localhost:5432/microsonya"
+  }],
+  "secrets": { "required": ["TELEGRAM_BOT_TOKEN", "MICROSONYA_DATA_ENCRYPTION_KEY"] }
+}

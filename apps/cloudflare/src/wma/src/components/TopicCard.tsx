@@ -1,9 +1,9 @@
-import type { Topic } from "../mock/chat";
+import type { WmaTopic } from "../api/contracts";
 import * as Accordion from "../shared/accordion";
 import MomentItem from "./MomentItem";
 import "./TopicCard.css";
 
-export default function TopicCard(props: { topic: Topic }) {
+export default function TopicCard(props: { topic: WmaTopic }) {
   return (
     <Accordion.Item value={props.topic.id} class="accordion-item topic-card">
       <Accordion.Trigger class="topic-trigger">

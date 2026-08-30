@@ -36,11 +36,24 @@
   transition: transform var(--motion-duration-fast) ease;
 }
 
-.topic-card[open] .topic-chevron { transform: rotate(90deg); }
+.topic-card[open] .topic-chevron {
+  transform: rotate(90deg);
+}
 
-.topic-heading { display: flex; flex-direction: column; gap: 0.15rem; min-width: 0; }
-.topic-title { font-weight: 500; font-size: 1rem; }
-.topic-meta { color: var(--text-hint); font-size: 0.8rem; }
+.topic-heading {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+.topic-title {
+  font-weight: 500;
+  font-size: 1rem;
+}
+.topic-meta {
+  color: var(--text-hint);
+  font-size: 0.8rem;
+}
 
 .topic-summary {
   display: block;
@@ -57,21 +70,71 @@
 }
 
 @supports (interpolate-size: allow-keywords) {
-  .topic-trigger { interpolate-size: allow-keywords; }
+  .topic-trigger {
+    interpolate-size: allow-keywords;
+  }
   .topic-summary {
-    height: auto; overflow: clip; opacity: 1;
-    transition: height var(--accordion-duration) var(--accordion-easing), opacity var(--accordion-opacity-in-duration) linear, border-color var(--accordion-opacity-in-duration) linear;
+    height: auto;
+    overflow: clip;
+    opacity: 1;
+    transition:
+      height var(--accordion-duration) var(--accordion-easing),
+      opacity var(--accordion-opacity-in-duration) linear,
+      border-color var(--accordion-opacity-in-duration) linear;
   }
   .topic-card[open] .topic-summary {
-    height: 0; opacity: 0; border-color: transparent; pointer-events: none;
-    transition: height var(--accordion-duration) var(--accordion-easing), opacity var(--accordion-opacity-out-duration) linear, border-color var(--accordion-opacity-out-duration) linear;
+    height: 0;
+    opacity: 0;
+    border-color: transparent;
+    pointer-events: none;
+    transition:
+      height var(--accordion-duration) var(--accordion-easing),
+      opacity var(--accordion-opacity-out-duration) linear,
+      border-color var(--accordion-opacity-out-duration) linear;
   }
 }
 
-.topic-preview { display: block; margin: 0 0 0.5rem; color: var(--text-hint); font-size: 0.9rem; line-height: 1.5; }
-.topic-key-points { color: var(--accent); font-size: 0.85rem; font-weight: 500; }
+.topic-preview {
+  display: block;
+  margin: 0 0 0.5rem;
+  color: var(--text-hint);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+.topic-key-points {
+  color: var(--accent);
+  font-size: 0.85rem;
+  font-weight: 500;
+}
 
 .moment-list {
-  list-style: none; margin: 0; padding: var(--accordion-padding-y) var(--accordion-padding-x);
-  border-top: 1px solid var(--separator); display: flex; flex-direction: column; gap: 0.9rem;
+  list-style: none;
+  margin: 0;
+  padding: var(--accordion-padding-y) var(--accordion-padding-x);
+  border-top: 1px solid var(--separator);
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+/* Telegram-like preview rail: swipe horizontally through source messages. */
+.moment-list {
+  flex-direction: row;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scroll-snap-type: inline mandatory;
+  scrollbar-width: none;
+  gap: 0.625rem;
+  padding-inline: var(--accordion-padding-x);
+}
+.moment-list::-webkit-scrollbar {
+  display: none;
+}
+.moment-list .moment {
+  flex: 0 0 min(84%, 21rem);
+  scroll-snap-align: start;
+  padding: 0.75rem;
+  border: 0;
+  border-radius: 0.75rem;
+  background: var(--surface-secondary);
 }

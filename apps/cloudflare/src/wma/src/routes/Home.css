@@ -67,3 +67,16 @@
   flex-direction: column;
   gap: 0;
 }
+
+.empty-state {
+  margin: 0;
+  padding: 2rem var(--spacing-screen);
+  color: var(--text-hint);
+  font-size: 0.9375rem;
+  text-align: center;
+}
+
+.chat-list { padding: 0.5rem 0; }
+.chat-row { display: flex; inline-size: 100%; justify-content: space-between; gap: 1rem; padding: 1rem var(--spacing-screen); border: 0; border-bottom: 1px solid var(--separator); background: var(--surface-primary); color: var(--text-primary); font: inherit; text-align: start; }
+.chat-row small { color: var(--text-hint); white-space: nowrap; }
+.back-button { border: 0; background: transparent; color: var(--accent); font: inherit; font-size: 2rem; line-height: 1; }

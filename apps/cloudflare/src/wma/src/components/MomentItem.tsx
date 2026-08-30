@@ -1,10 +1,10 @@
 import { createSignal, onCleanup } from "solid-js";
-import type { Moment } from "../mock/chat";
+import type { WmaMoment } from "../api/contracts";
 import "./MomentItem.css";
 
 const QUOTE_PREVIEW_LENGTH = 60;
 
-export default function MomentItem(props: { moment: Moment }) {
+export default function MomentItem(props: { moment: WmaMoment }) {
   const quoteMoment = props.moment.type === "quote" ? props.moment : undefined;
 
   return (
@@ -19,7 +19,7 @@ export default function MomentItem(props: { moment: Moment }) {
   );
 }
 
-function QuoteCard(props: { moment: Extract<Moment, { type: "quote" }> }) {
+function QuoteCard(props: { moment: Extract<WmaMoment, { type: "quote" }> }) {
   const isLong = props.moment.quote.length > QUOTE_PREVIEW_LENGTH;
   const [expanded, setExpanded] = createSignal(false);
   let body: HTMLDivElement | undefined;
@@ -118,7 +118,7 @@ function finishHeightAnimation(element: HTMLElement): void {
 }
 
 function QuoteText(props: {
-  moment: Extract<Moment, { type: "quote" }>;
+  moment: Extract<WmaMoment, { type: "quote" }>;
   quote: string;
 }) {
   return (

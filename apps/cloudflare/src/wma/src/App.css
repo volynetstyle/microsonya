@@ -105,6 +105,11 @@
   --motion-duration-standard: 0ms;
 }
 
+[data-device-performance="low"] {
+  --motion-duration-fast: 0ms;
+  --motion-duration-standard: 0ms;
+}
+
 @media (prefers-reduced-motion: reduce) {
   :root {
     --motion-duration-fast: 0ms;

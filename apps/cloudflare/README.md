@@ -14,6 +14,23 @@ Telegram webhook
   -> SUMMARY_PROCESSOR.process(runId)
 ```
 
+## Telegram Mini App hosting
+
+`microsonya-wma` is a CSR Solid app hosted as Cloudflare Workers Static Assets.
+Static navigations are served from the CDN; only `/api/wma/*` invokes the BFF
+Worker. The browser never reaches the lifecycle, processor, Queue, or database
+topology directly.
+
+```sh
+pnpm --filter @microsonya/cloudflare deploy:staging:wma
+pnpm --filter @microsonya/cloudflare deploy:wma
+```
+
+Before the first deploy, configure `TELEGRAM_BOT_TOKEN` and the existing
+`MICROSONYA_DATA_ENCRYPTION_KEY` as Worker secrets for each environment. Attach
+the published Worker custom domain, then configure that HTTPS URL in BotFather
+as the Mini App URL.
+
 Microsonya-owned portable request/result types live in
 `@microsonya/contracts`. Telegram command parsing lives in
 `@microsonya/telegram` and consumes Bot API types from `@telegraf/types`.
