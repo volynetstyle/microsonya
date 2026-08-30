@@ -3,7 +3,6 @@ import { OllamaError, type OllamaClient } from "@microsonya/model";
 import {
   asSummaryId,
   asTimestampMs,
-  createConversationWindow,
   type ChatId,
   type ChatMessage,
   type ConversationWindow,
@@ -24,7 +23,6 @@ import {
   createConversationSummarizer,
   type ConversationSummarizer,
 } from "./conversationSummarizer.js";
-import { DAY_MS, MAX_MESSAGES } from "./constants.js";
 import { processWindow, type FastClassifier } from "./orchestrator.js";
 import type {
   SummarizationTelemetryService,
@@ -36,6 +34,12 @@ import {
   CHECKPOINT_POLICY_VERSION,
   shouldAdvanceCheckpoint,
 } from "./checkpointPolicy.js";
+import {
+  pendingSummaryWindowSelector,
+  type SelectedConversation,
+  type SummaryWindowSelector,
+  type WindowMessage,
+} from "./summaryWindow.js";
 
 export interface MessageReader {
   listByChat(chatId: ChatId): Promise<readonly ChatMessage[]>;
@@ -65,19 +69,14 @@ export interface SummarizerDeps {
   readonly telemetry?: SummarizationTelemetryService;
   readonly createSummaryId?: () => SummaryId;
   readonly now?: () => TimestampMs;
+  /** Optional policy hook; the default implements the v0.1 pending window. */
+  readonly windowSelector?: SummaryWindowSelector;
 }
-
-export interface WindowMessage {
-  readonly message: ChatMessage;
-  readonly role: "eligible" | "context";
-}
-
-export interface SelectedConversation {
-  readonly window: ConversationWindow;
-  readonly messages: readonly WindowMessage[];
-  readonly eligibleMessages: readonly ChatMessage[];
-  readonly contextMessages: readonly ChatMessage[];
-}
+export type {
+  SelectedConversation,
+  SummaryWindowSelector,
+  WindowMessage,
+} from "./summaryWindow.js";
 
 const EMPTY_MODEL_METRICS = Object.freeze({
   modelCalls: 0,
@@ -182,7 +181,11 @@ async function run(
     stage = "messages.select";
 
     checkpointBefore = previous?.covers.lastId ?? null;
-    selected = selectConversationWindow(all, command, previous?.covers.lastId);
+    selected = (deps.windowSelector ?? pendingSummaryWindowSelector).select({
+      messages: all,
+      command,
+      checkpointBefore: previous?.covers.lastId,
+    });
     messageCount = selected?.eligibleMessages.length ?? 0;
     contextMessageCount = selected?.contextMessages.length ?? 0;
 
@@ -219,6 +222,7 @@ async function run(
         createSummaryId: deps.createSummaryId,
         now: deps.now,
         telemetry,
+        roles: selected.messages,
       },
       signal,
     );
@@ -242,6 +246,7 @@ async function run(
 
     if (
       disposition.kind !== "deferred" &&
+      selected.consumption === "checkpoint" &&
       shouldAdvanceCheckpoint(result.decision.action)
     ) {
       stage = "disposition.save";
@@ -477,84 +482,6 @@ function sha256(value: string): string {
   return createHash("sha256").update(value, "utf8").digest("hex");
 }
 
-export function selectMessages(
-  all: readonly ChatMessage[],
-  command: SummaryCommand,
-  lastId?: MessageId,
-): ChatMessage[] {
-  const since =
-    command.mode === "today"
-      ? new Date(command.date).setHours(0, 0, 0, 0)
-      : command.date - DAY_MS;
-  const eligible: ChatMessage[] = [];
-
-  for (const message of all) {
-    if (
-      message.id === command.commandMessageId ||
-      (lastId !== undefined && message.id <= lastId) ||
-      message.text.trim().length === 0 ||
-      (command.mode !== "count" && message.time < since)
-    ) {
-      continue;
-    }
-    eligible.push(message);
-  }
-  eligible.sort(compareChronologically);
-
-  const limit =
-    command.mode === "count" ? Math.max(1, command.count ?? 100) : MAX_MESSAGES;
-  return eligible.length > limit ? eligible.slice(-limit) : eligible;
-}
-
-export function selectConversationWindow(
-  all: readonly ChatMessage[],
-  command: SummaryCommand,
-  lastId?: MessageId,
-): SelectedConversation | null {
-  const eligibleMessages = selectMessages(all, command, lastId);
-  if (eligibleMessages.length === 0) return null;
-
-  // A reply may cross the checkpoint. Include its direct parent as read-only
-  // context even though the parent itself was covered by an earlier run.
-  const selectedIds = new Set<MessageId>();
-  for (const message of eligibleMessages) selectedIds.add(message.id);
-  const neededParentIds = new Set<MessageId>();
-  for (const { parentId } of eligibleMessages) {
-    if (parentId !== null && !selectedIds.has(parentId)) {
-      neededParentIds.add(parentId);
-    }
-  }
-  const contextMessages: ChatMessage[] = [];
-  if (neededParentIds.size > 0) {
-    for (const message of all) {
-      if (!neededParentIds.has(message.id)) continue;
-      contextMessages.push(message);
-      if (contextMessages.length === neededParentIds.size) break;
-    }
-    contextMessages.sort(compareChronologically);
-  }
-  const withReplyContext =
-    contextMessages.length === 0
-      ? eligibleMessages
-      : [...contextMessages, ...eligibleMessages].sort(compareChronologically);
-  const windowMessages = new Array<WindowMessage>(withReplyContext.length);
-  for (let index = 0; index < withReplyContext.length; index += 1) {
-    const message = withReplyContext[index]!;
-    windowMessages[index] = Object.freeze({
-      message,
-      role: neededParentIds.has(message.id)
-        ? ("context" as const)
-        : ("eligible" as const),
-    });
-  }
-  return Object.freeze({
-    window: createConversationWindow(withReplyContext),
-    messages: Object.freeze(windowMessages),
-    eligibleMessages: Object.freeze(eligibleMessages),
-    contextMessages: Object.freeze(contextMessages),
-  });
-}
-
 export function presentDisposition(disposition: WindowDisposition): string {
   switch (disposition.kind) {
     case "summarized":
@@ -654,10 +581,6 @@ function sameCoverage(
     left.lastId === right.lastId &&
     left.count === right.count
   );
-}
-
-function compareChronologically(left: ChatMessage, right: ChatMessage): number {
-  return left.time - right.time || left.id - right.id;
 }
 
 function requireOllama(deps: SummarizerDeps): Pick<OllamaClient, "chat"> {

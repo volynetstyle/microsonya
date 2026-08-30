@@ -306,6 +306,30 @@ describe("summarizer 0.1 workflow", () => {
     expect(chat).not.toHaveBeenCalled();
   });
 
+  it("does not save a canonical checkpoint for a read-only count window", async () => {
+    const saveRun = vi.fn(async () => undefined);
+    const previous = previousRun(1);
+    const summarizer = createSummarizer({
+      messages: {
+        listByChat: async () => [
+          message(2, "old history"),
+          message(3, "new history"),
+        ],
+      },
+      summaries: { findLastRun: async () => previous, saveRun },
+      classifier: {
+        classify: async () => ({
+          action: "SKIP_NO_VALUE",
+          evidence: { source: "model", model: "test" },
+        }),
+      },
+      conversationSummarizer: { summarize: vi.fn() },
+    });
+
+    await summarizer.process({ ...command(), mode: "count", count: 2 });
+    expect(saveRun).not.toHaveBeenCalled();
+  });
+
   it("attributes an invalid classifier contract to classifier.output", async () => {
     const events: SummarizationTelemetryEvent[] = [];
     const saveRun = vi.fn();

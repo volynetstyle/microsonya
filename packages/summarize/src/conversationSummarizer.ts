@@ -2,6 +2,7 @@ import { SUMMARIZER_PROFILE, type OllamaClient } from "@microsonya/model";
 import type { ConversationWindow, Summary } from "@microsonya/shared";
 import { outputSchema, SUMMARY_INSTRUCTIONS } from "./constants.js";
 import { buildModelPrompt } from "./prompt.js";
+import type { ModelWindowMessageRole } from "./prompt.js";
 import { parseModelOutput } from "./modelOutput.js";
 import type { SummarizationTelemetryTrace } from "./telemetry.js";
 
@@ -10,6 +11,7 @@ export interface ConversationSummarizer {
     window: ConversationWindow,
     signal?: AbortSignal,
     telemetry?: SummarizationTelemetryTrace,
+    roles?: readonly ModelWindowMessageRole[],
   ): Promise<Summary>;
 }
 
@@ -21,9 +23,9 @@ export function createConversationSummarizer({
   ollama,
 }: ConversationSummarizerDeps): ConversationSummarizer {
   return {
-    summarize: async (window, signal, telemetry) => {
+    summarize: async (window, signal, telemetry, roles) => {
       signal?.throwIfAborted();
-      const prompt = buildSummaryPrompt(window);
+      const prompt = buildSummaryPrompt(window, roles);
       telemetry?.record({
         type: "model.request",
         stage: "summarizer",
@@ -82,6 +84,14 @@ export function createConversationSummarizer({
   };
 }
 
-export function buildSummaryPrompt(window: ConversationWindow): string {
-  return buildModelPrompt("SUMMARY_POLICY", SUMMARY_INSTRUCTIONS, window);
+export function buildSummaryPrompt(
+  window: ConversationWindow,
+  roles?: readonly ModelWindowMessageRole[],
+): string {
+  return buildModelPrompt(
+    "SUMMARY_POLICY",
+    SUMMARY_INSTRUCTIONS,
+    window,
+    roles,
+  );
 }

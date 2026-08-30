@@ -10,6 +10,7 @@ import {
 } from "@microsonya/shared";
 import type { SummaryDecisionClassifier } from "./classifier.js";
 import type { ConversationSummarizer } from "./conversationSummarizer.js";
+import type { ModelWindowMessageRole } from "./prompt.js";
 import type { SummarizationTelemetryTrace } from "./telemetry.js";
 import { analyzeStructure, type StructuralAnalysis } from "./views.js";
 
@@ -42,6 +43,7 @@ export interface WindowProcessorDeps {
   readonly createSummaryId?: () => SummaryId;
   readonly now?: () => TimestampMs;
   readonly telemetry?: SummarizationTelemetryTrace;
+  readonly roles?: readonly ModelWindowMessageRole[];
 }
 
 export interface WindowProcessingResult {
@@ -55,6 +57,7 @@ export async function decideWindow(
   signal?: AbortSignal,
   fastClassifier: FastClassifier = abstainingFastClassifier,
   telemetry?: SummarizationTelemetryTrace,
+  roles?: readonly ModelWindowMessageRole[],
 ): Promise<SummaryDecision> {
   signal?.throwIfAborted();
   const analysis = analyzeStructure(window);
@@ -78,7 +81,7 @@ export async function decideWindow(
     });
   }
 
-  return classifier.classify(window, signal, telemetry);
+  return classifier.classify(window, signal, telemetry, roles);
 }
 
 export async function processWindow(
@@ -93,6 +96,7 @@ export async function processWindow(
     signal,
     deps.fastClassifier,
     deps.telemetry,
+    deps.roles,
   );
   signal?.throwIfAborted();
   deps.telemetry?.record({
@@ -109,6 +113,7 @@ export async function processWindow(
       window,
       signal,
       deps.telemetry,
+      deps.roles,
     );
     signal?.throwIfAborted();
     const messages = window.messages;

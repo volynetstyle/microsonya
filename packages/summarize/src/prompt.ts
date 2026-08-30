@@ -1,5 +1,10 @@
 import type { AuthorId, ConversationWindow } from "@microsonya/shared";
 
+export interface ModelWindowMessageRole {
+  readonly message: { readonly id: number };
+  readonly role: "eligible" | "context";
+}
+
 export const PIPE_SEPARATOR = "|";
 
 /** The sole ordered PIPECHAT schema. The guide and encoder derive from it. */
@@ -29,6 +34,8 @@ export const PIPE_GUIDE = [
   "",
   "Parent structure provides conversational context but does not by itself prove",
   "causality, agreement, contradiction, or any other semantic relation.",
+  "When INPUT_ROLES is present, context-only messages resolve references only.",
+  "Do not treat context-only messages as new events to classify or summarize.",
 ].join("\n");
 
 export type ModelPolicySection = "CLASSIFICATION_POLICY" | "SUMMARY_POLICY";
@@ -41,8 +48,17 @@ export function buildModelPrompt(
   policySection: ModelPolicySection,
   policy: string,
   window: ConversationWindow,
+  roles?: readonly ModelWindowMessageRole[],
 ): string {
-  return `${policySection}_BEGIN\n${policy}\n${policySection}_END\n\nTRANSCRIPT_FORMAT_BEGIN\n${PIPE_GUIDE}\nTRANSCRIPT_FORMAT_END\n\nTRANSCRIPT_BEGIN\n${encodePipeWindow(window)}\nTRANSCRIPT_END`;
+  const roleSection =
+    roles === undefined
+      ? ""
+      : `\n\nINPUT_ROLES_BEGIN\n${encodeInputRoles(roles)}\nINPUT_ROLES_END`;
+  return `${policySection}_BEGIN\n${policy}\n${policySection}_END\n\nTRANSCRIPT_FORMAT_BEGIN\n${PIPE_GUIDE}\nTRANSCRIPT_FORMAT_END${roleSection}\n\nTRANSCRIPT_BEGIN\n${encodePipeWindow(window)}\nTRANSCRIPT_END`;
+}
+
+function encodeInputRoles(roles: readonly ModelWindowMessageRole[]): string {
+  return roles.map(({ message, role }) => `#${message.id}|${role}`).join("\n");
 }
 
 /**

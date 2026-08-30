@@ -8,6 +8,7 @@ import { z } from "zod";
 import { buildModelPrompt } from "./prompt.js";
 import { ModelOutputError, parseModelOutput } from "./modelOutput.js";
 import { COMPACTION_DECISION_INSTRUCTIONS } from "./predicateV3.js";
+import type { ModelWindowMessageRole } from "./prompt.js";
 import type { SummarizationTelemetryTrace } from "./telemetry.js";
 
 /**
@@ -43,6 +44,7 @@ export interface SummaryDecisionClassifier {
     window: ConversationWindow,
     signal?: AbortSignal,
     telemetry?: SummarizationTelemetryTrace,
+    roles?: readonly ModelWindowMessageRole[],
   ): Promise<SummaryDecision>;
 }
 
@@ -54,9 +56,9 @@ export function createClassifier(
   deps: ClassifierDeps,
 ): SummaryDecisionClassifier {
   return {
-    classify: async (window, signal, telemetry) => {
+    classify: async (window, signal, telemetry, roles) => {
       signal?.throwIfAborted();
-      const prompt = buildClassifierPrompt(window);
+      const prompt = buildClassifierPrompt(window, roles);
       for (let attempt = 1; attempt <= 2; attempt += 1) {
         const numPredict =
           CLASSIFIER_PROFILE.options.num_predict * (attempt === 1 ? 1 : 2);
@@ -172,11 +174,15 @@ export function decideFromPredicates(
   return "SUMMARIZE";
 }
 
-export function buildClassifierPrompt(window: ConversationWindow): string {
+export function buildClassifierPrompt(
+  window: ConversationWindow,
+  roles?: readonly ModelWindowMessageRole[],
+): string {
   return buildModelPrompt(
     "CLASSIFICATION_POLICY",
     COMPACTION_DECISION_INSTRUCTIONS,
     window,
+    roles,
   );
 }
 

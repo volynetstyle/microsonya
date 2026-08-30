@@ -8,9 +8,12 @@ import {
   type SummaryCommand,
 } from "../packages/shared/src/index.js";
 import {
+  pendingSummaryWindowSelector,
   selectConversationWindow,
   selectMessages,
 } from "../packages/summarize/src/index.js";
+import { MAX_MESSAGES } from "../packages/summarize/src/constants.js";
+import { buildModelPrompt } from "../packages/summarize/src/prompt.js";
 
 const command: SummaryCommand = {
   chatId: asChatId("chat"),
@@ -51,27 +54,43 @@ describe("summary conversation-window selection", () => {
     ).toEqual([5, 9]);
   });
 
-  it("applies the time boundary and returns one validated canonical window", () => {
+  it("applies the time boundary and command upper boundary", () => {
     const window = selectConversationWindow(
       [
-        message(11, {
+        message(7, {
           time: asTimestampMs(command.date - 86_400_001),
         }),
-        message(12, {
+        message(8, {
           time: asTimestampMs(command.date - 86_400_000),
         }),
-        message(13, { time: asTimestampMs(command.date + 1) }),
+        message(9, { time: asTimestampMs(command.date + 1) }),
+        message(11, { time: asTimestampMs(command.date - 1_000) }),
       ],
       command,
     );
 
-    expect(window?.window.messages.map((item) => item.id)).toEqual([12, 13]);
+    expect(window?.window.messages.map((item) => item.id)).toEqual([8, 9]);
     expect(window?.messages.map(({ role }) => role)).toEqual([
       "eligible",
       "eligible",
     ]);
     expect(Object.isFrozen(window)).toBe(true);
     expect(Object.isFrozen(window?.messages)).toBe(true);
+  });
+
+  it("is deterministic when a retry observes messages added after its command", () => {
+    const beforeRetry = pendingSummaryWindowSelector.select({
+      messages: [message(7), message(8), message(9)],
+      command,
+    })!;
+    const retry = pendingSummaryWindowSelector.select({
+      messages: [message(7), message(8), message(9), message(11), message(12)],
+      command,
+    })!;
+
+    expect(retry.eligibleMessages.map(({ id }) => id)).toEqual(
+      beforeRetry.eligibleMessages.map(({ id }) => id),
+    );
   });
 
   it("marks a parent behind the cursor as context rather than eligible content", () => {
@@ -101,5 +120,60 @@ describe("summary conversation-window selection", () => {
         { ...command, commandMessageId: asMessageId(99) },
       ),
     ).toThrow(/different chat/i);
+  });
+
+  it("takes the earliest contiguous canonical chunk instead of skipping to a tail", () => {
+    const messages = Array.from({ length: MAX_MESSAGES + 2 }, (_, index) =>
+      message(101 + index, { time: asTimestampMs(command.date - 1_000) }),
+    );
+    const selected = pendingSummaryWindowSelector.select({
+      messages,
+      command: { ...command, commandMessageId: asMessageId(10_000) },
+      checkpointBefore: asMessageId(100),
+    })!;
+
+    expect(selected.consumption).toBe("checkpoint");
+    expect(selected.eligibleMessages).toHaveLength(MAX_MESSAGES);
+    expect(selected.eligibleMessages[0]?.id).toBe(101);
+    expect(selected.checkpointCandidate).toBe(100 + MAX_MESSAGES);
+  });
+
+  it("treats an explicit count as a read-only history selection", () => {
+    const selected = pendingSummaryWindowSelector.select({
+      messages: [message(101), message(102), message(103), message(104)],
+      command: {
+        ...command,
+        commandMessageId: asMessageId(105),
+        mode: "count",
+        count: 2,
+      },
+      checkpointBefore: asMessageId(100),
+    })!;
+
+    expect(selected.eligibleMessages.map(({ id }) => id)).toEqual([103, 104]);
+    expect(selected.consumption).toBe("read-only");
+    expect(selected.checkpointCandidate).toBe(100);
+  });
+
+  it("marks reply parents as context-only in model input", () => {
+    const selected = selectConversationWindow(
+      [
+        message(4, { text: "parent" }),
+        message(9, { parentId: asMessageId(4), text: "reply" }),
+      ],
+      command,
+      asMessageId(4),
+    )!;
+    const prompt = buildModelPrompt(
+      "SUMMARY_POLICY",
+      "policy",
+      selected.window,
+      selected.messages,
+    );
+
+    expect(prompt).toContain("INPUT_ROLES_BEGIN\n#4|context\n#9|eligible");
+    expect(prompt).toContain(
+      "Do not treat context-only messages as new events",
+    );
   });
 });
