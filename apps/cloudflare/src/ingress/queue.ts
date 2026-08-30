@@ -1,5 +1,10 @@
 import type { SummaryJob } from "@microsonya/contracts";
 import { tracing } from "cloudflare:workers";
+import {
+  errorName,
+  logTelemetry,
+  recordTelemetryMetric,
+} from "../observability.js";
 
 type QueueEnv = Pick<Env, "SUMMARY_PROCESSOR" | "SUMMARY_JOBS" | "ANALYTICS">;
 
@@ -10,8 +15,10 @@ export async function handleSummaryQueue(
   for (const message of batch.messages) {
     const body: unknown = message.body;
     if (!isSummaryJob(body)) {
-      console.error("summary.queue.malformed_job", { messageId: message.id });
-      recordQueueSignal(env, message.id, "malformed");
+      logTelemetry("error", "ingress", "summary.queue.malformed_job", {
+        messageId: message.id,
+      });
+      recordQueueSignal(env, "summary.queue", "malformed");
       message.ack();
       continue;
     }
@@ -19,7 +26,7 @@ export async function handleSummaryQueue(
       span.setAttribute("microsonya.run_id", body.runId);
       try {
         const result = await env.SUMMARY_PROCESSOR.process(body.runId);
-        console.info("summary.queue.disposition", {
+        logTelemetry("info", "ingress", "summary.queue.disposition", {
           runId: body.runId,
           disposition: result.disposition,
           retryAfterSeconds:
@@ -29,11 +36,11 @@ export async function handleSummaryQueue(
         });
         switch (result.disposition) {
           case "completed":
-            recordQueueSignal(env, body.runId, "completed");
+            recordQueueSignal(env, "summary.queue", "completed");
             message.ack();
             break;
           case "permanent-failure":
-            recordQueueSignal(env, body.runId, "failed_permanent");
+            recordQueueSignal(env, "summary.queue", "failed_permanent");
             message.ack();
             break;
           case "retry":
@@ -49,11 +56,11 @@ export async function handleSummaryQueue(
         // Never log raw errors: RPC exceptions can carry processor
         // parameters, including encrypted values. The run id remains enough
         // to recover the authoritative state from PostgreSQL.
-        console.error("summary.queue.processor_rpc_error", {
+        logTelemetry("error", "ingress", "summary.queue.processor_rpc_error", {
           runId: body.runId,
-          errorName: error instanceof Error ? error.name : "UNKNOWN_ERROR",
+          errorName: errorName(error),
         });
-        recordQueueSignal(env, body.runId, "rpc_error");
+        recordQueueSignal(env, "summary.queue.processor_rpc", "error");
         message.retry();
       }
     });
@@ -72,14 +79,14 @@ async function rescheduleLogicalRun(
       : { delaySeconds: retryAfterSeconds };
   try {
     await env.SUMMARY_JOBS.send(job, options);
-    recordQueueSignal(env, job.runId, "rescheduled");
+    recordQueueSignal(env, "summary.queue", "rescheduled");
     message.ack();
   } catch (error) {
-    console.error("summary.queue.reschedule_error", {
+    logTelemetry("error", "ingress", "summary.queue.reschedule_error", {
       runId: job.runId,
-      errorName: error instanceof Error ? error.name : "UNKNOWN_ERROR",
+      errorName: errorName(error),
     });
-    recordQueueSignal(env, job.runId, "reschedule_error");
+    recordQueueSignal(env, "summary.queue.reschedule", "error");
     message.retry(options);
   }
 }
@@ -92,20 +99,15 @@ function isSummaryJob(value: unknown): value is SummaryJob {
 
 function recordQueueSignal(
   env: QueueEnv,
-  runId: string,
+  event: string,
   signal:
     | "completed"
     | "failed_permanent"
     | "rescheduled"
-    | "reschedule_error"
-    | "rpc_error"
+    | "error"
     | "malformed",
 ): void {
-  env.ANALYTICS.writeDataPoint({
-    indexes: [runId],
-    blobs: [signal],
-    doubles: [Date.now()],
-  });
+  recordTelemetryMetric(env.ANALYTICS, "ingress", event, signal);
 }
 
 export default {} satisfies ExportedHandler;
