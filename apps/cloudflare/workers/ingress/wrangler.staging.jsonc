@@ -6,7 +6,7 @@
   "compatibility_flags": ["nodejs_compat"],
   "workers_dev": true,
   "vars": {
-    "BOT_USERNAME": "MicrosonyaStagingBot",
+    "BOT_USERNAME": "microsonya_bot",
   },
   "secrets": {
     "required": ["TELEGRAM_WEBHOOK_SECRET", "MICROSONYA_DATA_ENCRYPTION_KEY"],
