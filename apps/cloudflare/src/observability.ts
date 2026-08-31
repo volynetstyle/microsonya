@@ -28,7 +28,9 @@ type LogFields = Readonly<{
   checkpointAdvanced?: boolean;
   action?: string;
   stage?: string;
+  internalStage?: string;
   errorCode?: string;
+  summaryErrorCode?: string;
 }>;
 
 /**

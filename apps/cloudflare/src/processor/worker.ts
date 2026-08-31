@@ -39,6 +39,15 @@ type DeliveryClaim = {
   readonly summary?: string;
 };
 
+type ProcessingPhase =
+  | "services.bootstrap"
+  | "outcome.lookup"
+  | "summary.generate"
+  | "summary.present"
+  | "summary.validate"
+  | "summary.persist"
+  | "delivery.claim";
+
 async function withServices<T>(
   env: Env,
   operation: (services: Services) => Promise<T>,
@@ -139,23 +148,27 @@ export class SummaryProcessorEntrypoint extends WorkerEntrypoint<Env> {
     if (claimed === undefined)
       return { disposition: "retry", retryAfterSeconds: 5 };
     if (claimed.attempt > MAX_ATTEMPTS) {
+      const errorCode = "PROCESSING_ATTEMPTS_EXHAUSTED";
       const failed = await this.env.SUMMARY_RUNS.markFailed(
         runId,
         claimed.leaseToken,
         "processing",
-        "PROCESSING_ATTEMPTS_EXHAUSTED",
+        errorCode,
       );
+      if (failed) logTerminalFailure(runId, "processing", errorCode);
       return failed
         ? { disposition: "permanent-failure" }
         : { disposition: "retry", retryAfterSeconds: 5 };
     }
 
+    let phase: ProcessingPhase = "services.bootstrap";
     try {
       const disposition = await this.withProcessingLeaseHeartbeat(
         runId,
         claimed.leaseToken,
         () =>
           withServices(this.env, async (deps) => {
+            phase = "outcome.lookup";
             const persisted =
               await deps.summaries.findOrchestratedOutcome(runId);
             if (persisted !== undefined)
@@ -166,7 +179,8 @@ export class SummaryProcessorEntrypoint extends WorkerEntrypoint<Env> {
             const summarizer = createSummarizer({
               messages: deps.messages,
               summaries: {
-                findLastRun: (chatId) => deps.summaries.findLastRun(chatId),
+                findLastRun: (chatId) =>
+                  deps.summaries.findLastCheckpoint(chatId),
                 saveRun: (run) => deps.summaries.saveRun(run),
                 saveAttempt: (attempt) =>
                   deps.summaries.saveAttempt(attempt, {
@@ -179,8 +193,9 @@ export class SummaryProcessorEntrypoint extends WorkerEntrypoint<Env> {
               ollama: deps.ollama,
               createSummaryId: () => attemptId,
               now: () => asTimestampMs(Date.now()),
-              telemetry: createProcessorTelemetry(this.env.ANALYTICS),
+              telemetry: createProcessorTelemetry(this.env.ANALYTICS, runId),
             });
+            phase = "summary.generate";
             return tracing.enterSpan("summary.generate", (span) => {
               span.setAttribute("microsonya.run_id", runId);
               span.setAttribute("microsonya.attempt", claimed.attempt);
@@ -192,7 +207,9 @@ export class SummaryProcessorEntrypoint extends WorkerEntrypoint<Env> {
             });
           }),
       );
+      phase = "summary.present";
       const summary = presentGeneratedDisposition(disposition);
+      phase = "summary.validate";
       const validationError = tracing.enterSpan("summary.validate", (span) => {
         span.setAttribute("microsonya.run_id", runId);
         return validateSummary(summary);
@@ -204,10 +221,12 @@ export class SummaryProcessorEntrypoint extends WorkerEntrypoint<Env> {
           "processing",
           validationError,
         );
+        if (failed) logTerminalFailure(runId, "processing", validationError);
         return failed
           ? { disposition: "permanent-failure" }
           : { disposition: "retry", retryAfterSeconds: 5 };
       }
+      phase = "summary.persist";
       const saved = await tracing.enterSpan("summary.persist", (span) => {
         span.setAttribute("microsonya.run_id", runId);
         span.setAttribute("microsonya.model", "configured-profile");
@@ -223,6 +242,7 @@ export class SummaryProcessorEntrypoint extends WorkerEntrypoint<Env> {
         );
       });
       if (!saved) return { disposition: "retry", retryAfterSeconds: 5 };
+      phase = "delivery.claim";
       const ready = await this.env.SUMMARY_RUNS.claimDelivery(runId);
       return ready === undefined
         ? { disposition: "retry", retryAfterSeconds: 5 }
@@ -233,6 +253,7 @@ export class SummaryProcessorEntrypoint extends WorkerEntrypoint<Env> {
         claimed.leaseToken,
         claimed.attempt,
         error,
+        phase,
       );
     }
   }
@@ -254,14 +275,17 @@ export class SummaryProcessorEntrypoint extends WorkerEntrypoint<Env> {
   ): Promise<ProcessSummaryRunResult> {
     const { runId, leaseToken, deliveryAttempt, summary } = claim;
     if (summary === undefined || deliveryAttempt > MAX_DELIVERY_ATTEMPTS) {
+      const errorCode =
+        summary === undefined
+          ? "SUMMARY_MISSING"
+          : "DELIVERY_ATTEMPTS_EXHAUSTED";
       const failed = await this.env.SUMMARY_RUNS.markFailed(
         runId,
         leaseToken,
         "delivering",
-        summary === undefined
-          ? "SUMMARY_MISSING"
-          : "DELIVERY_ATTEMPTS_EXHAUSTED",
+        errorCode,
       );
+      if (failed) logTerminalFailure(runId, "delivering", errorCode);
       return failed
         ? { disposition: "permanent-failure" }
         : { disposition: "retry", retryAfterSeconds: 5 };
@@ -290,6 +314,7 @@ export class SummaryProcessorEntrypoint extends WorkerEntrypoint<Env> {
           "delivering",
           failure.code,
         );
+        if (failed) logTerminalFailure(runId, "delivering", failure.code);
         return failed
           ? { disposition: "permanent-failure" }
           : { disposition: "retry", retryAfterSeconds: 5 };
@@ -315,6 +340,7 @@ export class SummaryProcessorEntrypoint extends WorkerEntrypoint<Env> {
     leaseToken: string,
     attempt: number,
     error: unknown,
+    phase: ProcessingPhase,
   ): Promise<ProcessSummaryRunResult> {
     const failure = classifyFailure(error);
     if (!failure.retryable || attempt >= MAX_ATTEMPTS) {
@@ -324,6 +350,7 @@ export class SummaryProcessorEntrypoint extends WorkerEntrypoint<Env> {
         "processing",
         failure.code,
       );
+      if (failed) logTerminalFailure(runId, "processing", failure.code, phase);
       return failed
         ? { disposition: "permanent-failure" }
         : { disposition: "retry", retryAfterSeconds: 5 };
@@ -377,6 +404,20 @@ export class SummaryProcessorEntrypoint extends WorkerEntrypoint<Env> {
       await renewal;
     }
   }
+}
+
+function logTerminalFailure(
+  runId: SummaryId,
+  stage: "processing" | "delivering",
+  errorCode: string,
+  phase?: ProcessingPhase,
+): void {
+  logTelemetry("error", "processor", "summary.process.failed", {
+    runId,
+    stage,
+    errorCode,
+    ...(phase === undefined ? {} : { phase }),
+  });
 }
 
 class LeaseLostError extends Error {
@@ -455,8 +496,31 @@ export function classifyFailure(error: unknown): {
       retryAfterSeconds: DEFAULT_RETRY_SECONDS,
     };
   }
+  if (error instanceof TypeError) {
+    const code = KNOWN_TYPE_ERROR_CODES[error.message];
+    if (code !== undefined) {
+      return {
+        code,
+        retryable: false,
+        retryAfterSeconds: DEFAULT_RETRY_SECONDS,
+      };
+    }
+  }
   return classifyUnknownFailure(error);
 }
+
+const KNOWN_TYPE_ERROR_CODES: Readonly<Record<string, string>> = Object.freeze({
+  "Summary ledger encryption key must be 32 bytes.":
+    "CONFIG_DATA_ENCRYPTION_KEY_INVALID",
+  "Invalid summary ledger ciphertext envelope.":
+    "DATA_CIPHERTEXT_ENVELOPE_INVALID",
+  "Persisted summary attempt has no presentation.":
+    "PERSISTED_ATTEMPT_UNPRESENTABLE",
+  "Unsupported PostgreSQL bytea driver value.":
+    "DATA_BYTEA_DRIVER_VALUE_UNSUPPORTED",
+  "Terminal summary text is missing ciphertext.":
+    "LEGACY_SUMMARY_PRESENTATION_MISSING",
+});
 
 function telegramMessageId(payload: unknown): number | undefined {
   if (typeof payload !== "object" || payload === null) return undefined;

@@ -64,9 +64,7 @@ export function selectSummaryWindow(
 
   const isCount = command.mode === "count";
 
-  const consumption: WindowConsumption = isCount
-    ? "read-only"
-    : "checkpoint";
+  const consumption: WindowConsumption = isCount ? "read-only" : "checkpoint";
 
   // Preserve the current process-local day-boundary policy exactly.
   const since =
@@ -74,8 +72,11 @@ export function selectSummaryWindow(
       ? new Date(command.date).setHours(0, 0, 0, 0)
       : command.date - DAY_MS;
 
+  // Explicit `/summary N` is a read-only request, never an authorization to
+  // construct an unbounded model prompt.  Applying the same cap to retries is
+  // crucial: already queued legacy jobs may carry a larger requested count.
   const rawLimit = isCount
-    ? Math.max(1, command.count ?? 100)
+    ? Math.min(MAX_MESSAGES, Math.max(1, command.count ?? 100))
     : MAX_MESSAGES;
 
   const limit = normalizeSelectionLimit(rawLimit, consumption);
@@ -192,10 +193,7 @@ function selectEligibleMessages(
     }
 
     if (consumption === "checkpoint") {
-      if (
-        checkpointBefore !== undefined &&
-        message.id <= checkpointBefore
-      ) {
+      if (checkpointBefore !== undefined && message.id <= checkpointBefore) {
         continue;
       }
 
@@ -226,14 +224,7 @@ function selectEligibleMessages(
 
     const boundary = selected[0]!;
 
-    if (
-      shouldReplaceBoundary(
-        message,
-        ordinal,
-        boundary,
-        direction,
-      )
-    ) {
+    if (shouldReplaceBoundary(message, ordinal, boundary, direction)) {
       selected[0] = {
         message,
         ordinal,
@@ -307,24 +298,17 @@ function mergeChronologically(
     return context.slice();
   }
 
-  const merged = new Array<ChatMessage>(
-    context.length + eligible.length,
-  );
+  const merged = new Array<ChatMessage>(context.length + eligible.length);
 
   let contextIndex = 0;
   let eligibleIndex = 0;
   let outputIndex = 0;
 
-  while (
-    contextIndex < context.length &&
-    eligibleIndex < eligible.length
-  ) {
+  while (contextIndex < context.length && eligibleIndex < eligible.length) {
     const contextMessage = context[contextIndex]!;
     const eligibleMessage = eligible[eligibleIndex]!;
 
-    if (
-      compareChronologically(contextMessage, eligibleMessage) <= 0
-    ) {
+    if (compareChronologically(contextMessage, eligibleMessage) <= 0) {
       merged[outputIndex++] = contextMessage;
       contextIndex++;
     } else {
@@ -367,8 +351,7 @@ function compareIncomingToRanked(
   right: RankedMessage,
 ): number {
   return (
-    compareChronologically(message, right.message) ||
-    ordinal - right.ordinal
+    compareChronologically(message, right.message) || ordinal - right.ordinal
   );
 }
 
@@ -382,11 +365,7 @@ function heapifySelection(
   heap: RankedMessage[],
   direction: SelectionDirection,
 ): void {
-  for (
-    let index = (heap.length >>> 1) - 1;
-    index >= 0;
-    index--
-  ) {
+  for (let index = (heap.length >>> 1) - 1; index >= 0; index--) {
     siftDownSelection(heap, index, direction);
   }
 }
@@ -412,22 +391,12 @@ function siftDownSelection(
 
     if (
       right < length &&
-      boundaryPrecedes(
-        heap[right]!,
-        heap[left]!,
-        direction,
-      )
+      boundaryPrecedes(heap[right]!, heap[left]!, direction)
     ) {
       boundary = right;
     }
 
-    if (
-      !boundaryPrecedes(
-        heap[boundary]!,
-        heap[index]!,
-        direction,
-      )
-    ) {
+    if (!boundaryPrecedes(heap[boundary]!, heap[index]!, direction)) {
       return;
     }
 
@@ -446,9 +415,7 @@ function boundaryPrecedes(
 ): boolean {
   const comparison = compareRankedChronologically(left, right);
 
-  return direction === "earliest"
-    ? comparison > 0
-    : comparison < 0;
+  return direction === "earliest" ? comparison > 0 : comparison < 0;
 }
 
 function shouldReplaceBoundary(
@@ -457,15 +424,9 @@ function shouldReplaceBoundary(
   boundary: RankedMessage,
   direction: SelectionDirection,
 ): boolean {
-  const comparison = compareIncomingToRanked(
-    message,
-    ordinal,
-    boundary,
-  );
+  const comparison = compareIncomingToRanked(message, ordinal, boundary);
 
-  return direction === "earliest"
-    ? comparison < 0
-    : comparison > 0;
+  return direction === "earliest" ? comparison < 0 : comparison > 0;
 }
 
 /**
@@ -485,9 +446,7 @@ function normalizeSelectionLimit(
   consumption: WindowConsumption,
 ): number {
   if (Number.isNaN(rawLimit)) {
-    return consumption === "checkpoint"
-      ? 0
-      : Number.POSITIVE_INFINITY;
+    return consumption === "checkpoint" ? 0 : Number.POSITIVE_INFINITY;
   }
 
   if (!Number.isFinite(rawLimit)) {
@@ -524,9 +483,6 @@ export function selectConversationWindow(
   });
 }
 
-function compareChronologically(
-  left: ChatMessage,
-  right: ChatMessage,
-): number {
+function compareChronologically(left: ChatMessage, right: ChatMessage): number {
   return left.time - right.time || left.id - right.id;
 }

@@ -3,6 +3,8 @@ import {
   type SummarizationTelemetryEvent,
 } from "@microsonya/summarize";
 import { recordAnalyticsPoint } from "../observability.js";
+import { logTelemetry } from "../observability.js";
+import type { SummaryId } from "@microsonya/shared";
 
 /**
  * Fixed Analytics Engine schema for the summarization pipeline.
@@ -20,9 +22,20 @@ import { recordAnalyticsPoint } from "../observability.js";
  */
 export function createProcessorTelemetry(
   analytics: AnalyticsEngineDataset,
+  runId?: SummaryId,
 ): SummarizationTelemetryService {
   return new SummarizationTelemetryService(
-    (event) => recordSummarizationEvent(analytics, event),
+    (event) => {
+      recordSummarizationEvent(analytics, event);
+      if (runId !== undefined && event.type === "summary.error") {
+        logTelemetry("error", "processor", "summary.generate.failed", {
+          runId,
+          internalStage: event.stage,
+          summaryErrorCode: event.error.code,
+          errorName: event.error.name ?? "UNKNOWN_ERROR",
+        });
+      }
+    },
     { includePrompt: false, includeModelResponse: false },
   );
 }

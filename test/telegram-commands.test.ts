@@ -73,7 +73,7 @@ describe("summary command arguments", () => {
     expect(parseSummaryArgs(raw)).toEqual(expected);
   });
 
-  it.each(["0", "1025", "hello", "today extra"])("rejects '%s'", (raw) => {
+  it.each(["0", "129", "hello", "today extra"])("rejects '%s'", (raw) => {
     expect(parseSummaryArgs(raw)).toBeUndefined();
   });
 });

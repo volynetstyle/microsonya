@@ -46,7 +46,9 @@ export interface MessageReader {
 }
 
 export interface SummaryRunStore {
-  findLastRun(chatId: ChatId): Promise<SummaryRun | undefined>;
+  findLastRun(
+    chatId: ChatId,
+  ): Promise<Pick<SummaryRun, "covers"> | undefined>;
   saveRun(run: SummaryRun): Promise<void>;
   saveAttempt?(attempt: SummaryRunAttempt): Promise<void>;
 }

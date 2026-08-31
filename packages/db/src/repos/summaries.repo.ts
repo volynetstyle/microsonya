@@ -37,6 +37,10 @@ export interface OrchestrationAttemptRef {
   readonly acceptedAt: ReturnType<typeof asTimestampMs>;
 }
 
+export interface SummaryCheckpoint {
+  readonly covers: SummaryRun["covers"];
+}
+
 export class SummariesRepo {
   constructor(
     private readonly db: MicrosonyaDb,
@@ -83,6 +87,44 @@ export class SummariesRepo {
         row.summaryTextCiphertext,
         "Terminal summary text",
       ),
+    });
+  }
+
+  /** Reads only checkpoint metadata; presentation ciphertext is not required. */
+  async findLastCheckpoint(
+    chatId: ChatId,
+  ): Promise<SummaryCheckpoint | undefined> {
+    const row = (
+      await this.db
+        .select({
+          fromMessageId: summaryRuns.fromMessageId,
+          toMessageId: summaryRuns.toMessageId,
+          messageCount: summaryRuns.messageCount,
+        })
+        .from(summaryRuns)
+        .where(
+          and(
+            eq(summaryRuns.chatId, this.chatKey(chatId)),
+            inArray(summaryRuns.status, ["summarized", "skipped"]),
+          ),
+        )
+        .orderBy(
+          desc(summaryRuns.commandMessageId),
+          desc(summaryRuns.orchestrationAttempt),
+          desc(summaryRuns.createdAt),
+        )
+        .limit(1)
+    ).at(0);
+    if (row === undefined) return undefined;
+    if (row.fromMessageId === null || row.toMessageId === null) {
+      return undefined;
+    }
+    return Object.freeze({
+      covers: Object.freeze({
+        firstId: asMessageId(row.fromMessageId),
+        lastId: asMessageId(row.toMessageId),
+        count: asMessageCount(row.messageCount),
+      }),
     });
   }
 

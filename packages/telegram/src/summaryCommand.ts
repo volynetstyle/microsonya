@@ -7,7 +7,7 @@ import {
 } from "@microsonya/shared";
 
 export const SUMMARY_COMMAND_NAME = "summary";
-const MAX_REQUESTED_COUNT = 1024;
+const MAX_REQUESTED_COUNT = 128;
 
 export const telegramCommands = [
   {

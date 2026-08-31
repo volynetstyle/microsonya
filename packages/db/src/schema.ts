@@ -13,9 +13,24 @@ import {
   uniqueIndex,
 } from "drizzle-orm/pg-core";
 
-const bytea = customType<{ data: Buffer; driverData: Buffer }>({
+const bytea = customType<{ data: Buffer; driverData: unknown }>({
   dataType: () => "bytea",
+  toDriver: (value) => value,
+  fromDriver: (value) => normalizeBytea(value),
 });
+
+/** Normalize bytea values at the driver boundary across Node pg and Hyperdrive. */
+export function normalizeBytea(value: unknown): Buffer {
+  if (Buffer.isBuffer(value)) return value;
+  if (value instanceof Uint8Array) {
+    return Buffer.from(value.buffer, value.byteOffset, value.byteLength);
+  }
+  if (value instanceof ArrayBuffer) return Buffer.from(value);
+  if (typeof value === "string" && /^\\x(?:[\da-f]{2})*$/iu.test(value)) {
+    return Buffer.from(value.slice(2), "hex");
+  }
+  throw new TypeError("Unsupported PostgreSQL bytea driver value.");
+}
 
 export const messages = pgTable(
   "messages",
