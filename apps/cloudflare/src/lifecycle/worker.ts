@@ -80,6 +80,50 @@ export class SummaryRunsEntrypoint extends WorkerEntrypoint<Env> {
     return "pending";
   }
 
+  /**
+   * Resolves terminal state, resumable delivery, or a processing claim using
+   * one Service Binding invocation and one Hyperdrive connection.
+   */
+  async claimWork(runId: SummaryId, processorVersion: string) {
+    return withRepository(this.env, async (repository) => {
+      const run = await repository.get(runId);
+      if (run === undefined) return { kind: "missing" as const };
+      if (run.status === "completed") return { kind: "completed" as const };
+      if (run.status === "failed_permanent") {
+        return { kind: "failed_permanent" as const };
+      }
+
+      const now = asTimestampMs(Date.now());
+      const delivery = await repository.claimDelivery(
+        runId,
+        now,
+        DEFAULT_LEASE_MS,
+      );
+      if (delivery !== undefined) {
+        return {
+          kind: "delivery" as const,
+          claim: {
+            runId: delivery.id,
+            chatId: delivery.command.chatId,
+            summary: delivery.summary,
+            deliveryAttempt: delivery.deliveryAttempt,
+            leaseToken: delivery.leaseToken,
+          },
+        };
+      }
+
+      const processing = await repository.claimProcessing(
+        runId,
+        now,
+        DEFAULT_LEASE_MS,
+        processorVersion,
+      );
+      return processing === undefined
+        ? { kind: "pending" as const }
+        : { kind: "processing" as const, claim: processing };
+    });
+  }
+
   async claimProcessing(runId: SummaryId, processorVersion: string) {
     return withRepository(this.env, (repository) =>
       repository.claimProcessing(

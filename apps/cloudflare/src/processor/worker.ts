@@ -128,25 +128,22 @@ export class SummaryProcessorEntrypoint extends WorkerEntrypoint<Env> {
   }
 
   private async processRun(runId: SummaryId): Promise<ProcessSummaryRunResult> {
-    const status = await this.env.SUMMARY_RUNS.status(runId);
-    if (status === "missing") return { disposition: "permanent-failure" };
-    if (status === "completed" || status === "failed_permanent") {
-      return {
-        disposition: status === "completed" ? "completed" : "permanent-failure",
-      };
-    }
-    const delivery = await this.env.SUMMARY_RUNS.claimDelivery(runId);
-    if (delivery !== undefined) return this.deliver(delivery);
-
-    const claimed = await tracing.enterSpan("summary_run.claim", (span) => {
+    const work = await tracing.enterSpan("summary_run.claim", (span) => {
       span.setAttribute("microsonya.run_id", runId);
-      return this.env.SUMMARY_RUNS.claimProcessing(
+      return this.env.SUMMARY_RUNS.claimWork(
         runId,
         this.env.PROCESSOR_VERSION,
       );
     });
-    if (claimed === undefined)
+    if (work.kind === "missing" || work.kind === "failed_permanent") {
+      return { disposition: "permanent-failure" };
+    }
+    if (work.kind === "completed") return { disposition: "completed" };
+    if (work.kind === "delivery") return this.deliver(work.claim);
+    if (work.kind === "pending") {
       return { disposition: "retry", retryAfterSeconds: 5 };
+    }
+    const claimed = work.claim;
     if (claimed.attempt > MAX_ATTEMPTS) {
       const errorCode = "PROCESSING_ATTEMPTS_EXHAUSTED";
       const failed = await this.env.SUMMARY_RUNS.markFailed(
@@ -392,12 +389,7 @@ export class SummaryProcessorEntrypoint extends WorkerEntrypoint<Env> {
     try {
       const result = await operation();
       await renewal;
-      const renewed = await this.env.SUMMARY_RUNS.renewLease(
-        runId,
-        leaseToken,
-        "processing",
-      );
-      if (leaseLost || !renewed) throw new LeaseLostError();
+      if (leaseLost) throw new LeaseLostError();
       return result;
     } finally {
       clearInterval(timer);

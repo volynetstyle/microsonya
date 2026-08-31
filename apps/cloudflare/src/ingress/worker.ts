@@ -37,10 +37,10 @@ async function withMessages<T>(
 }
 
 const worker = {
-  async fetch(request, env): Promise<Response> {
+  async fetch(request, env, context): Promise<Response> {
     return tracing.enterSpan("telegram.ingress", async (span) => {
       span.setAttribute("microsonya.transport", "telegram");
-      return handleTelegramIngress(request, env, span);
+      return handleTelegramIngress(request, env, span, context);
     });
   },
 
@@ -55,6 +55,7 @@ async function handleTelegramIngress(
   request: Request,
   env: CloudflareEnv,
   span: Span,
+  context: ExecutionContext,
 ): Promise<Response> {
   const startedAt = Date.now();
   const url = new URL(request.url);
@@ -94,7 +95,15 @@ async function handleTelegramIngress(
   });
   span.setAttribute("microsonya.run_id", run.runId);
   await env.SUMMARY_JOBS.send({ runId: run.runId } satisfies SummaryJob);
-  await env.SUMMARY_RUNS.markQueued(run.runId);
+  context.waitUntil(
+    env.SUMMARY_RUNS.markQueued(run.runId).catch((error: unknown) => {
+      logTelemetry("warn", "ingress", "summary.run.mark_queued_failed", {
+        runId: run.runId,
+        errorName: error instanceof Error ? error.name : "UNKNOWN_ERROR",
+      });
+      return false;
+    }),
+  );
   const durationMs = Date.now() - startedAt;
   logTelemetry("info", "ingress", "summary.run.accepted", {
     runId: run.runId,
@@ -109,8 +118,9 @@ async function handleTelegramIngress(
     durationMs,
   );
 
-  // Telegram is acknowledged only after the durable run exists and Queue
-  // has accepted the job. Repeated updates resolve to the same logical run.
+  // Telegram is acknowledged after the durable run exists and Queue accepts
+  // the job. The queued marker is recoverable bookkeeping: created runs are
+  // reconciled and enqueueing/processing are idempotent.
   return new Response("OK");
 }
 
