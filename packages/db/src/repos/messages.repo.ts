@@ -1,4 +1,4 @@
-import { and, asc, eq, gt, gte, lte } from "drizzle-orm";
+import { and, asc, eq, gt, gte, lte, sql } from "drizzle-orm";
 import {
   asAuthorId,
   asMessageId,
@@ -41,22 +41,14 @@ export class MessagesRepo {
   ) {}
 
   async save(message: ChatMessage): Promise<void> {
-    await this.db
-      .insert(messages)
-      .values({
-        chatId: this.chatKey(message.chatId),
-        messageId: message.id,
-        date: message.time,
-        authorId: this.authorKey(message.author.id),
-        authorNameCiphertext: this.encryption.encrypt(message.author.label),
-        textCiphertext: this.encryption.encrypt(message.text),
-        replyToMessageId: message.parentId,
-        kind: "text",
-        isCommand: false,
-      })
-      .onConflictDoUpdate({
-        target: [messages.chatId, messages.messageId],
-        set: {
+    const chatId = this.chatKey(message.chatId);
+    await this.db.transaction(async (tx) => {
+      await lockTelegramIngress(tx as MicrosonyaDb, chatId);
+      await tx
+        .insert(messages)
+        .values({
+          chatId,
+          messageId: message.id,
           date: message.time,
           authorId: this.authorKey(message.author.id),
           authorNameCiphertext: this.encryption.encrypt(message.author.label),
@@ -64,9 +56,21 @@ export class MessagesRepo {
           replyToMessageId: message.parentId,
           kind: "text",
           isCommand: false,
-        },
-      })
-      .execute();
+        })
+        .onConflictDoUpdate({
+          target: [messages.chatId, messages.messageId],
+          set: {
+            date: message.time,
+            authorId: this.authorKey(message.author.id),
+            authorNameCiphertext: this.encryption.encrypt(message.author.label),
+            textCiphertext: this.encryption.encrypt(message.text),
+            replyToMessageId: message.parentId,
+            kind: "text",
+            isCommand: false,
+          },
+        })
+        .execute();
+    });
   }
 
   async listByChat(chatId: ChatId): Promise<ChatMessage[]> {
@@ -158,4 +162,14 @@ export class MessagesRepo {
   private authorKey(authorId: string): string {
     return this.encryption.lookup(authorId, "telegram-author-id");
   }
+}
+
+/** Serializes the short durable-ingress transaction for one Telegram chat. */
+export async function lockTelegramIngress(
+  db: MicrosonyaDb,
+  encryptedChatId: string,
+): Promise<void> {
+  await db.execute(
+    sql`select pg_advisory_xact_lock(hashtextextended(${encryptedChatId}, 0))`,
+  );
 }

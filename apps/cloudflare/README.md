@@ -63,6 +63,17 @@ The service binding RPC stubs are inferred from the exported entrypoint classes
 by Wrangler. No internal URLs, manual JSON serialization, or `Fetcher` wrappers
 are involved.
 
+Register the Telegram webhook with `max_connections=1`. This is the ingress
+ordering boundary for v0.1; PostgreSQL additionally serializes overlapping
+message/run transactions per chat. Queue ordering is intentionally irrelevant.
+
+```sh
+curl -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/setWebhook" \
+  -d "url=$TELEGRAM_WEBHOOK_URL/telegram" \
+  -d "secret_token=$TELEGRAM_WEBHOOK_SECRET" \
+  -d "max_connections=1"
+```
+
 Workers Logs and traces start at 100% sampling for the initial production
 period. This is operational evidence only; it never substitutes for durable
 `SummaryRun` lifecycle state.

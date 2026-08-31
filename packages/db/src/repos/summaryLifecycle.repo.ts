@@ -34,6 +34,7 @@ import { assertSummaryRunTransition } from "@microsonya/run-lifecycle";
 import type { MicrosonyaDb } from "../client.js";
 import type { DataEncryption } from "../encryption.js";
 import { summaryRunLifecycle } from "../schema.js";
+import { lockTelegramIngress } from "./messages.repo.js";
 
 type LifecycleRow = typeof summaryRunLifecycle.$inferSelect;
 
@@ -67,25 +68,29 @@ export class SummaryLifecycleRepo {
       request.idempotencyKey,
       "summary-run-idempotency-key",
     );
-    await this.db
-      .insert(summaryRunLifecycle)
-      .values({
-        id: randomUUID(),
-        idempotencyKey,
-        chatId: this.encryption.lookup(
-          request.command.chatId,
-          "telegram-chat-id",
-        ),
-        chatIdCiphertext: this.encryption.encrypt(request.command.chatId),
-        commandMessageId: request.command.commandMessageId,
-        commandDate: request.command.date,
-        mode: request.command.mode,
-        requestedCount: request.command.count,
-        status: "created",
-        createdAt: now,
-        updatedAt: now,
-      })
-      .onConflictDoNothing({ target: summaryRunLifecycle.idempotencyKey });
+    const chatId = this.encryption.lookup(
+      request.command.chatId,
+      "telegram-chat-id",
+    );
+    await this.db.transaction(async (tx) => {
+      await lockTelegramIngress(tx as MicrosonyaDb, chatId);
+      await tx
+        .insert(summaryRunLifecycle)
+        .values({
+          id: randomUUID(),
+          idempotencyKey,
+          chatId,
+          chatIdCiphertext: this.encryption.encrypt(request.command.chatId),
+          commandMessageId: request.command.commandMessageId,
+          commandDate: request.command.date,
+          mode: request.command.mode,
+          requestedCount: request.command.count,
+          status: "created",
+          createdAt: now,
+          updatedAt: now,
+        })
+        .onConflictDoNothing({ target: summaryRunLifecycle.idempotencyKey });
+    });
 
     const row = await this.findRowByIdempotencyKey(idempotencyKey);
     if (row === undefined) {
