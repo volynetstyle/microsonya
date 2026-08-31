@@ -1,11 +1,13 @@
-import worker, { type Env } from "./worker.js";
+import worker, { type WmaDevBindings } from "./worker.js";
 
-interface LocalEnv extends Env {
-  WMA_DEV_USER_ID: string;
-  WMA_DEV_USER_NAME: string;
-  WMA_DEV_CHAT_ID: string;
-  WMA_DEV_CHAT_TITLE: string;
-}
+type LocalEnv = Env &
+  WmaDevBindings &
+  Readonly<{
+    WMA_DEV_USER_ID: string;
+    WMA_DEV_USER_NAME: string;
+    WMA_DEV_CHAT_ID: string;
+    WMA_DEV_CHAT_TITLE: string;
+  }>;
 
 export default {
   async fetch(request, env): Promise<Response> {

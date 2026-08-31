@@ -2,8 +2,6 @@ import { tracing, WorkerEntrypoint } from "cloudflare:workers";
 import {
   MessagesRepo,
   SummariesRepo,
-  dataEncryptionFromBase64,
-  openWorkerDb,
   type PersistedSummaryAttempt,
 } from "@microsonya/db";
 import { OllamaClient, OllamaError } from "@microsonya/model";
@@ -18,6 +16,7 @@ import { createSummarizer, presentDisposition } from "@microsonya/summarize";
 import { EMPTY_SUMMARY_MESSAGE, classifyUnknownFailure } from "./policy.js";
 import { logTelemetry, recordTelemetryMetric } from "../observability.js";
 import { createProcessorTelemetry } from "./telemetry.js";
+import { withWorkerDatabase } from "../runtime/worker-db.js";
 
 const DEFAULT_RETRY_SECONDS = 30;
 const MAX_ATTEMPTS = 4;
@@ -52,22 +51,16 @@ async function withServices<T>(
   env: Env,
   operation: (services: Services) => Promise<T>,
 ): Promise<T> {
-  const client = await openWorkerDb(env.HYPERDRIVE.connectionString);
-  const encryption = dataEncryptionFromBase64(
-    env.MICROSONYA_DATA_ENCRYPTION_KEY,
-  );
-  try {
-    return await operation({
-      messages: new MessagesRepo(client.db, encryption),
-      summaries: new SummariesRepo(client.db, encryption),
+  return withWorkerDatabase(env, (db, encryption) =>
+    operation({
+      messages: new MessagesRepo(db, encryption),
+      summaries: new SummariesRepo(db, encryption),
       ollama: new OllamaClient({
         baseUrl: env.OLLAMA_BASE_URL,
         apiKey: env.OLLAMA_API_KEY,
       }),
-    });
-  } finally {
-    await client.close();
-  }
+    }),
+  );
 }
 
 function presentPersistedAttempt(attempt: PersistedSummaryAttempt): string {
@@ -130,10 +123,7 @@ export class SummaryProcessorEntrypoint extends WorkerEntrypoint<Env> {
   private async processRun(runId: SummaryId): Promise<ProcessSummaryRunResult> {
     const work = await tracing.enterSpan("summary_run.claim", (span) => {
       span.setAttribute("microsonya.run_id", runId);
-      return this.env.SUMMARY_RUNS.claimWork(
-        runId,
-        this.env.PROCESSOR_VERSION,
-      );
+      return this.env.SUMMARY_RUNS.claimWork(runId, this.env.PROCESSOR_VERSION);
     });
     if (work.kind === "missing" || work.kind === "failed_permanent") {
       return { disposition: "permanent-failure" };

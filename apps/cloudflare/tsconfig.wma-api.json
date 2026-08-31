@@ -3,7 +3,7 @@
   "compilerOptions": {
     "rootDir": "src",
     "outDir": "dist",
-    "types": ["./types/ingress.d.ts"]
+    "types": ["./types/wma.d.ts"]
   },
   "include": ["src/wma-api/**/*.ts"]
 }

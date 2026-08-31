@@ -2,18 +2,16 @@ import type {
   CreateSummaryRunRequest,
   SummaryJob,
 } from "@microsonya/contracts";
-import {
-  MessagesRepo,
-  dataEncryptionFromBase64,
-  openWorkerDb,
-} from "@microsonya/db";
+import { MessagesRepo } from "@microsonya/db";
 import {
   parseSummaryCommandUpdate,
   parseTelegramChatMessageUpdate,
 } from "@microsonya/telegram";
 import { tracing } from "cloudflare:workers";
+import { timingSafeEqual } from "node:crypto";
 import { handleSummaryQueue } from "./queue.js";
 import { logTelemetry, recordTelemetryMetric } from "../observability.js";
+import { withWorkerDatabase } from "../runtime/worker-db.js";
 
 const TELEGRAM_WEBHOOK_PATH = "/telegram";
 type CloudflareEnv = Omit<Env, "SUMMARY_JOBS"> & {
@@ -23,17 +21,9 @@ async function withMessages<T>(
   env: CloudflareEnv,
   operation: (repo: MessagesRepo) => Promise<T>,
 ): Promise<T> {
-  const client = await openWorkerDb(env.HYPERDRIVE.connectionString);
-  try {
-    return await operation(
-      new MessagesRepo(
-        client.db,
-        dataEncryptionFromBase64(env.MICROSONYA_DATA_ENCRYPTION_KEY),
-      ),
-    );
-  } finally {
-    await client.close();
-  }
+  return withWorkerDatabase(env, (db, encryption) =>
+    operation(new MessagesRepo(db, encryption)),
+  );
 }
 
 const worker = {
@@ -125,8 +115,7 @@ async function handleTelegramIngress(
 }
 
 function hasTelegramWebhookSecret(request: Request, expected: string): boolean {
-  return (
-    expected.length > 0 &&
-    request.headers.get("X-Telegram-Bot-Api-Secret-Token") === expected
-  );
+  const actual = request.headers.get("X-Telegram-Bot-Api-Secret-Token") ?? "";
+  if (expected.length === 0 || actual.length !== expected.length) return false;
+  return timingSafeEqual(Buffer.from(actual), Buffer.from(expected));
 }

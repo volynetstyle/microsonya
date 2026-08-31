@@ -1,12 +1,13 @@
 import { and, desc, eq } from "drizzle-orm";
 import {
-  dataEncryptionFromBase64,
-  openWorkerDb,
   summaryRunMessages,
   summaryRuns,
   wmaChatCatalog,
 } from "@microsonya/db";
 import type { TelegramIdentity } from "./auth.js";
+import { withWorkerDatabase } from "../runtime/worker-db.js";
+
+const TELEGRAM_AUTH_CONCURRENCY = 4;
 
 export type WmaChat = {
   ref: string;
@@ -36,48 +37,48 @@ export type WmaSummaryDetail = {
     body: string;
   }[];
 };
-type WmaEnv = {
-  HYPERDRIVE: Hyperdrive;
-  MICROSONYA_DATA_ENCRYPTION_KEY: string;
-  TELEGRAM_BOT_TOKEN: string;
-};
+type WmaEnv = Pick<
+  Env,
+  "HYPERDRIVE" | "MICROSONYA_DATA_ENCRYPTION_KEY" | "TELEGRAM_BOT_TOKEN"
+>;
 
 /** Home is backed by the WMA projection, never by lifecycle history. */
 export async function listWmaChats(
   env: WmaEnv,
   identity: TelegramIdentity,
 ): Promise<readonly WmaChat[]> {
-  const encryption = dataEncryptionFromBase64(
-    env.MICROSONYA_DATA_ENCRYPTION_KEY,
+  const catalog = await withWorkerDatabase(env, async (db, encryption) =>
+    (
+      await db
+        .select()
+        .from(wmaChatCatalog)
+        .orderBy(desc(wmaChatCatalog.lastSummaryAt))
+    ).map((entry) => ({
+      chatId: encryption.decrypt(entry.chatIdCiphertext),
+      summaryCount: entry.summaryCount,
+      lastSummaryAt: entry.lastSummaryAt,
+    })),
   );
-  const client = await openWorkerDb(env.HYPERDRIVE.connectionString);
-  try {
-    const catalog = await client.db
-      .select()
-      .from(wmaChatCatalog)
-      .orderBy(desc(wmaChatCatalog.lastSummaryAt));
-    const chats = await Promise.all(
-      catalog.map(async (entry) => {
-        const chatId = encryption.decrypt(entry.chatIdCiphertext);
-        const title = await accessibleChatTitle(
-          env.TELEGRAM_BOT_TOKEN,
-          chatId,
-          identity.user.id,
-        );
-        return title === undefined
-          ? undefined
-          : {
-              ref: chatId,
-              title,
-              summaryCount: entry.summaryCount,
-              lastSummaryAt: entry.lastSummaryAt,
-            };
-      }),
-    );
-    return chats.filter((chat): chat is WmaChat => chat !== undefined);
-  } finally {
-    await client.close();
-  }
+  const chats = await mapConcurrent(
+    catalog,
+    TELEGRAM_AUTH_CONCURRENCY,
+    async (entry) => {
+      const title = await accessibleChatTitle(
+        env.TELEGRAM_BOT_TOKEN,
+        entry.chatId,
+        identity.user.id,
+      );
+      return title === undefined
+        ? undefined
+        : {
+            ref: entry.chatId,
+            title,
+            summaryCount: entry.summaryCount,
+            lastSummaryAt: entry.lastSummaryAt,
+          };
+    },
+  );
+  return chats.filter((chat): chat is WmaChat => chat !== undefined);
 }
 
 /** Overview returns headers only. Source messages are fetched by detail(). */
@@ -87,14 +88,10 @@ export async function getChatOverview(
   chatRef?: string,
 ): Promise<WmaChatOverview> {
   const chat = await authorizeChat(env, identity, chatRef);
-  const encryption = dataEncryptionFromBase64(
-    env.MICROSONYA_DATA_ENCRYPTION_KEY,
-  );
-  const chatId = encryption.lookup(chat.id, "telegram-chat-id");
-  const client = await openWorkerDb(env.HYPERDRIVE.connectionString);
-  try {
+  return withWorkerDatabase(env, async (db, encryption) => {
+    const chatId = encryption.lookup(chat.id, "telegram-chat-id");
     const [rows, catalog] = await Promise.all([
-      client.db
+      db
         .select({
           id: summaryRuns.id,
           createdAt: summaryRuns.createdAt,
@@ -110,7 +107,7 @@ export async function getChatOverview(
         )
         .orderBy(desc(summaryRuns.createdAt))
         .limit(20),
-      client.db
+      db
         .select()
         .from(wmaChatCatalog)
         .where(eq(wmaChatCatalog.chatId, chatId))
@@ -136,9 +133,7 @@ export async function getChatOverview(
         ];
       }),
     };
-  } finally {
-    await client.close();
-  }
+  });
 }
 
 export async function getSummaryDetail(
@@ -149,13 +144,9 @@ export async function getSummaryDetail(
 ): Promise<WmaSummaryDetail> {
   const chat = await authorizeChat(env, identity, chatRef);
   if (!summaryId) throw new TypeError("A summary must be selected.");
-  const encryption = dataEncryptionFromBase64(
-    env.MICROSONYA_DATA_ENCRYPTION_KEY,
-  );
-  const client = await openWorkerDb(env.HYPERDRIVE.connectionString);
-  try {
+  return withWorkerDatabase(env, async (db, encryption) => {
     const run = (
-      await client.db
+      await db
         .select({
           id: summaryRuns.id,
           summaryTextCiphertext: summaryRuns.summaryTextCiphertext,
@@ -174,7 +165,7 @@ export async function getSummaryDetail(
         .limit(1)
     ).at(0);
     if (!run?.summaryTextCiphertext) throw new TypeError("Summary not found.");
-    const rows = await client.db
+    const rows = await db
       .select()
       .from(summaryRunMessages)
       .where(eq(summaryRunMessages.runId, run.id))
@@ -189,9 +180,7 @@ export async function getSummaryDetail(
         body: encryption.decrypt(row.textCiphertext),
       })),
     };
-  } finally {
-    await client.close();
-  }
+  });
 }
 
 async function authorizeChat(
@@ -215,18 +204,56 @@ async function accessibleChatTitle(
   chatId: string,
   userId: string,
 ): Promise<string | undefined> {
-  const member = await fetch(
-    `https://api.telegram.org/bot${token}/getChatMember?chat_id=${encodeURIComponent(chatId)}&user_id=${encodeURIComponent(userId)}`,
-  );
-  if (!member.ok) return;
-  if (!((await member.json()) as { ok?: boolean }).ok) return;
-  const chat = await fetch(
-    `https://api.telegram.org/bot${token}/getChat?chat_id=${encodeURIComponent(chatId)}`,
-  );
-  if (!chat.ok) return;
-  const body = (await chat.json()) as {
-    ok?: boolean;
-    result?: { title?: string; first_name?: string };
+  const apiBase = `https://api.telegram.org/bot${token}`;
+  const encodedChatId = encodeURIComponent(chatId);
+  const [member, chat] = await Promise.all([
+    fetch(
+      `${apiBase}/getChatMember?chat_id=${encodedChatId}&user_id=${encodeURIComponent(userId)}`,
+    ),
+    fetch(`${apiBase}/getChat?chat_id=${encodedChatId}`),
+  ]);
+  if (!member.ok || !chat.ok) return;
+  const [memberBody, chatBody]: [unknown, unknown] = await Promise.all([
+    member.json(),
+    chat.json(),
+  ]);
+  if (!isTelegramOk(memberBody) || !isTelegramOk(chatBody)) return;
+  const result = chatBody.result;
+  if (typeof result !== "object" || result === null) return;
+  const { title, first_name: firstName } = result as {
+    readonly title?: unknown;
+    readonly first_name?: unknown;
   };
-  return body.ok ? (body.result?.title ?? body.result?.first_name) : undefined;
+  if (typeof title === "string") return title;
+  return typeof firstName === "string" ? firstName : undefined;
+}
+
+function isTelegramOk(
+  value: unknown,
+): value is { readonly ok: true; readonly result?: unknown } {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    (value as { readonly ok?: unknown }).ok === true
+  );
+}
+
+async function mapConcurrent<Input, Output>(
+  values: readonly Input[],
+  concurrency: number,
+  mapper: (value: Input) => Promise<Output>,
+): Promise<Output[]> {
+  const results = new Array<Output>(values.length);
+  let nextIndex = 0;
+  async function worker(): Promise<void> {
+    while (nextIndex < values.length) {
+      const index = nextIndex;
+      nextIndex += 1;
+      results[index] = await mapper(values[index]!);
+    }
+  }
+  await Promise.all(
+    Array.from({ length: Math.min(concurrency, values.length) }, worker),
+  );
+  return results;
 }

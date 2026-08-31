@@ -6,19 +6,17 @@ import {
 } from "./bootstrap.js";
 import { errorName, logTelemetry } from "../observability.js";
 
-export interface Env {
-  ASSETS: Fetcher;
-  HYPERDRIVE: Hyperdrive;
-  TELEGRAM_BOT_TOKEN: string;
-  MICROSONYA_DATA_ENCRYPTION_KEY: string;
+export type WmaDevBindings = Readonly<{
   WMA_DEV_BYPASS_AUTH?: string;
   WMA_DEV_USER_ID?: string;
   WMA_DEV_USER_NAME?: string;
   WMA_DEV_CHAT_ID?: string;
   WMA_DEV_CHAT_TITLE?: string;
-}
+}>;
+export type WmaEnv = Env & WmaDevBindings;
+
 export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
+  async fetch(request: Request, env: WmaEnv): Promise<Response> {
     const url = new URL(request.url);
     if (!url.pathname.startsWith("/api/wma/")) return env.ASSETS.fetch(request);
     if (request.method !== "POST")
@@ -60,7 +58,7 @@ export default {
       return json({ error: "INTERNAL_ERROR" }, 500);
     }
   },
-} satisfies ExportedHandler<Env>;
+} satisfies ExportedHandler<WmaEnv>;
 function json(body: unknown, status = 200): Response {
   return Response.json(body, {
     status,
@@ -68,7 +66,7 @@ function json(body: unknown, status = 200): Response {
   });
 }
 
-function devIdentity(env: Env) {
+function devIdentity(env: WmaEnv) {
   if (
     !env.WMA_DEV_USER_ID ||
     !env.WMA_DEV_USER_NAME ||

@@ -5,16 +5,29 @@
   "compatibility_date": "2026-08-30",
   "compatibility_flags": ["nodejs_compat"],
   "workers_dev": true,
+  "observability": {
+    "enabled": true,
+    "logs": {
+      "enabled": true,
+      "invocation_logs": true,
+      "head_sampling_rate": 1,
+    },
+    "traces": { "enabled": true, "head_sampling_rate": 1 },
+  },
   "assets": {
     "directory": "../../src/wma/dist/client",
     "binding": "ASSETS",
     "not_found_handling": "single-page-application",
-    "run_worker_first": ["/api/*"]
+    "run_worker_first": ["/api/*"],
   },
-  "hyperdrive": [{
-    "binding": "HYPERDRIVE",
-    "id": "8d2c145ca49e4254861ff56a9e4a93b5",
-    "localConnectionString": "postgresql://microsonya:microsonya@localhost:5432/microsonya"
-  }],
-  "secrets": { "required": ["TELEGRAM_BOT_TOKEN", "MICROSONYA_DATA_ENCRYPTION_KEY"] }
+  "hyperdrive": [
+    {
+      "binding": "HYPERDRIVE",
+      "id": "8d2c145ca49e4254861ff56a9e4a93b5",
+      "localConnectionString": "postgresql://microsonya:microsonya@localhost:5432/microsonya",
+    },
+  ],
+  "secrets": {
+    "required": ["TELEGRAM_BOT_TOKEN", "MICROSONYA_DATA_ENCRYPTION_KEY"],
+  },
 }

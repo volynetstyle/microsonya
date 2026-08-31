@@ -1,9 +1,5 @@
 import { WorkerEntrypoint } from "cloudflare:workers";
-import {
-  SummaryLifecycleRepo,
-  dataEncryptionFromBase64,
-  openWorkerDb,
-} from "@microsonya/db";
+import { SummaryLifecycleRepo } from "@microsonya/db";
 import { asSummaryId, asTimestampMs, type SummaryId } from "@microsonya/shared";
 import type {
   CreateSummaryRunRequest,
@@ -16,6 +12,7 @@ import {
   type SummaryRunLifecycleStatus,
 } from "@microsonya/run-lifecycle";
 import { errorName, logTelemetry } from "../observability.js";
+import { withWorkerDatabase } from "../runtime/worker-db.js";
 
 const STALE_AFTER_MS = 5 * 60_000;
 const DEFAULT_LEASE_MS = 2 * 60_000;
@@ -24,17 +21,9 @@ async function withRepository<T>(
   env: Env,
   operation: (repository: SummaryLifecycleRepo) => Promise<T>,
 ): Promise<T> {
-  const client = await openWorkerDb(env.HYPERDRIVE.connectionString);
-  try {
-    return await operation(
-      new SummaryLifecycleRepo(
-        client.db,
-        dataEncryptionFromBase64(env.MICROSONYA_DATA_ENCRYPTION_KEY),
-      ),
-    );
-  } finally {
-    await client.close();
-  }
+  return withWorkerDatabase(env, (db, encryption) =>
+    operation(new SummaryLifecycleRepo(db, encryption)),
+  );
 }
 
 export class SummaryRunsEntrypoint extends WorkerEntrypoint<Env> {
@@ -250,7 +239,7 @@ export class SummaryRunsEntrypoint extends WorkerEntrypoint<Env> {
 export default {
   async scheduled(_controller, env): Promise<void> {
     const now = asTimestampMs(Date.now());
-    await withRepository(env, async (repository) => {
+    const jobs = await withRepository(env, async (repository) => {
       const stale = await repository.listStale(
         asTimestampMs(now - STALE_AFTER_MS),
         now,
@@ -264,6 +253,7 @@ export default {
         staleCount: stale.length,
       });
 
+      const preparedJobs: SummaryJob[] = [];
       for (const run of stale) {
         const action = decideReconciliation(
           run,
@@ -284,7 +274,7 @@ export default {
           );
           if (!prepared) continue;
 
-          await env.SUMMARY_JOBS.send({ runId: run.id } satisfies SummaryJob);
+          preparedJobs.push({ runId: run.id } satisfies SummaryJob);
         } catch (error) {
           // The run remains in a recoverable queued state. A later cron scan
           // will retry it if the Queue binding is temporarily unavailable.
@@ -294,7 +284,19 @@ export default {
           });
         }
       }
+      return preparedJobs;
     });
+    if (jobs.length === 0) return;
+    try {
+      await env.SUMMARY_JOBS.sendBatch(jobs.map((body) => ({ body })));
+    } catch (error) {
+      // Prepared runs remain recoverable in queued state and will be selected
+      // by a later reconciliation pass if Queue is temporarily unavailable.
+      logTelemetry("error", "lifecycle", "summary.reconcile.batch_error", {
+        errorName: errorName(error),
+        messageCount: jobs.length,
+      });
+    }
   },
 } satisfies ExportedHandler<Env, unknown>;
 
