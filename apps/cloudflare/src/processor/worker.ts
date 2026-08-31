@@ -12,7 +12,18 @@ import {
   type DeferReason,
   type SummaryId,
 } from "@microsonya/shared";
-import { createSummarizer, presentDisposition } from "@microsonya/summarize";
+import {
+  createSummarizer,
+  GROUP_PROGRESSIVE_POLICY,
+  PRIVATE_PROGRESSIVE_POLICY,
+  ProgressiveSummarySession,
+  presentDisposition,
+} from "@microsonya/summarize";
+import {
+  TelegramEditableMessageTransport,
+  TelegramPrivateDraftTransport,
+  type TelegramApi,
+} from "@microsonya/telegram";
 import { EMPTY_SUMMARY_MESSAGE, classifyUnknownFailure } from "./policy.js";
 import { logTelemetry, recordTelemetryMetric } from "../observability.js";
 import { createProcessorTelemetry } from "./telemetry.js";
@@ -149,6 +160,11 @@ export class SummaryProcessorEntrypoint extends WorkerEntrypoint<Env> {
     }
 
     let phase: ProcessingPhase = "services.bootstrap";
+    let progressiveSession: ProgressiveSummarySession | undefined;
+    let progressiveTransport:
+      | TelegramPrivateDraftTransport
+      | TelegramEditableMessageTransport
+      | undefined;
     try {
       const disposition = await this.withProcessingLeaseHeartbeat(
         runId,
@@ -162,6 +178,25 @@ export class SummaryProcessorEntrypoint extends WorkerEntrypoint<Env> {
               return presentPersistedAttempt(persisted);
             const attemptId = asSummaryId(
               `${runId}:attempt:${claimed.attempt}`,
+            );
+            const telegram = createTelegramApi(this.env.TELEGRAM_BOT_TOKEN);
+            const isPrivate = !claimed.command.chatId.startsWith("-");
+            progressiveTransport = isPrivate
+              ? new TelegramPrivateDraftTransport(
+                  telegram,
+                  claimed.command.chatId,
+                  claimed.command.commandMessageId,
+                )
+              : new TelegramEditableMessageTransport(telegram, {
+                  chatId: claimed.command.chatId,
+                  commandMessageId: claimed.command.commandMessageId,
+                });
+            progressiveSession = new ProgressiveSummarySession(
+              progressiveTransport,
+              undefined,
+              isPrivate
+                ? PRIVATE_PROGRESSIVE_POLICY
+                : GROUP_PROGRESSIVE_POLICY,
             );
             const summarizer = createSummarizer({
               messages: deps.messages,
@@ -181,6 +216,7 @@ export class SummaryProcessorEntrypoint extends WorkerEntrypoint<Env> {
               createSummaryId: () => attemptId,
               now: () => asTimestampMs(Date.now()),
               telemetry: createProcessorTelemetry(this.env.ANALYTICS, runId),
+              progressive: progressiveSession,
             });
             phase = "summary.generate";
             return tracing.enterSpan("summary.generate", (span) => {
@@ -231,10 +267,50 @@ export class SummaryProcessorEntrypoint extends WorkerEntrypoint<Env> {
       if (!saved) return { disposition: "retry", retryAfterSeconds: 5 };
       phase = "delivery.claim";
       const ready = await this.env.SUMMARY_RUNS.claimDelivery(runId);
-      return ready === undefined
-        ? { disposition: "retry", retryAfterSeconds: 5 }
-        : this.deliver(ready);
+      if (ready === undefined) {
+        return { disposition: "retry", retryAfterSeconds: 5 };
+      }
+      if (
+        progressiveSession?.state === "finalizing" &&
+        progressiveTransport !== undefined
+      ) {
+        try {
+          await progressiveSession.commit();
+          const messageId = progressiveMessageId(progressiveTransport);
+          if (messageId === undefined) {
+            throw new DeliveryError("TELEGRAM_MALFORMED_RESPONSE", true);
+          }
+          const completed = await this.env.SUMMARY_RUNS.markCompleted(
+            runId,
+            ready.leaseToken,
+            messageId,
+          );
+          return completed
+            ? { disposition: "completed" }
+            : { disposition: "retry", retryAfterSeconds: 5 };
+        } catch (error) {
+          return this.handleClaimedDeliveryError(ready, error);
+        }
+      }
+      return this.deliver(ready);
     } catch (error) {
+      if (
+        progressiveSession !== undefined &&
+        progressiveSession.state !== "completed" &&
+        progressiveSession.state !== "failed"
+      ) {
+        try {
+          await progressiveSession.fail(error);
+        } catch (presentationError) {
+          logTelemetry("warn", "processor", "summary.progressive.fail", {
+            runId,
+            errorName:
+              presentationError instanceof Error
+                ? presentationError.name
+                : "UNKNOWN_ERROR",
+          });
+        }
+      }
       return this.handleProcessingError(
         runId,
         claimed.leaseToken,
@@ -357,6 +433,44 @@ export class SummaryProcessorEntrypoint extends WorkerEntrypoint<Env> {
       : { disposition: "retry", retryAfterSeconds: 5 };
   }
 
+  private async handleClaimedDeliveryError(
+    claim: DeliveryClaim,
+    error: unknown,
+  ): Promise<ProcessSummaryRunResult> {
+    const failure = classifyFailure(error);
+    logTelemetry(
+      failure.retryable ? "warn" : "error",
+      "processor",
+      "summary.delivery.failed",
+      {
+        runId: claim.runId,
+        errorCode: failure.code,
+        disposition: failure.retryable ? "retry" : "permanent-failure",
+      },
+    );
+    if (!failure.retryable) {
+      const failed = await this.env.SUMMARY_RUNS.markFailed(
+        claim.runId,
+        claim.leaseToken,
+        "delivering",
+        failure.code,
+      );
+      return failed
+        ? { disposition: "permanent-failure" }
+        : { disposition: "retry", retryAfterSeconds: 5 };
+    }
+    const retrying = await this.env.SUMMARY_RUNS.markRetry(
+      claim.runId,
+      claim.leaseToken,
+      "delivering",
+      failure.code,
+      failure.retryAfterSeconds,
+    );
+    return retrying
+      ? { disposition: "retry", retryAfterSeconds: failure.retryAfterSeconds }
+      : { disposition: "retry", retryAfterSeconds: 5 };
+  }
+
   private async withProcessingLeaseHeartbeat<T>(
     runId: SummaryId,
     leaseToken: string,
@@ -446,6 +560,41 @@ async function sendTelegramMessage(
     throw new DeliveryError("TELEGRAM_MALFORMED_RESPONSE", true);
   }
   return messageId;
+}
+
+function createTelegramApi(token: string): TelegramApi {
+  return {
+    call: (method, body) => callTelegramApi(token, method, body),
+  };
+}
+
+async function callTelegramApi(
+  token: string,
+  method: string,
+  body: Readonly<Record<string, unknown>>,
+): Promise<unknown> {
+  const response = await fetch(`https://api.telegram.org/bot${token}/${method}`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  const payload: unknown = await response.json();
+  if (!response.ok) {
+    throw new DeliveryError(
+      `TELEGRAM_HTTP_${response.status}`,
+      response.status === 429 || response.status >= 500,
+      telegramRetryAfter(payload),
+    );
+  }
+  return payload;
+}
+
+function progressiveMessageId(
+  transport: TelegramPrivateDraftTransport | TelegramEditableMessageTransport,
+): number | undefined {
+  return transport instanceof TelegramPrivateDraftTransport
+    ? transport.messageId
+    : transport.committedMessageId;
 }
 
 class DeliveryError extends Error {

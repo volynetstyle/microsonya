@@ -1,0 +1,21 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "rootDir": "src",
+    "types": [
+      "./types/ingress.d.ts",
+      "./types/lifecycle.d.ts",
+      "./types/processor.d.ts",
+      "./types/wma.d.ts"
+    ]
+  },
+  "include": [
+    "src/ingress/**/*.ts",
+    "src/lifecycle/**/*.ts",
+    "src/processor/**/*.ts",
+    "src/runtime/**/*.ts",
+    "src/wma-api/**/*.ts",
+    "src/observability.ts"
+  ]
+}

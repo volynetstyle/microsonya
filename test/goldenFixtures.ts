@@ -284,6 +284,70 @@ export const goldenFixtures = [
     },
   }),
   fixture({
+    id: "conversational-ellipsis-and-author-boundary",
+    source: "live",
+    messages: [
+      "Карінка: хліб 80 грн, і ще випадково купила лосьйон за 400 грн.",
+      "Meleys: Я буду купувати блок.",
+      "Oleksandr: То ти готовий чи в когось замовляти будеш збірку?",
+      "Meleys: Певне готовий...",
+      "Oleksandr: Ну хочаб вже якийсь компроміс.",
+      "Хтось: Дадуть гроші.",
+      "Daria (reply): От би мені хтось дав...",
+    ],
+    expected: {
+      action: "SUMMARIZE",
+      summary: {
+        mustInclude: [
+          "Карінка",
+          "хліб",
+          "лосьйон",
+          "Meleys",
+          "компроміс",
+          "Daria",
+          "гроші",
+        ],
+        mustNotInvent: [
+          "блок живлення",
+          "Карінка купує комп’ютер",
+          "Карінка планує купити комп’ютер",
+          "Meleys готовий до замовлення",
+          "Oleksandr запропонував компроміс",
+          "Daria хоче отримати допомогу",
+        ],
+        preserveRelations: [
+          "bread and lotion belong to Карінка; the computer choice belongs to Meleys",
+          "готовий contrasts a ready-made computer/system unit with ordering a custom build",
+          "Oleksandr evaluates the ready-made choice as a compromise rather than proposing one",
+          "Daria's reply refers specifically to receiving money",
+        ],
+        propositions: [
+          {
+            subject: "Карінка",
+            relation: "bought",
+            object: "bread for 80 UAH and lotion for 400 UAH",
+          },
+          {
+            subject: "Meleys",
+            relation: "prefers",
+            object: "a ready-made computer/system unit over a custom build",
+          },
+          {
+            subject: "Oleksandr",
+            relation: "evaluates",
+            object: "the ready-made choice as a compromise",
+          },
+          {
+            subject: "Daria",
+            relation: "wants_to_receive",
+            object: "money",
+          },
+        ],
+      },
+      checkpoint: { advance: true },
+    },
+  }),
+  fixture({
     id: "checkpoint-single-banter-after-summary",
     source: "live",
     messages: ["Бо то робив кацап."],
@@ -438,6 +502,7 @@ export const smokeE2E = [
 ] as const;
 
 export const adversarialE2E = [
+  "conversational-ellipsis-and-author-boundary",
   "long-fictional-spongebob-story",
   "banter-with-durable-technical-island",
   "wordplay-only-banter",

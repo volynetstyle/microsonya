@@ -5,7 +5,7 @@ import {
   wmaChatCatalog,
 } from "@microsonya/db";
 import type { TelegramIdentity } from "./auth.js";
-import { withWorkerDatabase } from "../runtime/worker-db.js";
+import { withWorkerDatabase } from "../../runtime/worker-db.js";
 
 const TELEGRAM_AUTH_CONCURRENCY = 4;
 

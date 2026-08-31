@@ -13,6 +13,12 @@ export interface ConversationSummarizer {
     telemetry?: SummarizationTelemetryTrace,
     roles?: readonly ModelWindowMessageRole[],
   ): Promise<Summary>;
+  stream?(
+    window: ConversationWindow,
+    signal?: AbortSignal,
+    telemetry?: SummarizationTelemetryTrace,
+    roles?: readonly ModelWindowMessageRole[],
+  ): AsyncIterable<string>;
 }
 
 export interface ConversationSummarizerDeps {
@@ -22,7 +28,57 @@ export interface ConversationSummarizerDeps {
 export function createConversationSummarizer({
   ollama,
 }: ConversationSummarizerDeps): ConversationSummarizer {
+  const stream = async function* (
+    window: ConversationWindow,
+    signal?: AbortSignal,
+    telemetry?: SummarizationTelemetryTrace,
+    roles?: readonly ModelWindowMessageRole[],
+  ): AsyncIterable<string> {
+    signal?.throwIfAborted();
+    const prompt = `${buildSummaryPrompt(window, roles)}\n\nReturn only the summary as plain text. Do not use JSON or Markdown.`;
+    telemetry?.record({
+      type: "model.request",
+      stage: "summarizer",
+      model: SUMMARIZER_PROFILE.model,
+      messageCount: window.messages.length,
+      promptChars: prompt.length,
+      prompt,
+    });
+    const startedAt = performance.now();
+    let content = "";
+    for await (const event of ollama.chat(
+      {
+        ...SUMMARIZER_PROFILE,
+        format: undefined,
+        stream: true,
+        messages: [{ role: "user", content: prompt }],
+      },
+      { signal },
+    )) {
+      signal?.throwIfAborted();
+      const delta = event.message.content;
+      if (delta.length > 0) {
+        content += delta;
+        yield delta;
+      }
+    }
+    const durationMs = performance.now() - startedAt;
+    if (content.trim().length === 0) {
+      throw new TypeError("Streaming summarizer returned empty output.");
+    }
+    telemetry?.record({
+      type: "model.response",
+      stage: "summarizer",
+      model: SUMMARIZER_PROFILE.model,
+      attempt: 1,
+      durationMs,
+      responseChars: content.length,
+      summaryChars: content.length,
+    });
+  };
+
   return {
+    stream,
     summarize: async (window, signal, telemetry, roles) => {
       signal?.throwIfAborted();
       const prompt = buildSummaryPrompt(window, roles);

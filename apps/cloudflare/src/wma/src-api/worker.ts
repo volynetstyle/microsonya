@@ -4,7 +4,7 @@ import {
   getSummaryDetail,
   listWmaChats,
 } from "./bootstrap.js";
-import { errorName, logTelemetry } from "../observability.js";
+import { errorName, logTelemetry } from "../../observability.js";
 
 export type WmaDevBindings = Readonly<{
   WMA_DEV_BYPASS_AUTH?: string;

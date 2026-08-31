@@ -44,6 +44,12 @@ export interface WindowProcessorDeps {
   readonly now?: () => TimestampMs;
   readonly telemetry?: SummarizationTelemetryTrace;
   readonly roles?: readonly ModelWindowMessageRole[];
+  readonly progressive?: {
+    begin(): Promise<void>;
+    append(delta: string): void;
+    finalize(): Promise<string>;
+    fail(error: unknown): Promise<void>;
+  };
 }
 
 export interface WindowProcessingResult {
@@ -109,12 +115,31 @@ export async function processWindow(
   });
   let disposition: WindowDisposition;
   if (decision.action === "SUMMARIZE") {
-    const generated = await deps.summarizer.summarize(
-      window,
-      signal,
-      deps.telemetry,
-      deps.roles,
-    );
+    let generated: { readonly text: string };
+    if (deps.progressive !== undefined && deps.summarizer.stream !== undefined) {
+      await deps.progressive.begin();
+      try {
+        for await (const delta of deps.summarizer.stream(
+          window,
+          signal,
+          deps.telemetry,
+          deps.roles,
+        )) {
+          deps.progressive.append(delta);
+        }
+        generated = { text: await deps.progressive.finalize() };
+      } catch (error) {
+        await deps.progressive.fail(error);
+        throw error;
+      }
+    } else {
+      generated = await deps.summarizer.summarize(
+        window,
+        signal,
+        deps.telemetry,
+        deps.roles,
+      );
+    }
     signal?.throwIfAborted();
     const messages = window.messages;
     disposition = Object.freeze({

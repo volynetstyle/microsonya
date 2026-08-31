@@ -6,11 +6,14 @@ import {
 import { extractionFixtures } from "./extractionFixtures.js";
 
 describe("semantic proposition contracts", () => {
-  it("covers all seven long-context fixtures and the live production case", () => {
+  it("covers all long-context fixtures and live production regressions", () => {
     expect(
       extractionFixtures.every(({ id }) => hasPropositionContract(id)),
     ).toBe(true);
     expect(hasPropositionContract("live-prod-version-vs-time")).toBe(true);
+    expect(
+      hasPropositionContract("conversational-ellipsis-and-author-boundary"),
+    ).toBe(true);
   });
 
   it("distinguishes an 18:00 deadline from version 1.8", () => {
@@ -65,5 +68,25 @@ describe("semantic proposition contracts", () => {
     )!;
     expect(faithful.score).toBe(1);
     expect(stale.errorsByType.SUPERSESSION).toBeGreaterThanOrEqual(1);
+  });
+
+  it("preserves author boundaries, ellipsis, speech acts, and reply referents", () => {
+    const faithful = evaluatePropositions(
+      "conversational-ellipsis-and-author-boundary",
+      "Карінка купила хліб за 80 грн і лосьйон за 400 грн. Meleys схиляється до готового системного блока, а не замовної збірки; Oleksandr назвав цей вибір компромісом. Daria хотіла б, щоб їй дали гроші.",
+    )!;
+    const fluentButFalse = evaluatePropositions(
+      "conversational-ellipsis-and-author-boundary",
+      "Карінка купила хліб за 80 грн і лосьйон за 400 грн, а потім комп’ютер. Meleys планує купити блок живлення і готовий до замовлення збірки. Oleksandr запропонував компроміс. Daria хотіла б отримати допомогу.",
+    )!;
+
+    expect(faithful.score).toBe(1);
+    expect(fluentButFalse.score).toBeLessThan(0.5);
+    expect(fluentButFalse.errorsByType).toMatchObject({
+      FACT_INVENTION: 1,
+      PROVENANCE: 2,
+      ENTITY_BINDING: 1,
+      SPEECH_ACT: 1,
+    });
   });
 });

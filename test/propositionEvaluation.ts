@@ -6,6 +6,7 @@ export type SemanticErrorType =
   | "PROVENANCE"
   | "SUPERSESSION"
   | "EPISTEMIC_STATE"
+  | "SPEECH_ACT"
   | "CONDITION_PRESERVATION";
 
 export interface PropositionAssertion {
@@ -266,6 +267,60 @@ const definitions: Readonly<Record<string, readonly PropositionAssertion[]>> = {
       "EPISTEMIC_STATE",
       "Race condition remains a hypothesis",
       /(?:race condition)[^.\n]*(?:підтверд|confirmed|була?\s+причин)|(?:причиною\s+(?:був|була)|confirmed cause)[^.\n]*race condition/iu,
+    ),
+  ],
+  "conversational-ellipsis-and-author-boundary": [
+    required(
+      "karinka-purchases",
+      "PROVENANCE",
+      "Bread and lotion purchases belong to Карінка",
+      [/карінк/iu, /хліб/iu, /лосьйон/iu, /80/iu, /400/iu],
+    ),
+    required(
+      "meleys-ready-made-computer",
+      "ENTITY_BINDING",
+      "Meleys chooses a ready-made computer/system unit rather than a custom build",
+      [
+        /meleys/iu,
+        /готов(?:ий|ого)|системн(?:ий|ого)\s+блок|готов(?:ий|ого)\s+(?:комп|пк)/iu,
+        /збірк|сборк|custom\s+build/iu,
+      ],
+    ),
+    required(
+      "oleksandr-compromise-assessment",
+      "SPEECH_ACT",
+      "Oleksandr calls the resulting choice a compromise",
+      [/oleksandr|олександр/iu, /компроміс|компромисс|compromise/iu],
+    ),
+    required(
+      "daria-money-referent",
+      "PROVENANCE",
+      "Daria's reply refers specifically to receiving money",
+      [/daria|дар[’'ь]?я/iu, /грош|ден(?:ьги|ег)|money/iu],
+    ),
+    forbidden(
+      "psu-invented",
+      "FACT_INVENTION",
+      "The ambiguous word блок must not become a power supply",
+      /блок\s+(?:живлення|питания)|power\s+supply|\bpsu\b/iu,
+    ),
+    forbidden(
+      "karinka-computer-merge",
+      "PROVENANCE",
+      "Карінка's purchases must not be merged with the computer purchase",
+      /карінк[^.\n]*(?:комп(?:’ютер|ьютер)?|пк|системн(?:ий|ого)\s+блок)|(?:комп(?:’ютер|ьютер)?|пк|системн(?:ий|ого)\s+блок)[^.\n]*карінк/iu,
+    ),
+    forbidden(
+      "personal-readiness",
+      "ENTITY_BINDING",
+      "готовий must not be interpreted as personal readiness to order",
+      /(?:готов(?:ий|а|і)|готовност)[^.\n]*(?:замов|заказ)|(?:замов|заказ)[^.\n]*(?:готов(?:ий|а|і)|готовност)/iu,
+    ),
+    forbidden(
+      "compromise-proposed",
+      "SPEECH_ACT",
+      "Oleksandr's assessment must not become a proposed action",
+      /oleksandr[^.\n]*(?:запропон|предлож|propos)[^.\n]*компроміс|олександр[^.\n]*(?:запропон|предлож)[^.\n]*компромисс/iu,
     ),
   ],
 };

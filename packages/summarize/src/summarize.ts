@@ -23,7 +23,11 @@ import {
   createConversationSummarizer,
   type ConversationSummarizer,
 } from "./conversationSummarizer.js";
-import { processWindow, type FastClassifier } from "./orchestrator.js";
+import {
+  processWindow,
+  type FastClassifier,
+  type WindowProcessorDeps,
+} from "./orchestrator.js";
 import type {
   SummarizationTelemetryService,
   SummarizationTelemetryTrace,
@@ -73,6 +77,7 @@ export interface SummarizerDeps {
   readonly now?: () => TimestampMs;
   /** Optional policy hook; the default implements the v0.1 pending window. */
   readonly windowSelector?: SummaryWindowSelector;
+  readonly progressive?: WindowProcessorDeps["progressive"];
 }
 export type {
   SelectedConversation,
@@ -225,6 +230,7 @@ async function run(
         now: deps.now,
         telemetry,
         roles: selected.messages,
+        progressive: deps.progressive,
       },
       signal,
     );
