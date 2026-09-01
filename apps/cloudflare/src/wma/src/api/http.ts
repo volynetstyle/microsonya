@@ -9,7 +9,10 @@ export class WmaApiError extends Error {
 export async function postJson<T>(path: string, initData: string): Promise<T> {
   const response = await fetch(path, {
     method: "POST",
-    headers: { "X-Telegram-Init-Data": initData, "X-Time-Zone": Intl.DateTimeFormat().resolvedOptions().timeZone },
+    headers: {
+      "X-Telegram-Init-Data": initData,
+      "X-Time-Zone": Intl.DateTimeFormat().resolvedOptions().timeZone,
+    },
   });
   if (!response.ok)
     throw new WmaApiError(response.status, await response.text());

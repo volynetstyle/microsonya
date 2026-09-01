@@ -5,5 +5,5 @@
     "outDir": "dist",
     "types": ["./types/wma.d.ts"]
   },
-  "include": ["src/wma-api/**/*.ts"]
+  "include": ["src/wma/src-api/**/*.ts"]
 }

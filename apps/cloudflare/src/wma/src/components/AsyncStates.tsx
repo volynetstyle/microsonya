@@ -42,39 +42,31 @@ export function ChatSkeleton() {
       aria-label="Завантаження підсумків"
     >
       <span class="sr-only">Завантажуємо підсумки…</span>
-      <header
-        class="app-header chat-header skeleton-chat-header"
-        aria-hidden="true"
-      >
-        <span class="skeleton-back" />
-        <span class="skeleton-header-copy">
-          <span class="skeleton-block skeleton-line skeleton-chat-title" />
-          <span class="skeleton-block skeleton-line skeleton-chat-subtitle" />
-        </span>
-      </header>
       <div class="chat-content skeleton-summary-list" aria-hidden="true">
         <div class="section-heading skeleton-section-heading">
           <span class="skeleton-block skeleton-line skeleton-section-title" />
           <span class="skeleton-block skeleton-pill" />
         </div>
-        <For each={SUMMARY_ROWS}>
-          {(_, index) => (
-            <article class="skeleton-summary-card">
-              <div class="skeleton-summary-heading">
-                <span class="skeleton-block skeleton-summary-icon" />
-                <span class="skeleton-summary-copy">
-                  <span class="skeleton-block skeleton-line skeleton-line-title" />
-                  <span class="skeleton-block skeleton-line skeleton-line-caption" />
-                </span>
-              </div>
-              <span
-                class="skeleton-block skeleton-line skeleton-line-body"
-                style={{ width: `${88 - index() * 7}%` }}
-              />
-              <span class="skeleton-block skeleton-line skeleton-line-body-short" />
-            </article>
-          )}
-        </For>
+        <div class="skeleton-summary-group">
+          <For each={SUMMARY_ROWS}>
+            {(_, index) => (
+              <article class="skeleton-summary-card">
+                <div class="skeleton-summary-heading">
+                  <span class="skeleton-block skeleton-summary-icon" />
+                  <span class="skeleton-summary-copy">
+                    <span class="skeleton-block skeleton-line skeleton-line-title" />
+                    <span class="skeleton-block skeleton-line skeleton-line-caption" />
+                  </span>
+                </div>
+                <span
+                  class="skeleton-block skeleton-line skeleton-line-body"
+                  style={{ width: `${88 - index() * 7}%` }}
+                />
+                <span class="skeleton-block skeleton-line skeleton-line-body-short" />
+              </article>
+            )}
+          </For>
+        </div>
       </div>
     </div>
   );

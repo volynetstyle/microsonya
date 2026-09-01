@@ -1,7 +1,7 @@
 {
   "$schema": "../../../node_modules/wrangler/config-schema.json",
   "name": "microsonya-wma-staging",
-  "main": "../../src/wma-api/worker.ts",
+  "main": "../../src/wma/src-api/worker.ts",
   "compatibility_date": "2026-08-30",
   "compatibility_flags": ["nodejs_compat"],
   "workers_dev": true,

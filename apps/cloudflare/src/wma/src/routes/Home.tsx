@@ -6,9 +6,8 @@ import {
   Loading,
   Show,
 } from "solid-js";
-import { loadChats } from "../api/bootstrap";
+import { fixtureHref, loadChats } from "../api/bootstrap";
 import type { WmaChat } from "../api/contracts";
-import { fixtureHref } from "../api/fixtures";
 import {
   EmptyState,
   ErrorState,

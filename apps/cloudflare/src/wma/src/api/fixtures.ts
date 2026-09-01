@@ -97,14 +97,6 @@ export function activeFixture(): WmaFixture | undefined {
     : undefined;
 }
 
-export function fixtureHref(path: string): string {
-  const fixture = activeFixture();
-  if (!fixture) return path;
-  const url = new URL(path, location.origin);
-  url.searchParams.set("fixture", fixture);
-  return `${url.pathname}${url.search}`;
-}
-
 export function fixtureResponse<T>(
   resource: WmaFixtureResource,
 ): Promise<T> | undefined {

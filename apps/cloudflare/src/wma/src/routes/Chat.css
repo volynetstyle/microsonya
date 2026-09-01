@@ -1,0 +1,135 @@
+.chat-screen {
+  background:
+    radial-gradient(
+      circle at 0 0,
+      color-mix(in srgb, var(--accent) 5%, transparent),
+      transparent 18rem
+    ),
+    var(--surface-secondary);
+}
+
+.chat-header {
+  display: flex;
+  align-items: center;
+  min-block-size: calc(4.5rem + var(--safe-top));
+  padding: calc(0.625rem + var(--safe-top)) var(--spacing-screen) 0.625rem
+    0.5rem;
+  border-block-end: 1px solid var(--separator-soft);
+}
+
+.chat-back {
+  display: grid;
+  flex: none;
+  inline-size: 2.75rem;
+  block-size: 2.75rem;
+  margin-inline-end: 0.375rem;
+  border-radius: 50%;
+  color: var(--accent);
+  place-items: center;
+  transition: background-color var(--motion-duration-fast) ease;
+}
+
+.chat-back svg {
+  inline-size: 1.5rem;
+  block-size: 1.5rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.chat-back:active {
+  background: var(--accent-soft);
+}
+
+.chat-back:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.chat-header-copy {
+  display: flex;
+  flex: 1;
+  min-inline-size: 0;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.chat-title {
+  margin: 0;
+  overflow: hidden;
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: -0.015em;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chat-subtitle {
+  overflow: hidden;
+  color: var(--text-secondary);
+  font-size: 0.6875rem;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chat-title-skeleton {
+  inline-size: min(12rem, 52vw);
+  block-size: 0.75rem;
+}
+
+.chat-subtitle-skeleton {
+  inline-size: 7rem;
+  block-size: 0.5rem;
+}
+
+.chat-content {
+  padding: 1rem var(--spacing-screen) 0;
+}
+
+.chat-section-heading {
+  min-block-size: 2.5rem;
+  padding-inline: 0.25rem;
+}
+
+.chat-section-heading > span:first-child {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.chat-section-kicker {
+  color: var(--accent);
+  font-size: 0.5625rem;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+}
+
+.chat-count-badge {
+  padding: 0.3rem 0.6rem;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 0.6875rem;
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+}
+
+.topic-list {
+  display: flex;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  flex-direction: column;
+  gap: 0;
+  list-style: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .chat-back:hover {
+    background: var(--accent-soft);
+  }
+}

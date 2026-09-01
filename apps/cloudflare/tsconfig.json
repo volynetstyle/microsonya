@@ -15,7 +15,7 @@
     "src/lifecycle/**/*.ts",
     "src/processor/**/*.ts",
     "src/runtime/**/*.ts",
-    "src/wma-api/**/*.ts",
+    "src/wma/src-api/**/*.ts",
     "src/observability.ts"
   ]
 }
