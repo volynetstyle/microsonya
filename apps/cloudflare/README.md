@@ -27,9 +27,10 @@ pnpm --filter @microsonya/cloudflare deploy:wma
 ```
 
 Before the first deploy, configure `TELEGRAM_BOT_TOKEN` and the existing
-`MICROSONYA_DATA_ENCRYPTION_KEY` as Worker secrets for each environment. Attach
-the published Worker custom domain, then configure that HTTPS URL in BotFather
-as the Mini App URL.
+`MICROSONYA_DATA_ENCRYPTION_KEY` as Worker secrets for each environment. The
+ingress Worker also needs `TELEGRAM_BOT_TOKEN` so `/app` can return its native
+ephemeral launcher. Attach the published WMA Worker custom domain, then
+configure that HTTPS URL in BotFather as the bot's Main Mini App URL.
 
 Microsonya-owned portable request/result types live in
 `@microsonya/contracts`. Telegram command parsing lives in
@@ -72,6 +73,23 @@ curl -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/setWebhook" \
   -d "url=$TELEGRAM_WEBHOOK_URL/telegram" \
   -d "secret_token=$TELEGRAM_WEBHOOK_SECRET" \
   -d "max_connections=1"
+```
+
+Register the command list through Bot API 10.3 or newer. `is_ephemeral` makes
+both the incoming `/app` command and its launcher visible only to its sender in
+groups and supergroups:
+
+```sh
+curl -X POST "https://api.telegram.org/bot$TELEGRAM_BOT_TOKEN/setMyCommands" \
+  -H "Content-Type: application/json" \
+  -d '{"commands":[{"command":"summary","description":"Summarize recent messages"},{"command":"app","description":"Open Microsonya","is_ephemeral":true}]}'
+```
+
+Set the bot token on both ingress deployments before deploying this change:
+
+```sh
+pnpm --filter @microsonya/cloudflare exec wrangler secret put TELEGRAM_BOT_TOKEN -c workers/ingress/wrangler.jsonc
+pnpm --filter @microsonya/cloudflare exec wrangler secret put TELEGRAM_BOT_TOKEN -c workers/ingress/wrangler.staging.jsonc
 ```
 
 Workers Logs and traces start at 100% sampling for the initial production

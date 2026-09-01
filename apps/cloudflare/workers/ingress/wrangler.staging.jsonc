@@ -9,7 +9,11 @@
     "BOT_USERNAME": "microsonya_bot",
   },
   "secrets": {
-    "required": ["TELEGRAM_WEBHOOK_SECRET", "MICROSONYA_DATA_ENCRYPTION_KEY"],
+    "required": [
+      "TELEGRAM_WEBHOOK_SECRET",
+      "TELEGRAM_BOT_TOKEN",
+      "MICROSONYA_DATA_ENCRYPTION_KEY",
+    ],
   },
   "hyperdrive": [
     {

@@ -5,6 +5,7 @@ import {
   asTimestampMs,
   type SummaryCommand,
 } from "@microsonya/shared";
+import { APP_COMMAND_NAME } from "./appCommand.js";
 
 export const SUMMARY_COMMAND_NAME = "summary";
 const MAX_REQUESTED_COUNT = 128;
@@ -13,6 +14,11 @@ export const telegramCommands = [
   {
     command: SUMMARY_COMMAND_NAME,
     description: "Summarize recent messages",
+  },
+  {
+    command: APP_COMMAND_NAME,
+    description: "Open Microsonya",
+    is_ephemeral: true,
   },
 ];
 

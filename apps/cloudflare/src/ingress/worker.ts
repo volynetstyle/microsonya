@@ -4,6 +4,8 @@ import type {
 } from "@microsonya/contracts";
 import { MessagesRepo } from "@microsonya/db";
 import {
+  createAppLauncherMessage,
+  parseAppCommandUpdate,
   parseSummaryCommandUpdate,
   parseTelegramChatMessageUpdate,
 } from "@microsonya/telegram";
@@ -63,6 +65,16 @@ async function handleTelegramIngress(
   }
 
   const update: unknown = await request.json();
+  const appCommand = parseAppCommandUpdate(update, env.BOT_USERNAME);
+  if (appCommand !== undefined) {
+    span.setAttribute("microsonya.command", "app");
+    await sendAppLauncher(
+      env,
+      createAppLauncherMessage(appCommand, env.BOT_USERNAME),
+    );
+    return new Response("OK");
+  }
+
   const chatMessage = parseTelegramChatMessageUpdate(update);
   if (chatMessage !== undefined) {
     await tracing.enterSpan("telegram.message.persist", (persistSpan) => {
@@ -112,6 +124,37 @@ async function handleTelegramIngress(
   // the job. The queued marker is recoverable bookkeeping: created runs are
   // reconciled and enqueueing/processing are idempotent.
   return new Response("OK");
+}
+
+async function sendAppLauncher(
+  env: CloudflareEnv,
+  body: Readonly<Record<string, unknown>>,
+): Promise<void> {
+  const response = await fetch(
+    `https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`,
+    {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(body),
+    },
+  );
+  const payload: unknown = await response.json();
+  if (!response.ok || !isTelegramSuccess(payload)) {
+    logTelemetry("error", "ingress", "telegram.app_launcher.failed", {
+      errorCode: `TELEGRAM_HTTP_${response.status}`,
+    });
+    throw new Error(
+      `Telegram app launcher failed with HTTP ${response.status}.`,
+    );
+  }
+}
+
+function isTelegramSuccess(payload: unknown): boolean {
+  return (
+    typeof payload === "object" &&
+    payload !== null &&
+    (payload as { readonly ok?: unknown }).ok === true
+  );
 }
 
 function hasTelegramWebhookSecret(request: Request, expected: string): boolean {
