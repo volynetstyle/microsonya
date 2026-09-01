@@ -5,16 +5,16 @@
   color-scheme: light dark;
 
   --fallback-bg: #ffffff;
-  --fallback-secondary-bg: #f0f0f0;
-  --fallback-text: #000000;
-  --fallback-hint: #707579;
-  --fallback-link: #2563eb;
-  --fallback-button: #2563eb;
+  --fallback-secondary-bg: #f3f5f8;
+  --fallback-text: #15202b;
+  --fallback-hint: #74808d;
+  --fallback-link: #2481cc;
+  --fallback-button: #2481cc;
   --fallback-button-text: #ffffff;
   --fallback-destructive: #df3f40;
 
-  --motion-duration-fast: 160ms;
-  --motion-duration-standard: 200ms;
+  --motion-duration-fast: 140ms;
+  --motion-duration-standard: 220ms;
 
   /* Application semantics consume Telegram's official CSS variables directly.
      Components do not depend on the host's naming scheme. */
@@ -54,43 +54,71 @@
     --tg-theme-section-separator-color,
     color-mix(in srgb, var(--text-hint) 30%, transparent)
   );
-  --accent-soft: color-mix(in srgb, var(--accent) 12%, var(--surface-section));
-  --accent-border: color-mix(in srgb, var(--accent) 30%, transparent);
+  --separator-soft: color-mix(in srgb, var(--separator) 60%, transparent);
+  --surface-tint: color-mix(
+    in srgb,
+    var(--surface-primary) 94%,
+    var(--accent) 6%
+  );
+  --surface-pressed: color-mix(
+    in srgb,
+    var(--surface-section) 92%,
+    var(--accent) 8%
+  );
+  --accent-soft: color-mix(in srgb, var(--accent) 10%, var(--surface-section));
+  --accent-border: color-mix(in srgb, var(--accent) 24%, transparent);
   --scrollbar: color-mix(in srgb, var(--text-primary) 20%, transparent);
+  --skeleton-fill: color-mix(
+    in srgb,
+    var(--text-hint) 13%,
+    var(--surface-section)
+  );
+  --shadow-card:
+    0 1px 2px color-mix(in srgb, #0b1f33 7%, transparent),
+    0 0.5rem 1.5rem color-mix(in srgb, #0b1f33 4%, transparent);
+
+  --safe-top: max(
+    var(--tg-content-safe-area-inset-top, 0px),
+    env(safe-area-inset-top, 0px)
+  );
+  --safe-bottom: max(
+    var(--tg-content-safe-area-inset-bottom, 0px),
+    env(safe-area-inset-bottom, 0px)
+  );
 
   /* Default/browser morphology. Telegram platform profiles override this. */
-  --font-ui: system-ui, sans-serif;
+  --font-ui: Inter, system-ui, sans-serif;
   --font-size-body: 16px;
   --font-size-caption: 14px;
   --font-size-title: 17px;
   --font-weight-regular: 400;
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
-  --control-radius: 10px;
-  --section-radius: 12px;
+  --control-radius: 12px;
+  --section-radius: 16px;
   --spacing-screen: 16px;
-  --row-min-height: 50px;
+  --row-min-height: 52px;
 }
 
 [data-tg-platform="ios"],
 [data-tg-platform="macos"] {
   --font-ui: -apple-system, BlinkMacSystemFont, sans-serif;
-  --control-radius: 10px;
-  --section-radius: 10px;
+  --control-radius: 12px;
+  --section-radius: 16px;
 }
 
 [data-tg-platform="android"],
 [data-tg-platform="android_x"] {
   --font-ui: Roboto, "Noto Sans", sans-serif;
   --control-radius: 12px;
-  --section-radius: 12px;
+  --section-radius: 16px;
 }
 
 [data-tg-platform="tdesktop"],
 [data-tg-platform="unigram"] {
   --font-ui: "Open Sans", "Segoe UI", sans-serif;
   --control-radius: 8px;
-  --section-radius: 8px;
+  --section-radius: 12px;
   --row-min-height: 46px;
 }
 
@@ -191,10 +219,74 @@ html::-webkit-scrollbar-track {
 }
 
 body {
+  min-inline-size: 18rem;
+  min-block-size: 100dvh;
   margin: 0;
   background: var(--surface-secondary);
   color: var(--text-primary);
   font-family: var(--font-ui);
   font-size: var(--font-size-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
   overflow-wrap: anywhere;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  font-family: inherit;
+}
+
+.view-transition-viewport {
+  min-block-size: var(--tg-viewport-stable-height, 100dvh);
+}
+
+.screen {
+  max-inline-size: 48rem;
+  min-block-size: var(--tg-viewport-stable-height, 100dvh);
+  margin-inline: auto;
+  padding-block-end: calc(1rem + var(--safe-bottom));
+  background: var(--surface-secondary);
+}
+
+.app-header {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 10;
+  background: color-mix(in srgb, var(--surface-header) 94%, transparent);
+  backdrop-filter: saturate(145%) blur(1rem);
+  -webkit-backdrop-filter: saturate(145%) blur(1rem);
+}
+
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.section-heading h2 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.01em;
+}
+
+@media (min-width: 48rem) {
+  :root {
+    --spacing-screen: 20px;
+  }
+
+  .screen {
+    min-block-size: calc(var(--tg-viewport-stable-height, 100dvh) - 2rem);
+    margin-block: 1rem;
+    border: 1px solid var(--separator-soft);
+    border-radius: 1.25rem;
+    overflow: clip;
+    box-shadow: var(--shadow-card);
+  }
 }
