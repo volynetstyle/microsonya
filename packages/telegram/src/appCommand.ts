@@ -91,7 +91,7 @@ export function createAppLauncherMessage(
 
   return Object.freeze({
     chat_id: command.chatId,
-    text: "Microsonya готова к работе.",
+    text: "Microsonya готова до роботи.",
     ...(command.ephemeralMessageId === undefined
       ? {}
       : {
@@ -106,7 +106,7 @@ export function createAppLauncherMessage(
       inline_keyboard: [
         [
           {
-            text: "Открыть Microsonya",
+            text: "Відкрити Microsonya",
             url: `https://t.me/${username}?startapp`,
           },
         ],

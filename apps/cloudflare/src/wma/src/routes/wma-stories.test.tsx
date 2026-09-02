@@ -6,9 +6,11 @@ import Home from "./Home";
 afterEach(() => {
   cleanup();
   history.replaceState(null, "", "/");
+  delete document.documentElement.dataset.devicePerformance;
 });
 
-describe("WMA visual state stories", () => {
+// Every story intentionally owns the same location/history surface.
+describe.sequential("WMA visual state stories", () => {
   it("renders the production-shaped home fixture", async () => {
     history.replaceState(null, "", "/?fixture=demo");
     const view = render(() => <Home />);
@@ -44,6 +46,7 @@ describe("WMA visual state stories", () => {
   });
 
   it("covers the summary-to-source hot path", async () => {
+    document.documentElement.dataset.devicePerformance = "low";
     history.replaceState(null, "", "/chat?ref=product-team&fixture=demo");
     const view = render(() => <Chat chatRef="product-team" />);
 
@@ -70,6 +73,13 @@ describe("WMA visual state stories", () => {
     expect(
       view.getByRole("button", { name: "Повернутися до підсумку" }),
     ).toBeInTheDocument();
+    const sourceMessage = view.container.querySelector(".source-message");
+    expect(sourceMessage).not.toBeNull();
+    expect(
+      (sourceMessage as HTMLElement).style.getPropertyValue(
+        "--source-item-duration",
+      ),
+    ).toBe("200ms");
   });
 
   it("exposes a retry action in the error story", async () => {

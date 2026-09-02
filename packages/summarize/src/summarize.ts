@@ -50,9 +50,7 @@ export interface MessageReader {
 }
 
 export interface SummaryRunStore {
-  findLastRun(
-    chatId: ChatId,
-  ): Promise<Pick<SummaryRun, "covers"> | undefined>;
+  findLastRun(chatId: ChatId): Promise<Pick<SummaryRun, "covers"> | undefined>;
   saveRun(run: SummaryRun): Promise<void>;
   saveAttempt?(attempt: SummaryRunAttempt): Promise<void>;
 }
@@ -252,6 +250,17 @@ async function run(
       });
     }
 
+    const terminalRun =
+      disposition.kind === "summarized"
+        ? toSummaryRun(
+            selected,
+            command,
+            result.decision.action,
+            disposition,
+            deps,
+          )
+        : undefined;
+
     if (
       disposition.kind !== "deferred" &&
       selected.consumption === "checkpoint" &&
@@ -259,15 +268,19 @@ async function run(
     ) {
       stage = "disposition.save";
       const saveStartedAt = performance.now();
-      const terminalRun = toSummaryRun(
-        selected,
-        command,
-        result.decision.action,
-        disposition,
-        deps,
-      );
       stage = "attempt.save";
-      await persistAttempt(disposition.kind, undefined, terminalRun);
+      await persistAttempt(
+        disposition.kind,
+        undefined,
+        terminalRun ??
+          toSummaryRun(
+            selected,
+            command,
+            result.decision.action,
+            disposition,
+            deps,
+          ),
+      );
       attemptPersisted = true;
       checkpointAdvanced = true;
       deferStreakByChat.delete(command.chatId);
@@ -284,7 +297,7 @@ async function run(
     });
     if (!attemptPersisted) {
       stage = "attempt.save";
-      await persistAttempt(disposition.kind);
+      await persistAttempt(disposition.kind, undefined, terminalRun);
       attemptPersisted = true;
     }
     recordRun(disposition.kind);

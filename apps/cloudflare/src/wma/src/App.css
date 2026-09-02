@@ -261,6 +261,15 @@ button {
   -webkit-backdrop-filter: saturate(145%) blur(1rem);
 }
 
+/* Blur is paint-bound during scroll. Low-end Telegram keeps identical motion
+   timing while using the opaque header path, so frame delivery stays on the
+   compositor without changing the interaction physics. */
+[data-device-performance="low"] .app-header {
+  background: var(--surface-header);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
 .section-heading {
   display: flex;
   align-items: center;

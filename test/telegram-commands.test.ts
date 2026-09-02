@@ -46,14 +46,14 @@ describe("Telegram app command", () => {
     });
     expect(createAppLauncherMessage(command!, "MicrosonyaBot")).toEqual({
       chat_id: "-42",
-      text: "Microsonya готова к работе.",
+      text: "Microsonya готова до роботи.",
       ephemeral_message_parameters: { receiver_user_id: 7 },
       reply_parameters: { ephemeral_message_id: 91 },
       reply_markup: {
         inline_keyboard: [
           [
             {
-              text: "Открыть Microsonya",
+              text: "Відкрити Microsonya",
               url: "https://t.me/MicrosonyaBot?startapp",
             },
           ],

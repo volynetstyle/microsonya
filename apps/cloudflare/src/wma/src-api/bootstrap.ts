@@ -1,13 +1,15 @@
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, isNotNull, lt, or } from "drizzle-orm";
 import {
   summaryRunMessages,
   summaryRuns,
   wmaChatCatalog,
 } from "@microsonya/db";
 import type { TelegramIdentity } from "./auth.js";
+import { getAccessibleTelegramChatTitle } from "./chat-access.js";
 import { withWorkerDatabase } from "../../runtime/worker-db.js";
 
 const TELEGRAM_AUTH_CONCURRENCY = 4;
+const SUMMARY_PAGE_SIZE = 7;
 
 export type WmaChat = {
   ref: string;
@@ -19,6 +21,7 @@ export type WmaChatOverview = {
   chat: { ref: string; title: string };
   stats: { summaryCount: number; messageCount: number };
   summaries: readonly WmaSummaryCard[];
+  nextCursor: string | null;
 };
 export type WmaSummaryCard = {
   id: string;
@@ -63,7 +66,7 @@ export async function listWmaChats(
     catalog,
     TELEGRAM_AUTH_CONCURRENCY,
     async (entry) => {
-      const title = await accessibleChatTitle(
+      const title = await getAccessibleTelegramChatTitle(
         env.TELEGRAM_BOT_TOKEN,
         entry.chatId,
         identity.user.id,
@@ -86,8 +89,10 @@ export async function getChatOverview(
   env: WmaEnv,
   identity: TelegramIdentity,
   chatRef?: string,
+  cursor?: string,
 ): Promise<WmaChatOverview> {
   const chat = await authorizeChat(env, identity, chatRef);
+  const pageCursor = decodeSummaryCursor(cursor);
   return withWorkerDatabase(env, async (db, encryption) => {
     const chatId = encryption.lookup(chat.id, "telegram-chat-id");
     const [rows, catalog] = await Promise.all([
@@ -103,23 +108,35 @@ export async function getChatOverview(
           and(
             eq(summaryRuns.chatId, chatId),
             eq(summaryRuns.status, "summarized"),
+            isNotNull(summaryRuns.summaryTextCiphertext),
+            pageCursor === undefined
+              ? undefined
+              : or(
+                  lt(summaryRuns.createdAt, pageCursor.createdAt),
+                  and(
+                    eq(summaryRuns.createdAt, pageCursor.createdAt),
+                    lt(summaryRuns.id, pageCursor.id),
+                  ),
+                ),
           ),
         )
-        .orderBy(desc(summaryRuns.createdAt))
-        .limit(20),
+        .orderBy(desc(summaryRuns.createdAt), desc(summaryRuns.id))
+        .limit(SUMMARY_PAGE_SIZE + 1),
       db
         .select()
         .from(wmaChatCatalog)
         .where(eq(wmaChatCatalog.chatId, chatId))
         .limit(1),
     ]);
+    const pageRows = rows.slice(0, SUMMARY_PAGE_SIZE);
+    const lastRow = pageRows.at(-1);
     return {
       chat: { ref: chat.id, title: chat.title },
       stats: {
         summaryCount: catalog[0]?.summaryCount ?? 0,
         messageCount: catalog[0]?.messageCount ?? 0,
       },
-      summaries: rows.flatMap((row) => {
+      summaries: pageRows.flatMap((row) => {
         if (row.summaryTextCiphertext === null) return [];
         const summary = encryption.decrypt(row.summaryTextCiphertext);
         return [
@@ -132,8 +149,29 @@ export async function getChatOverview(
           },
         ];
       }),
+      nextCursor:
+        rows.length > SUMMARY_PAGE_SIZE && lastRow !== undefined
+          ? encodeSummaryCursor(lastRow.createdAt, lastRow.id)
+          : null,
     };
   });
+}
+
+function encodeSummaryCursor(createdAt: number, id: string): string {
+  return `${createdAt}:${encodeURIComponent(id)}`;
+}
+
+function decodeSummaryCursor(
+  cursor?: string,
+): { createdAt: number; id: string } | undefined {
+  if (cursor === undefined) return;
+  const separator = cursor.indexOf(":");
+  const createdAt = Number(cursor.slice(0, separator));
+  const id =
+    separator < 1 ? "" : decodeURIComponent(cursor.slice(separator + 1));
+  if (!Number.isSafeInteger(createdAt) || createdAt < 0 || id.length === 0)
+    throw new TypeError("Invalid summary cursor.");
+  return { createdAt, id };
 }
 
 export async function getSummaryDetail(
@@ -190,52 +228,20 @@ async function authorizeChat(
 ): Promise<{ id: string; title: string }> {
   const chatId = chatRef ?? identity.chat?.id;
   if (!chatId) throw new TypeError("A chat must be selected.");
-  const title = await accessibleChatTitle(
+  const title = await getAccessibleTelegramChatTitle(
     env.TELEGRAM_BOT_TOKEN,
     chatId,
     identity.user.id,
   );
-  if (!title) throw new TypeError("The requested chat is not authorized.");
+  if (!title) throw new WmaChatAccessError();
   return { id: chatId, title };
 }
 
-async function accessibleChatTitle(
-  token: string,
-  chatId: string,
-  userId: string,
-): Promise<string | undefined> {
-  const apiBase = `https://api.telegram.org/bot${token}`;
-  const encodedChatId = encodeURIComponent(chatId);
-  const [member, chat] = await Promise.all([
-    fetch(
-      `${apiBase}/getChatMember?chat_id=${encodedChatId}&user_id=${encodeURIComponent(userId)}`,
-    ),
-    fetch(`${apiBase}/getChat?chat_id=${encodedChatId}`),
-  ]);
-  if (!member.ok || !chat.ok) return;
-  const [memberBody, chatBody]: [unknown, unknown] = await Promise.all([
-    member.json(),
-    chat.json(),
-  ]);
-  if (!isTelegramOk(memberBody) || !isTelegramOk(chatBody)) return;
-  const result = chatBody.result;
-  if (typeof result !== "object" || result === null) return;
-  const { title, first_name: firstName } = result as {
-    readonly title?: unknown;
-    readonly first_name?: unknown;
-  };
-  if (typeof title === "string") return title;
-  return typeof firstName === "string" ? firstName : undefined;
-}
-
-function isTelegramOk(
-  value: unknown,
-): value is { readonly ok: true; readonly result?: unknown } {
-  return (
-    typeof value === "object" &&
-    value !== null &&
-    (value as { readonly ok?: unknown }).ok === true
-  );
+export class WmaChatAccessError extends Error {
+  constructor() {
+    super("The requested chat is not authorized.");
+    this.name = "WmaChatAccessError";
+  }
 }
 
 async function mapConcurrent<Input, Output>(

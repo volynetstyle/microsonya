@@ -102,6 +102,11 @@
   backface-visibility: hidden;
 }
 
+.accordion > .accordion-item[open] > .accordion-content {
+  contain-intrinsic-block-size: none;
+  content-visibility: visible;
+}
+
 .accordion > .accordion-item > summary::-webkit-details-marker {
   display: none;
 }
@@ -162,6 +167,13 @@
       opacity var(--accordion-opacity-in-duration) linear,
       transform var(--accordion-duration) var(--accordion-easing),
       content-visibility var(--accordion-duration) allow-discrete;
+  }
+
+  /* A default-open item is already in its final geometry on first paint.
+     Suppressing only that entrance transition prevents async content from
+     shifting every following item; user-triggered toggles keep full motion. */
+  .accordion[data-initial-motion] > .accordion-item::details-content {
+    transition: none;
   }
 }
 

@@ -15,6 +15,7 @@ export type WmaChatOverview = {
   chat: { ref: string; title: string };
   stats: { summaryCount: number; messageCount: number };
   summaries: readonly WmaSummaryCard[];
+  nextCursor: string | null;
 };
 export type WmaSummaryDetail = {
   id: string;

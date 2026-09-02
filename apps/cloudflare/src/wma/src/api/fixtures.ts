@@ -59,6 +59,7 @@ const demoOverview: WmaChatOverview = {
         "Список чатів і overview залишаються компактними. Повні джерельні повідомлення завантажуються лише після явної дії користувача, тому перший екран не переносить зайві дані.",
     },
   ],
+  nextCursor: null,
 };
 
 const demoDetail: WmaSummaryDetail = {
@@ -99,8 +100,15 @@ export function activeFixture(): WmaFixture | undefined {
 
 export function fixtureResponse<T>(
   resource: WmaFixtureResource,
+  requestedFixture: string | null = activeFixture() ?? null,
 ): Promise<T> | undefined {
-  const fixture = activeFixture();
+  const fixture =
+    requestedFixture === "demo" ||
+    requestedFixture === "empty" ||
+    requestedFixture === "error" ||
+    requestedFixture === "loading"
+      ? requestedFixture
+      : undefined;
   if (!fixture) return;
   if (fixture === "loading") return new Promise<T>(() => undefined);
   if (fixture === "error")
@@ -112,6 +120,7 @@ export function fixtureResponse<T>(
         chat: { ref: "empty", title: "Новий чат" },
         stats: { summaryCount: 0, messageCount: 0 },
         summaries: [],
+        nextCursor: null,
       } as T);
     return Promise.resolve({ id: "empty", summary: "", moments: [] } as T);
   }

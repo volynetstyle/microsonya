@@ -1,15 +1,19 @@
 import {
+  createEffect,
   createMemo,
   createSignal,
   Errored,
   For,
   Loading,
+  onCleanup,
   Show,
 } from "solid-js";
+import type { ParentProps } from "solid-js";
 import {
   fixtureHref,
   loadChatOverview,
   loadSummaryDetail,
+  peekChatOverview,
 } from "../api/bootstrap";
 import type { WmaSummaryCard } from "../api/contracts";
 import {
@@ -18,9 +22,20 @@ import {
   ErrorState,
   MessagesSkeleton,
 } from "../components/AsyncStates";
+import { AnimatedSourceList } from "../components/AnimatedSourceList";
+import { useMeasuredSourceWindow } from "../components/source-window";
 import * as Accordion from "../shared/accordion";
 import "../components/TopicCard.css";
 import "./Chat.css";
+
+const SUMMARY_DAY_FORMATTER = new Intl.DateTimeFormat("uk-UA", {
+  day: "numeric",
+  month: "short",
+});
+const SUMMARY_TIME_FORMATTER = new Intl.DateTimeFormat("uk-UA", {
+  hour: "2-digit",
+  minute: "2-digit",
+});
 
 const messageLabel = (count: number) => {
   const mod10 = count % 10;
@@ -51,35 +66,59 @@ function summaryMoment(timestamp: number) {
       ? "Сьогодні"
       : day === yesterday.toDateString()
         ? "Учора"
-        : new Intl.DateTimeFormat("uk-UA", {
-            day: "numeric",
-            month: "short",
-          }).format(date);
-  const time = new Intl.DateTimeFormat("uk-UA", {
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(date);
+        : SUMMARY_DAY_FORMATTER.format(date);
+  const time = SUMMARY_TIME_FORMATTER.format(date);
   return { label: `${prefix}, ${time}`, datetime: date.toISOString() };
 }
 
-function initials(name: string) {
-  return (
-    name
-      .trim()
-      .split(/\s+/u)
-      .slice(0, 2)
-      .map((part) => part[0])
-      .join("")
-      .toLocaleUpperCase("uk-UA") || "?"
-  );
-}
-
 export default function Chat(props: { chatRef: string }) {
+  const cachedOverview = peekChatOverview(props.chatRef);
   const [reloadKey, setReloadKey] = createSignal(0);
+  const [overviewPage, setOverviewPage] = createSignal(cachedOverview);
+  const [summaries, setSummaries] = createSignal<readonly WmaSummaryCard[]>(
+    cachedOverview?.summaries ?? [],
+  );
+  const [nextCursor, setNextCursor] = createSignal<string | null>(
+    cachedOverview?.nextCursor ?? null,
+  );
+  const [loadingMore, setLoadingMore] = createSignal(false);
+  const [loadMoreError, setLoadMoreError] = createSignal<unknown>();
   const overview = createMemo(async () => {
     reloadKey();
     return loadChatOverview(props.chatRef);
   });
+  createEffect(
+    () => overview(),
+    (page) => {
+      setOverviewPage(page);
+      setSummaries(page.summaries);
+      setNextCursor(page.nextCursor);
+      setLoadMoreError(undefined);
+    },
+  );
+  const visibleOverview = () => overviewPage() ?? overview();
+
+  const loadMore = async () => {
+    const cursor = nextCursor();
+    if (cursor === null || loadingMore()) return;
+    setLoadingMore(true);
+    setLoadMoreError(undefined);
+    try {
+      const page = await loadChatOverview(props.chatRef, cursor);
+      setSummaries((current) => {
+        const known = new Set(current.map(({ id }) => id));
+        return [
+          ...current,
+          ...page.summaries.filter(({ id }) => !known.has(id)),
+        ];
+      });
+      setNextCursor(page.nextCursor);
+    } catch (error) {
+      setLoadMoreError(error);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
 
   return (
     <main class="screen chat-screen">
@@ -103,10 +142,10 @@ export default function Chat(props: { chatRef: string }) {
                 </>
               }
             >
-              <h1 class="chat-title">{overview().chat.title}</h1>
+              <h1 class="chat-title">{visibleOverview().chat.title}</h1>
               <span class="chat-subtitle">
-                {summaryLabel(overview().stats.summaryCount)} ·{" "}
-                {messageLabel(overview().stats.messageCount)}
+                {summaryLabel(visibleOverview().stats.summaryCount)} ·{" "}
+                {messageLabel(visibleOverview().stats.messageCount)}
               </span>
             </Loading>
           </Errored>
@@ -132,12 +171,12 @@ export default function Chat(props: { chatRef: string }) {
                 <h2 id="chat-summaries-heading">Останні підсумки</h2>
               </span>
               <span class="chat-count-badge">
-                {overview().summaries.length} у стрічці
+                {summaries().length} / {visibleOverview().stats.summaryCount}
               </span>
             </div>
 
             <Show
-              when={overview().summaries.length > 0}
+              when={summaries().length > 0}
               fallback={
                 <EmptyState
                   title="Тут ще тихо"
@@ -147,19 +186,65 @@ export default function Chat(props: { chatRef: string }) {
             >
               <Accordion.Root
                 class="topic-list"
-                defaultValue={overview().summaries[0]?.id}
+                defaultValue={summaries()[0]?.id}
               >
-                <For each={overview().summaries}>
+                <For each={summaries()}>
                   {(summary) => (
                     <SummaryCard chatRef={props.chatRef} summary={summary} />
                   )}
                 </For>
               </Accordion.Root>
+              <Show
+                when={nextCursor() !== null || loadMoreError() !== undefined}
+              >
+                <ProgressiveLoader
+                  loading={loadingMore()}
+                  error={loadMoreError()}
+                  onLoad={loadMore}
+                />
+              </Show>
             </Show>
           </section>
         </Loading>
       </Errored>
     </main>
+  );
+}
+
+function ProgressiveLoader(props: {
+  loading: boolean;
+  error: unknown;
+  onLoad: () => Promise<void>;
+}) {
+  let sentinel!: HTMLDivElement;
+  createEffect(
+    () => ({ loading: props.loading, error: props.error }),
+    ({ loading, error }) => {
+      if (loading || error !== undefined) return;
+      const observer = new IntersectionObserver(
+        (entries) => {
+          if (entries.some(({ isIntersecting }) => isIntersecting))
+            void props.onLoad();
+        },
+        { rootMargin: "240px 0px" },
+      );
+      observer.observe(sentinel);
+      onCleanup(() => observer.disconnect());
+    },
+  );
+  return (
+    <div ref={sentinel} class="chat-progressive-loader" aria-live="polite">
+      <Show
+        when={props.error === undefined}
+        fallback={
+          <button type="button" onClick={() => void props.onLoad()}>
+            Повторити завантаження
+          </button>
+        }
+      >
+        <span>{props.loading ? "Завантажуємо ще…" : "Прокрутіть далі"}</span>
+      </Show>
+    </div>
   );
 }
 
@@ -241,7 +326,7 @@ function SummaryCard(props: { chatRef: string; summary: WmaSummaryCard }) {
             </section>
           }
         >
-          <section class="summary-screen summary-messages-screen">
+          <MeasuredSourceScreen>
             <header class="source-header">
               <button
                 type="button"
@@ -258,61 +343,48 @@ function SummaryCard(props: { chatRef: string; summary: WmaSummaryCard }) {
                 <small>Фрагменти, на яких побудовано підсумок</small>
               </span>
             </header>
-            <Errored
-              fallback={(error) => (
-                <ErrorState
-                  compact
-                  error={error()}
-                  onRetry={() => setDetailReloadKey((key) => key + 1)}
-                />
-              )}
-            >
-              <Loading fallback={<MessagesSkeleton />}>
-                <Show
-                  when={(detail()?.moments.length ?? 0) > 0}
-                  fallback={
-                    <EmptyState
-                      compact
-                      title="Джерел не знайдено"
-                      description="Повідомлення могли бути видалені після створення підсумку."
-                    />
-                  }
-                >
-                  <ol class="source-message-list">
-                    <For each={detail()!.moments}>
-                      {(message) => (
-                        <li class="source-message">
-                          <span class="source-avatar" aria-hidden="true">
-                            {initials(message.author)}
-                          </span>
-                          <span class="source-message-content">
-                            <span class="source-message-heading">
-                              <strong>{message.author}</strong>
-                              <time
-                                datetime={new Date(
-                                  message.sentAt,
-                                ).toISOString()}
-                              >
-                                {new Intl.DateTimeFormat("uk-UA", {
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                }).format(new Date(message.sentAt))}
-                              </time>
-                            </span>
-                            <span class="source-message-body">
-                              {message.body}
-                            </span>
-                          </span>
-                        </li>
-                      )}
-                    </For>
-                  </ol>
-                </Show>
-              </Loading>
-            </Errored>
-          </section>
+            <div class="source-list-window">
+              <Errored
+                fallback={(error) => (
+                  <ErrorState
+                    compact
+                    error={error()}
+                    onRetry={() => setDetailReloadKey((key) => key + 1)}
+                  />
+                )}
+              >
+                <Loading fallback={<MessagesSkeleton />}>
+                  <Show
+                    when={(detail()?.moments.length ?? 0) > 0}
+                    fallback={
+                      <EmptyState
+                        compact
+                        title="Джерел не знайдено"
+                        description="Повідомлення могли бути видалені після створення підсумку."
+                      />
+                    }
+                  >
+                    <AnimatedSourceList messages={detail()!.moments} />
+                  </Show>
+                </Loading>
+              </Errored>
+            </div>
+          </MeasuredSourceScreen>
         </Show>
       </Accordion.Content>
     </Accordion.Item>
+  );
+}
+
+function MeasuredSourceScreen(props: ParentProps) {
+  let element!: HTMLElement;
+  useMeasuredSourceWindow(() => element);
+  return (
+    <section
+      ref={element}
+      class="summary-screen summary-messages-screen"
+    >
+      {props.children}
+    </section>
   );
 }

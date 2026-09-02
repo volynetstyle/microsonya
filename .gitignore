@@ -17,3 +17,4 @@ research/*
 packages/eval/results/
 .wrangler/
 *.patch
+.agents/

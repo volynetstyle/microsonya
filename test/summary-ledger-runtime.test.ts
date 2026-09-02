@@ -207,6 +207,36 @@ describe("summary runtime ledger evidence", () => {
     expect(JSON.stringify(emitted)).not.toContain("private input");
     expect(JSON.stringify(emitted)).not.toContain(raw);
   });
+
+  it("persists summary text for a non-checkpoint count run", async () => {
+    const attempts: SummaryRunAttempt[] = [];
+    const summarizer = createSummarizer({
+      messages: { listByChat: async () => [message()] },
+      summaries: {
+        findLastRun: async () => undefined,
+        saveRun: vi.fn(),
+        saveAttempt: async (attempt) => void attempts.push(attempt),
+      },
+      classifier: {
+        classify: async () => ({
+          action: "SUMMARIZE",
+          evidence: { source: "model", model: "test-model" },
+        }),
+      },
+      conversationSummarizer: {
+        summarize: async () => ({ text: "Deployment is scheduled at 18:00." }),
+      },
+    });
+
+    await expect(
+      summarizer.process({ ...command(), mode: "count", count: 1 }),
+    ).resolves.toMatchObject({ kind: "summarized" });
+    expect(attempts[0]).toMatchObject({
+      mode: "count",
+      status: "summarized",
+      summaryText: "Deployment is scheduled at 18:00.",
+    });
+  });
 });
 
 function command() {

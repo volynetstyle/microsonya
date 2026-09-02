@@ -170,6 +170,9 @@ export class SummariesRepo {
     attempt: SummaryRunAttempt,
     orchestration?: OrchestrationAttemptRef,
   ): Promise<void> {
+    if (attempt.status === "summarized" && attempt.summaryText === undefined) {
+      throw new TypeError("A summarized attempt must include summary text.");
+    }
     const encryptedChatId = this.chatKey(attempt.chatId);
     const firstEligible = attempt.messages.find(
       ({ role }) => role === "eligible",

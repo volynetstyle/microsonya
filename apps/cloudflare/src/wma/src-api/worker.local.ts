@@ -10,7 +10,7 @@ type LocalEnv = Env &
   }>;
 
 export default {
-  async fetch(request, env): Promise<Response> {
+  async fetch(request, env, ctx): Promise<Response> {
     const headers = new Headers(request.headers);
 
     if (
@@ -25,6 +25,7 @@ export default {
         headers,
       }) as Request,
       env,
+      ctx,
     );
   },
 } satisfies ExportedHandler<LocalEnv>;

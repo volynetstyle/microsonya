@@ -87,6 +87,11 @@ export const summaryRuns = pgTable(
   (table) => [
     index("idx_summary_runs_command").on(table.chatId, table.commandMessageId),
     index("idx_summary_runs_chat_created").on(table.chatId, table.createdAt),
+    index("idx_summary_runs_wma_page").on(
+      table.chatId,
+      table.createdAt.desc(),
+      table.id.desc(),
+    ),
     uniqueIndex("idx_summary_runs_orchestration_attempt").on(
       table.orchestrationRunId,
       table.orchestrationAttempt,
@@ -94,6 +99,10 @@ export const summaryRuns = pgTable(
     check(
       "summary_runs_orchestration_attempt_check",
       sql`(${table.orchestrationRunId} is null and ${table.orchestrationAttempt} is null) or (${table.orchestrationRunId} is not null and ${table.orchestrationAttempt} is not null and ${table.orchestrationAttempt} > 0)`,
+    ),
+    check(
+      "summary_runs_summarized_text_check",
+      sql`${table.status} <> 'summarized' or ${table.summaryTextCiphertext} is not null`,
     ),
   ],
 );

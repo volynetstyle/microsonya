@@ -200,7 +200,7 @@ export function useViewTransitionRouter(options: Options): Accessor<string> {
       );
     };
 
-    rememberScroll();
+    scrollPositions.set(index, ZERO_SCROLL);
     document.addEventListener("click", handleClick);
     addEventListener("popstate", handlePopState);
     addEventListener("scroll", handleScroll, { passive: true });

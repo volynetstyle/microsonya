@@ -1,4 +1,4 @@
-import { createSignal, createUniqueId } from "solid-js";
+import { createSignal, createUniqueId, onSettled, untrack } from "solid-js";
 import type { ParentProps } from "solid-js";
 import { AccordionContext } from "./accordion-context";
 
@@ -12,6 +12,22 @@ export interface AccordionRootProps extends ParentProps {
 
 export function AccordionRoot(props: AccordionRootProps) {
   const groupName = `accordion-${createUniqueId()}`;
+  let root!: HTMLDivElement;
+  let settleFrame: number | undefined;
+  let releaseFrame: number | undefined;
+  onSettled(() => {
+    settleFrame = requestAnimationFrame(() => {
+      settleFrame = undefined;
+      releaseFrame = requestAnimationFrame(() => {
+        releaseFrame = undefined;
+        root.removeAttribute("data-initial-motion");
+      });
+    });
+    return () => {
+      if (settleFrame !== undefined) cancelAnimationFrame(settleFrame);
+      if (releaseFrame !== undefined) cancelAnimationFrame(releaseFrame);
+    };
+  });
 
   // X is the only logical state. Single mode stores one value (or none),
   // while multiple mode stores its exact subset. Creating one signal instead
@@ -19,17 +35,19 @@ export function AccordionRoot(props: AccordionRootProps) {
   const [nativeValue, setNativeValue] = createSignal<
     string | readonly string[] | null
   >(
-    props.multiple
-      ? Array.isArray(props.defaultValue)
-        ? props.defaultValue
+    untrack(() =>
+      props.multiple
+        ? Array.isArray(props.defaultValue)
+          ? props.defaultValue
+          : typeof props.defaultValue === "string"
+            ? [props.defaultValue]
+            : EMPTY_VALUES
         : typeof props.defaultValue === "string"
-          ? [props.defaultValue]
-          : EMPTY_VALUES
-      : typeof props.defaultValue === "string"
-        ? props.defaultValue
-        : Array.isArray(props.defaultValue)
-          ? (props.defaultValue[0] ?? null)
-          : null,
+          ? props.defaultValue
+          : Array.isArray(props.defaultValue)
+            ? (props.defaultValue[0] ?? null)
+            : null,
+    ),
   );
 
   const isControlled = () => props.value !== undefined;
@@ -99,7 +117,9 @@ export function AccordionRoot(props: AccordionRootProps) {
   return (
     <AccordionContext value={context}>
       <div
+        ref={root}
         class={`accordion accordion-root${props.class ? ` ${props.class}` : ""}`}
+        data-initial-motion="settling"
       >
         {props.children}
       </div>

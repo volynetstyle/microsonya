@@ -1,4 +1,5 @@
 import {
+  createEffect,
   createMemo,
   createSignal,
   Errored,
@@ -6,7 +7,7 @@ import {
   Loading,
   Show,
 } from "solid-js";
-import { fixtureHref, loadChats } from "../api/bootstrap";
+import { fixtureHref, loadChats, peekChats } from "../api/bootstrap";
 import type { WmaChat } from "../api/contracts";
 import {
   EmptyState,
@@ -85,11 +86,20 @@ function ChatRow(props: { chat: WmaChat }) {
 }
 
 export default function Home() {
+  const cachedChats = peekChats();
   const [reloadKey, setReloadKey] = createSignal(0);
+  const [loadedChats, setLoadedChats] = createSignal(cachedChats);
   const chats = createMemo(async () => {
     reloadKey();
     return loadChats();
   });
+  createEffect(
+    () => chats(),
+    (value) => {
+      setLoadedChats(value);
+    },
+  );
+  const visibleChats = () => loadedChats() ?? chats();
 
   return (
     <main class="screen home-screen">
@@ -122,7 +132,7 @@ export default function Home() {
         >
           <Loading fallback={<HomeSkeleton />}>
             <Show
-              when={chats().length > 0}
+              when={visibleChats().length > 0}
               fallback={
                 <EmptyState
                   title="Підсумків поки немає"
@@ -131,7 +141,9 @@ export default function Home() {
               }
             >
               <ul class="home-chat-list">
-                <For each={chats()}>{(chat) => <ChatRow chat={chat} />}</For>
+                <For each={visibleChats()}>
+                  {(chat) => <ChatRow chat={chat} />}
+                </For>
               </ul>
             </Show>
           </Loading>

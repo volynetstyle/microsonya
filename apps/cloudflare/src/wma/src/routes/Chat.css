@@ -128,6 +128,23 @@
   list-style: none;
 }
 
+.chat-progressive-loader {
+  display: grid;
+  min-block-size: 4rem;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  place-items: center;
+}
+
+.chat-progressive-loader button {
+  padding: 0.625rem 0.875rem;
+  border: 1px solid var(--separator-soft);
+  border-radius: 999px;
+  background: var(--surface-primary);
+  color: var(--accent);
+  font: inherit;
+}
+
 @media (hover: hover) and (pointer: fine) {
   .chat-back:hover {
     background: var(--accent-soft);

@@ -12,6 +12,7 @@ import {
   summaryFeedback,
   summaryRunMessages,
   summaryRuns,
+  wmaChatCatalog,
 } from "../packages/db/src/index.js";
 import {
   asAuthorId,
@@ -110,6 +111,10 @@ describe("production summary ledger", () => {
         .select()
         .from(datasetCandidates)
         .where(eq(datasetCandidates.runId, attempt.id));
+      const [catalog] = await client.db
+        .select()
+        .from(wmaChatCatalog)
+        .where(eq(wmaChatCatalog.chatId, run!.chatId));
 
       const [canonicalMessage] = await client.db
         .select()
@@ -124,6 +129,11 @@ describe("production summary ledger", () => {
         eligibleCount: 2,
         contextCount: 1,
         inputHash: encryption.lookup("input-sha256", "summary-input-hash"),
+      });
+      expect(catalog).toMatchObject({
+        summaryCount: 1,
+        messageCount: attempt.eligibleCount,
+        lastSummaryAt: attempt.completedAt,
       });
       expect(run!.chatId).toBe(
         encryption.lookup("chat-ledger", "telegram-chat-id"),
@@ -283,6 +293,24 @@ describe("production summary ledger", () => {
         checkpointBefore: 12,
         checkpointAfter: 12,
       });
+    } finally {
+      await client.close();
+    }
+  });
+  it("rejects summarized evidence without summary text", async () => {
+    const client = await openTestDb();
+    const summaries = new SummariesRepo(
+      client.db,
+      createLedgerEncryption(Buffer.alloc(32, 8)),
+    );
+    try {
+      await expect(
+        summaries.saveAttempt({
+          ...fixtureAttempt(),
+          id: asSummaryId("run-without-summary"),
+          summaryText: undefined,
+        }),
+      ).rejects.toThrow("must include summary text");
     } finally {
       await client.close();
     }
