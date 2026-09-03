@@ -11,6 +11,7 @@ import {
   EMPTY_SUMMARY_MESSAGE,
   classifyUnknownFailure,
 } from "../src/processor/policy.js";
+import { isRetryableTelegramStatus } from "../src/ingress/policy.js";
 
 type ProcessorResult = Awaited<ReturnType<Env["SUMMARY_PROCESSOR"]["process"]>>;
 
@@ -36,6 +37,12 @@ function environment(
 }
 
 describe("summary Queue protocol in Workers runtime", () => {
+  it("does not let a permanent Telegram launcher error poison webhook retries", () => {
+    expect(isRetryableTelegramStatus(400)).toBe(false);
+    expect(isRetryableTelegramStatus(403)).toBe(false);
+    expect(isRetryableTelegramStatus(429)).toBe(true);
+    expect(isRetryableTelegramStatus(500)).toBe(true);
+  });
   it("renders the empty result in valid Ukrainian and does not retry code bugs", () => {
     expect(EMPTY_SUMMARY_MESSAGE).toBe("Немає нових повідомлень для підсумку.");
     expect(classifyUnknownFailure(new TypeError("bug"))).toMatchObject({

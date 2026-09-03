@@ -12,6 +12,7 @@ import {
 import { tracing } from "cloudflare:workers";
 import { timingSafeEqual } from "node:crypto";
 import { handleSummaryQueue } from "./queue.js";
+import { isRetryableTelegramStatus } from "./policy.js";
 import { logTelemetry, recordTelemetryMetric } from "../observability.js";
 import { withWorkerDatabase } from "../runtime/worker-db.js";
 
@@ -143,9 +144,11 @@ async function sendAppLauncher(
     logTelemetry("error", "ingress", "telegram.app_launcher.failed", {
       errorCode: `TELEGRAM_HTTP_${response.status}`,
     });
-    throw new Error(
-      `Telegram app launcher failed with HTTP ${response.status}.`,
-    );
+    // Replaying the same invalid Bot API request can never recover and would
+    // poison the webhook backlog. ACK permanent 4xx failures; retain Telegram
+    // retries for rate limits and server-side failures.
+    if (!isRetryableTelegramStatus(response.status)) return;
+    throw new Error(`Telegram app launcher failed with HTTP ${response.status}.`);
   }
 }
 
