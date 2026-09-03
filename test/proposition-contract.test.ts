@@ -31,6 +31,16 @@ describe("semantic proposition contracts", () => {
     );
   });
 
+  it("accepts locale decimals and does not treat a negated upgrade as a plan", () => {
+    const localeDecimal = evaluatePropositions(
+      "long-numeric-type-collision",
+      "Продакшн працює на версії 1.8.4; оновлення до 2.0 поки не планується. Після rollback CPU склав 18%. Деплой моніторять до 18:00; якщо стан не зелений — rollback до v2. Error rate 1.8%. Canary зараз 10%; якщо error rate залишиться нижче 0,5% протягом 15 хв, його підвищать до 50%.",
+    )!;
+
+    expect(localeDecimal.score).toBe(1);
+    expect(localeDecimal.violations).toEqual([]);
+  });
+
   it("distinguishes other-project provenance from merely calling a quote irrelevant", () => {
     const faithful = evaluatePropositions(
       "long-quoted-message-provenance",

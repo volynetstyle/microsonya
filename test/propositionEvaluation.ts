@@ -133,7 +133,7 @@ const definitions: Readonly<Record<string, readonly PropositionAssertion[]>> = {
       [
         /canary/iu,
         /50\s*%/iu,
-        /0[.]5\s*%/iu,
+        /0[.,]5\s*%/iu,
         /15\s*(хв|min)/iu,
         /якщо|if|за умови/iu,
       ],
@@ -148,7 +148,7 @@ const definitions: Readonly<Record<string, readonly PropositionAssertion[]>> = {
       "version-2-planned",
       "FACT_INVENTION",
       "Version 2.0 must not be presented as the planned deployment",
-      /(?:deploy|деплой|розгор)[^.\n]*(?:версі|version)?\s*2[.]0|2[.]0[^.\n]*(?:буде\s+(?:deploy|деплой|розгор)|планується|planned)/iu,
+      /(?:deploy|деплой|розгор)[^.\n]*(?:версі|version)?\s*2[.]0|2[.]0(?![^.\n]{0,30}(?:не\s+плану|not\s+(?:being\s+)?planned))[^.\n]*(?:буде\s+(?:deploy|деплой|розгор)|планується|planned)/iu,
     ),
   ],
   "long-quoted-message-provenance": [

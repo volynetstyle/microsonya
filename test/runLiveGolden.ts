@@ -12,8 +12,10 @@ import { loadOllamaConfig, OllamaClient } from "../packages/model/src/index.js";
 import {
   createClassifier,
   createConversationSummarizer,
+  ModelOutputError,
   processWindow,
   shouldAdvanceCheckpoint,
+  type SummaryPromptVariant,
 } from "../packages/summarize/src/index.js";
 import {
   adversarialE2E,
@@ -56,6 +58,7 @@ interface LiveResult extends E2EResult {
   readonly extractionMetrics?: ExtractionMetrics;
   readonly propositionMetrics?: PropositionMetrics;
   readonly error?: string;
+  readonly modelOutputPreview?: string;
 }
 
 interface FixtureReport {
@@ -84,7 +87,17 @@ const reports: FixtureReport[] = [];
 for (const fixture of selected) {
   const runs: LiveResult[] = [];
   for (let index = 0; index < args.runs; index += 1) {
-    runs.push(await runFixture(fixture, client, args.timeoutMs, args.model));
+    runs.push(
+      await runFixture(
+        fixture,
+        client,
+        args.timeoutMs,
+        args.model,
+        args.promptVariant,
+        args.seed + index,
+        args.summarizerOnly,
+      ),
+    );
     if (!args.json) {
       const result = runs.at(-1)!;
       const marker = result.error
@@ -117,6 +130,9 @@ const report = {
   model: args.model,
   endpoint: redactEndpoint(endpoint),
   suite: args.suite,
+  promptVariant: args.promptVariant,
+  seed: args.seed,
+  summarizerOnly: args.summarizerOnly,
   reports,
   totals,
 };
@@ -132,6 +148,9 @@ async function runFixture(
   ollama: OllamaClient,
   timeoutMs: number,
   model: string,
+  promptVariant: SummaryPromptVariant,
+  seed: number,
+  summarizerOnly: boolean,
 ): Promise<LiveResult> {
   const startedAt = performance.now();
   let modelCalls = 0;
@@ -143,7 +162,14 @@ async function runFixture(
       if (kind === "classifier") classifierCalls += 1;
       else summarizerCalls += 1;
       const [request, options] = chatArgs;
-      return ollama.chat({ ...request, model }, options) as never;
+      return ollama.chat(
+        {
+          ...request,
+          model,
+          options: { ...request.options, seed },
+        },
+        options,
+      ) as never;
     },
   });
 
@@ -172,11 +198,22 @@ async function runFixture(
     const result = await processWindow(
       window,
       {
-        classifier: createClassifier({
-          ollama: countedClient("classifier") as never,
-        }),
+        classifier: summarizerOnly
+          ? {
+              classify: async () => ({
+                action: "SUMMARIZE" as const,
+                evidence: {
+                  source: "deterministic" as const,
+                  rule: "live-eval-summarizer-only",
+                },
+              }),
+            }
+          : createClassifier({
+              ollama: countedClient("classifier") as never,
+            }),
         summarizer: createConversationSummarizer({
           ollama: countedClient("summarizer") as never,
+          promptVariant,
         }),
       },
       controller.signal,
@@ -221,6 +258,9 @@ async function runFixture(
         error instanceof Error
           ? `${error.name}: ${error.message}`
           : String(error),
+      ...(error instanceof ModelOutputError
+        ? { modelOutputPreview: error.outputPreview }
+        : {}),
     };
   } finally {
     clearTimeout(timeout);
@@ -271,6 +311,19 @@ function parseArgs(argv: readonly string[]) {
     const index = argv.indexOf(name);
     return index === -1 ? undefined : argv[index + 1];
   };
+  const readAll = (name: string) => {
+    const values: string[] = [];
+    for (let index = 0; index < argv.length; index += 1) {
+      const value = argv[index]!;
+      if (value.startsWith(`${name}=`)) {
+        values.push(value.slice(name.length + 1));
+      } else if (value === name && argv[index + 1] !== undefined) {
+        values.push(argv[index + 1]!);
+        index += 1;
+      }
+    }
+    return values;
+  };
   const suite = read("--suite") ?? "smoke";
   if (
     !["smoke", "adversarial", "stability", "extraction", "all"].includes(suite)
@@ -289,6 +342,11 @@ function parseArgs(argv: readonly string[]) {
   if (minimumAccuracy < 0 || minimumAccuracy > 1) {
     throw new TypeError("minimum-accuracy must be between 0 and 1.");
   }
+  const promptVariant = read("--prompt-variant") ?? "V2";
+  if (!["V0", "V1", "V2", "V3"].includes(promptVariant)) {
+    throw new TypeError(`Unknown prompt variant: ${promptVariant}`);
+  }
+  const seed = nonNegativeInteger(read("--seed") ?? "0", "seed");
   return {
     suite: suite as
       | "smoke"
@@ -299,10 +357,13 @@ function parseArgs(argv: readonly string[]) {
     runs,
     timeoutMs,
     minimumAccuracy,
-    fixtureId: read("--fixture"),
+    fixtureIds: readAll("--fixture"),
     output: read("--output"),
     json: argv.includes("--json"),
     model: read("--model") ?? "gpt-oss:120b-cloud",
+    promptVariant: promptVariant as SummaryPromptVariant,
+    seed,
+    summarizerOnly: argv.includes("--summarizer-only"),
   };
 }
 
@@ -320,25 +381,26 @@ function selectFixtures(args: ReturnType<typeof parseArgs>): E2EFixture[] {
       ? extraction
       : [...semanticGoldens, ...extraction];
   const byId = new Map(available.map((value) => [value.id, value]));
-  const ids = args.fixtureId
-    ? [args.fixtureId]
-    : args.suite === "smoke"
-      ? [...smokeE2E]
-      : args.suite === "adversarial"
-        ? [...adversarialE2E]
-        : args.suite === "stability"
-          ? [
-              "live-casual-high-information-minecraft",
-              "summarize-schema-fallback-lifecycle",
-              "live-prod-version-vs-time",
-              "banter-with-durable-technical-island",
-              "long-frequency-vs-final-state@front",
-              "long-frequency-vs-final-state@middle",
-              "long-frequency-vs-final-state@tail",
-            ]
-          : args.suite === "extraction"
-            ? extraction.map(({ id }) => id)
-            : available.map(({ id }) => id);
+  const ids =
+    args.fixtureIds.length > 0
+      ? args.fixtureIds
+      : args.suite === "smoke"
+        ? [...smokeE2E]
+        : args.suite === "adversarial"
+          ? [...adversarialE2E]
+          : args.suite === "stability"
+            ? [
+                "live-casual-high-information-minecraft",
+                "summarize-schema-fallback-lifecycle",
+                "live-prod-version-vs-time",
+                "banter-with-durable-technical-island",
+                "long-frequency-vs-final-state@front",
+                "long-frequency-vs-final-state@middle",
+                "long-frequency-vs-final-state@tail",
+              ]
+            : args.suite === "extraction"
+              ? extraction.map(({ id }) => id)
+              : available.map(({ id }) => id);
   return ids.map((id) => {
     const value = byId.get(id);
     if (!value) throw new TypeError(`Unknown fixture: ${id}`);
@@ -389,6 +451,14 @@ function positiveInteger(raw: string, label: string): number {
   const value = Number(raw);
   if (!Number.isSafeInteger(value) || value < 1) {
     throw new TypeError(`${label} must be a positive integer.`);
+  }
+  return value;
+}
+
+function nonNegativeInteger(raw: string, label: string): number {
+  const value = Number(raw);
+  if (!Number.isSafeInteger(value) || value < 0) {
+    throw new TypeError(`${label} must be a non-negative integer.`);
   }
   return value;
 }
@@ -530,6 +600,7 @@ function aggregate(reports: readonly FixtureReport[]) {
           "PROVENANCE",
           "SUPERSESSION",
           "EPISTEMIC_STATE",
+          "SPEECH_ACT",
           "CONDITION_PRESERVATION",
         ].map((errorType) => [
           errorType,

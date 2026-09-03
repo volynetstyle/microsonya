@@ -117,9 +117,30 @@ describe("summarizer 0.1 workflow", () => {
       expect.objectContaining({
         model: "gpt-oss:120b-cloud",
         think: "low",
-        format: "json",
+        format: {
+          type: "object",
+          properties: {
+            summary: { type: "string", minLength: 1 },
+          },
+          required: ["summary"],
+          additionalProperties: false,
+        },
         stream: false,
         options: expect.objectContaining({ num_predict: 2_500 }),
+      }),
+    );
+    expect(chat.mock.calls[1]?.[0]).toEqual(
+      expect.objectContaining({
+        messages: [
+          expect.objectContaining({
+            role: "system",
+            content: expect.stringContaining("SUMMARY_POLICY_BEGIN"),
+          }),
+          expect.objectContaining({
+            role: "user",
+            content: expect.stringContaining("TRANSCRIPT_BEGIN"),
+          }),
+        ],
       }),
     );
     expect(saveRun).toHaveBeenCalledWith(

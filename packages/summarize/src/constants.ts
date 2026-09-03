@@ -17,6 +17,19 @@ export const outputSchema = z
   })
   .strict();
 
+/** Ollama structured-output contract mirroring {@link outputSchema}. */
+export const SUMMARY_RESPONSE_SCHEMA = Object.freeze({
+  type: "object",
+  properties: Object.freeze({
+    summary: Object.freeze({
+      type: "string",
+      minLength: 1,
+    }),
+  }),
+  required: Object.freeze(["summary"]),
+  additionalProperties: false,
+});
+
 /**
  * Semantic model of summarization
  *
@@ -222,7 +235,14 @@ export const SUMMARY_INSTRUCTIONS = `
   Prefer omission over weak interpretation.
   Prefer an empty or minimal summary over summarizing conversation that contains no meaningful information.
 
+`.trim();
+
+export const SUMMARY_STRUCTURED_OUTPUT_INSTRUCTIONS = `
   Return only JSON matching the required output schema.
+`.trim();
+
+export const SUMMARY_STREAM_OUTPUT_INSTRUCTIONS = `
+  Return only the summary as plain text. Do not use JSON or Markdown.
 `.trim();
 
 export const SUMMARY_DECISION_RESPONSE_INSTRUCTIONS = `

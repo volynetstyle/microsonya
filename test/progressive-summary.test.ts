@@ -33,11 +33,12 @@ function transport(overrides: Partial<ProgressiveTransport> = {}) {
 
 describe("progressive summary runtime", () => {
   it("exposes model output as plain append-only chunks", async () => {
-    const fetch = vi.fn<typeof globalThis.fetch>(async () =>
-      new Response(
-        `${JSON.stringify({ message: { content: "Перша " }, done: false })}\n${JSON.stringify({ message: { content: "частина." }, done: true })}\n`,
-        { status: 200 },
-      ),
+    const fetch = vi.fn<typeof globalThis.fetch>(
+      async () =>
+        new Response(
+          `${JSON.stringify({ message: { content: "Перша " }, done: false })}\n${JSON.stringify({ message: { content: "частина." }, done: true })}\n`,
+          { status: 200 },
+        ),
     );
     const summarizer = createConversationSummarizer({
       ollama: new OllamaClient({ baseUrl: "http://model/api", fetch }),
@@ -57,7 +58,21 @@ describe("progressive summary runtime", () => {
     for await (const chunk of summarizer.stream!(window)) chunks.push(chunk);
     expect(chunks).toEqual(["Перша ", "частина."]);
     const request = JSON.parse(String(fetch.mock.calls[0]?.[1]?.body));
-    expect(request).toMatchObject({ stream: true });
+    expect(request).toMatchObject({
+      stream: true,
+      messages: [
+        {
+          role: "system",
+          content: expect.stringContaining(
+            "Return only the summary as plain text.",
+          ),
+        },
+        {
+          role: "user",
+          content: expect.stringContaining("TRANSCRIPT_BEGIN"),
+        },
+      ],
+    });
     expect(request).not.toHaveProperty("format");
   });
 
@@ -201,8 +216,14 @@ describe("Telegram progressive transports", () => {
     await target.commit("Підсумок");
 
     expect(call.mock.calls).toEqual([
-      ["sendMessageDraft", { chat_id: "42", draft_id: 7, text: "", can_stop: false }],
-      ["sendMessageDraft", { chat_id: "42", draft_id: 7, text: "Підсумок", can_stop: false }],
+      [
+        "sendMessageDraft",
+        { chat_id: "42", draft_id: 7, text: "", can_stop: false },
+      ],
+      [
+        "sendMessageDraft",
+        { chat_id: "42", draft_id: 7, text: "Підсумок", can_stop: false },
+      ],
       ["sendMessage", { chat_id: "42", text: "Підсумок" }],
     ]);
   });

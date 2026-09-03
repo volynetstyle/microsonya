@@ -81,6 +81,7 @@ export async function openTestDb(): Promise<DbClient> {
       chat_id TEXT NOT NULL,
       chat_id_ciphertext BYTEA NOT NULL,
       command_message_id INTEGER NOT NULL,
+      message_thread_id INTEGER,
       command_date BIGINT NOT NULL,
       mode TEXT NOT NULL CHECK (mode IN ('recent', 'today', 'count')),
       requested_count INTEGER,

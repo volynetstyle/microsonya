@@ -8,6 +8,7 @@ import {
 } from "../packages/shared/src/index.js";
 import {
   buildClassifierPrompt,
+  buildSummaryMessages,
   buildSummaryPrompt,
   encodePipeWindow,
   PIPE_FIELDS,
@@ -79,6 +80,105 @@ describe("canonical model transcript", () => {
     expect(classifierTranscript).toBe(encoded);
     expect(summaryTranscript).toBe(encoded);
     expect(classifierTranscript).toBe(summaryTranscript);
+  });
+
+  it("keeps trusted summary policy in system and untrusted transcript in user", () => {
+    const window = fixtureWindow();
+    const messages = buildSummaryMessages(
+      window,
+      [
+        { message: window.messages[0]!, role: "context" },
+        { message: window.messages[1]!, role: "eligible" },
+        { message: window.messages[2]!, role: "eligible" },
+      ],
+      { promptVariant: "V3" },
+    );
+
+    expect(messages.map(({ role }) => role)).toEqual(["system", "user"]);
+    expect(messages[0]!.content).toContain("SUMMARY_POLICY_BEGIN");
+    expect(messages[0]!.content).toContain("TRANSCRIPT_FORMAT_BEGIN");
+    expect(messages[0]!.content).toContain("SEMANTIC_COMPOSITION_POLICY_BEGIN");
+    expect(messages[0]!.content).toContain("SEMANTIC_CONTRAST_EXAMPLES_BEGIN");
+    expect(messages[0]!.content).toContain(
+      'Correct final output:\n{"summary":"Реліз перенесли на четвер.',
+    );
+    expect(messages[0]!.content).toContain(
+      "Do not fuse propositions from different speakers",
+    );
+    expect(messages[0]!.content).not.toContain("TRANSCRIPT_BEGIN");
+    expect(messages[0]!.content).not.toContain("First | line");
+
+    expect(messages[1]!.content).toContain("INPUT_ROLES_BEGIN");
+    expect(messages[1]!.content).toContain("#101|context");
+    expect(messages[1]!.content).toContain("TRANSCRIPT_BEGIN");
+    expect(messages[1]!.content).toContain("First \\u007c line");
+    expect(messages[1]!.content).not.toContain("SUMMARY_POLICY_BEGIN");
+    expect(messages[1]!.content).not.toContain(
+      "SEMANTIC_COMPOSITION_POLICY_BEGIN",
+    );
+  });
+
+  it("uses a plain-text output contract only for progressive streaming", () => {
+    const window = fixtureWindow();
+    const structured = buildSummaryMessages(window, undefined, {
+      promptVariant: "V3",
+    });
+    const streaming = buildSummaryMessages(window, undefined, {
+      outputMode: "plain-text",
+      promptVariant: "V3",
+    });
+
+    expect(structured[0]!.content).toContain(
+      "Return only JSON matching the required output schema.",
+    );
+    expect(streaming[0]!.content).toContain(
+      "Return only the summary as plain text.",
+    );
+    expect(streaming[0]!.content).not.toContain(
+      "Return only JSON matching the required output schema.",
+    );
+    expect(streaming[0]!.content).toContain(
+      "Correct final output:\nРеліз перенесли на четвер.",
+    );
+    expect(streaming[0]!.content).not.toContain(
+      'Correct final output:\n{"summary":',
+    );
+    expect(streaming[1]!.content).toBe(structured[1]!.content);
+  });
+
+  it("exposes the V0-V3 ablation matrix while defaulting to proven V2", () => {
+    const window = fixtureWindow();
+    const variants = (["V0", "V1", "V2", "V3"] as const).map(
+      (promptVariant) => ({
+        promptVariant,
+        messages: buildSummaryMessages(window, undefined, { promptVariant }),
+      }),
+    );
+
+    expect(
+      variants.map(({ messages }) => messages.map(({ role }) => role)),
+    ).toEqual([
+      ["user"],
+      ["system", "user"],
+      ["system", "user"],
+      ["system", "user"],
+    ]);
+    expect(variants[0]!.messages[0]!.content).not.toContain(
+      "SEMANTIC_COMPOSITION_POLICY_BEGIN",
+    );
+    expect(variants[1]!.messages[0]!.content).not.toContain(
+      "SEMANTIC_COMPOSITION_POLICY_BEGIN",
+    );
+    expect(variants[2]!.messages[0]!.content).toContain(
+      "SEMANTIC_COMPOSITION_POLICY_BEGIN",
+    );
+    expect(variants[2]!.messages[0]!.content).not.toContain(
+      "SEMANTIC_CONTRAST_EXAMPLES_BEGIN",
+    );
+    expect(variants[3]!.messages[0]!.content).toContain(
+      "SEMANTIC_CONTRAST_EXAMPLES_BEGIN",
+    );
+    expect(buildSummaryMessages(window)).toEqual(variants[2]!.messages);
   });
 });
 
