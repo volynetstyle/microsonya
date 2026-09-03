@@ -22,11 +22,6 @@ if (process.env.MICROSONYA_PIPELINE_INTEGRATION === "1" && !databaseUrl) {
   );
 }
 
-if (databaseUrl) {
-  process.env.CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE ??=
-    databaseUrl;
-}
-
 const encryptionKey = randomBytes(32).toString("base64");
 const webhookSecret = "pipeline-webhook-secret";
 const network = setupServer(

@@ -79,7 +79,7 @@ Run the multi-Worker production-build harness only after database acceptance pas
 pnpm test:pipeline:staging
 ```
 
-It loads only `.env.staging` and requires `STAGING_PIPELINE_DATABASE_URL`; during the transition it accepts the existing `STAGING_DATABASE_URL` as an explicit compatibility fallback. Wrangler's documented `CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE` override is set from that same target **before Vitest starts**, so every local Worker connects to the exact database asserted by the test.
+It loads only `.env.staging` and requires `STAGING_PIPELINE_DATABASE_URL`; during the transition it accepts the existing `STAGING_DATABASE_URL` as an explicit compatibility fallback. The harness injects that exact target as each Worker's programmatic Hyperdrive `localConnectionString`, so every local Worker connects to the database asserted by the test without a second process-global override.
 
 The test sends an ordinary Telegram message before `/summary`, verifies that `messages` contains it, mocks both the model and Telegram delivery, and then verifies a completed `summary_run_lifecycle` record with persisted output and delivery metadata.
 

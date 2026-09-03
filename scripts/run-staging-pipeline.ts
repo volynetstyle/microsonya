@@ -26,7 +26,6 @@ const child = spawn(
     env: {
       ...process.env,
       PIPELINE_DATABASE_URL: databaseUrl,
-      CLOUDFLARE_HYPERDRIVE_LOCAL_CONNECTION_STRING_HYPERDRIVE: databaseUrl,
     },
     stdio: "inherit",
   },
