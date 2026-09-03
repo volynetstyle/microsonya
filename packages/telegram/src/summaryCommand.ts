@@ -25,7 +25,7 @@ export const telegramCommands = [
 /** The exact Telegram Bot API projection consumed by the command adapter. */
 export type TelegramSummaryCommandMessage = Pick<
   Message.ServiceMessage,
-  "message_id" | "date"
+  "message_id" | "date" | "message_thread_id"
 > &
   Partial<Pick<Message.TextMessage, "text">> & {
     readonly entities?: readonly Pick<
@@ -73,6 +73,9 @@ export function parseSummaryCommand<T extends TelegramSummaryCommandMessage>(
   return {
     chatId: asChatId(String(message.chat.id)),
     commandMessageId: asMessageId(message.message_id),
+    ...(message.message_thread_id === undefined
+      ? {}
+      : { messageThreadId: message.message_thread_id }),
     date: asTimestampMs(message.date * 1_000),
     ...args,
   };
@@ -97,13 +100,18 @@ export function parseSummaryCommandUpdate(
   const messageId =
     message === undefined ? undefined : asSafeInteger(message.message_id);
   const date = message === undefined ? undefined : asSafeInteger(message.date);
+  const messageThreadId =
+    message === undefined || message.message_thread_id === undefined
+      ? undefined
+      : asPositiveSafeInteger(message.message_thread_id);
   const chatId = chat === undefined ? undefined : asChatIdentifier(chat.id);
   if (
     message === undefined ||
     typeof message.text !== "string" ||
     messageId === undefined ||
     date === undefined ||
-    chatId === undefined
+    chatId === undefined ||
+    (message.message_thread_id !== undefined && messageThreadId === undefined)
   ) {
     return undefined;
   }
@@ -119,6 +127,9 @@ export function parseSummaryCommandUpdate(
       date,
       text: message.text,
       chat: { id: chatId },
+      ...(messageThreadId === undefined
+        ? {}
+        : { message_thread_id: messageThreadId }),
       entities,
       forward_origin: message.forward_origin,
       forward_date:
@@ -187,6 +198,11 @@ function asSafeInteger(value: unknown): number | undefined {
 function asNonNegativeSafeInteger(value: unknown): number | undefined {
   const number = asSafeInteger(value);
   return number !== undefined && number >= 0 ? number : undefined;
+}
+
+function asPositiveSafeInteger(value: unknown): number | undefined {
+  const number = asSafeInteger(value);
+  return number !== undefined && number > 0 ? number : undefined;
 }
 
 function asChatIdentifier(value: unknown): number | undefined {

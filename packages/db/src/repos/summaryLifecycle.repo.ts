@@ -82,6 +82,7 @@ export class SummaryLifecycleRepo {
           chatId,
           chatIdCiphertext: this.encryption.encrypt(request.command.chatId),
           commandMessageId: request.command.commandMessageId,
+          messageThreadId: request.command.messageThreadId,
           commandDate: request.command.date,
           mode: request.command.mode,
           requestedCount: request.command.count,
@@ -554,6 +555,9 @@ export class SummaryLifecycleRepo {
       command: Object.freeze({
         chatId,
         commandMessageId: asMessageId(row.commandMessageId),
+        ...(row.messageThreadId === null
+          ? {}
+          : { messageThreadId: row.messageThreadId }),
         date: asTimestampMs(row.commandDate),
         mode: asMode(row.mode),
         ...(row.requestedCount === null ? {} : { count: row.requestedCount }),

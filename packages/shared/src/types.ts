@@ -130,6 +130,8 @@ export type SummaryMode = "recent" | "today" | "count";
 export interface SummaryCommand {
   readonly chatId: ChatId;
   readonly commandMessageId: MessageId;
+  /** Telegram forum topic containing the command, when applicable. */
+  readonly messageThreadId?: number;
   readonly date: TimestampMs;
   readonly mode: SummaryMode;
   readonly count?: number;

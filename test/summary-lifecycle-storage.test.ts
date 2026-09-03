@@ -15,6 +15,7 @@ import { openTestDb } from "./dbTestUtils.js";
 const command = Object.freeze({
   chatId: asChatId("-100123456"),
   commandMessageId: asMessageId(42),
+  messageThreadId: 77,
   date: asTimestampMs(1_800_000_000_000),
   mode: "recent" as const,
 });
@@ -46,6 +47,7 @@ describe("SummaryRun authoritative storage", () => {
       const [stored] = await client.db.select().from(summaryRunLifecycle);
       expect(stored.chatId).not.toBe(command.chatId);
       expect(stored.idempotencyKey).not.toContain(command.chatId);
+      expect(runs[0]?.command.messageThreadId).toBe(77);
     } finally {
       await client.close();
     }

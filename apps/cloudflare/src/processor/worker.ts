@@ -46,6 +46,7 @@ type DeliveryClaim = {
   readonly leaseToken: string;
   readonly deliveryAttempt: number;
   readonly chatId: string;
+  readonly messageThreadId?: number;
   readonly summary?: string;
 };
 
@@ -190,6 +191,9 @@ export class SummaryProcessorEntrypoint extends WorkerEntrypoint<Env> {
               : new TelegramEditableMessageTransport(telegram, {
                   chatId: claimed.command.chatId,
                   commandMessageId: claimed.command.commandMessageId,
+                  ...(claimed.command.messageThreadId === undefined
+                    ? {}
+                    : { messageThreadId: claimed.command.messageThreadId }),
                 });
             progressiveSession = new ProgressiveSummarySession(
               progressiveTransport,
@@ -359,6 +363,7 @@ export class SummaryProcessorEntrypoint extends WorkerEntrypoint<Env> {
         this.env.TELEGRAM_BOT_TOKEN,
         claim.chatId,
         summary,
+        claim.messageThreadId,
       );
       const persisted = await this.env.SUMMARY_RUNS.markCompleted(
         runId,
@@ -537,13 +542,20 @@ async function sendTelegramMessage(
   token: string,
   chatId: string,
   text: string,
+  messageThreadId?: number,
 ): Promise<number> {
   const response = await fetch(
     `https://api.telegram.org/bot${token}/sendMessage`,
     {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ chat_id: chatId, text }),
+      body: JSON.stringify({
+        chat_id: chatId,
+        text,
+        ...(messageThreadId === undefined
+          ? {}
+          : { message_thread_id: messageThreadId }),
+      }),
     },
   );
   const payload: unknown = await response.json();

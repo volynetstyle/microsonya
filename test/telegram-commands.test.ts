@@ -208,6 +208,7 @@ describe("untrusted Telegram update boundary", () => {
           update_id: 42,
           message: {
             message_id: 5,
+            message_thread_id: 77,
             date: 1_700,
             text: "/summary 20",
             chat: { id: 42 },
@@ -219,9 +220,39 @@ describe("untrusted Telegram update boundary", () => {
     ).toEqual({
       chatId: "42",
       commandMessageId: 5,
+      messageThreadId: 77,
       date: 1_700_000,
       mode: "count",
       count: 20,
+    });
+  });
+
+  it.each([
+    { text: "/summary", expected: { mode: "recent" } },
+    { text: "/summary today", expected: { mode: "today" } },
+    { text: "/summary 20", expected: { mode: "count", count: 20 } },
+  ])("preserves the forum topic for '$text'", ({ text, expected }) => {
+    expect(
+      parseSummaryCommandUpdate(
+        {
+          update_id: 42,
+          message: {
+            message_id: 5,
+            message_thread_id: 77,
+            date: 1_700,
+            text,
+            chat: { id: -10042 },
+            entities: [{ type: "bot_command", offset: 0, length: 8 }],
+          },
+        },
+        "microsonya_bot",
+      ),
+    ).toEqual({
+      chatId: "-10042",
+      commandMessageId: 5,
+      messageThreadId: 77,
+      date: 1_700_000,
+      ...expected,
     });
   });
 

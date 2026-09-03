@@ -116,6 +116,7 @@ export const summaryRunLifecycle = pgTable(
     chatId: text("chat_id").notNull(),
     chatIdCiphertext: bytea("chat_id_ciphertext").notNull(),
     commandMessageId: integer("command_message_id").notNull(),
+    messageThreadId: integer("message_thread_id"),
     commandDate: bigint("command_date", { mode: "number" }).notNull(),
     mode: text("mode").notNull(),
     requestedCount: integer("requested_count"),

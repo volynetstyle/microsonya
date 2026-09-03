@@ -94,6 +94,9 @@ export class SummaryRunsEntrypoint extends WorkerEntrypoint<Env> {
           claim: {
             runId: delivery.id,
             chatId: delivery.command.chatId,
+            ...(delivery.command.messageThreadId === undefined
+              ? {}
+              : { messageThreadId: delivery.command.messageThreadId }),
             summary: delivery.summary,
             deliveryAttempt: delivery.deliveryAttempt,
             leaseToken: delivery.leaseToken,
@@ -167,9 +170,12 @@ export class SummaryRunsEntrypoint extends WorkerEntrypoint<Env> {
       return claim === undefined
         ? undefined
         : {
-            runId: claim.id,
-            chatId: claim.command.chatId,
-            summary: claim.summary,
+          runId: claim.id,
+          chatId: claim.command.chatId,
+          ...(claim.command.messageThreadId === undefined
+            ? {}
+            : { messageThreadId: claim.command.messageThreadId }),
+          summary: claim.summary,
             deliveryAttempt: claim.deliveryAttempt,
             leaseToken: claim.leaseToken,
           };
