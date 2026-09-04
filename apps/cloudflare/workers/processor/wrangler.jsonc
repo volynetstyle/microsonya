@@ -8,6 +8,7 @@
     "PROCESSOR_VERSION": "0.1.0",
     "OLLAMA_BASE_URL": "https://ollama.com/api",
   },
+  "version_metadata": { "binding": "WORKER_VERSION" },
   "secrets": {
     "required": [
       "MICROSONYA_DATA_ENCRYPTION_KEY",

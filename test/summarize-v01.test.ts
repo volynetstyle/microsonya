@@ -36,9 +36,19 @@ describe("summarizer 0.1 workflow", () => {
             },
           };
         }
+        if (
+          (request.options as { temperature?: number } | undefined)
+            ?.temperature === 0
+        ) {
+          return {
+            message: {
+              content: summaryPlanJson(),
+            },
+          };
+        }
         return {
           message: {
-            content: JSON.stringify({ summary: "Release is Friday." }),
+            content: "Release is Friday.",
           },
         };
       },
@@ -58,7 +68,7 @@ describe("summarizer 0.1 workflow", () => {
       summary: { text: "Release is Friday." },
     });
     expect(listByChat).toHaveBeenCalledOnce();
-    expect(chat).toHaveBeenCalledTimes(2);
+    expect(chat).toHaveBeenCalledTimes(3);
     expect(events.map((event) => event.type)).toEqual([
       "summary.start",
       "messages.loaded",
@@ -69,11 +79,15 @@ describe("summarizer 0.1 workflow", () => {
       "model.response.envelope",
       "model.response.raw",
       "model.response",
+      "window.skip-guard",
       "window.decision",
       "model.request",
       "model.response.envelope",
       "model.response.raw",
-      "summarizer.output_mode",
+      "model.response",
+      "summary.plan.validated",
+      "model.request",
+      "model.response.envelope",
       "model.response",
       "window.disposition",
       "summary.saved",
@@ -85,7 +99,7 @@ describe("summarizer 0.1 workflow", () => {
       action: "SUMMARIZE",
       messageCount: 1,
       contextMessageCount: 0,
-      modelCalls: 2,
+      modelCalls: 3,
       checkpointAdvanced: true,
       consecutiveDeferCount: 0,
       status: "summarized",
@@ -119,18 +133,32 @@ describe("summarizer 0.1 workflow", () => {
       expect.objectContaining({
         model: "gpt-oss:120b-cloud",
         think: "low",
-        format: {
-          type: "object",
-          properties: {
-            summary: { type: "string", minLength: 1 },
-          },
-          required: ["summary"],
-          additionalProperties: false,
-        },
         stream: false,
-        options: expect.objectContaining({ num_predict: 2_500 }),
+        options: expect.objectContaining({
+          num_predict: 2_500,
+          temperature: 0,
+        }),
       }),
     );
+    expect(chat.mock.calls[1]?.[0]).not.toHaveProperty("format");
+    expect(chat.mock.calls[2]?.[0]).toEqual(
+      expect.objectContaining({
+        model: "gpt-oss:120b-cloud",
+        think: "low",
+        stream: false,
+        messages: [
+          expect.objectContaining({
+            role: "system",
+            content: expect.stringContaining("validated SummaryPlan"),
+          }),
+          expect.objectContaining({
+            role: "user",
+            content: expect.stringContaining("SUMMARY_PLAN_BEGIN"),
+          }),
+        ],
+      }),
+    );
+    expect(chat.mock.calls[2]?.[0]).not.toHaveProperty("format");
     expect(chat.mock.calls[1]?.[0]).toEqual(
       expect.objectContaining({
         messages: [
@@ -412,7 +440,10 @@ describe("summarizer 0.1 workflow", () => {
                     visiblyIncomplete: false,
                     requiresSynthesis: true,
                   })
-                : JSON.stringify({ summary: "Release is Friday." }),
+                : (request.options as { temperature?: number } | undefined)
+                      ?.temperature === 0
+                  ? summaryPlanJson()
+                  : "Release is Friday.",
           },
         };
       },
@@ -429,7 +460,7 @@ describe("summarizer 0.1 workflow", () => {
     await expect(summarizer.process(command())).resolves.toMatchObject({
       kind: "summarized",
     });
-    expect(ollama.callCount).toBe(2);
+    expect(ollama.callCount).toBe(3);
   });
 
   it("keeps a useful one-window result correct when telemetry completely fails", async () => {
@@ -487,6 +518,25 @@ describe("summarizer 0.1 workflow", () => {
     );
   });
 });
+
+function summaryPlanJson(): string {
+  return JSON.stringify({
+    referents: [],
+    claims: [
+      {
+        id: "c1",
+        referentId: null,
+        speaker: null,
+        source: null,
+        proposition: "Release is Friday.",
+        epistemicStatus: "established",
+        numericFacts: [],
+        evidenceMessageIds: [1],
+      },
+    ],
+    retainedClaimIds: ["c1"],
+  });
+}
 
 function command(): SummaryCommand {
   return {

@@ -1,5 +1,3 @@
-import { z } from "zod";
-
 /**
  * Upper bound for every model-facing conversation window.
  *
@@ -10,25 +8,6 @@ import { z } from "zod";
  */
 export const MAX_MESSAGES = 128;
 export const DAY_MS = 86_400_000;
-
-export const outputSchema = z
-  .object({
-    summary: z.string().trim().min(1),
-  })
-  .strict();
-
-/** Ollama structured-output contract mirroring {@link outputSchema}. */
-export const SUMMARY_RESPONSE_SCHEMA = Object.freeze({
-  type: "object",
-  properties: Object.freeze({
-    summary: Object.freeze({
-      type: "string",
-      minLength: 1,
-    }),
-  }),
-  required: Object.freeze(["summary"]),
-  additionalProperties: false,
-});
 
 /**
  * Semantic model of summarization

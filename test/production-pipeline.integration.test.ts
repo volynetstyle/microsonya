@@ -32,7 +32,11 @@ const network = setupServer(
     const body = (await request.json()) as {
       messages?: Array<{ content?: string }>;
     };
-    const prompt = body.messages?.[0]?.content ?? "";
+    const prompt =
+      body.messages?.map(({ content }) => content ?? "").join("\n\n") ?? "";
+    const evidenceMessageId = Number(
+      prompt.match(/TRANSCRIPT_BEGIN\s*#(\d+)\|/u)?.[1] ?? "0",
+    );
     const content = prompt.includes("CLASSIFICATION_POLICY")
       ? JSON.stringify({
           durable: true,
@@ -41,10 +45,25 @@ const network = setupServer(
           visiblyIncomplete: false,
           requiresSynthesis: true,
         })
-      : JSON.stringify({
-          summary:
-            "Staging pipeline confirmed the durable deployment plan and its verification gates.",
-        });
+      : prompt.includes("SUMMARY_POLICY_BEGIN")
+        ? JSON.stringify({
+            referents: [{ id: "r1", kind: "task" }],
+            claims: [
+              {
+                id: "c1",
+                referentId: "r1",
+                speaker: "@1",
+                source: null,
+                proposition:
+                  "Deploy staging only after migrations, Hyperdrive, Queue, and DLQ pass their gates.",
+                epistemicStatus: "proposed",
+                numericFacts: [],
+                evidenceMessageIds: [evidenceMessageId],
+              },
+            ],
+            retainedClaimIds: ["c1"],
+          })
+        : "@1 proposed deploying staging only after the migration, Hyperdrive, Queue, and DLQ gates pass.";
     return HttpResponse.json({
       model: "pipeline-mock",
       created_at: "2026-08-29T00:00:00.000Z",
@@ -215,13 +234,45 @@ describe("production multi-Worker pipeline", () => {
       status: "completed",
       attempt: 1,
       last_error_code: null,
-      processor_version: "0.1.0-staging",
+      processor_version: "0.1.5-staging",
       model: "configured-profile",
-      prompt_version: "summarize-package",
+      prompt_version: "summary-v2",
       telegram_message_id: 987_654,
     });
     expect(terminal.delivered_at).not.toBeNull();
     expect(terminal.summary_ciphertext).not.toBeNull();
+
+    const attemptResult = await database.query<{
+      build_sha: string | null;
+      classifier_policy_version: string | null;
+      summary_prompt_version: string | null;
+      summary_plan_schema_version: string | null;
+      classifier_action: string | null;
+      plan_validation_status: string | null;
+      plan_retry_count: number | null;
+      plan_hash: string | null;
+      stream_mode: string | null;
+    }>(
+      `select build_sha, classifier_policy_version, summary_prompt_version,
+              summary_plan_schema_version, classifier_action,
+              plan_validation_status, plan_retry_count, plan_hash, stream_mode
+       from summary_runs
+       where command_message_id = $1
+       order by created_at desc
+       limit 1`,
+      [commandMessageId],
+    );
+    expect(attemptResult.rows[0]).toMatchObject({
+      classifier_policy_version: "classifier-rc-pending",
+      summary_prompt_version: "summary-v2",
+      summary_plan_schema_version: "summary-plan-v0.1",
+      classifier_action: "SUMMARIZE",
+      plan_validation_status: "valid",
+      plan_retry_count: 0,
+      stream_mode: "progressive",
+    });
+    expect(attemptResult.rows[0]?.build_sha).toEqual(expect.any(String));
+    expect(attemptResult.rows[0]?.plan_hash).toMatch(/^[a-f0-9]{64}$/u);
 
     const persisted = await database.query<{ message_id: number }>(
       `select message_id from messages where message_id = $1 limit 1`,

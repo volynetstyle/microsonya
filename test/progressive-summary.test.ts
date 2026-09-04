@@ -40,8 +40,18 @@ describe("progressive summary runtime", () => {
           { status: 200 },
         ),
     );
+    let call = 0;
+    const modelFetch = vi.fn<typeof globalThis.fetch>(async (input, init) => {
+      call += 1;
+      return call === 1
+        ? Response.json({ message: { content: planJson(null) }, done: true })
+        : fetch(input, init);
+    });
     const summarizer = createConversationSummarizer({
-      ollama: new OllamaClient({ baseUrl: "http://model/api", fetch }),
+      ollama: new OllamaClient({
+        baseUrl: "http://model/api",
+        fetch: modelFetch,
+      }),
     });
     const window = createConversationWindow([
       {
@@ -64,12 +74,12 @@ describe("progressive summary runtime", () => {
         {
           role: "system",
           content: expect.stringContaining(
-            "Return only the summary as plain text.",
+            "using only the validated SummaryPlan",
           ),
         },
         {
           role: "user",
-          content: expect.stringContaining("TRANSCRIPT_BEGIN"),
+          content: expect.stringContaining("SUMMARY_PLAN_BEGIN"),
         },
       ],
     });
@@ -84,8 +94,18 @@ describe("progressive summary runtime", () => {
           { status: 200 },
         ),
     );
+    let call = 0;
+    const modelFetch = vi.fn<typeof globalThis.fetch>(async (input, init) => {
+      call += 1;
+      return call === 1
+        ? Response.json({ message: { content: planJson("@1") }, done: true })
+        : fetch(input, init);
+    });
     const summarizer = createConversationSummarizer({
-      ollama: new OllamaClient({ baseUrl: "http://model/api", fetch }),
+      ollama: new OllamaClient({
+        baseUrl: "http://model/api",
+        fetch: modelFetch,
+      }),
     });
     const window = createConversationWindow([
       {
@@ -239,6 +259,25 @@ describe("progressive summary runtime", () => {
     }
   });
 });
+
+function planJson(speaker: "@1" | null): string {
+  return JSON.stringify({
+    referents: [],
+    claims: [
+      {
+        id: "c1",
+        referentId: null,
+        speaker,
+        source: null,
+        proposition: "The plan is confirmed.",
+        epistemicStatus: "established",
+        numericFacts: [],
+        evidenceMessageIds: [1],
+      },
+    ],
+    retainedClaimIds: ["c1"],
+  });
+}
 
 describe("Telegram progressive transports", () => {
   it("uses one non-stoppable draft id in private chat and commits normally", async () => {

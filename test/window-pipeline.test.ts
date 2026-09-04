@@ -3,7 +3,9 @@ import {
   SUMMARY_ACTIONS,
   asAuthorId,
   asChatId,
+  asClaimId,
   asMessageId,
+  asReferentId,
   asSummaryId,
   asTimestampMs,
   createConversationWindow,
@@ -85,11 +87,11 @@ describe("conversation-window decision pipeline", () => {
       fastClassifier: {
         classify: (receivedWindow, analysis) => {
           expect(receivedWindow).toBe(window);
-          expect(analysis.hasExternalReply).toBe(true);
+          expect(analysis.hasExternalReply).toBe(false);
           return {
             kind: "resolved",
-            action: "SKIP_REACTIONS",
-            rule: "TEST_REACTIONS_ONLY",
+            action: "DEFER_COMPACT",
+            rule: "TEST_ALREADY_COMPACT",
           };
         },
       },
@@ -97,26 +99,44 @@ describe("conversation-window decision pipeline", () => {
 
     expect(result).toEqual({
       decision: {
-        action: "SKIP_REACTIONS",
+        action: "DEFER_COMPACT",
         evidence: {
           source: "deterministic",
-          rule: "TEST_REACTIONS_ONLY",
+          rule: "TEST_ALREADY_COMPACT",
         },
       },
-      disposition: { kind: "skipped", reason: "SKIP_REACTIONS" },
+      disposition: { kind: "deferred", reason: "DEFER_COMPACT" },
     });
     expect(classify).not.toHaveBeenCalled();
     expect(summarize).not.toHaveBeenCalled();
   });
 
   it("does not infer DEFER_CONTEXT merely from an external parent", async () => {
-    const window = fixtureWindow();
+    const window = fixtureWindow(true);
     const classify = vi.fn(async () => modelDecision("DEFER_COMPACT"));
 
     await expect(decideWindow(window, { classify })).resolves.toEqual(
       modelDecision("DEFER_COMPACT"),
     );
     expect(classify).toHaveBeenCalledOnce();
+  });
+
+  it("vetoes only a risky irreversible skip and never promotes it to summarize", async () => {
+    const window = fixtureWindow(true);
+    const summarize = vi.fn<ConversationSummarizer["summarize"]>();
+    const result = await processWindow(window, {
+      classifier: { classify: async () => modelDecision("SKIP_NO_VALUE") },
+      summarizer: { summarize },
+    });
+
+    expect(result).toEqual({
+      decision: {
+        action: "DEFER_COMPACT",
+        evidence: { source: "model", model: "test-model" },
+      },
+      disposition: { kind: "deferred", reason: "DEFER_COMPACT" },
+    });
+    expect(summarize).not.toHaveBeenCalled();
   });
 
   it("uses the streaming summarizer when a production-progressive sink is provided", async () => {
@@ -146,6 +166,47 @@ describe("conversation-window decision pipeline", () => {
     });
   });
 
+  it("begins progressive output only after plan extraction and validation", async () => {
+    const window = fixtureWindow();
+    let resolvePlan!: (value: ReturnType<typeof plan>) => void;
+    const pendingPlan = new Promise<ReturnType<typeof plan>>(
+      (resolve) => (resolvePlan = resolve),
+    );
+    const begin = vi.fn(async () => undefined);
+    const streamPlan = vi.fn(async function* (receivedPlan) {
+      expect(receivedPlan).toEqual(plan());
+      yield "Validated summary.";
+    });
+
+    const pending = processWindow(window, {
+      classifier: { classify: async () => modelDecision("SUMMARIZE") },
+      summarizer: {
+        summarize: vi.fn(),
+        prepare: vi.fn(async () => pendingPlan),
+        streamPlan,
+      },
+      progressive: {
+        begin,
+        append: vi.fn(),
+        finalize: vi.fn(async () => "Validated summary."),
+        fail: vi.fn(async () => undefined),
+      },
+    });
+
+    await Promise.resolve();
+    expect(begin).not.toHaveBeenCalled();
+    expect(streamPlan).not.toHaveBeenCalled();
+    resolvePlan(plan());
+    await expect(pending).resolves.toMatchObject({
+      disposition: {
+        kind: "summarized",
+        summary: { text: "Validated summary." },
+      },
+    });
+    expect(begin).toHaveBeenCalledOnce();
+    expect(streamPlan).toHaveBeenCalledOnce();
+  });
+
   it("honors an already-aborted signal before either model-facing component", async () => {
     const controller = new AbortController();
     controller.abort();
@@ -164,7 +225,7 @@ describe("conversation-window decision pipeline", () => {
   });
 });
 
-function fixtureWindow() {
+function fixtureWindow(externalReply = false) {
   return createConversationWindow([
     {
       id: asMessageId(5),
@@ -179,7 +240,7 @@ function fixtureWindow() {
       chatId: asChatId("chat"),
       author: { id: asAuthorId("b"), label: "Vlad" },
       time: asTimestampMs(2_000),
-      parentId: asMessageId(2),
+      parentId: externalReply ? asMessageId(2) : null,
       text: "Second",
     },
   ]);
@@ -189,5 +250,21 @@ function modelDecision(action: SummaryAction): SummaryDecision {
   return {
     action,
     evidence: { source: "model", model: "test-model" },
+  };
+}
+
+function plan() {
+  return {
+    referents: [{ id: asReferentId("r1"), kind: "task" as const }],
+    claims: [
+      {
+        id: asClaimId("c1"),
+        referentId: asReferentId("r1"),
+        proposition: "The task is complete.",
+        epistemicStatus: "established" as const,
+        evidenceMessageIds: [asMessageId(5)],
+      },
+    ],
+    retainedClaimIds: [asClaimId("c1")],
   };
 }

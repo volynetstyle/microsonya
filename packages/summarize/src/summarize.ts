@@ -17,12 +17,15 @@ import {
 } from "@microsonya/shared";
 import {
   createClassifier,
+  CLASSIFIER_POLICY_VERSION,
   type SummaryDecisionClassifier,
 } from "./classifier.js";
 import {
   createConversationSummarizer,
+  SUMMARY_PROMPT_VERSION,
   type ConversationSummarizer,
 } from "./conversationSummarizer.js";
+import { SUMMARY_PLAN_SCHEMA_VERSION } from "./summaryPlan.js";
 import {
   processWindow,
   type FastClassifier,
@@ -76,6 +79,8 @@ export interface SummarizerDeps {
   /** Optional policy hook; the default implements the v0.1 pending window. */
   readonly windowSelector?: SummaryWindowSelector;
   readonly progressive?: WindowProcessorDeps["progressive"];
+  /** Deployment fingerprint supplied by the runtime adapter. */
+  readonly buildSha?: string;
 }
 export type {
   SelectedConversation,
@@ -86,6 +91,8 @@ export type {
 const EMPTY_MODEL_METRICS = Object.freeze({
   modelCalls: 0,
   classifierMs: 0,
+  plannerMs: 0,
+  realizerMs: 0,
   summarizerMs: 0,
 });
 
@@ -337,15 +344,24 @@ async function run(
 
     const completedAt = now();
     const model = modelMetrics(telemetry);
+    const pipeline = telemetry?.pipelineEvidence();
     const modelInvocations = telemetry?.modelInvocations(errorCode) ?? [];
     const snapshots = snapshotMessages(selected?.messages ?? []);
     const inputHash = hashInput(snapshots);
     const classifierInvocation = [...modelInvocations]
       .reverse()
       .find(({ stage: invocationStage }) => invocationStage === "classifier");
-    const summarizerInvocation = [...modelInvocations]
+    const plannerInvocation = [...modelInvocations]
+      .reverse()
+      .find(({ stage: invocationStage }) => invocationStage === "planner");
+    const realizerInvocation = [...modelInvocations]
+      .reverse()
+      .find(({ stage: invocationStage }) => invocationStage === "realizer");
+    const legacySummarizerInvocation = [...modelInvocations]
       .reverse()
       .find(({ stage: invocationStage }) => invocationStage === "summarizer");
+    const summarizerInvocation =
+      realizerInvocation ?? legacySummarizerInvocation;
     const checkpointAfter = terminalRun?.covers.lastId ?? checkpointBefore;
     const summaryText = terminalRun?.finalText;
     const summaryInline = terminalRun?.finalInline;
@@ -364,12 +380,38 @@ async function run(
         mode: command.mode,
         action,
         status,
+        buildSha: deps.buildSha ?? "unknown",
+        classifierPolicyVersion: CLASSIFIER_POLICY_VERSION,
+        summaryPromptVersion: SUMMARY_PROMPT_VERSION,
+        summaryPlanSchemaVersion: SUMMARY_PLAN_SCHEMA_VERSION,
+        classifierEvidence: pipeline?.classifierEvidence,
+        classifierAction: pipeline?.classifierAction,
+        planValidationStatus:
+          pipeline?.plan !== undefined
+            ? "valid"
+            : plannerInvocation !== undefined
+              ? "failed"
+              : "not_run",
+        planRetryCount: pipeline?.plan?.retryCount ?? 0,
+        planHash: pipeline?.plan?.planHash,
+        streamMode: deps.progressive === undefined ? "buffered" : "progressive",
         classifierModel: classifierInvocation?.model,
-        summarizerModel: summarizerInvocation?.model,
+        summarizerModel:
+          summarizerInvocation?.model ?? plannerInvocation?.model,
         classifierPromptHash: classifierInvocation?.promptHash,
-        summaryPromptHash: summarizerInvocation?.promptHash,
-        policyHash: sha256(CHECKPOINT_POLICY_VERSION),
+        summaryPromptHash:
+          summarizerInvocation?.promptHash ?? plannerInvocation?.promptHash,
+        policyHash: sha256(
+          [
+            CHECKPOINT_POLICY_VERSION,
+            CLASSIFIER_POLICY_VERSION,
+            SUMMARY_PROMPT_VERSION,
+            SUMMARY_PLAN_SCHEMA_VERSION,
+          ].join("|"),
+        ),
         classifierLatencyMs: model.classifierMs,
+        plannerLatencyMs: model.plannerMs,
+        realizerLatencyMs: model.realizerMs,
         summarizerLatencyMs: model.summarizerMs,
         totalLatencyMs: elapsed(),
         summaryText,
@@ -400,6 +442,8 @@ async function run(
       messageCount,
       contextMessageCount,
       classifierMs: model.classifierMs,
+      plannerMs: model.plannerMs,
+      realizerMs: model.realizerMs,
       summarizerMs: model.summarizerMs,
       totalMs: elapsed(),
       modelCalls: model.modelCalls,

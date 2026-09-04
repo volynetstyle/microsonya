@@ -10,6 +10,10 @@ export type AuthorId = Brand<string, "AuthorId">;
  * deliberately distinct from a source-platform user identifier.
  */
 export type ParticipantId = Brand<string, "ParticipantId">;
+/** Window-local identity of a concrete object or event in one summary plan. */
+export type ReferentId = Brand<string, "ReferentId">;
+/** Window-local identity of a proposition in one summary plan. */
+export type ClaimId = Brand<string, "ClaimId">;
 export type TimestampMs = Brand<number, "TimestampMs">;
 export type SummaryId = Brand<string, "SummaryId">;
 
@@ -31,6 +35,14 @@ export function asAuthorId(value: unknown): AuthorId {
 
 export function asParticipantId(value: unknown): ParticipantId {
   return asNonEmptyString(value, "ParticipantId") as ParticipantId;
+}
+
+export function asReferentId(value: unknown): ReferentId {
+  return asNonEmptyString(value, "ReferentId") as ReferentId;
+}
+
+export function asClaimId(value: unknown): ClaimId {
+  return asNonEmptyString(value, "ClaimId") as ClaimId;
 }
 
 export function asTimestampMs(value: unknown): TimestampMs {
@@ -223,9 +235,17 @@ export type ReferentKind =
   | "other";
 
 export interface SummaryReferent {
-  readonly id: string;
+  readonly id: ReferentId;
   readonly kind: ReferentKind;
 }
+
+export type EpistemicStatus =
+  | "established"
+  | "reported"
+  | "claimed"
+  | "speculated"
+  | "proposed"
+  | "conditional";
 
 export type NumericDimension =
   | "duration"
@@ -242,18 +262,26 @@ export interface NumericFact {
 }
 
 export interface SummaryClaim {
-  readonly id: string;
-  readonly referentId?: string;
+  readonly id: ClaimId;
+  readonly referentId?: ReferentId;
   readonly speakerId?: ParticipantId;
   readonly sourceId?: string;
   readonly proposition: string;
+  readonly epistemicStatus: EpistemicStatus;
   readonly numericFacts?: readonly NumericFact[];
   readonly evidenceMessageIds: readonly MessageId[];
 }
 
+/** Validated, viewer-independent semantic input to summary realization. */
+export interface SummaryPlan {
+  readonly referents: readonly SummaryReferent[];
+  readonly claims: readonly SummaryClaim[];
+  readonly retainedClaimIds: readonly ClaimId[];
+}
+
 export interface ModelInvocationEvidence {
   readonly id: SummaryId;
-  readonly stage: "classifier" | "summarizer";
+  readonly stage: "classifier" | "planner" | "realizer" | "summarizer";
   readonly model: string;
   readonly promptHash: string;
   readonly inputTokens?: number;
@@ -288,12 +316,24 @@ export interface SummaryRunAttempt {
   readonly mode: SummaryMode;
   readonly action?: SummaryAction;
   readonly status: SummaryRunAttemptStatus;
+  readonly buildSha?: string;
+  readonly classifierPolicyVersion?: string;
+  readonly summaryPromptVersion?: string;
+  readonly summaryPlanSchemaVersion?: string;
+  readonly classifierEvidence?: unknown;
+  readonly classifierAction?: SummaryAction;
+  readonly planValidationStatus?: "valid" | "not_run" | "failed";
+  readonly planRetryCount?: number;
+  readonly planHash?: string;
+  readonly streamMode?: "progressive" | "buffered";
   readonly classifierModel?: string;
   readonly summarizerModel?: string;
   readonly classifierPromptHash?: string;
   readonly summaryPromptHash?: string;
   readonly policyHash: string;
   readonly classifierLatencyMs: number;
+  readonly plannerLatencyMs?: number;
+  readonly realizerLatencyMs?: number;
   readonly summarizerLatencyMs: number;
   readonly totalLatencyMs: number;
   readonly summaryText?: string;

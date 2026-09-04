@@ -11,8 +11,9 @@ import type {
 import { asSummaryId, asTimestampMs } from "@microsonya/shared";
 import type { StructuralAnalysis } from "./views.js";
 import type { ClassificationPredicates } from "./classifier.js";
+import type { SkipRiskIndicator } from "./skipGuard.js";
 
-export type ModelStage = "classifier" | "summarizer";
+export type ModelStage = "classifier" | "planner" | "realizer" | "summarizer";
 export type ModelOutputFailure =
   | "MODEL_OUTPUT_EMPTY"
   | "MODEL_OUTPUT_INVALID_JSON"
@@ -58,6 +59,13 @@ export type SummarizationTelemetryPayload =
       result: "abstain" | "resolved";
       action?: SummaryAction;
       rule?: string;
+    }
+  | {
+      type: "window.skip-guard";
+      proposedAction: SummaryAction;
+      action: SummaryAction;
+      vetoed: boolean;
+      reasons: readonly SkipRiskIndicator[];
     }
   | {
       type: "model.request";
@@ -122,8 +130,12 @@ export type SummarizationTelemetryPayload =
       predicates?: ClassificationPredicates;
     }
   | {
-      type: "summarizer.output_mode";
-      mode: "structured" | "plaintext_fallback";
+      type: "summary.plan.validated";
+      schemaVersion: string;
+      retryCount: number;
+      planHash: string;
+      claimCount: number;
+      retainedClaimCount: number;
     }
   | {
       type: "summary.saved";
@@ -154,6 +166,8 @@ export type SummarizationTelemetryPayload =
       contextMessageCount: number;
       classifierMs: number;
       summarizerMs: number;
+      plannerMs?: number;
+      realizerMs?: number;
       totalMs: number;
       modelCalls: number;
       checkpointAdvanced: boolean;
@@ -209,7 +223,16 @@ export class SummarizationTelemetryTrace {
   private readonly startedAt: number;
   private modelCalls = 0;
   private classifierMs = 0;
+  private plannerMs = 0;
+  private realizerMs = 0;
   private summarizerMs = 0;
+  private classifierEvidence?: ClassificationPredicates;
+  private classifierAction?: SummaryAction;
+  private planEvidence?: {
+    readonly schemaVersion: string;
+    readonly retryCount: number;
+    readonly planHash: string;
+  };
   private readonly invocations = new Map<string, MutableInvocation>();
 
   constructor(
@@ -237,9 +260,17 @@ export class SummarizationTelemetryTrace {
       });
     }
     if (payload.type === "model.response.envelope") {
-      if (payload.stage === "classifier")
+      if (payload.stage === "classifier") {
         this.classifierMs += payload.durationMs;
-      else this.summarizerMs += payload.durationMs;
+      } else if (payload.stage === "planner") {
+        this.plannerMs += payload.durationMs;
+        this.summarizerMs += payload.durationMs;
+      } else if (payload.stage === "realizer") {
+        this.realizerMs += payload.durationMs;
+        this.summarizerMs += payload.durationMs;
+      } else {
+        this.summarizerMs += payload.durationMs;
+      }
       const invocation = this.invocations.get(
         invocationKey(payload.stage, payload.attempt),
       );
@@ -266,12 +297,21 @@ export class SummarizationTelemetryTrace {
       if (invocation !== undefined) {
         invocation.status = "succeeded";
         if (payload.stage === "classifier") {
+          this.classifierEvidence = payload.predicates;
+          this.classifierAction = payload.action;
           invocation.outputJson = {
             ...payload.predicates,
             action: payload.action,
           };
         }
       }
+    }
+    if (payload.type === "summary.plan.validated") {
+      this.planEvidence = Object.freeze({
+        schemaVersion: payload.schemaVersion,
+        retryCount: payload.retryCount,
+        planHash: payload.planHash,
+      });
     }
     // Evidence capture above is production-critical. Everything below only
     // prepares and emits the verbose development event stream.
@@ -307,11 +347,15 @@ export class SummarizationTelemetryTrace {
   modelMetrics(): Readonly<{
     modelCalls: number;
     classifierMs: number;
+    plannerMs: number;
+    realizerMs: number;
     summarizerMs: number;
   }> {
     return Object.freeze({
       modelCalls: this.modelCalls,
       classifierMs: this.classifierMs,
+      plannerMs: this.plannerMs,
+      realizerMs: this.realizerMs,
       summarizerMs: this.summarizerMs,
     });
   }
@@ -334,6 +378,14 @@ export class SummarizationTelemetryTrace {
         }),
       ),
     );
+  }
+
+  pipelineEvidence() {
+    return Object.freeze({
+      classifierEvidence: this.classifierEvidence,
+      classifierAction: this.classifierAction,
+      plan: this.planEvidence,
+    });
   }
 
   private emit(payload: SummarizationTelemetryPayload): void {

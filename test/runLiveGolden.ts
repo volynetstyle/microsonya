@@ -15,7 +15,6 @@ import {
   ModelOutputError,
   processWindow,
   shouldAdvanceCheckpoint,
-  type SummaryPromptVariant,
   type ClassifierEvalRegime,
   type ModelWindowMessageRole,
 } from "../packages/summarize/src/index.js";
@@ -24,6 +23,7 @@ import {
   goldenFixtures,
   smokeE2E,
   type E2EFixture,
+  type FixtureMessage,
 } from "./goldenFixtures.js";
 import {
   assessAction,
@@ -116,7 +116,6 @@ for (const fixture of selected) {
         client,
         args.timeoutMs,
         args.model,
-        args.promptVariant,
         args.seed + index,
         args.summarizerOnly,
         args.classifierOnly,
@@ -159,7 +158,6 @@ const report = {
   model: args.model,
   endpoint: redactEndpoint(endpoint),
   suite: args.suite,
-  promptVariant: args.promptVariant,
   generationPath: args.generationPath,
   classifierRegime: args.classifierRegime,
   exemplarOrder: args.exemplarOrderName,
@@ -182,7 +180,6 @@ async function runFixture(
   ollama: OllamaClient,
   timeoutMs: number,
   model: string,
-  promptVariant: SummaryPromptVariant,
   seed: number,
   summarizerOnly: boolean,
   classifierOnly: boolean,
@@ -302,7 +299,6 @@ async function runFixture(
         classifier,
         summarizer: createConversationSummarizer({
           ollama: countedClient("summarizer") as never,
-          promptVariant,
         }),
         roles: materialized.roles,
         ...(generationPath === "production"
@@ -370,17 +366,42 @@ async function runFixture(
   }
 }
 
-function message(id: number, text: string): ChatMessage {
+function message(
+  id: number,
+  value: string | FixtureMessage,
+  all?: readonly (string | FixtureMessage)[],
+): ChatMessage {
+  const fixture =
+    typeof value === "string"
+      ? { text: value, author: `Participant ${(id % 3) + 1}` }
+      : value;
+  const replyTo = fixture.replyTo;
+  if (
+    replyTo !== undefined &&
+    (all === undefined || replyTo < 0 || replyTo >= id - 1)
+  ) {
+    throw new TypeError(
+      `Fixture replyTo ${replyTo} must reference an earlier message.`,
+    );
+  }
   return Object.freeze({
     id: asMessageId(id),
     chatId: asChatId("golden-live"),
     author: Object.freeze({
-      id: asAuthorId(String((id % 3) + 1)),
-      label: `Participant ${(id % 3) + 1}`,
+      id: asAuthorId(`fixture-author:${fixture.author}`),
+      label: fixture.author,
     }),
+    ...(fixture.source === undefined
+      ? {}
+      : {
+          contentSource: Object.freeze({
+            ...fixture.source,
+            sourceId: `fixture-source:${fixture.source.kind}:${fixture.source.label}`,
+          }),
+        }),
     time: asTimestampMs(1_700_000_000_000 + id * 1_000),
-    parentId: null,
-    text,
+    parentId: replyTo === undefined ? null : asMessageId(replyTo + 1),
+    text: fixture.text,
   });
 }
 
@@ -406,8 +427,8 @@ function materializeFixture(fixture: E2EFixture): {
       ],
     };
   }
-  const messages = fixture.messages.map((text, index) =>
-    message(index + 1, text),
+  const messages = fixture.messages.map((value, index) =>
+    message(index + 1, value, fixture.messages),
   );
   return {
     messages,
@@ -526,10 +547,6 @@ function parseArgs(argv: readonly string[]) {
   if (minimumAccuracy < 0 || minimumAccuracy > 1) {
     throw new TypeError("minimum-accuracy must be between 0 and 1.");
   }
-  const promptVariant = read("--prompt-variant") ?? "V2";
-  if (!["V0", "V1", "V2", "V3"].includes(promptVariant)) {
-    throw new TypeError(`Unknown prompt variant: ${promptVariant}`);
-  }
   const generationPath = read("--generation-path") ?? "production";
   if (!["production", "structured-diagnostic"].includes(generationPath)) {
     throw new TypeError(
@@ -572,7 +589,6 @@ function parseArgs(argv: readonly string[]) {
     output: read("--output"),
     json: argv.includes("--json"),
     model: read("--model") ?? "gpt-oss:120b-cloud",
-    promptVariant: promptVariant as SummaryPromptVariant,
     generationPath: generationPath as SummaryGenerationPath,
     seed,
     summarizerOnly: argv.includes("--summarizer-only"),
@@ -847,7 +863,8 @@ function aggregate(reports: readonly FixtureReport[]) {
       summarizerMatchesActions: runs.every(
         ({ action, summarizerCalls, error }) =>
           error !== undefined ||
-          summarizerCalls === (action === "SUMMARIZE" ? 1 : 0),
+          summarizerCalls ===
+            (action === "SUMMARIZE" && !args.classifierOnly ? 2 : 0),
       ),
     },
     errors,

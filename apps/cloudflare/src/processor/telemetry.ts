@@ -146,14 +146,29 @@ function projectEvent(event: SummarizationTelemetryEvent): Projection {
         durationMs: event.durationMs,
         summarizerMs: event.responseChars,
       };
-    case "summarizer.output_mode":
-      return { ...base, mode: event.mode };
+    case "summary.plan.validated":
+      return {
+        ...base,
+        status: "valid",
+        stage: "planner",
+        mode: event.schemaVersion,
+        modelCalls: event.retryCount,
+        messageCount: event.claimCount,
+        contextMessageCount: event.retainedClaimCount,
+      };
     case "window.fast-classifier":
       return {
         ...base,
         status: event.result,
         action: event.action ?? "",
         mode: event.rule ?? "",
+      };
+    case "window.skip-guard":
+      return {
+        ...base,
+        status: event.vetoed ? "vetoed" : "passed",
+        action: event.action,
+        mode: event.reasons.join(","),
       };
     case "window.decision":
       return {

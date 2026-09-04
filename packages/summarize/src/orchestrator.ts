@@ -14,6 +14,7 @@ import type { ConversationSummarizer } from "./conversationSummarizer.js";
 import type { ModelWindowMessageRole } from "./prompt.js";
 import type { SummarizationTelemetryTrace } from "./telemetry.js";
 import { analyzeStructure, type StructuralAnalysis } from "./views.js";
+import { guardIrreversibleSkip } from "./skipGuard.js";
 
 export type FastRule = string;
 
@@ -79,16 +80,18 @@ export async function decideWindow(
   });
 
   if (fast.kind === "resolved") {
-    return Object.freeze({
+    const raw = Object.freeze({
       action: fast.action,
       evidence: Object.freeze({
         source: "deterministic" as const,
         rule: fast.rule,
       }),
     });
+    return applySkipGuard(raw, window, telemetry, roles);
   }
 
-  return classifier.classify(window, signal, telemetry, roles);
+  const raw = await classifier.classify(window, signal, telemetry, roles);
+  return applySkipGuard(raw, window, telemetry, roles);
 }
 
 export async function processWindow(
@@ -119,8 +122,58 @@ export async function processWindow(
     let generated: Summary;
     if (
       deps.progressive !== undefined &&
+      deps.summarizer.prepare !== undefined &&
+      deps.summarizer.streamPlan !== undefined
+    ) {
+      // No speculative prose is exposed before the semantic plan is valid.
+      const plan = await deps.summarizer.prepare(
+        window,
+        signal,
+        deps.telemetry,
+        deps.roles,
+      );
+      signal?.throwIfAborted();
+      await deps.progressive.begin();
+      try {
+        for await (const delta of deps.summarizer.streamPlan(
+          plan,
+          window,
+          signal,
+          deps.telemetry,
+        )) {
+          deps.progressive.append(delta);
+        }
+        const finalText = await deps.progressive.finalize();
+        generated = deps.summarizer.streamedSummary?.(window) ?? {
+          text: finalText,
+        };
+      } catch (error) {
+        await deps.progressive.fail(error);
+        throw error;
+      }
+    } else if (
+      deps.summarizer.prepare !== undefined &&
+      deps.summarizer.realizePlan !== undefined
+    ) {
+      const plan = await deps.summarizer.prepare(
+        window,
+        signal,
+        deps.telemetry,
+        deps.roles,
+      );
+      signal?.throwIfAborted();
+      generated = await deps.summarizer.realizePlan(
+        plan,
+        window,
+        signal,
+        deps.telemetry,
+      );
+    } else if (
+      deps.progressive !== undefined &&
       deps.summarizer.stream !== undefined
     ) {
+      // Compatibility path for isolated adapters and test doubles. The
+      // production factory always exposes prepare + streamPlan above.
       await deps.progressive.begin();
       try {
         for await (const delta of deps.summarizer.stream(
@@ -194,6 +247,23 @@ export async function processWindow(
   });
 
   return Object.freeze({ decision, disposition });
+}
+
+function applySkipGuard(
+  decision: SummaryDecision,
+  window: ConversationWindow,
+  telemetry?: SummarizationTelemetryTrace,
+  roles?: readonly ModelWindowMessageRole[],
+): SummaryDecision {
+  const guarded = guardIrreversibleSkip(decision, window, roles);
+  telemetry?.record({
+    type: "window.skip-guard",
+    proposedAction: guarded.proposedAction,
+    action: guarded.decision.action,
+    vetoed: guarded.vetoed,
+    reasons: guarded.reasons,
+  });
+  return guarded.decision;
 }
 
 function defaultSummaryId(): SummaryId {

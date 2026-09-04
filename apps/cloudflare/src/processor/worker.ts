@@ -17,6 +17,7 @@ import {
   GROUP_PROGRESSIVE_POLICY,
   PRIVATE_PROGRESSIVE_POLICY,
   ProgressiveSummarySession,
+  SUMMARY_PROMPT_VERSION,
   presentDisposition,
 } from "@microsonya/summarize";
 import {
@@ -198,11 +199,10 @@ export class SummaryProcessorEntrypoint extends WorkerEntrypoint<Env> {
             progressiveSession = new ProgressiveSummarySession(
               progressiveTransport,
               undefined,
-              isPrivate
-                ? PRIVATE_PROGRESSIVE_POLICY
-                : GROUP_PROGRESSIVE_POLICY,
+              isPrivate ? PRIVATE_PROGRESSIVE_POLICY : GROUP_PROGRESSIVE_POLICY,
             );
             const summarizer = createSummarizer({
+              buildSha: this.env.WORKER_VERSION.id,
               messages: deps.messages,
               summaries: {
                 findLastRun: (chatId) =>
@@ -257,14 +257,14 @@ export class SummaryProcessorEntrypoint extends WorkerEntrypoint<Env> {
       const saved = await tracing.enterSpan("summary.persist", (span) => {
         span.setAttribute("microsonya.run_id", runId);
         span.setAttribute("microsonya.model", "configured-profile");
-        span.setAttribute("microsonya.prompt_version", "summarize-package");
+        span.setAttribute("microsonya.prompt_version", SUMMARY_PROMPT_VERSION);
         return this.env.SUMMARY_RUNS.saveSummary(
           runId,
           claimed.leaseToken,
           summary,
           {
             model: "configured-profile",
-            promptVersion: "summarize-package",
+            promptVersion: SUMMARY_PROMPT_VERSION,
           },
         );
       });
@@ -585,11 +585,14 @@ async function callTelegramApi(
   method: string,
   body: Readonly<Record<string, unknown>>,
 ): Promise<unknown> {
-  const response = await fetch(`https://api.telegram.org/bot${token}/${method}`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify(body),
-  });
+  const response = await fetch(
+    `https://api.telegram.org/bot${token}/${method}`,
+    {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(body),
+    },
+  );
   const payload: unknown = await response.json();
   if (!response.ok) {
     throw new DeliveryError(

@@ -12,29 +12,17 @@ pnpm eval:live -- --fixture durable-70k-pc-story --runs 20
 pnpm eval:live -- --suite all --model gpt-oss:20b-cloud --output .data/e2e-20b.json
 ```
 
-To run the prompt ablation matrix with the same five seeds, execute:
+The summarizer policy is frozen to `summary-v2`. Every production generation
+run first extracts a JSON `SummaryPlan`, parses it locally, validates it with
+Zod and deterministic semantic checks, and only then begins progressive plain-
+text realization. Cloud schema enforcement is not a correctness boundary. Run
+number `N` uses `seed + N`; generation path and the initial seed are recorded in
+the JSON report. `--summarizer-only` deterministically selects `SUMMARIZE`, so
+classifier behavior cannot hide or confound generation failures.
 
-```sh
-pnpm eval:live -- --suite extraction --summarizer-only --prompt-variant V0 --runs 5 --seed 100 --output .data/summary-v0.json
-pnpm eval:live -- --suite extraction --summarizer-only --prompt-variant V1 --runs 5 --seed 100 --output .data/summary-v1.json
-pnpm eval:live -- --suite extraction --summarizer-only --prompt-variant V2 --runs 5 --seed 100 --output .data/summary-v2.json
-pnpm eval:live -- --suite extraction --summarizer-only --prompt-variant V3 --runs 5 --seed 100 --output .data/summary-v3.json
-```
-
-The variants are cumulative: V0 is the former single-user-message prompt, V1
-adds native system/user role separation, V2 adds semantic composition rules,
-and V3 adds the two adversarial contrasts. By default, every live generation
-run uses the production path: plain-text instructions, `stream: true`, no
-`format`, and the progressive orchestrator branch. Run number `N` uses
-`seed + N`, and the chosen variant, generation path, and initial seed are
-recorded in the JSON report. `--summarizer-only` deterministically selects
-`SUMMARIZE`, so classifier behavior and cost cannot hide or confound generation
-differences.
-
-Use `--generation-path structured-diagnostic` only for a separate diagnostic of
-the non-production JSON-schema path. It is not a release-generation gate.
-The runtime defaults to V2; V3 remains opt-in until a broader ablation proves a
-gain over V2 rather than a tie.
+Use `--generation-path structured-diagnostic` only to disable the progressive
+delivery collector while retaining the same planner and realizer policy. It is
+not a release-generation gate.
 
 The stability suite runs each known decision-boundary fixture five times and
 reports its action distribution, dominant-action stability, and accepted-action
@@ -48,7 +36,7 @@ proposition score fell below 90%. Preferred-label accuracy is diagnostic only.
 Use `--timeout-ms`, `--suite`, `--runs`, and `--output` to override defaults and
 persist a report. Use `--model` to run the frozen fixture contract against a
 different Ollama model without changing the runtime model profiles. Use
-`--prompt-variant` and `--seed` for controlled V0-V3 comparisons.
+`--seed` for controlled repeated runs.
 Repeat `--fixture` to evaluate a selected group of fixtures in one report.
 
 ### Classifier RC evaluation

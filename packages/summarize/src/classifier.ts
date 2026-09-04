@@ -30,6 +30,9 @@ import type { SummarizationTelemetryTrace } from "./telemetry.js";
 /** @deprecated Prefer the domain name SummaryAction. */
 export type CompactionAction = SummaryAction;
 
+/** RC marker until the required X2/X3 ten-seed gate selects the final policy. */
+export const CLASSIFIER_POLICY_VERSION = "classifier-rc-pending";
+
 const nonDurableKindSchema = z.enum(["reaction", "banter", "no_value"]);
 
 const legacyClassifierOutputSchema = z

@@ -217,6 +217,16 @@ export class SummariesRepo {
           mode: attempt.mode,
           status: attempt.status,
           action: attempt.action,
+          buildSha: attempt.buildSha,
+          classifierPolicyVersion: attempt.classifierPolicyVersion,
+          summaryPromptVersion: attempt.summaryPromptVersion,
+          summaryPlanSchemaVersion: attempt.summaryPlanSchemaVersion,
+          classifierEvidence: attempt.classifierEvidence,
+          classifierAction: attempt.classifierAction,
+          planValidationStatus: attempt.planValidationStatus,
+          planRetryCount: attempt.planRetryCount,
+          planHash: attempt.planHash,
+          streamMode: attempt.streamMode,
           classifierModel: attempt.classifierModel,
           summarizerModel: attempt.summarizerModel,
           classifierPromptHash: this.privateFingerprint(
@@ -229,6 +239,14 @@ export class SummariesRepo {
           ),
           policyHash: attempt.policyHash,
           classifierLatencyMs: rounded(attempt.classifierLatencyMs),
+          plannerLatencyMs:
+            attempt.plannerLatencyMs === undefined
+              ? undefined
+              : rounded(attempt.plannerLatencyMs),
+          realizerLatencyMs:
+            attempt.realizerLatencyMs === undefined
+              ? undefined
+              : rounded(attempt.realizerLatencyMs),
           summarizerLatencyMs: rounded(attempt.summarizerLatencyMs),
           totalLatencyMs: rounded(attempt.totalLatencyMs),
           summaryTextCiphertext:

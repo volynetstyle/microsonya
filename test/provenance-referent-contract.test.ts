@@ -7,7 +7,7 @@ import {
   createConversationWindow,
 } from "../packages/shared/src/index.js";
 import {
-  buildSummaryMessages,
+  buildSummaryPlanMessages,
   encodePipeWindow,
 } from "../packages/summarize/src/index.js";
 import { parseTelegramChatMessageUpdate } from "../packages/telegram/src/index.js";
@@ -80,18 +80,12 @@ describe("provenance-aware and referent-safe summary contract", () => {
         text: "Окреме замовлення MOYO досі комплектується.",
       },
     ]);
-    const policy = buildSummaryMessages(window, undefined, {
-      promptVariant: "V2",
-    })[0]!.content;
+    const policy = buildSummaryPlanMessages(window)[0]!.content;
 
-    expect(policy).toContain("Different referents must not be");
-    expect(policy).toContain(
-      "same merchant, or the same carrier is not linking evidence",
-    );
-    expect(policy).toContain(
-      '"three days in transit" must not become "sent three times"',
-    );
-    expect(policy).toContain("Participant coverage is not an objective");
-    expect(policy).toContain("Do not infer psychological states");
+    expect(policy).toContain("Keep distinct shipments, orders, purchases");
+    expect(policy).toContain("Adjacency is not linking");
+    expect(policy).toContain("three days is duration");
+    expect(policy).toContain("Omit jokes, wishes, reactions");
+    expect(policy).toContain("reported or claimed, never established");
   });
 });

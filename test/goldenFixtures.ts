@@ -8,12 +8,23 @@ export type ExpectedAction =
   | "SKIP_NO_VALUE"
   | "EMPTY";
 
+export interface FixtureMessage {
+  readonly text: string;
+  readonly author: string;
+  readonly source?: {
+    readonly kind: "channel" | "forwarded_user";
+    readonly label: string;
+  };
+  /** Zero-based index of an earlier message in this fixture. */
+  readonly replyTo?: number;
+}
+
 export interface E2EFixture {
   readonly id: string;
   readonly source: "exact" | "live" | "reconstructed";
   readonly scope?: "semantic" | "system";
   readonly status?: "accepted" | "under_review";
-  readonly messages: readonly string[];
+  readonly messages: readonly (string | FixtureMessage)[];
   readonly expected: {
     readonly action: ExpectedAction;
     /** Product-safe alternatives. The preferred action remains `action`. */
@@ -484,6 +495,76 @@ export const goldenFixtures = [
     ],
     expected: { action: "SUMMARIZE", checkpoint: { advance: false } },
   }),
+  fixture({
+    id: "critical-shipment-order-provenance",
+    source: "reconstructed",
+    messages: [
+      {
+        author: "Vlad",
+        text: "Моя посилка вже третій день у дорозі.",
+      },
+      {
+        author: "Karina",
+        text: "Може, вона загубилася?",
+        replyTo: 0,
+      },
+      {
+        author: "Sanya",
+        text: "Моє окреме замовлення в MOYO ще комплектується; перевізнику його не передали.",
+      },
+      {
+        author: "Karina",
+        source: { kind: "channel", label: "Security Monitor" },
+        text: "Канал стверджує, що на прикордонному напрямку сталася атака; незалежного підтвердження в чаті немає.",
+      },
+      { author: "Sanya", text: "Хай уже обидві доїдуть 🙏" },
+      { author: "Vlad", text: "Після цього хочу тільки чай, не каву 😅" },
+    ],
+    expected: {
+      action: "SUMMARIZE",
+      summary: {
+        mustInclude: [
+          "третій день у дорозі",
+          "MOYO",
+          "ще комплектується",
+          "перевізнику не передали",
+          "Security Monitor",
+        ],
+        mustExclude: ["чай", "каву", "молит", "побажан"],
+        mustNotInvent: [
+          "третя посилка",
+          "третій раз",
+          "посилка втрачена",
+          "замовлення MOYO у дорозі",
+          "атака підтверджена",
+        ],
+        exactInvariants: [
+          "Vlad shipment != MOYO order",
+          "3 days is duration",
+          "SOURCE claim remains claimed",
+          "possible loss remains speculation",
+        ],
+        propositions: [
+          {
+            subject: "Vlad shipment",
+            relation: "duration in transit",
+            object: "3 days",
+          },
+          {
+            subject: "MOYO order",
+            relation: "current state",
+            object: "assembling; carrier handoff not started",
+          },
+          {
+            subject: "Security Monitor",
+            relation: "claimed",
+            object: "border-direction attack",
+          },
+        ],
+      },
+      checkpoint: { advance: true },
+    },
+  }),
 ] as const satisfies readonly E2EFixture[];
 
 export const smokeE2E = [
@@ -511,4 +592,5 @@ export const adversarialE2E = [
   "edited-message-latest-state",
   "parallel-summary-idempotency",
   "provider-timeout",
+  "critical-shipment-order-provenance",
 ] as const;
