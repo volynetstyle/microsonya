@@ -4,9 +4,13 @@ export type WmaCachePolicy = Readonly<{ ttlSeconds: number }>;
 
 export function wmaCachePolicy(url: URL): WmaCachePolicy | undefined {
   if (url.pathname === "/api/wma/chats") return { ttlSeconds: 30 };
-  if (url.pathname === "/api/wma/chat-overview")
-    return { ttlSeconds: url.searchParams.has("cursor") ? 300 : 30 };
-  if (url.pathname === "/api/wma/summary-detail") return { ttlSeconds: 86_400 };
+  // These responses are viewer-rendered: resolve aliases for every request so
+  // a rename is immediately visible and never survives an edge-cache entry.
+  if (
+    url.pathname === "/api/wma/chat-overview" ||
+    url.pathname === "/api/wma/summary-detail"
+  )
+    return;
   return;
 }
 

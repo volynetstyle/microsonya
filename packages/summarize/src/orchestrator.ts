@@ -3,6 +3,7 @@ import {
   asSummaryId,
   asTimestampMs,
   type ConversationWindow,
+  type Summary,
   type SummaryDecision,
   type SummaryId,
   type TimestampMs,
@@ -115,8 +116,11 @@ export async function processWindow(
   });
   let disposition: WindowDisposition;
   if (decision.action === "SUMMARIZE") {
-    let generated: { readonly text: string };
-    if (deps.progressive !== undefined && deps.summarizer.stream !== undefined) {
+    let generated: Summary;
+    if (
+      deps.progressive !== undefined &&
+      deps.summarizer.stream !== undefined
+    ) {
       await deps.progressive.begin();
       try {
         for await (const delta of deps.summarizer.stream(
@@ -127,7 +131,10 @@ export async function processWindow(
         )) {
           deps.progressive.append(delta);
         }
-        generated = { text: await deps.progressive.finalize() };
+        const finalText = await deps.progressive.finalize();
+        generated = deps.summarizer.streamedSummary?.(window) ?? {
+          text: finalText,
+        };
       } catch (error) {
         await deps.progressive.fail(error);
         throw error;
@@ -153,6 +160,7 @@ export async function processWindow(
           count: messages.length,
         }),
         text: generated.text,
+        ...(generated.inline === undefined ? {} : { inline: generated.inline }),
         createdAt: (deps.now ?? defaultNow)(),
       }),
     });

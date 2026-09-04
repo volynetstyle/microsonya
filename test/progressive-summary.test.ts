@@ -76,6 +76,41 @@ describe("progressive summary runtime", () => {
     expect(request).not.toHaveProperty("format");
   });
 
+  it("converts only explicit model @N references into public text and inline ids", async () => {
+    const fetch = vi.fn<typeof globalThis.fetch>(
+      async () =>
+        new Response(
+          `${JSON.stringify({ message: { content: "@" }, done: false })}\n${JSON.stringify({ message: { content: "1 підтвердила план." }, done: true })}\n`,
+          { status: 200 },
+        ),
+    );
+    const summarizer = createConversationSummarizer({
+      ollama: new OllamaClient({ baseUrl: "http://model/api", fetch }),
+    });
+    const window = createConversationWindow([
+      {
+        id: asMessageId(1),
+        chatId: asChatId("chat"),
+        author: { id: asAuthorId("source-user-id"), label: "Karina" },
+        time: asTimestampMs(1),
+        parentId: null,
+        text: "text",
+      },
+    ]);
+
+    const chunks: string[] = [];
+    for await (const chunk of summarizer.stream!(window)) chunks.push(chunk);
+
+    expect(chunks).toEqual(["Karina підтвердила план."]);
+    expect(summarizer.streamedSummary?.(window)).toEqual({
+      text: "Karina підтвердила план.",
+      inline: [
+        { type: "participant", participantId: "source-user-id" },
+        { type: "text", value: " підтвердила план." },
+      ],
+    });
+  });
+
   it("coalesces desired snapshots while preserving serialized prefix order", async () => {
     let release!: () => void;
     const firstUpdate = new Promise<void>((resolve) => (release = resolve));

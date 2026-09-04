@@ -6,13 +6,19 @@ export class WmaApiError extends Error {
     super(message);
   }
 }
-export async function postJson<T>(path: string, initData: string): Promise<T> {
+export async function postJson<T>(
+  path: string,
+  initData: string,
+  body?: unknown,
+): Promise<T> {
   const response = await fetch(path, {
     method: "POST",
     headers: {
       "X-Telegram-Init-Data": initData,
       "X-Time-Zone": Intl.DateTimeFormat().resolvedOptions().timeZone,
+      ...(body === undefined ? {} : { "content-type": "application/json" }),
     },
+    ...(body === undefined ? {} : { body: JSON.stringify(body) }),
   });
   if (!response.ok)
     throw new WmaApiError(response.status, await response.text());

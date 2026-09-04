@@ -1,4 +1,4 @@
-import { For, onSettled } from "solid-js";
+import { For, onSettled, Show } from "solid-js";
 import type { WmaSummaryDetail } from "../api/contracts";
 
 type SourceMessage = WmaSummaryDetail["moments"][number];
@@ -23,6 +23,7 @@ export function sourceGradientOpacities(
 
 export function AnimatedSourceList(props: {
   messages: readonly SourceMessage[];
+  onRenameParticipant?: (message: SourceMessage) => Promise<void>;
 }) {
   const nativeScrollTimeline =
     typeof CSS !== "undefined" &&
@@ -188,6 +189,17 @@ export function AnimatedSourceList(props: {
                 <span class="source-message-content">
                   <span class="source-message-heading">
                     <strong>{message.author}</strong>
+                    <Show when={props.onRenameParticipant !== undefined}>
+                      <button
+                        type="button"
+                        class="source-participant-rename"
+                        onClick={() =>
+                          void props.onRenameParticipant?.(message)
+                        }
+                      >
+                        Перейменувати
+                      </button>
+                    </Show>
                     <time datetime={sentAt.toISOString()}>
                       {TIME_FORMATTER.format(sentAt)}
                     </time>

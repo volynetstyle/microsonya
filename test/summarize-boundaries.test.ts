@@ -8,12 +8,12 @@ import {
   type SummaryCommand,
 } from "../packages/shared/src/index.js";
 import {
+  buildClassifierPrompt,
   pendingSummaryWindowSelector,
   selectConversationWindow,
   selectMessages,
 } from "../packages/summarize/src/index.js";
 import { MAX_MESSAGES } from "../packages/summarize/src/constants.js";
-import { buildModelPrompt } from "../packages/summarize/src/prompt.js";
 
 const command: SummaryCommand = {
   chatId: asChatId("chat"),
@@ -164,12 +164,7 @@ describe("summary conversation-window selection", () => {
       command,
       asMessageId(4),
     )!;
-    const prompt = buildModelPrompt(
-      "SUMMARY_POLICY",
-      "policy",
-      selected.window,
-      selected.messages,
-    );
+    const prompt = buildClassifierPrompt(selected.window, selected.messages);
 
     expect(prompt).toContain("INPUT_ROLES_BEGIN\n#4|context\n#9|eligible");
     expect(prompt).toContain(

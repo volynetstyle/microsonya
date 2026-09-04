@@ -120,6 +120,7 @@ for (const fixture of selected) {
         args.seed + index,
         args.summarizerOnly,
         args.classifierOnly,
+        args.generationPath,
         args.classifierRegime,
         args.exemplarOrder,
         args.exemplarMode,
@@ -159,6 +160,7 @@ const report = {
   endpoint: redactEndpoint(endpoint),
   suite: args.suite,
   promptVariant: args.promptVariant,
+  generationPath: args.generationPath,
   classifierRegime: args.classifierRegime,
   exemplarOrder: args.exemplarOrderName,
   classifierExemplars: args.classifierExemplars,
@@ -184,6 +186,7 @@ async function runFixture(
   seed: number,
   summarizerOnly: boolean,
   classifierOnly: boolean,
+  generationPath: SummaryGenerationPath,
   classifierRegime: ClassifierEvalRegime,
   exemplarOrder: readonly number[] | undefined,
   exemplarMode: "current" | "none" | "hardest",
@@ -302,6 +305,9 @@ async function runFixture(
           promptVariant,
         }),
         roles: materialized.roles,
+        ...(generationPath === "production"
+          ? { progressive: createProductionParityCollector() }
+          : {}),
       },
       controller.signal,
     );
@@ -524,6 +530,12 @@ function parseArgs(argv: readonly string[]) {
   if (!["V0", "V1", "V2", "V3"].includes(promptVariant)) {
     throw new TypeError(`Unknown prompt variant: ${promptVariant}`);
   }
+  const generationPath = read("--generation-path") ?? "production";
+  if (!["production", "structured-diagnostic"].includes(generationPath)) {
+    throw new TypeError(
+      "generation-path must be production or structured-diagnostic.",
+    );
+  }
   const seed = nonNegativeInteger(read("--seed") ?? "0", "seed");
   if (
     argv.includes("--summarizer-only") &&
@@ -561,6 +573,7 @@ function parseArgs(argv: readonly string[]) {
     json: argv.includes("--json"),
     model: read("--model") ?? "gpt-oss:120b-cloud",
     promptVariant: promptVariant as SummaryPromptVariant,
+    generationPath: generationPath as SummaryGenerationPath,
     seed,
     summarizerOnly: argv.includes("--summarizer-only"),
     classifierOnly: argv.includes("--classifier-only"),
@@ -583,6 +596,25 @@ function parseArgs(argv: readonly string[]) {
         : undefined,
   };
 }
+
+/**
+ * The live generation gate must exercise the same orchestrator branch as the
+ * Worker: stream=true, no format, plain-text instructions, and progressive
+ * collection. It has no presentation side effect, so it is safe for eval.
+ */
+function createProductionParityCollector() {
+  let text = "";
+  return {
+    begin: async () => undefined,
+    append: (delta: string) => {
+      text += delta;
+    },
+    finalize: async () => text,
+    fail: async () => undefined,
+  };
+}
+
+type SummaryGenerationPath = "production" | "structured-diagnostic";
 
 function selectFixtures(args: ReturnType<typeof parseArgs>): E2EFixture[] {
   const extraction = extractionFixtures.flatMap((fixture) =>

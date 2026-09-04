@@ -5,7 +5,11 @@ import {
   type SummaryDecision,
 } from "@microsonya/shared";
 import { z } from "zod";
-import { buildModelInputPrompt, buildModelPolicyPrompt } from "./prompt.js";
+import {
+  buildClassifierInputRepresentation,
+  buildModelPolicyPrompt,
+  buildSummaryInputPrompt,
+} from "./prompt.js";
 import { ModelOutputError, parseModelOutput } from "./modelOutput.js";
 import { COMPACTION_DECISION_INSTRUCTIONS } from "./predicateV3.js";
 import { LEGACY_COMPACTION_DECISION_INSTRUCTIONS } from "./legacyPredicateV3.js";
@@ -373,7 +377,10 @@ export function buildClassifierInputPrompt(
   roles?: readonly ModelWindowMessageRole[],
   includeReplyContextCapsules = true,
 ): string {
-  return buildModelInputPrompt(window, roles, { includeReplyContextCapsules });
+  if (!includeReplyContextCapsules || roles === undefined) {
+    return buildSummaryInputPrompt(window, roles);
+  }
+  return buildClassifierInputRepresentation(window, roles);
 }
 
 export function buildClassifierPrompt(

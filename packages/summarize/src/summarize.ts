@@ -348,6 +348,7 @@ async function run(
       .find(({ stage: invocationStage }) => invocationStage === "summarizer");
     const checkpointAfter = terminalRun?.covers.lastId ?? checkpointBefore;
     const summaryText = terminalRun?.finalText;
+    const summaryInline = terminalRun?.finalInline;
 
     await deps.summaries.saveAttempt(
       Object.freeze({
@@ -372,6 +373,7 @@ async function run(
         summarizerLatencyMs: model.summarizerMs,
         totalLatencyMs: elapsed(),
         summaryText,
+        ...(summaryInline === undefined ? {} : { summaryInline }),
         errorCode,
         inputHash,
         messages: snapshots,
@@ -553,6 +555,9 @@ function toSummaryRun(
       status: "summarized",
       action,
       finalText: disposition.summary.text,
+      ...(disposition.summary.inline === undefined
+        ? {}
+        : { finalInline: disposition.summary.inline }),
     });
   }
 

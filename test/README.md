@@ -23,11 +23,16 @@ pnpm eval:live -- --suite extraction --summarizer-only --prompt-variant V3 --run
 
 The variants are cumulative: V0 is the former single-user-message prompt, V1
 adds native system/user role separation, V2 adds semantic composition rules,
-and V3 adds the two adversarial contrasts. Structured output remains enabled in
-every variant so the ablation changes only the three factors under test. Run
-number `N` uses `seed + N`, and the chosen variant and initial seed are recorded
-in the JSON report. `--summarizer-only` deterministically selects `SUMMARIZE`,
-so classifier behavior and cost cannot hide or confound generation differences.
+and V3 adds the two adversarial contrasts. By default, every live generation
+run uses the production path: plain-text instructions, `stream: true`, no
+`format`, and the progressive orchestrator branch. Run number `N` uses
+`seed + N`, and the chosen variant, generation path, and initial seed are
+recorded in the JSON report. `--summarizer-only` deterministically selects
+`SUMMARIZE`, so classifier behavior and cost cannot hide or confound generation
+differences.
+
+Use `--generation-path structured-diagnostic` only for a separate diagnostic of
+the non-production JSON-schema path. It is not a release-generation gate.
 The runtime defaults to V2; V3 remains opt-in until a broader ablation proves a
 gain over V2 rather than a tie.
 

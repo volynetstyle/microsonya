@@ -69,18 +69,21 @@ const demoDetail: WmaSummaryDetail = {
     {
       id: "message-1",
       sentAt: now - 1000 * 60 * 42,
+      participantId: "participant-olena",
       author: "Олена",
       body: "Фіксуємо scope: polishing hot path, усі async-стани й окремий перегляд джерел. Решту переносимо в наступну ітерацію.",
     },
     {
       id: "message-2",
       sentAt: now - 1000 * 60 * 35,
+      participantId: "participant-andrii",
       author: "Андрій",
       body: "Після мобільного QA проганяємо release gate і відкриваємо поступовий rollout для першої групи.",
     },
     {
       id: "message-3",
       sentAt: now - 1000 * 60 * 27,
+      participantId: "participant-marko",
       author: "Марко",
       body: "Додам перевірку темної теми, safe-area і reduced motion. Для loading/error/empty залишу стабільні dev-fixtures.",
     },

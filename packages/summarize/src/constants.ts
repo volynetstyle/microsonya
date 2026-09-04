@@ -206,6 +206,10 @@ export const SUMMARY_INSTRUCTIONS = `
   - important numbers, dates, times, constraints, and uncertainty;
   - who said, believed, requested, planned, decided, or did something when attribution matters.
 
+  When attribution matters, refer to a source participant only with their
+  window-local AUTHOR handle (for example, @1), never by profile label. The
+  delivery layer resolves that explicit handle to the public profile label.
+
   Usually omit:
   - greetings and reactions;
   - jokes, wordplay, laughter, and casual banter;

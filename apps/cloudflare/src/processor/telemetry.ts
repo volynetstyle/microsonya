@@ -146,6 +146,8 @@ function projectEvent(event: SummarizationTelemetryEvent): Projection {
         durationMs: event.durationMs,
         summarizerMs: event.responseChars,
       };
+    case "summarizer.output_mode":
+      return { ...base, mode: event.mode };
     case "window.fast-classifier":
       return {
         ...base,

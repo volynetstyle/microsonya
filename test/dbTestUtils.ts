@@ -51,6 +51,7 @@ export async function openTestDb(): Promise<DbClient> {
       summarizer_latency_ms INTEGER,
       total_latency_ms INTEGER,
       summary_text_ciphertext BYTEA,
+      summary_inline JSONB,
       error_code TEXT,
       input_hash TEXT NOT NULL
     );

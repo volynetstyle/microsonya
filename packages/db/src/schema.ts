@@ -81,6 +81,8 @@ export const summaryRuns = pgTable(
     summarizerLatencyMs: integer("summarizer_latency_ms"),
     totalLatencyMs: integer("total_latency_ms"),
     summaryTextCiphertext: bytea("summary_text_ciphertext"),
+    /** Canonical, opaque participant references for presentation only. */
+    summaryInline: jsonb("summary_inline"),
     errorCode: text("error_code"),
     inputHash: text("input_hash").notNull(),
   },
@@ -104,6 +106,24 @@ export const summaryRuns = pgTable(
       "summary_runs_summarized_text_check",
       sql`${table.status} <> 'summarized' or ${table.summaryTextCiphertext} is not null`,
     ),
+  ],
+);
+
+/**
+ * Private, viewer-owned names. Both identifiers are opaque HMAC-derived
+ * values; labels remain encrypted at rest like source display names.
+ */
+export const participantAliases = pgTable(
+  "participant_aliases",
+  {
+    ownerUserId: text("owner_user_id").notNull(),
+    participantId: text("participant_id").notNull(),
+    displayLabelCiphertext: bytea("display_label_ciphertext").notNull(),
+    updatedAt: bigint("updated_at", { mode: "number" }).notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.ownerUserId, table.participantId] }),
+    index("idx_participant_aliases_owner").on(table.ownerUserId),
   ],
 );
 

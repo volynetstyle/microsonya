@@ -14,8 +14,9 @@ import {
   loadChatOverview,
   loadSummaryDetail,
   peekChatOverview,
+  renameParticipant,
 } from "../api/bootstrap";
-import type { WmaSummaryCard } from "../api/contracts";
+import type { WmaSummaryCard, WmaSummaryDetail } from "../api/contracts";
 import {
   ChatSkeleton,
   EmptyState,
@@ -190,7 +191,13 @@ export default function Chat(props: { chatRef: string }) {
               >
                 <For each={summaries()}>
                   {(summary) => (
-                    <SummaryCard chatRef={props.chatRef} summary={summary} />
+                    <SummaryCard
+                      chatRef={props.chatRef}
+                      summary={summary}
+                      onPresentationChanged={() =>
+                        setReloadKey((key) => key + 1)
+                      }
+                    />
                   )}
                 </For>
               </Accordion.Root>
@@ -249,7 +256,11 @@ function ProgressiveLoader(props: {
 }
 
 /** Source messages are fetched only when the reader explicitly opens them. */
-function SummaryCard(props: { chatRef: string; summary: WmaSummaryCard }) {
+function SummaryCard(props: {
+  chatRef: string;
+  summary: WmaSummaryCard;
+  onPresentationChanged: () => void;
+}) {
   const [showMessages, setShowMessages] = createSignal(false);
   const [detailReloadKey, setDetailReloadKey] = createSignal(0);
   const detail = createMemo(async () => {
@@ -259,6 +270,20 @@ function SummaryCard(props: { chatRef: string; summary: WmaSummaryCard }) {
       : undefined;
   });
   const moment = () => summaryMoment(props.summary.createdAt);
+  const rename = async (message: WmaSummaryDetail["moments"][number]) => {
+    const next = window.prompt(
+      `Як називати ${message.author}? Залиште поле порожнім, щоб повернути ім'я Telegram.`,
+      message.author,
+    );
+    if (next === null) return;
+    await renameParticipant(
+      props.chatRef,
+      message.participantId,
+      next.trim().length === 0 ? undefined : next,
+    );
+    props.onPresentationChanged();
+    setDetailReloadKey((key) => key + 1);
+  };
 
   return (
     <Accordion.Item value={props.summary.id} class="topic-card">
@@ -364,7 +389,10 @@ function SummaryCard(props: { chatRef: string; summary: WmaSummaryCard }) {
                       />
                     }
                   >
-                    <AnimatedSourceList messages={detail()!.moments} />
+                    <AnimatedSourceList
+                      messages={detail()!.moments}
+                      onRenameParticipant={rename}
+                    />
                   </Show>
                 </Loading>
               </Errored>
@@ -380,10 +408,7 @@ function MeasuredSourceScreen(props: ParentProps) {
   let element!: HTMLElement;
   useMeasuredSourceWindow(() => element);
   return (
-    <section
-      ref={element}
-      class="summary-screen summary-messages-screen"
-    >
+    <section ref={element} class="summary-screen summary-messages-screen">
       {props.children}
     </section>
   );

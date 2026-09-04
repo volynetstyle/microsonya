@@ -8,7 +8,9 @@ import {
 } from "../packages/shared/src/index.js";
 import {
   buildClassifierPrompt,
+  buildClassifierInputPrompt,
   buildSummaryMessages,
+  buildSummaryInputPrompt,
   buildSummaryPrompt,
   encodePipeWindow,
   PIPE_FIELDS,
@@ -116,6 +118,40 @@ describe("canonical model transcript", () => {
     expect(messages[1]!.content).not.toContain(
       "SEMANTIC_COMPOSITION_POLICY_BEGIN",
     );
+    expect(messages[1]!.content).not.toContain("REPLY_CONTEXT_CAPSULES_BEGIN");
+  });
+
+  it("contains reply capsules only in the classifier representation", () => {
+    const window = fixtureWindow();
+    const roles = [
+      { message: window.messages[0]!, role: "context" as const },
+      { message: window.messages[1]!, role: "eligible" as const },
+      { message: window.messages[2]!, role: "eligible" as const },
+    ];
+
+    const classifier = buildClassifierInputPrompt(window, roles);
+    const summarizer = buildSummaryInputPrompt(window, roles);
+
+    expect(classifier).toContain("REPLY_CONTEXT_CAPSULES_BEGIN");
+    expect(summarizer).not.toContain("REPLY_CONTEXT_CAPSULES_BEGIN");
+    expect(summarizer.match(/#101\|\^77\|/gu)).toHaveLength(1);
+    expect(summarizer.match(/#102\|\^101\|/gu)).toHaveLength(1);
+  });
+
+  it("uses PIPECHAT aliases unchanged in reply capsules", () => {
+    const window = fixtureWindow();
+    const roles = [
+      { message: window.messages[0]!, role: "context" as const },
+      { message: window.messages[1]!, role: "eligible" as const },
+      { message: window.messages[2]!, role: "eligible" as const },
+    ];
+
+    const classifier = buildClassifierInputPrompt(window, roles);
+
+    expect(classifier).toContain('PARENT_AUTHOR "@1 Vlad');
+    expect(classifier).toContain('CHILD_AUTHOR "@2 Vlad');
+    expect(classifier).not.toContain("telegram-user-111");
+    expect(classifier).not.toContain("telegram-user-222");
   });
 
   it("uses a plain-text output contract only for progressive streaming", () => {

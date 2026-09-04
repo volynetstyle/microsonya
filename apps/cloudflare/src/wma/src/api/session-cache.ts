@@ -62,3 +62,26 @@ export function peekSessionCached<T>(resource: string): T | undefined {
     ? undefined
     : readSessionCache<T>(`microsonya:wma:v1:${scope}:${resource}`);
 }
+
+/** Remove only this authenticated viewer's rendered presentation resources. */
+export function invalidatePresentationCache(chatRef: string): void {
+  const scope = telegramCacheScope();
+  if (scope === undefined) return;
+  const prefix = `microsonya:wma:v1:${scope}:`;
+  const resources = [`overview:${chatRef}:`, `detail:${chatRef}:`];
+  try {
+    for (let index = sessionStorage.length - 1; index >= 0; index -= 1) {
+      const key = sessionStorage.key(index);
+      if (
+        key !== null &&
+        key.startsWith(prefix) &&
+        resources.some((resource) => key.startsWith(`${prefix}${resource}`))
+      ) {
+        sessionStorage.removeItem(key);
+      }
+    }
+  } catch {
+    // A storage failure only disables the convenience cache; the API remains
+    // request-resolved and is not edge-cached.
+  }
+}

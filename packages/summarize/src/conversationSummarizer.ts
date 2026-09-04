@@ -3,7 +3,12 @@ import {
   type ChatMessage,
   type OllamaClient,
 } from "@microsonya/model";
-import type { ConversationWindow, Summary } from "@microsonya/shared";
+import {
+  asParticipantId,
+  type ConversationWindow,
+  type Summary,
+  type SummaryInline,
+} from "@microsonya/shared";
 import {
   outputSchema,
   SUMMARY_INSTRUCTIONS,
@@ -11,8 +16,11 @@ import {
   SUMMARY_STREAM_OUTPUT_INSTRUCTIONS,
   SUMMARY_STRUCTURED_OUTPUT_INSTRUCTIONS,
 } from "./constants.js";
-import { buildModelInputPrompt, buildModelPolicyPrompt } from "./prompt.js";
-import type { ModelWindowMessageRole } from "./prompt.js";
+import { buildModelPolicyPrompt, buildSummaryInputPrompt } from "./prompt.js";
+import {
+  buildWindowAuthorAliases,
+  type ModelWindowMessageRole,
+} from "./prompt.js";
 import { parseSummaryModelOutput } from "./modelOutput.js";
 import type { SummarizationTelemetryTrace } from "./telemetry.js";
 
@@ -29,6 +37,8 @@ export interface ConversationSummarizer {
     telemetry?: SummarizationTelemetryTrace,
     roles?: readonly ModelWindowMessageRole[],
   ): AsyncIterable<string>;
+  /** The canonical structured artifact produced by the last completed stream. */
+  streamedSummary?(window: ConversationWindow): Summary | undefined;
 }
 
 export interface ConversationSummarizerDeps {
@@ -124,6 +134,7 @@ export function createConversationSummarizer({
   ollama,
   promptVariant = "V2",
 }: ConversationSummarizerDeps): ConversationSummarizer {
+  const streamed = new WeakMap<ConversationWindow, Summary>();
   const stream = async function* (
     window: ConversationWindow,
     signal?: AbortSignal,
@@ -146,6 +157,8 @@ export function createConversationSummarizer({
     });
     const startedAt = performance.now();
     let content = "";
+    let pendingAlias = "";
+    const aliases = aliasesByWindowToken(window);
     for await (const event of ollama.chat(
       {
         ...SUMMARIZER_PROFILE,
@@ -159,13 +172,20 @@ export function createConversationSummarizer({
       const delta = event.message.content;
       if (delta.length > 0) {
         content += delta;
-        yield delta;
+        const joined = pendingAlias + delta;
+        const trailing = joined.match(/@(\d*)$/u)?.[0] ?? "";
+        const stable = joined.slice(0, joined.length - trailing.length);
+        pendingAlias = trailing;
+        if (stable.length > 0) yield replaceWindowAliases(stable, aliases);
       }
     }
     const durationMs = performance.now() - startedAt;
     if (content.trim().length === 0) {
       throw new TypeError("Streaming summarizer returned empty output.");
     }
+    if (pendingAlias.length > 0)
+      yield replaceWindowAliases(pendingAlias, aliases);
+    streamed.set(window, summaryFromWindowAliases(content, aliases));
     telemetry?.record({
       type: "model.response",
       stage: "summarizer",
@@ -179,6 +199,7 @@ export function createConversationSummarizer({
 
   return {
     stream,
+    streamedSummary: (window) => streamed.get(window),
     summarize: async (window, signal, telemetry, roles) => {
       signal?.throwIfAborted();
       const messages = buildSummaryMessages(window, roles, {
@@ -243,9 +264,77 @@ export function createConversationSummarizer({
         responseChars: response.message.content.length,
         summaryChars: summary.length,
       });
-      return Object.freeze({ text: summary });
+      return summaryFromWindowAliases(summary, aliasesByWindowToken(window));
     },
   };
+}
+
+/**
+ * The model can identify a speaker only with the already-visible window-local
+ * `@N` handle. Convert those explicit references after inference; labels never
+ * enter model input and no natural-language name is searched or replaced.
+ */
+function aliasesByWindowToken(
+  window: ConversationWindow,
+): ReadonlyMap<
+  string,
+  { readonly participantId: string; readonly sourceLabel: string }
+> {
+  const aliases = buildWindowAuthorAliases(window);
+  return new Map(
+    window.messages.map((message) => [
+      aliases.get(message.author.id)!,
+      {
+        participantId: message.author.id,
+        sourceLabel: message.author.label,
+      },
+    ]),
+  );
+}
+
+function replaceWindowAliases(
+  text: string,
+  aliases: ReadonlyMap<
+    string,
+    { readonly participantId: string; readonly sourceLabel: string }
+  >,
+): string {
+  return text.replace(
+    /@(\d+)\b/gu,
+    (token) => aliases.get(token)?.sourceLabel ?? token,
+  );
+}
+
+function summaryFromWindowAliases(
+  text: string,
+  aliases: ReadonlyMap<
+    string,
+    { readonly participantId: string; readonly sourceLabel: string }
+  >,
+): Summary {
+  const inline: SummaryInline[] = [];
+  let textStart = 0;
+  for (const match of text.matchAll(/@(\d+)\b/gu)) {
+    const token = match[0];
+    const participant = aliases.get(token);
+    if (participant === undefined || match.index === undefined) continue;
+    if (match.index > textStart) {
+      inline.push({ type: "text", value: text.slice(textStart, match.index) });
+    }
+    inline.push({
+      type: "participant",
+      participantId: asParticipantId(participant.participantId),
+    });
+    textStart = match.index + token.length;
+  }
+  if (inline.length === 0) return Object.freeze({ text });
+  if (textStart < text.length) {
+    inline.push({ type: "text", value: text.slice(textStart) });
+  }
+  return Object.freeze({
+    text: replaceWindowAliases(text, aliases),
+    inline: Object.freeze(inline),
+  });
 }
 
 export function buildSummaryPrompt(
@@ -279,7 +368,9 @@ export function buildSummaryMessages(
       ? [buildSummaryContrastExamples(outputMode)]
       : []),
   ].join("\n\n");
-  const input = buildModelInputPrompt(window, roles);
+  // Never inherit classifier-only reply capsules. The canonical transcript is
+  // the summarizer's complete source of events and attribution.
+  const input = buildSummaryInputPrompt(window, roles);
 
   if (promptVariant === "V0") {
     return [{ role: "user", content: `${trustedSections}\n\n${input}` }];

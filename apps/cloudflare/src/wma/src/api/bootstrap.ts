@@ -1,6 +1,10 @@
 import type { WmaChat, WmaChatOverview, WmaSummaryDetail } from "./contracts";
 import { postJson } from "./http";
-import { peekSessionCached, sessionCached } from "./session-cache";
+import {
+  invalidatePresentationCache,
+  peekSessionCached,
+  sessionCached,
+} from "./session-cache";
 
 const initData = () => window.Telegram?.WebApp?.initData ?? "";
 
@@ -55,3 +59,16 @@ export const loadSummaryDetail = (chatRef: string, summaryId: string) =>
       ),
     ),
   );
+
+export async function renameParticipant(
+  chatRef: string,
+  participantId: string,
+  displayLabel: string | undefined,
+): Promise<void> {
+  await postJson<{ ok: true }>("/api/wma/participant-alias", initData(), {
+    chatRef,
+    participantId,
+    ...(displayLabel === undefined ? {} : { displayLabel }),
+  });
+  invalidatePresentationCache(chatRef);
+}

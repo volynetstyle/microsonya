@@ -235,6 +235,10 @@ export class SummariesRepo {
             attempt.summaryText === undefined
               ? null
               : this.encryption.encrypt(attempt.summaryText),
+          summaryInline:
+            attempt.summaryInline === undefined
+              ? null
+              : this.persistInline(attempt.summaryInline),
           errorCode: attempt.errorCode,
           inputHash: this.encryption.lookup(
             attempt.inputHash,
@@ -346,6 +350,10 @@ export class SummariesRepo {
         action: run.action,
         policyHash: "legacy",
         summaryTextCiphertext: this.encryption.encrypt(run.finalText),
+        summaryInline:
+          run.finalInline === undefined
+            ? null
+            : this.persistInline(run.finalInline),
         inputHash: this.encryption.lookup(run.id, "legacy-summary-input"),
       })
       .onConflictDoUpdate({
@@ -363,6 +371,10 @@ export class SummariesRepo {
           status: run.status,
           action: run.action,
           summaryTextCiphertext: this.encryption.encrypt(run.finalText),
+          summaryInline:
+            run.finalInline === undefined
+              ? null
+              : this.persistInline(run.finalInline),
         },
       })
       .execute();
@@ -374,6 +386,22 @@ export class SummariesRepo {
 
   private authorKey(authorId: string): string {
     return this.encryption.lookup(authorId, "telegram-author-id");
+  }
+
+  private persistInline(
+    inline: NonNullable<SummaryRunAttempt["summaryInline"]>,
+  ) {
+    return inline.map((part) =>
+      part.type === "text"
+        ? part
+        : {
+            type: "participant" as const,
+            participantId: this.encryption.lookup(
+              part.participantId,
+              "wma-participant-id",
+            ),
+          },
+    );
   }
 
   private privateFingerprint(

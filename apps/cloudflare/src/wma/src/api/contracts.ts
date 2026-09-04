@@ -23,6 +23,8 @@ export type WmaSummaryDetail = {
   moments: readonly {
     id: string;
     sentAt: number;
+    /** Opaque application participant ID; never a raw Telegram user ID. */
+    participantId: string;
     author: string;
     body: string;
   }[];

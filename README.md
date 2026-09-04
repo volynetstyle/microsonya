@@ -39,8 +39,8 @@ The domain enforces these invariants:
   is an immutable run with encrypted input/output snapshots; feedback only
   places evidence in a review queue.
 
-A normal `SUMMARIZE` path makes two structured model calls: classification,
-then summarization over the same W. A `DEFER_*` or `SKIP_*` result needs only the
+A normal `SUMMARIZE` path makes a structured classifier call followed by a
+plain-text streaming summarizer call over the same W. A `DEFER_*` or `SKIP_*` result needs only the
 classifier call. The deterministic classifier contract exists but abstains in
 v0.1 until explicit fast rules are approved.
 

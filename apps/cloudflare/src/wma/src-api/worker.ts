@@ -3,6 +3,8 @@ import {
   getChatOverview,
   getSummaryDetail,
   listWmaChats,
+  setParticipantAlias,
+  WmaAliasInputError,
   WmaChatAccessError,
 } from "./bootstrap.js";
 import { errorName, logTelemetry } from "../../observability.js";
@@ -69,7 +71,11 @@ export default {
             url.searchParams.get("summaryId") ?? undefined,
           ),
         );
-      else return json({ error: "NOT_FOUND" }, 404);
+      else if (url.pathname === "/api/wma/participant-alias") {
+        const body = await parseParticipantAliasRequest(request);
+        await setParticipantAlias(env, identity, body);
+        response = json({ ok: true });
+      } else return json({ error: "NOT_FOUND" }, 404);
       if (cacheRequest === undefined || policy === undefined) return response;
       ctx.waitUntil(
         cache.put(
@@ -83,6 +89,8 @@ export default {
         return json({ error: "UNAUTHORIZED" }, 401);
       if (error instanceof WmaChatAccessError)
         return json({ error: "FORBIDDEN" }, 403);
+      if (error instanceof WmaAliasInputError)
+        return json({ error: "INVALID_ALIAS" }, 400);
       logTelemetry("error", "wma", "wma.api.failed", {
         errorName: errorName(error),
       });
@@ -95,6 +103,52 @@ function json(body: unknown, status = 200): Response {
     status,
     headers: { "Cache-Control": "no-store" },
   });
+}
+
+async function parseParticipantAliasRequest(request: Request): Promise<{
+  chatRef?: string;
+  participantId: string;
+  displayLabel?: string;
+}> {
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    throw new WmaAliasInputError("The alias request must be JSON.");
+  }
+  if (typeof body !== "object" || body === null) {
+    throw new WmaAliasInputError("The alias request must be an object.");
+  }
+  const input = body as {
+    chatRef?: unknown;
+    participantId?: unknown;
+    displayLabel?: unknown;
+  };
+  if (
+    (input.chatRef !== undefined && typeof input.chatRef !== "string") ||
+    typeof input.participantId !== "string" ||
+    input.participantId.trim().length === 0
+  ) {
+    throw new WmaAliasInputError("The participant is invalid.");
+  }
+  if (
+    input.displayLabel !== undefined &&
+    typeof input.displayLabel !== "string"
+  ) {
+    throw new WmaAliasInputError("The alias label is invalid.");
+  }
+  const displayLabel = input.displayLabel?.trim();
+  if (displayLabel !== undefined && displayLabel.length > 96) {
+    throw new WmaAliasInputError("The alias label is too long.");
+  }
+  return {
+    ...(input.chatRef === undefined ? {} : { chatRef: input.chatRef }),
+    participantId: input.participantId,
+    // An empty value is the explicit remove operation.
+    ...(displayLabel === undefined || displayLabel.length === 0
+      ? {}
+      : { displayLabel }),
+  };
 }
 
 function devIdentity(env: WmaEnv) {

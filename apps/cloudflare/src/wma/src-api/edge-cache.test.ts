@@ -7,7 +7,7 @@ import {
 } from "./edge-cache.js";
 
 describe("WMA edge cache", () => {
-  it("uses short TTLs for mutable views and a long TTL for immutable detail", () => {
+  it("caches only alias-independent chat catalog responses", () => {
     expect(wmaCachePolicy(new URL("https://wma.test/api/wma/chats"))).toEqual({
       ttlSeconds: 30,
     });
@@ -15,19 +15,14 @@ describe("WMA edge cache", () => {
       wmaCachePolicy(
         new URL("https://wma.test/api/wma/chat-overview?chatRef=1"),
       ),
-    ).toEqual({ ttlSeconds: 30 });
-    expect(
-      wmaCachePolicy(
-        new URL("https://wma.test/api/wma/chat-overview?chatRef=1&cursor=next"),
-      ),
-    ).toEqual({ ttlSeconds: 300 });
+    ).toBeUndefined();
     expect(
       wmaCachePolicy(
         new URL(
           "https://wma.test/api/wma/summary-detail?chatRef=1&summaryId=2",
         ),
       ),
-    ).toEqual({ ttlSeconds: 86_400 });
+    ).toBeUndefined();
   });
 
   it("normalizes query order and isolates cache keys by Telegram user", async () => {

@@ -119,6 +119,33 @@ describe("conversation-window decision pipeline", () => {
     expect(classify).toHaveBeenCalledOnce();
   });
 
+  it("uses the streaming summarizer when a production-progressive sink is provided", async () => {
+    const summarize = vi.fn<ConversationSummarizer["summarize"]>();
+    const stream = vi.fn(async function* () {
+      yield "Production ";
+      yield "summary.";
+    });
+    const append = vi.fn();
+    const result = await processWindow(fixtureWindow(), {
+      classifier: { classify: async () => modelDecision("SUMMARIZE") },
+      summarizer: { summarize, stream },
+      progressive: {
+        begin: vi.fn(async () => undefined),
+        append,
+        finalize: vi.fn(async () => "Production summary."),
+        fail: vi.fn(async () => undefined),
+      },
+    });
+
+    expect(stream).toHaveBeenCalledOnce();
+    expect(summarize).not.toHaveBeenCalled();
+    expect(append.mock.calls).toEqual([["Production "], ["summary."]]);
+    expect(result.disposition).toMatchObject({
+      kind: "summarized",
+      summary: { text: "Production summary." },
+    });
+  });
+
   it("honors an already-aborted signal before either model-facing component", async () => {
     const controller = new AbortController();
     controller.abort();

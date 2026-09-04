@@ -1,11 +1,20 @@
-import { and, desc, eq, isNotNull, lt, or } from "drizzle-orm";
+import { and, desc, eq, inArray, isNotNull, lt, or } from "drizzle-orm";
 import {
+  participantAliases,
   summaryRunMessages,
   summaryRuns,
   wmaChatCatalog,
+  type DataEncryption,
+  type MicrosonyaDb,
 } from "@microsonya/db";
 import type { TelegramIdentity } from "./auth.js";
 import { getAccessibleTelegramChatTitle } from "./chat-access.js";
+import {
+  parseSummaryInline,
+  renderSummaryInline,
+  resolveParticipantLabel,
+  type WmaParticipant,
+} from "./identity-presentation.js";
 import { withWorkerDatabase } from "../../runtime/worker-db.js";
 
 const TELEGRAM_AUTH_CONCURRENCY = 4;
@@ -36,6 +45,7 @@ export type WmaSummaryDetail = {
   moments: readonly {
     id: string;
     sentAt: number;
+    participantId: string;
     author: string;
     body: string;
   }[];
@@ -102,6 +112,7 @@ export async function getChatOverview(
           createdAt: summaryRuns.createdAt,
           messageCount: summaryRuns.messageCount,
           summaryTextCiphertext: summaryRuns.summaryTextCiphertext,
+          summaryInline: summaryRuns.summaryInline,
         })
         .from(summaryRuns)
         .where(
@@ -130,6 +141,12 @@ export async function getChatOverview(
     ]);
     const pageRows = rows.slice(0, SUMMARY_PAGE_SIZE);
     const lastRow = pageRows.at(-1);
+    const presentation = await loadPresentation(
+      db,
+      encryption,
+      identity.user.id,
+      pageRows.map((row) => row.id),
+    );
     return {
       chat: { ref: chat.id, title: chat.title },
       stats: {
@@ -138,7 +155,12 @@ export async function getChatOverview(
       },
       summaries: pageRows.flatMap((row) => {
         if (row.summaryTextCiphertext === null) return [];
-        const summary = encryption.decrypt(row.summaryTextCiphertext);
+        const summary = renderStoredSummary(
+          encryption.decrypt(row.summaryTextCiphertext),
+          row.summaryInline,
+          presentation.participants,
+          presentation.aliases,
+        );
         return [
           {
             id: row.id,
@@ -188,6 +210,7 @@ export async function getSummaryDetail(
         .select({
           id: summaryRuns.id,
           summaryTextCiphertext: summaryRuns.summaryTextCiphertext,
+          summaryInline: summaryRuns.summaryInline,
         })
         .from(summaryRuns)
         .where(
@@ -208,17 +231,184 @@ export async function getSummaryDetail(
       .from(summaryRunMessages)
       .where(eq(summaryRunMessages.runId, run.id))
       .orderBy(summaryRunMessages.ordinal);
+    const presentation = await loadPresentation(
+      db,
+      encryption,
+      identity.user.id,
+      [run.id],
+      rows,
+    );
     return {
       id: run.id,
-      summary: encryption.decrypt(run.summaryTextCiphertext),
+      summary: renderStoredSummary(
+        encryption.decrypt(run.summaryTextCiphertext),
+        run.summaryInline,
+        presentation.participants,
+        presentation.aliases,
+      ),
       moments: rows.map((row) => ({
         id: `${run.id}:${row.ordinal}`,
         sentAt: row.sentAt,
-        author: encryption.decrypt(row.authorNameCiphertext),
+        participantId: participantIdForAuthor(encryption, row.authorId),
+        author: resolveParticipantLabel(
+          participantFromRow(encryption, row),
+          presentation.aliases,
+        ),
         body: encryption.decrypt(row.textCiphertext),
       })),
     };
   });
+}
+
+/** Creates, updates, or removes the authenticated viewer's private alias. */
+export async function setParticipantAlias(
+  env: WmaEnv,
+  identity: TelegramIdentity,
+  input: Readonly<{
+    chatRef?: string;
+    participantId: string;
+    displayLabel?: string;
+  }>,
+): Promise<void> {
+  const chat = await authorizeChat(env, identity, input.chatRef);
+  await withWorkerDatabase(env, async (db, encryption) => {
+    const chatId = encryption.lookup(chat.id, "telegram-chat-id");
+    const sources = await db
+      .select({ authorId: summaryRunMessages.authorId })
+      .from(summaryRunMessages)
+      .where(eq(summaryRunMessages.chatId, chatId));
+    const knownParticipants = new Set(
+      sources.map((source) =>
+        participantIdForAuthor(encryption, source.authorId),
+      ),
+    );
+    if (!knownParticipants.has(input.participantId)) {
+      throw new WmaAliasInputError("Unknown participant for this chat.");
+    }
+    const ownerUserId = encryption.lookup(
+      identity.user.id,
+      "telegram-author-id",
+    );
+    if (input.displayLabel === undefined) {
+      await db
+        .delete(participantAliases)
+        .where(
+          and(
+            eq(participantAliases.ownerUserId, ownerUserId),
+            eq(participantAliases.participantId, input.participantId),
+          ),
+        );
+      return;
+    }
+    await db
+      .insert(participantAliases)
+      .values({
+        ownerUserId,
+        participantId: input.participantId,
+        displayLabelCiphertext: encryption.encrypt(input.displayLabel),
+        updatedAt: Date.now(),
+      })
+      .onConflictDoUpdate({
+        target: [
+          participantAliases.ownerUserId,
+          participantAliases.participantId,
+        ],
+        set: {
+          displayLabelCiphertext: encryption.encrypt(input.displayLabel),
+          updatedAt: Date.now(),
+        },
+      });
+  });
+}
+
+export class WmaAliasInputError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "WmaAliasInputError";
+  }
+}
+
+function participantIdForAuthor(
+  encryption: DataEncryption,
+  authorId: string,
+): string {
+  return encryption.lookup(authorId, "wma-participant-id");
+}
+
+function participantFromRow(
+  encryption: DataEncryption,
+  row: Pick<
+    typeof summaryRunMessages.$inferSelect,
+    "authorId" | "authorNameCiphertext"
+  >,
+): WmaParticipant {
+  return {
+    id: participantIdForAuthor(encryption, row.authorId),
+    sourceLabel: encryption.decrypt(row.authorNameCiphertext),
+  };
+}
+
+async function loadPresentation(
+  db: MicrosonyaDb,
+  encryption: DataEncryption,
+  viewerId: string,
+  runIds: readonly string[],
+  suppliedRows?: readonly (typeof summaryRunMessages.$inferSelect)[],
+): Promise<
+  Readonly<{
+    participants: ReadonlyMap<string, WmaParticipant>;
+    aliases: ReadonlyMap<string, string>;
+  }>
+> {
+  const rows =
+    suppliedRows ??
+    (runIds.length === 0
+      ? []
+      : await db
+          .select()
+          .from(summaryRunMessages)
+          .where(inArray(summaryRunMessages.runId, [...runIds])));
+  const participants = new Map<string, WmaParticipant>();
+  for (const row of rows) {
+    const participant = participantFromRow(encryption, row);
+    participants.set(participant.id, participant);
+  }
+  if (participants.size === 0) {
+    return { participants, aliases: new Map() };
+  }
+  const ownerUserId = encryption.lookup(viewerId, "telegram-author-id");
+  const aliases = await db
+    .select({
+      participantId: participantAliases.participantId,
+      displayLabelCiphertext: participantAliases.displayLabelCiphertext,
+    })
+    .from(participantAliases)
+    .where(
+      and(
+        eq(participantAliases.ownerUserId, ownerUserId),
+        inArray(participantAliases.participantId, [...participants.keys()]),
+      ),
+    );
+  return {
+    participants,
+    aliases: new Map(
+      aliases.map((alias) => [
+        alias.participantId,
+        encryption.decrypt(alias.displayLabelCiphertext),
+      ]),
+    ),
+  };
+}
+
+function renderStoredSummary(
+  fallbackText: string,
+  rawInline: unknown,
+  participants: ReadonlyMap<string, WmaParticipant>,
+  aliases: ReadonlyMap<string, string>,
+): string {
+  const inline = parseSummaryInline(rawInline);
+  if (inline === undefined) return fallbackText;
+  return renderSummaryInline(inline, participants, aliases);
 }
 
 async function authorizeChat(

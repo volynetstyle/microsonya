@@ -5,6 +5,11 @@ export type Brand<T, Name extends string> = T & {
 export type ChatId = Brand<string, "ChatId">;
 export type MessageId = Brand<number, "MessageId">;
 export type AuthorId = Brand<string, "AuthorId">;
+/**
+ * Opaque, application-level identity used by presentation consumers. It is
+ * deliberately distinct from a source-platform user identifier.
+ */
+export type ParticipantId = Brand<string, "ParticipantId">;
 export type TimestampMs = Brand<number, "TimestampMs">;
 export type SummaryId = Brand<string, "SummaryId">;
 
@@ -22,6 +27,10 @@ export function asMessageId(value: unknown): MessageId {
 
 export function asAuthorId(value: unknown): AuthorId {
   return asNonEmptyString(value, "AuthorId") as AuthorId;
+}
+
+export function asParticipantId(value: unknown): ParticipantId {
+  return asNonEmptyString(value, "ParticipantId") as ParticipantId;
 }
 
 export function asTimestampMs(value: unknown): TimestampMs {
@@ -92,7 +101,21 @@ export interface SummaryDecision {
 
 export interface Summary {
   readonly text: string;
+  /**
+   * Optional backwards-compatible presentation structure. `text` remains the
+   * canonical public rendering used for Telegram; a renderer may resolve the
+   * explicit participant references for a private view without changing it.
+   */
+  readonly inline?: readonly SummaryInline[];
 }
+
+/**
+ * Canonical summary presentation fragments. A participant fragment stores an
+ * opaque participant identity, never a viewer-owned display label.
+ */
+export type SummaryInline =
+  | { readonly type: "text"; readonly value: string }
+  | { readonly type: "participant"; readonly participantId: ParticipantId };
 
 export interface MessageRange {
   readonly firstId: MessageId;
@@ -105,6 +128,7 @@ export interface SummaryRecord {
   readonly chatId: ChatId;
   readonly covers: MessageRange;
   readonly text: string;
+  readonly inline?: readonly SummaryInline[];
   readonly createdAt: TimestampMs;
 }
 
@@ -148,6 +172,7 @@ export interface SummaryRun {
   readonly status: "summarized" | "skipped";
   readonly action: SummaryAction;
   readonly finalText: string;
+  readonly finalInline?: readonly SummaryInline[];
 }
 
 export type SummaryRunAttemptStatus =
@@ -218,6 +243,7 @@ export interface SummaryRunAttempt {
   readonly summarizerLatencyMs: number;
   readonly totalLatencyMs: number;
   readonly summaryText?: string;
+  readonly summaryInline?: readonly SummaryInline[];
   readonly errorCode?: string;
   readonly inputHash: string;
   readonly messages: readonly SummaryRunMessageSnapshot[];
