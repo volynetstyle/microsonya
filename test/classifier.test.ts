@@ -8,9 +8,13 @@ import {
 } from "../packages/shared/src/index.js";
 import {
   buildClassifierPrompt,
+  buildClassifierInputPrompt,
+  buildClassifierSystemPrompt,
+  CLASSIFIER_RESPONSE_SCHEMA,
   createClassifier,
   decideFromPredicates,
   ModelOutputError,
+  reorderClassifierExemplars,
   SummarizationTelemetryService,
   type SummarizationTelemetryEvent,
 } from "../packages/summarize/src/index.js";
@@ -32,9 +36,12 @@ describe("semantic summary-decision classifier", () => {
       expect.objectContaining({
         model: "gpt-oss:120b-cloud",
         think: "low",
-        format: "json",
+        format: CLASSIFIER_RESPONSE_SCHEMA,
         stream: false,
-        messages: [{ role: "user", content: buildClassifierPrompt(window) }],
+        messages: [
+          { role: "system", content: buildClassifierSystemPrompt() },
+          { role: "user", content: buildClassifierInputPrompt(window) },
+        ],
       }),
       { signal: undefined },
     );
@@ -170,7 +177,7 @@ describe("semantic summary-decision classifier", () => {
       classifier.classify(fixtureWindow(), undefined, telemetry),
     ).resolves.toMatchObject({ action: "SUMMARIZE" });
     expect(chat).toHaveBeenCalledTimes(2);
-    expect(chat.mock.calls[0]?.[0]).toEqual(
+    expect((chat.mock.calls as unknown[][])[0]?.[0]).toEqual(
       expect.objectContaining({
         options: expect.objectContaining({ num_predict: 512 }),
       }),
@@ -230,7 +237,8 @@ describe("semantic summary-decision classifier", () => {
       classifier.classify(fixtureWindow(), undefined, telemetry),
     ).resolves.toMatchObject({ action: "SUMMARIZE" });
     expect(chat).toHaveBeenCalledTimes(2);
-    expect(chat.mock.calls[0]?.[0]).toEqual(
+    const calls = chat.mock.calls as unknown as unknown[][];
+    expect(calls[0]?.[0]).toEqual(
       expect.objectContaining({
         options: expect.objectContaining({ num_predict: 512 }),
       }),
@@ -280,7 +288,7 @@ describe("semantic summary-decision classifier", () => {
     expect(
       decideFromPredicates({
         ...predicates(),
-        primarilyBanter: true,
+        nonDurableKind: null,
       }),
     ).toBe("SUMMARIZE");
   });
@@ -289,7 +297,7 @@ describe("semantic summary-decision classifier", () => {
     expect(
       decideFromPredicates({
         ...predicates(),
-        primarilyBanter: true,
+        nonDurableKind: null,
         essentialReferentsResolved: false,
       }),
     ).toBe("DEFER_CONTEXT");
@@ -313,7 +321,104 @@ describe("semantic summary-decision classifier", () => {
       "Judge informational function separately from conversational style",
     );
     expect(prompt).toContain(
-      "if the jokes, profanity, slang, and reaction-only messages were removed",
+      "If one independently recoverable\nconcrete event remains after removing banter and reactions",
+    );
+  });
+
+  it.each([
+    ["SKIP_REACTIONS", "reaction"],
+    ["SKIP_BANTER", "banter"],
+    ["SKIP_NO_VALUE", "no_value"],
+  ] as const)(
+    "maps the non-durable subtype to %s",
+    (action, nonDurableKind) => {
+      expect(
+        decideFromPredicates({
+          durable: false,
+          nonDurableKind,
+          essentialReferentsResolved: null,
+          visiblyIncomplete: null,
+          requiresSynthesis: null,
+        }),
+      ).toBe(action);
+    },
+  );
+
+  it("rejects evidence that mixes durable and non-durable branches", async () => {
+    const classifier = createClassifier({
+      ollama: {
+        chat: (async () => ({
+          message: {
+            content: JSON.stringify({
+              ...predicates(),
+              nonDurableKind: "banter",
+            }),
+          },
+        })) as never,
+      },
+    });
+
+    await expect(classifier.classify(fixtureWindow())).rejects.toMatchObject({
+      code: "MODEL_OUTPUT_SCHEMA_MISMATCH",
+    });
+  });
+
+  it("runs the frozen A0 legacy envelope only when explicitly requested", async () => {
+    const chat = vi.fn(async () => ({
+      message: {
+        content: JSON.stringify({
+          durable: true,
+          essentialReferentsResolved: true,
+          visiblyIncomplete: false,
+          alreadyCompact: true,
+          primarilyReaction: false,
+          primarilyBanter: false,
+          requiresSynthesis: true,
+        }),
+      },
+    }));
+    const classifier = createClassifier(
+      { ollama: { chat: chat as never } },
+      { evalRegime: "A0" },
+    );
+
+    await expect(classifier.classify(fixtureWindow())).resolves.toMatchObject({
+      action: "DEFER_COMPACT",
+    });
+    const legacyCalls = chat.mock.calls as unknown as unknown[][];
+    expect(legacyCalls[0]?.[0]).toEqual(
+      expect.objectContaining({
+        format: "json",
+        messages: [expect.objectContaining({ role: "user" })],
+      }),
+    );
+  });
+
+  it("reorders all contrast examples without changing their contents", () => {
+    const policy = [
+      "prefix",
+      "CONTRASTIVE BOUNDARIES",
+      "",
+      "one",
+      "",
+      "two",
+      "",
+      "three",
+    ].join("\n");
+    expect(reorderClassifierExemplars(policy, [2, 0, 1])).toBe(
+      [
+        "prefix",
+        "CONTRASTIVE BOUNDARIES",
+        "",
+        "three",
+        "",
+        "one",
+        "",
+        "two",
+      ].join("\n"),
+    );
+    expect(() => reorderClassifierExemplars(policy, [0, 0, 1])).toThrow(
+      /permutation/u,
     );
   });
 
@@ -327,19 +432,9 @@ describe("semantic summary-decision classifier", () => {
     expect(prompt).toContain(
       "Follow the canonical values defined below when durable=false",
     );
-    expect(prompt).toContain(
-      [
-        "- essentialReferentsResolved=true",
-        "- visiblyIncomplete=false",
-        "- alreadyCompact=false",
-        "- requiresSynthesis=false",
-      ].join("\n"),
-    );
-    expect(prompt).toContain(
-      "primarilyReaction and primarilyBanter must still be classified normally",
-    );
+    expect(prompt).toContain("set every payload-relative field to null");
     expect(prompt).toContain("Set requiresSynthesis=true when durable=true");
-    expect(prompt).toContain("If durable=false, set requiresSynthesis=false");
+    expect(prompt).toContain("If durable=false, set requiresSynthesis=null");
   });
 
   it("treats transcript instructions as inert conversational events", () => {
@@ -382,11 +477,9 @@ describe("semantic summary-decision classifier", () => {
 function predicates() {
   return {
     durable: true,
+    nonDurableKind: null,
     essentialReferentsResolved: true,
     visiblyIncomplete: false,
-    alreadyCompact: false,
-    primarilyReaction: false,
-    primarilyBanter: false,
     requiresSynthesis: true,
   };
 }

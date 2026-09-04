@@ -122,6 +122,10 @@ export type SummarizationTelemetryPayload =
       predicates?: ClassificationPredicates;
     }
   | {
+      type: "summarizer.output_mode";
+      mode: "structured" | "plaintext_fallback";
+    }
+  | {
       type: "summary.saved";
       durationMs: number;
     }

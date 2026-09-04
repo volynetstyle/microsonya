@@ -45,3 +45,49 @@ persist a report. Use `--model` to run the frozen fixture contract against a
 different Ollama model without changing the runtime model profiles. Use
 `--prompt-variant` and `--seed` for controlled V0-V3 comparisons.
 Repeat `--fixture` to evaluate a selected group of fixtures in one report.
+
+### Classifier RC evaluation
+
+Production is frozen to classifier regime A2. The regime flags below exist only
+for offline evaluation:
+
+- `A0`: previous production prompt, seven booleans, and legacy reducer;
+- `B0`: legacy policy/schema with native system/user roles;
+- `B1`: B0 plus a real JSON Schema transport contract;
+- `A1`: predicate-v4 with native roles and JSON Schema, without reply capsules;
+- `A2`: the release candidate, including reply-context capsules.
+
+Run the action-only matrix without allowing downstream summarizer failures to
+replace a valid classifier action with `EMPTY`:
+
+```sh
+pnpm eval:live -- --suite all --classifier-only --classifier-regime A0 --exemplar-order E0 --seed 0 --json --output .data/classifier-rc/a0-all.json
+pnpm eval:live -- --suite all --classifier-only --classifier-regime A1 --exemplar-order E0 --seed 0 --json --output .data/classifier-rc/a1-all.json
+pnpm eval:live -- --suite all --classifier-only --classifier-regime A2 --exemplar-order E0 --seed 0 --json --output .data/classifier-rc/a2-all.json
+```
+
+`E0` is canonical order. `E1` is reversed, `E2` is rotated, and `E3` through
+`E5` are fixed permutations. Run those orders against the targeted safety
+fixtures, then compare every report:
+
+```sh
+pnpm eval:classifier:compare -- .data/classifier-rc/a0-all.json .data/classifier-rc/a1-all.json .data/classifier-rc/a2-all.json .data/classifier-rc/a2-e1-targeted.json
+```
+
+The primary classifier score is `classifierSafety.costWeightedLoss`. Reports
+also contain BoundarySafeRate, DurableFN/FP, critical and irreversible loss,
+unsafe premature summaries, actor/reply errors, schema mismatch rate, action
+distribution, classifier latency, and classifier prompt tokens. The comparator
+requires zero safety-critical errors and no regression from A0 in either
+BoundarySafeRate or CostWeightedLoss.
+
+Use a separate ordinary end-to-end run for A1/A2 when evaluating whether reply
+capsules alter summarizer attribution or overweight context. `--classifier-only`
+must not be used for that G0/G1 comparison.
+
+Boundary-policy ablations use `--classifier-exemplars X0|X1|X2|X3`: X0 is the
+saved pre-boundary policy with five examples, X1 is the strengthened procedure
+without examples, X2 keeps only the durable and incomplete contrasts, and X3
+uses the strengthened procedure with all five examples. Start with targeted
+durable/incomplete/referent fixtures and do not proceed to the full suite until
+the zero-critical gates pass.

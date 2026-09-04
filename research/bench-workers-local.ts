@@ -60,20 +60,16 @@ function createRunner(scenario: Scenario, messageCount: number) {
     scenario === "skip"
       ? {
           durable: false,
-          essentialReferentsResolved: true,
-          visiblyIncomplete: false,
-          alreadyCompact: false,
-          primarilyReaction: true,
-          primarilyBanter: false,
-          requiresSynthesis: false,
+          nonDurableKind: "reaction",
+          essentialReferentsResolved: null,
+          visiblyIncomplete: null,
+          requiresSynthesis: null,
         }
       : {
           durable: true,
+          nonDurableKind: null,
           essentialReferentsResolved: true,
           visiblyIncomplete: false,
-          alreadyCompact: false,
-          primarilyReaction: false,
-          primarilyBanter: false,
           requiresSynthesis: true,
         },
   );

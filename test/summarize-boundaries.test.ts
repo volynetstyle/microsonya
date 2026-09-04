@@ -175,5 +175,13 @@ describe("summary conversation-window selection", () => {
     expect(prompt).toContain(
       "Do not treat context-only messages as new events",
     );
+    expect(prompt).toContain("REPLY_CONTEXT_CAPSULES_BEGIN\nREPLY #9 -> #4");
+    expect(prompt).toContain('PARENT_MESSAGE "parent"');
+    expect(prompt).toContain('CHILD_MESSAGE "reply"');
+    expect(prompt).toContain("REPLY_CONTEXT_CAPSULES_END\n\nTRANSCRIPT_BEGIN");
+    expect(prompt.match(/#4\|\^0\|/gu)).toHaveLength(1);
+    expect(prompt.indexOf("REPLY_CONTEXT_CAPSULES_BEGIN")).toBeLessThan(
+      prompt.indexOf("TRANSCRIPT_BEGIN"),
+    );
   });
 });

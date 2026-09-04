@@ -5,6 +5,10 @@ export interface ModelWindowMessageRole {
   readonly role: "eligible" | "context";
 }
 
+export interface ModelInputPromptOptions {
+  readonly includeReplyContextCapsules?: boolean;
+}
+
 export const PIPE_SEPARATOR = "|";
 
 /** The sole ordered PIPECHAT schema. The guide and encoder derive from it. */
@@ -36,6 +40,8 @@ export const PIPE_GUIDE = [
   "causality, agreement, contradiction, or any other semantic relation.",
   "When INPUT_ROLES is present, context-only messages resolve references only.",
   "Do not treat context-only messages as new events to classify or summarize.",
+  "REPLY_CONTEXT_CAPSULES may repeat a context parent next to its eligible child",
+  "to preserve reply locality. They are a derived view, not additional events.",
 ].join("\n");
 
 export type ModelPolicySection = "CLASSIFICATION_POLICY" | "SUMMARY_POLICY";
@@ -50,12 +56,21 @@ export function buildModelPolicyPrompt(
 export function buildModelInputPrompt(
   window: ConversationWindow,
   roles?: readonly ModelWindowMessageRole[],
+  options: ModelInputPromptOptions = {},
 ): string {
   const roleSection =
     roles === undefined
       ? ""
       : `INPUT_ROLES_BEGIN\n${encodeInputRoles(roles)}\nINPUT_ROLES_END\n\n`;
-  return `${roleSection}TRANSCRIPT_BEGIN\n${encodePipeWindow(window)}\nTRANSCRIPT_END`;
+  const replyCapsules =
+    roles === undefined || options.includeReplyContextCapsules === false
+      ? ""
+      : encodeReplyContextCapsules(window, roles);
+  const capsuleSection =
+    replyCapsules.length === 0
+      ? ""
+      : `REPLY_CONTEXT_CAPSULES_BEGIN\n${replyCapsules}\nREPLY_CONTEXT_CAPSULES_END\n\n`;
+  return `${roleSection}${capsuleSection}TRANSCRIPT_BEGIN\n${encodePipeWindow(window)}\nTRANSCRIPT_END`;
 }
 
 /**
@@ -73,6 +88,43 @@ export function buildModelPrompt(
 
 function encodeInputRoles(roles: readonly ModelWindowMessageRole[]): string {
   return roles.map(({ message, role }) => `#${message.id}|${role}`).join("\n");
+}
+
+/**
+ * Co-locates an eligible reply with its context-only parent for model attention.
+ * The canonical chronological transcript remains present and unchanged below.
+ */
+export function encodeReplyContextCapsules(
+  window: ConversationWindow,
+  roles: readonly ModelWindowMessageRole[],
+): string {
+  const roleById = new Map(
+    roles.map(({ message, role }) => [message.id, role]),
+  );
+  const messageById = new Map(
+    window.messages.map((message) => [message.id, message] as const),
+  );
+  const capsules: string[] = [];
+
+  for (const child of window.messages) {
+    if (roleById.get(child.id) !== "eligible" || child.parentId === null) {
+      continue;
+    }
+    const parent = messageById.get(child.parentId);
+    if (parent === undefined || roleById.get(parent.id) !== "context") continue;
+
+    capsules.push(
+      [
+        `REPLY #${child.id} -> #${parent.id}`,
+        `PARENT_AUTHOR ${encodePipeString(parent.author.label ?? String(parent.author.id))}`,
+        `PARENT_MESSAGE ${encodePipeString(parent.text)}`,
+        `CHILD_AUTHOR ${encodePipeString(child.author.label ?? String(child.author.id))}`,
+        `CHILD_MESSAGE ${encodePipeString(child.text)}`,
+      ].join("\n"),
+    );
+  }
+
+  return capsules.join("\n\n");
 }
 
 /**

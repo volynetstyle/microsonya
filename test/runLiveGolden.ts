@@ -16,6 +16,8 @@ import {
   processWindow,
   shouldAdvanceCheckpoint,
   type SummaryPromptVariant,
+  type ClassifierEvalRegime,
+  type ModelWindowMessageRole,
 } from "../packages/summarize/src/index.js";
 import {
   adversarialE2E,
@@ -43,6 +45,7 @@ import {
   evaluatePropositions,
   type PropositionMetrics,
 } from "./propositionEvaluation.js";
+import { PRE_BOUNDARY_COMPACTION_DECISION_INSTRUCTIONS } from "./fixtures/preBoundaryPredicateV4.js";
 
 loadEnv({ quiet: true });
 
@@ -53,12 +56,23 @@ interface LiveResult extends E2EResult {
   readonly modelCalls: number;
   readonly classifierCalls: number;
   readonly summarizerCalls: number;
+  readonly classifierLatencyMs: number;
+  readonly classifierPromptTokens: number;
+  readonly schemaMismatch: boolean;
+  readonly classifierEvidence?: ClassifierEvidence;
   readonly missingRequired: readonly string[];
   readonly forbiddenClaims: readonly string[];
   readonly extractionMetrics?: ExtractionMetrics;
   readonly propositionMetrics?: PropositionMetrics;
   readonly error?: string;
   readonly modelOutputPreview?: string;
+}
+
+interface ClassifierEvidence {
+  readonly durable: boolean;
+  readonly essentialReferentsResolved: boolean | null;
+  readonly visiblyIncomplete: boolean | null;
+  readonly requiresSynthesis: boolean | null;
 }
 
 interface FixtureReport {
@@ -69,6 +83,15 @@ interface FixtureReport {
   readonly runs: readonly LiveResult[];
   readonly metrics: EvaluationMetrics;
 }
+
+const EXEMPLAR_ORDERS: Readonly<Record<string, readonly number[]>> = {
+  E0: [0, 1, 2, 3, 4],
+  E1: [4, 3, 2, 1, 0],
+  E2: [1, 2, 3, 4, 0],
+  E3: [2, 0, 4, 1, 3],
+  E4: [3, 1, 4, 0, 2],
+  E5: [4, 0, 2, 3, 1],
+};
 
 const args = parseArgs(process.argv.slice(2));
 const ollamaConfig = loadOllamaConfig(process.env);
@@ -96,6 +119,11 @@ for (const fixture of selected) {
         args.promptVariant,
         args.seed + index,
         args.summarizerOnly,
+        args.classifierOnly,
+        args.classifierRegime,
+        args.exemplarOrder,
+        args.exemplarMode,
+        args.evalPolicyOverride,
       ),
     );
     if (!args.json) {
@@ -131,8 +159,12 @@ const report = {
   endpoint: redactEndpoint(endpoint),
   suite: args.suite,
   promptVariant: args.promptVariant,
+  classifierRegime: args.classifierRegime,
+  exemplarOrder: args.exemplarOrderName,
+  classifierExemplars: args.classifierExemplars,
   seed: args.seed,
   summarizerOnly: args.summarizerOnly,
+  classifierOnly: args.classifierOnly,
   reports,
   totals,
 };
@@ -151,25 +183,46 @@ async function runFixture(
   promptVariant: SummaryPromptVariant,
   seed: number,
   summarizerOnly: boolean,
+  classifierOnly: boolean,
+  classifierRegime: ClassifierEvalRegime,
+  exemplarOrder: readonly number[] | undefined,
+  exemplarMode: "current" | "none" | "hardest",
+  evalPolicyOverride: string | undefined,
 ): Promise<LiveResult> {
   const startedAt = performance.now();
   let modelCalls = 0;
   let classifierCalls = 0;
   let summarizerCalls = 0;
+  let classifierLatencyMs = 0;
+  let classifierPromptTokens = 0;
+  let classifierEvidence: ClassifierEvidence | undefined;
   const countedClient = (kind: "classifier" | "summarizer") => ({
     chat: async (...chatArgs: Parameters<OllamaClient["chat"]>) => {
       modelCalls += 1;
       if (kind === "classifier") classifierCalls += 1;
       else summarizerCalls += 1;
       const [request, options] = chatArgs;
-      return ollama.chat(
+      const callStartedAt = performance.now();
+      const response = (await ollama.chat(
         {
           ...request,
           model,
           options: { ...request.options, seed },
         },
         options,
-      ) as never;
+      )) as unknown as {
+        readonly prompt_eval_count?: number;
+        readonly message?: { readonly content?: string };
+      };
+      if (kind === "classifier") {
+        classifierLatencyMs += performance.now() - callStartedAt;
+        classifierPromptTokens += response.prompt_eval_count ?? 0;
+        classifierEvidence = parseClassifierEvidence(
+          response.message?.content,
+          classifierRegime,
+        );
+      }
+      return response as never;
     },
   });
 
@@ -183,6 +236,9 @@ async function runFixture(
       modelCalls,
       classifierCalls,
       summarizerCalls,
+      classifierLatencyMs,
+      classifierPromptTokens,
+      schemaMismatch: false,
       missingRequired: [],
       forbiddenClaims: [],
     };
@@ -192,29 +248,60 @@ async function runFixture(
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
-    const window = createConversationWindow(
-      fixture.messages.map((text, index) => message(index + 1, text)),
-    );
+    const materialized = materializeFixture(fixture);
+    const window = createConversationWindow(materialized.messages);
+    const classifier = summarizerOnly
+      ? {
+          classify: async () => ({
+            action: "SUMMARIZE" as const,
+            evidence: {
+              source: "deterministic" as const,
+              rule: "live-eval-summarizer-only",
+            },
+          }),
+        }
+      : createClassifier(
+          { ollama: countedClient("classifier") as never },
+          {
+            evalRegime: classifierRegime,
+            exemplarOrder,
+            exemplarMode,
+            evalPolicyOverride,
+          },
+        );
+    if (classifierOnly) {
+      const decision = await classifier.classify(
+        window,
+        controller.signal,
+        undefined,
+        materialized.roles,
+      );
+      return {
+        fixtureId: fixture.id,
+        expectedAction: fixture.expected.action,
+        action: decision.action,
+        checkpointAdvanced: shouldAdvanceCheckpoint(decision.action),
+        durationMs: performance.now() - startedAt,
+        modelCalls,
+        classifierCalls,
+        summarizerCalls,
+        classifierLatencyMs,
+        classifierPromptTokens,
+        schemaMismatch: false,
+        classifierEvidence,
+        missingRequired: [],
+        forbiddenClaims: [],
+      };
+    }
     const result = await processWindow(
       window,
       {
-        classifier: summarizerOnly
-          ? {
-              classify: async () => ({
-                action: "SUMMARIZE" as const,
-                evidence: {
-                  source: "deterministic" as const,
-                  rule: "live-eval-summarizer-only",
-                },
-              }),
-            }
-          : createClassifier({
-              ollama: countedClient("classifier") as never,
-            }),
+        classifier,
         summarizer: createConversationSummarizer({
           ollama: countedClient("summarizer") as never,
           promptVariant,
         }),
+        roles: materialized.roles,
       },
       controller.signal,
     );
@@ -236,6 +323,10 @@ async function runFixture(
       modelCalls,
       classifierCalls,
       summarizerCalls,
+      classifierLatencyMs,
+      classifierPromptTokens,
+      schemaMismatch: false,
+      classifierEvidence,
       ...constraints,
       ...(extractionFixture
         ? { extractionMetrics: evaluateExtraction(extractionFixture, summary) }
@@ -252,6 +343,12 @@ async function runFixture(
       modelCalls,
       classifierCalls,
       summarizerCalls,
+      classifierLatencyMs,
+      classifierPromptTokens,
+      schemaMismatch:
+        error instanceof ModelOutputError &&
+        error.code === "MODEL_OUTPUT_SCHEMA_MISMATCH",
+      classifierEvidence,
       missingRequired: fixture.expected.summary?.mustInclude ?? [],
       forbiddenClaims: [],
       error:
@@ -279,6 +376,87 @@ function message(id: number, text: string): ChatMessage {
     parentId: null,
     text,
   });
+}
+
+function materializeFixture(fixture: E2EFixture): {
+  readonly messages: readonly ChatMessage[];
+  readonly roles?: readonly ModelWindowMessageRole[];
+} {
+  if (fixture.id === "reply-crosses-checkpoint") {
+    const parent = {
+      ...message(100, fixture.messages[0]!),
+      text: "Backend deploy is blocked by migration 42.",
+    };
+    const child = {
+      ...message(117, fixture.messages[1]!),
+      parentId: asMessageId(100),
+      text: "Міграцію вже закінчили, deploy можна запускати.",
+    };
+    return {
+      messages: [parent, child],
+      roles: [
+        { message: parent, role: "context" },
+        { message: child, role: "eligible" },
+      ],
+    };
+  }
+  const messages = fixture.messages.map((text, index) =>
+    message(index + 1, text),
+  );
+  return {
+    messages,
+    roles: messages.map((value) => ({
+      message: value,
+      role: "eligible" as const,
+    })),
+  };
+}
+
+function parseClassifierEvidence(
+  content: string | undefined,
+  regime: ClassifierEvalRegime,
+): ClassifierEvidence | undefined {
+  if (!content) return undefined;
+  try {
+    const value = JSON.parse(content) as Record<string, unknown>;
+    if (typeof value.durable !== "boolean") return undefined;
+    if (["A0", "B0", "B1"].includes(regime)) {
+      return {
+        durable: value.durable,
+        essentialReferentsResolved:
+          typeof value.essentialReferentsResolved === "boolean"
+            ? value.essentialReferentsResolved
+            : null,
+        visiblyIncomplete:
+          typeof value.visiblyIncomplete === "boolean"
+            ? value.visiblyIncomplete
+            : null,
+        requiresSynthesis:
+          value.alreadyCompact === true
+            ? false
+            : typeof value.requiresSynthesis === "boolean"
+              ? value.requiresSynthesis
+              : null,
+      };
+    }
+    return {
+      durable: value.durable,
+      essentialReferentsResolved:
+        typeof value.essentialReferentsResolved === "boolean"
+          ? value.essentialReferentsResolved
+          : null,
+      visiblyIncomplete:
+        typeof value.visiblyIncomplete === "boolean"
+          ? value.visiblyIncomplete
+          : null,
+      requiresSynthesis:
+        typeof value.requiresSynthesis === "boolean"
+          ? value.requiresSynthesis
+          : null,
+    };
+  } catch {
+    return undefined;
+  }
 }
 
 function evaluateSummaryConstraints(
@@ -347,6 +525,27 @@ function parseArgs(argv: readonly string[]) {
     throw new TypeError(`Unknown prompt variant: ${promptVariant}`);
   }
   const seed = nonNegativeInteger(read("--seed") ?? "0", "seed");
+  if (
+    argv.includes("--summarizer-only") &&
+    argv.includes("--classifier-only")
+  ) {
+    throw new TypeError(
+      "summarizer-only and classifier-only are mutually exclusive.",
+    );
+  }
+  const classifierRegime = read("--classifier-regime") ?? "A2";
+  if (!["A0", "B0", "B1", "A1", "A2"].includes(classifierRegime)) {
+    throw new TypeError(`Unknown classifier regime: ${classifierRegime}`);
+  }
+  const exemplarOrderName = read("--exemplar-order") ?? "E0";
+  const exemplarOrder = EXEMPLAR_ORDERS[exemplarOrderName];
+  if (exemplarOrder === undefined) {
+    throw new TypeError(`Unknown exemplar order: ${exemplarOrderName}`);
+  }
+  const classifierExemplars = read("--classifier-exemplars") ?? "X3";
+  if (!["X0", "X1", "X2", "X3"].includes(classifierExemplars)) {
+    throw new TypeError(`Unknown classifier exemplars: ${classifierExemplars}`);
+  }
   return {
     suite: suite as
       | "smoke"
@@ -364,6 +563,24 @@ function parseArgs(argv: readonly string[]) {
     promptVariant: promptVariant as SummaryPromptVariant,
     seed,
     summarizerOnly: argv.includes("--summarizer-only"),
+    classifierOnly: argv.includes("--classifier-only"),
+    classifierRegime: classifierRegime as ClassifierEvalRegime,
+    exemplarOrderName,
+    exemplarOrder:
+      classifierRegime === "A0" || exemplarOrderName === "E0"
+        ? undefined
+        : exemplarOrder,
+    classifierExemplars,
+    exemplarMode:
+      classifierExemplars === "X1"
+        ? ("none" as const)
+        : classifierExemplars === "X2"
+          ? ("hardest" as const)
+          : ("current" as const),
+    evalPolicyOverride:
+      classifierExemplars === "X0"
+        ? PRE_BOUNDARY_COMPACTION_DECISION_INSTRUCTIONS
+        : undefined,
   };
 }
 
@@ -373,9 +590,7 @@ function selectFixtures(args: ReturnType<typeof parseArgs>): E2EFixture[] {
       expandExtractionFixture(fixture, placement),
     ),
   );
-  const semanticGoldens = goldenFixtures.filter(
-    ({ scope }) => scope !== "system",
-  );
+  const semanticGoldens = [...goldenFixtures];
   const available =
     args.suite === "extraction"
       ? extraction
@@ -475,7 +690,7 @@ function aggregate(reports: readonly FixtureReport[]) {
   );
   const acceptedSemanticRuns = acceptedSemantic.flatMap(({ runs }) => runs);
   const actionAssessments = reports.flatMap((report) => {
-    const fixture = goldenFixtures.find(({ id }) => id === report.fixtureId);
+    const fixture = findFixture(report.fixtureId);
     if (!fixture || report.scope === "system") return [];
     return report.runs.map((result) => assessAction(fixture, result.action));
   });
@@ -515,9 +730,66 @@ function aggregate(reports: readonly FixtureReport[]) {
       sum + report.runs.length * report.metrics.irreversibleLossRate,
     0,
   );
+  const durableFalseNegatives = acceptedSemanticRuns.filter(
+    (result) =>
+      isMeaningfulExpected(result.expectedAction) &&
+      result.action.startsWith("SKIP_"),
+  ).length;
+  const durableFalsePositives = acceptedSemanticRuns.filter(
+    (result) =>
+      result.expectedAction.startsWith("SKIP_") &&
+      isMeaningfulExpected(result.action),
+  ).length;
+  const unsafePrematureSummaries = actionAssessments.filter(
+    ({ category }) => category === "unsafe_premature_summary",
+  ).length;
+  const actorAttributionRuns = runs.filter(
+    ({ action, summary, propositionMetrics }) =>
+      action === "SUMMARIZE" &&
+      summary !== undefined &&
+      propositionMetrics !== undefined,
+  );
+  const actorAttributionErrors = actorAttributionRuns.reduce(
+    (sum, result) =>
+      sum +
+      (result.propositionMetrics?.errorsByType.ENTITY_BINDING ?? 0) +
+      (result.propositionMetrics?.errorsByType.PROVENANCE ?? 0),
+    0,
+  );
+  const actorAttributionEvaluatedRuns = actorAttributionRuns.length;
+  const replyTargetIds = new Set(["reply-crosses-checkpoint"]);
+  const replyResolutionErrors = reports
+    .filter(({ fixtureId }) => replyTargetIds.has(fixtureId))
+    .flatMap(({ runs }) => runs)
+    .filter((result) => {
+      const fixture = findFixture(result.fixtureId);
+      return (
+        result.error !== undefined ||
+        !fixture ||
+        !isAcceptedAction(fixture, result.action)
+      );
+    }).length;
+  const schemaMismatches = runs.filter(
+    ({ schemaMismatch }) => schemaMismatch,
+  ).length;
+  const totalWeightedCost = actionAssessments.reduce(
+    (sum, assessment) => sum + assessment.cost,
+    0,
+  );
+  const actionDistribution = Object.fromEntries(
+    [...new Set(runs.map(({ action }) => action))].map((action) => [
+      action,
+      runs.filter((result) => result.action === action).length,
+    ]),
+  );
+  const predicateFailureManifest = buildPredicateFailureManifest(reports);
   const releaseChecks = {
     criticalErrors: criticalErrors === 0,
     irreversibleLosses: irreversibleLosses === 0,
+    durableFalseNegatives: durableFalseNegatives === 0,
+    unsafePrematureSummaries: unsafePrematureSummaries === 0,
+    actorAttributionErrors: actorAttributionErrors === 0,
+    replyResolutionErrors: replyResolutionErrors === 0,
     providerParseFailures: errors === 0,
     productSafeActionRate: productSafeActionRate >= 0.9,
     semanticPropositionScore:
@@ -623,10 +895,11 @@ function aggregate(reports: readonly FixtureReport[]) {
       ).length,
     },
     weightedErrors: {
-      totalCost: actionAssessments.reduce(
-        (sum, assessment) => sum + assessment.cost,
-        0,
-      ),
+      totalCost: totalWeightedCost,
+      meanCost:
+        actionAssessments.length === 0
+          ? 0
+          : totalWeightedCost / actionAssessments.length,
       critical: criticalErrors,
       medium: actionAssessments.filter(({ severity }) => severity === "medium")
         .length,
@@ -662,6 +935,33 @@ function aggregate(reports: readonly FixtureReport[]) {
       ),
     },
     irreversibleLosses,
+    classifierSafety: {
+      boundarySafeRate: productSafeActionRate,
+      durableFalseNegatives,
+      durableFalsePositives,
+      unsafePrematureSummaries,
+      actorAttributionErrors,
+      actorAttributionEvaluatedRuns,
+      replyResolutionErrors,
+      schemaMismatches,
+      schemaMismatchRate:
+        runs.length === 0 ? 0 : schemaMismatches / runs.length,
+      actionDistribution,
+      costWeightedLoss: totalWeightedCost,
+      meanClassifierLatencyMs:
+        runs.length === 0
+          ? 0
+          : runs.reduce((sum, result) => sum + result.classifierLatencyMs, 0) /
+            runs.length,
+      meanClassifierPromptTokens:
+        runs.length === 0
+          ? 0
+          : runs.reduce(
+              (sum, result) => sum + result.classifierPromptTokens,
+              0,
+            ) / runs.length,
+      predicateFailureManifest,
+    },
     lexicalConstraintDiagnostics: runs.reduce(
       (sum, result) =>
         sum + result.missingRequired.length + result.forbiddenClaims.length,
@@ -676,4 +976,97 @@ function aggregate(reports: readonly FixtureReport[]) {
       },
     },
   };
+}
+
+function buildPredicateFailureManifest(reports: readonly FixtureReport[]) {
+  const order = [
+    "durable",
+    "essentialReferentsResolved",
+    "visiblyIncomplete",
+    "requiresSynthesis",
+    "unavailable",
+  ] as const;
+  const predicateOrder: readonly (keyof ClassifierEvidence)[] = [
+    "durable",
+    "essentialReferentsResolved",
+    "visiblyIncomplete",
+    "requiresSynthesis",
+  ];
+  const rows = new Map<
+    (typeof order)[number],
+    { failures: number; safetyCost: number; fixtures: Set<string> }
+  >();
+  for (const predicate of order) {
+    rows.set(predicate, { failures: 0, safetyCost: 0, fixtures: new Set() });
+  }
+
+  for (const report of reports) {
+    const fixture = findFixture(report.fixtureId);
+    if (!fixture || report.scope === "system") continue;
+    for (const run of report.runs) {
+      const assessment = assessAction(fixture, run.action);
+      if (assessment.correct || assessment.category === "golden_under_review") {
+        continue;
+      }
+      const expected = expectedEvidence(fixture.expected.action);
+      const actual = run.classifierEvidence;
+      const first = actual
+        ? (predicateOrder.find((predicate) => {
+            const required = expected[predicate];
+            return required !== undefined && actual[predicate] !== required;
+          }) ?? "unavailable")
+        : "unavailable";
+      const row = rows.get(first)!;
+      row.failures += 1;
+      row.safetyCost += assessment.cost;
+      row.fixtures.add(report.fixtureId);
+    }
+  }
+
+  return order.map((predicate) => {
+    const row = rows.get(predicate)!;
+    return {
+      predicate,
+      failures: row.failures,
+      safetyCost: row.safetyCost,
+      fixtures: [...row.fixtures],
+    };
+  });
+}
+
+function expectedEvidence(
+  action: E2EResult["action"],
+): Partial<ClassifierEvidence> {
+  if (action.startsWith("SKIP_")) return { durable: false };
+  if (action === "DEFER_CONTEXT") {
+    return { durable: true, essentialReferentsResolved: false };
+  }
+  if (action === "DEFER_INCOMPLETE") {
+    return {
+      durable: true,
+      essentialReferentsResolved: true,
+      visiblyIncomplete: true,
+    };
+  }
+  if (action === "SUMMARIZE") {
+    return {
+      durable: true,
+      essentialReferentsResolved: true,
+      visiblyIncomplete: false,
+      requiresSynthesis: true,
+    };
+  }
+  if (action === "DEFER_COMPACT") {
+    return {
+      durable: true,
+      essentialReferentsResolved: true,
+      visiblyIncomplete: false,
+      requiresSynthesis: false,
+    };
+  }
+  return {};
+}
+
+function isMeaningfulExpected(action: E2EResult["action"]): boolean {
+  return action === "SUMMARIZE" || action.startsWith("DEFER_");
 }

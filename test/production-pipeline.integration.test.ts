@@ -36,11 +36,9 @@ const network = setupServer(
     const content = prompt.includes("CLASSIFICATION_POLICY")
       ? JSON.stringify({
           durable: true,
+          nonDurableKind: null,
           essentialReferentsResolved: true,
           visiblyIncomplete: false,
-          alreadyCompact: false,
-          primarilyReaction: false,
-          primarilyBanter: false,
           requiresSynthesis: true,
         })
       : JSON.stringify({

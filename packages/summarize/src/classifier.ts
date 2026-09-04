@@ -5,9 +5,10 @@ import {
   type SummaryDecision,
 } from "@microsonya/shared";
 import { z } from "zod";
-import { buildModelPrompt } from "./prompt.js";
+import { buildModelInputPrompt, buildModelPolicyPrompt } from "./prompt.js";
 import { ModelOutputError, parseModelOutput } from "./modelOutput.js";
 import { COMPACTION_DECISION_INSTRUCTIONS } from "./predicateV3.js";
+import { LEGACY_COMPACTION_DECISION_INSTRUCTIONS } from "./legacyPredicateV3.js";
 import type { ModelWindowMessageRole } from "./prompt.js";
 import type { SummarizationTelemetryTrace } from "./telemetry.js";
 
@@ -25,7 +26,9 @@ import type { SummarizationTelemetryTrace } from "./telemetry.js";
 /** @deprecated Prefer the domain name SummaryAction. */
 export type CompactionAction = SummaryAction;
 
-const classifierOutputSchema = z
+const nonDurableKindSchema = z.enum(["reaction", "banter", "no_value"]);
+
+const legacyClassifierOutputSchema = z
   .object({
     durable: z.boolean(),
     essentialReferentsResolved: z.boolean(),
@@ -36,6 +39,34 @@ const classifierOutputSchema = z
     requiresSynthesis: z.boolean(),
   })
   .strict();
+
+const classifierOutputSchema = z
+  .object({
+    durable: z.boolean(),
+    nonDurableKind: nonDurableKindSchema.nullable(),
+    essentialReferentsResolved: z.boolean().nullable(),
+    visiblyIncomplete: z.boolean().nullable(),
+    requiresSynthesis: z.boolean().nullable(),
+  })
+  .strict()
+  .superRefine((evidence, context) => {
+    const payloadFields = [
+      evidence.essentialReferentsResolved,
+      evidence.visiblyIncomplete,
+      evidence.requiresSynthesis,
+    ];
+    const valid = evidence.durable
+      ? evidence.nonDurableKind === null &&
+        payloadFields.every((value) => value !== null)
+      : evidence.nonDurableKind !== null &&
+        payloadFields.every((value) => value === null);
+    if (!valid) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Evidence must follow the durable decision branch.",
+      });
+    }
+  });
 
 export type ClassificationPredicates = z.infer<typeof classifierOutputSchema>;
 
@@ -52,13 +83,39 @@ export interface ClassifierDeps {
   readonly ollama: Pick<OllamaClient, "chat">;
 }
 
+export type ClassifierEvalRegime = "A0" | "B0" | "B1" | "A1" | "A2";
+export type ClassifierExemplarMode = "current" | "none" | "hardest";
+
+export interface ClassifierOptions {
+  /** Offline ablation only. Production is frozen to A2. */
+  readonly evalRegime?: ClassifierEvalRegime;
+  /** Offline robustness probe; indexes the five contrast examples. */
+  readonly exemplarOrder?: readonly number[];
+  readonly exemplarMode?: ClassifierExemplarMode;
+  readonly evalPolicyOverride?: string;
+}
+
 export function createClassifier(
   deps: ClassifierDeps,
+  options: ClassifierOptions = {},
 ): SummaryDecisionClassifier {
   return {
     classify: async (window, signal, telemetry, roles) => {
       signal?.throwIfAborted();
-      const prompt = buildClassifierPrompt(window, roles);
+      const regime = options.evalRegime ?? "A2";
+      const usesLegacyEvidence = ["A0", "B0", "B1"].includes(regime);
+      const systemPrompt = buildClassifierSystemPrompt(
+        regime,
+        options.exemplarOrder,
+        options.exemplarMode,
+        options.evalPolicyOverride,
+      );
+      const userPrompt = buildClassifierInputPrompt(
+        window,
+        roles,
+        regime === "A2",
+      );
+      const combinedPrompt = `${systemPrompt}\n\n${userPrompt}`;
       for (let attempt = 1; attempt <= 2; attempt += 1) {
         const numPredict =
           CLASSIFIER_PROFILE.options.num_predict * (attempt === 1 ? 1 : 2);
@@ -69,8 +126,8 @@ export function createClassifier(
           attempt,
           numPredict,
           messageCount: window.messages.length,
-          promptChars: prompt.length,
-          prompt,
+          promptChars: systemPrompt.length + userPrompt.length,
+          prompt: combinedPrompt,
         });
         const startedAt = performance.now();
         const response = await deps.ollama.chat(
@@ -81,7 +138,19 @@ export function createClassifier(
               num_predict: numPredict,
             },
             stream: false,
-            messages: [{ role: "user", content: prompt }],
+            format:
+              regime === "A0" || regime === "B0"
+                ? "json"
+                : regime === "B1"
+                  ? LEGACY_CLASSIFIER_RESPONSE_SCHEMA
+                  : CLASSIFIER_RESPONSE_SCHEMA,
+            messages:
+              regime === "A0"
+                ? [{ role: "user", content: combinedPrompt }]
+                : [
+                    { role: "system", content: systemPrompt },
+                    { role: "user", content: userPrompt },
+                  ],
           },
           { signal },
         );
@@ -105,16 +174,30 @@ export function createClassifier(
         });
 
         try {
-          const predicates = parseModelOutput({
+          const parseArgs = {
             raw: response.message.content,
-            schema: classifierOutputSchema,
-            stage: "classifier",
+            stage: "classifier" as const,
             model: CLASSIFIER_PROFILE.model,
             durationMs,
             attempt,
             telemetry,
-          });
-          const action = decideFromPredicates(predicates);
+          };
+          const predicates = usesLegacyEvidence
+            ? parseModelOutput({
+                ...parseArgs,
+                schema: legacyClassifierOutputSchema,
+              })
+            : parseModelOutput({
+                ...parseArgs,
+                schema: classifierOutputSchema,
+              });
+          const action = usesLegacyEvidence
+            ? decideFromLegacyPredicates(
+                predicates as unknown as z.infer<
+                  typeof legacyClassifierOutputSchema
+                >,
+              )
+            : decideFromPredicates(predicates as ClassificationPredicates);
           telemetry?.record({
             type: "model.response",
             stage: "classifier",
@@ -123,7 +206,13 @@ export function createClassifier(
             durationMs,
             responseChars: response.message.content.length,
             action,
-            predicates,
+            predicates: usesLegacyEvidence
+              ? legacyToEvidence(
+                  predicates as unknown as z.infer<
+                    typeof legacyClassifierOutputSchema
+                  >,
+                )
+              : (predicates as ClassificationPredicates),
           });
           return {
             action,
@@ -162,6 +251,20 @@ export function decideFromPredicates(
   predicates: ClassificationPredicates,
 ): SummaryAction {
   if (!predicates.durable) {
+    if (predicates.nonDurableKind === "reaction") return "SKIP_REACTIONS";
+    if (predicates.nonDurableKind === "banter") return "SKIP_BANTER";
+    return "SKIP_NO_VALUE";
+  }
+  if (!predicates.essentialReferentsResolved) return "DEFER_CONTEXT";
+  if (predicates.visiblyIncomplete) return "DEFER_INCOMPLETE";
+  if (!predicates.requiresSynthesis) return "DEFER_COMPACT";
+  return "SUMMARIZE";
+}
+
+function decideFromLegacyPredicates(
+  predicates: z.infer<typeof legacyClassifierOutputSchema>,
+): SummaryAction {
+  if (!predicates.durable) {
     if (predicates.primarilyReaction) return "SKIP_REACTIONS";
     if (predicates.primarilyBanter) return "SKIP_BANTER";
     return "SKIP_NO_VALUE";
@@ -174,16 +277,148 @@ export function decideFromPredicates(
   return "SUMMARIZE";
 }
 
+function legacyToEvidence(
+  predicates: z.infer<typeof legacyClassifierOutputSchema>,
+): ClassificationPredicates {
+  if (!predicates.durable) {
+    return {
+      durable: false,
+      nonDurableKind: predicates.primarilyReaction
+        ? "reaction"
+        : predicates.primarilyBanter
+          ? "banter"
+          : "no_value",
+      essentialReferentsResolved: null,
+      visiblyIncomplete: null,
+      requiresSynthesis: null,
+    };
+  }
+  return {
+    durable: true,
+    nonDurableKind: null,
+    essentialReferentsResolved: predicates.essentialReferentsResolved,
+    visiblyIncomplete: predicates.visiblyIncomplete,
+    requiresSynthesis: predicates.alreadyCompact
+      ? false
+      : predicates.requiresSynthesis,
+  };
+}
+
+export const CLASSIFIER_RESPONSE_SCHEMA = {
+  type: "object",
+  additionalProperties: false,
+  required: [
+    "durable",
+    "nonDurableKind",
+    "essentialReferentsResolved",
+    "visiblyIncomplete",
+    "requiresSynthesis",
+  ],
+  properties: {
+    durable: { type: "boolean" },
+    nonDurableKind: {
+      anyOf: [{ enum: ["reaction", "banter", "no_value"] }, { type: "null" }],
+    },
+    essentialReferentsResolved: { type: ["boolean", "null"] },
+    visiblyIncomplete: { type: ["boolean", "null"] },
+    requiresSynthesis: { type: ["boolean", "null"] },
+  },
+} as const;
+
+export const LEGACY_CLASSIFIER_RESPONSE_SCHEMA = {
+  type: "object",
+  additionalProperties: false,
+  required: [
+    "durable",
+    "essentialReferentsResolved",
+    "visiblyIncomplete",
+    "alreadyCompact",
+    "primarilyReaction",
+    "primarilyBanter",
+    "requiresSynthesis",
+  ],
+  properties: {
+    durable: { type: "boolean" },
+    essentialReferentsResolved: { type: "boolean" },
+    visiblyIncomplete: { type: "boolean" },
+    alreadyCompact: { type: "boolean" },
+    primarilyReaction: { type: "boolean" },
+    primarilyBanter: { type: "boolean" },
+    requiresSynthesis: { type: "boolean" },
+  },
+} as const;
+
+export function buildClassifierSystemPrompt(
+  regime: ClassifierEvalRegime = "A2",
+  exemplarOrder?: readonly number[],
+  exemplarMode: ClassifierExemplarMode = "current",
+  evalPolicyOverride?: string,
+): string {
+  const policy =
+    evalPolicyOverride ??
+    (["A0", "B0", "B1"].includes(regime)
+      ? LEGACY_COMPACTION_DECISION_INSTRUCTIONS
+      : selectClassifierExemplars(
+          reorderClassifierExemplars(
+            COMPACTION_DECISION_INSTRUCTIONS,
+            exemplarOrder,
+          ),
+          exemplarMode,
+        ));
+  return buildModelPolicyPrompt("CLASSIFICATION_POLICY", policy);
+}
+
+export function buildClassifierInputPrompt(
+  window: ConversationWindow,
+  roles?: readonly ModelWindowMessageRole[],
+  includeReplyContextCapsules = true,
+): string {
+  return buildModelInputPrompt(window, roles, { includeReplyContextCapsules });
+}
+
 export function buildClassifierPrompt(
   window: ConversationWindow,
   roles?: readonly ModelWindowMessageRole[],
 ): string {
-  return buildModelPrompt(
-    "CLASSIFICATION_POLICY",
-    COMPACTION_DECISION_INSTRUCTIONS,
-    window,
-    roles,
-  );
+  return `${buildClassifierSystemPrompt()}\n\n${buildClassifierInputPrompt(window, roles)}`;
+}
+
+const CONTRAST_MARKER = "CONTRASTIVE BOUNDARIES\n\n";
+
+export function selectClassifierExemplars(
+  policy: string,
+  mode: ClassifierExemplarMode,
+): string {
+  if (mode === "current") return policy;
+  const markerIndex = policy.indexOf(CONTRAST_MARKER);
+  if (markerIndex < 0)
+    throw new TypeError("Classifier contrast marker missing.");
+  if (mode === "none") return policy.slice(0, markerIndex).trimEnd();
+  const start = markerIndex + CONTRAST_MARKER.length;
+  const examples = policy.slice(start).split("\n\n");
+  return `${policy.slice(0, start)}${[examples[0], examples[3]].join("\n\n")}`;
+}
+
+export function reorderClassifierExemplars(
+  policy: string,
+  order: readonly number[] | undefined,
+): string {
+  if (order === undefined) return policy;
+  const markerIndex = policy.indexOf(CONTRAST_MARKER);
+  if (markerIndex < 0)
+    throw new TypeError("Classifier contrast marker missing.");
+  const start = markerIndex + CONTRAST_MARKER.length;
+  const examples = policy.slice(start).split("\n\n");
+  if (
+    order.length !== examples.length ||
+    new Set(order).size !== examples.length ||
+    order.some((index) => index < 0 || index >= examples.length)
+  ) {
+    throw new TypeError(`Expected a permutation of 0..${examples.length - 1}.`);
+  }
+  return `${policy.slice(0, start)}${order
+    .map((index) => examples[index])
+    .join("\n\n")}`;
 }
 
 /* Legacy predicate-v2 policy retained temporarily for review; not executable.

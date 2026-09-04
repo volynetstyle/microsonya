@@ -70,6 +70,63 @@ export function parseModelOutput<T>(options: {
   return result.data;
 }
 
+/** Strict structured output with a summarizer-only plain-text transport fallback. */
+export function parseSummaryModelOutput<
+  T extends { summary: string },
+>(options: {
+  readonly raw: string;
+  readonly schema: z.ZodType<T>;
+  readonly model: string;
+  readonly durationMs: number;
+  readonly attempt?: number;
+  readonly telemetry?: SummarizationTelemetryTrace;
+}): {
+  readonly summary: string;
+  readonly outputEnvelope: "structured" | "plaintext_fallback";
+} {
+  const { raw, schema, model, durationMs, attempt, telemetry } = options;
+  telemetry?.record({
+    type: "model.response.raw",
+    stage: "summarizer",
+    model,
+    attempt,
+    durationMs,
+    responseChars: raw.length,
+    response: raw,
+  });
+  const trimmed = raw.trim();
+  if (trimmed.length === 0) {
+    throw invalidModelOutput(
+      { ...options, stage: "summarizer" },
+      "MODEL_OUTPUT_EMPTY",
+    );
+  }
+
+  let value: unknown;
+  try {
+    value = JSON.parse(raw);
+  } catch (cause) {
+    if (/^[{[]/u.test(trimmed)) {
+      throw invalidModelOutput(
+        { ...options, stage: "summarizer" },
+        "MODEL_OUTPUT_INVALID_JSON",
+        cause,
+      );
+    }
+    return { summary: trimmed, outputEnvelope: "plaintext_fallback" };
+  }
+
+  const result = schema.safeParse(value);
+  if (!result.success) {
+    throw invalidModelOutput(
+      { ...options, stage: "summarizer" },
+      "MODEL_OUTPUT_SCHEMA_MISMATCH",
+      result.error,
+    );
+  }
+  return { summary: result.data.summary, outputEnvelope: "structured" };
+}
+
 function invalidModelOutput<T>(
   {
     raw,

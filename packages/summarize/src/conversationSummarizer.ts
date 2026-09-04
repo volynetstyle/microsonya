@@ -13,7 +13,7 @@ import {
 } from "./constants.js";
 import { buildModelInputPrompt, buildModelPolicyPrompt } from "./prompt.js";
 import type { ModelWindowMessageRole } from "./prompt.js";
-import { parseModelOutput } from "./modelOutput.js";
+import { parseSummaryModelOutput } from "./modelOutput.js";
 import type { SummarizationTelemetryTrace } from "./telemetry.js";
 
 export interface ConversationSummarizer {
@@ -222,14 +222,17 @@ export function createConversationSummarizer({
         content: response.message.content,
         thinking: response.message.thinking,
       });
-      const { summary } = parseModelOutput({
+      const { summary, outputEnvelope } = parseSummaryModelOutput({
         raw: response.message.content,
         schema: outputSchema,
-        stage: "summarizer",
         model: SUMMARIZER_PROFILE.model,
         durationMs,
         attempt: 1,
         telemetry,
+      });
+      telemetry?.record({
+        type: "summarizer.output_mode",
+        mode: outputEnvelope,
       });
       telemetry?.record({
         type: "model.response",

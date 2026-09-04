@@ -182,11 +182,9 @@ describe("summary runtime ledger evidence", () => {
       action: "SUMMARIZE",
       predicates: {
         durable: true,
+        nonDurableKind: null,
         essentialReferentsResolved: true,
         visiblyIncomplete: false,
-        alreadyCompact: false,
-        primarilyReaction: false,
-        primarilyBanter: false,
         requiresSynthesis: true,
       },
     });

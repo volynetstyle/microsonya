@@ -28,11 +28,9 @@ describe("summarizer 0.1 workflow", () => {
             message: {
               content: JSON.stringify({
                 durable: true,
+                nonDurableKind: null,
                 essentialReferentsResolved: true,
                 visiblyIncomplete: false,
-                alreadyCompact: false,
-                primarilyReaction: false,
-                primarilyBanter: false,
                 requiresSynthesis: true,
               }),
             },
@@ -75,6 +73,7 @@ describe("summarizer 0.1 workflow", () => {
       "model.request",
       "model.response.envelope",
       "model.response.raw",
+      "summarizer.output_mode",
       "model.response",
       "window.disposition",
       "summary.saved",
@@ -108,7 +107,10 @@ describe("summarizer 0.1 workflow", () => {
       expect.objectContaining({
         model: "gpt-oss:120b-cloud",
         think: "low",
-        format: "json",
+        format: expect.objectContaining({
+          type: "object",
+          additionalProperties: false,
+        }),
         stream: false,
         options: expect.objectContaining({ num_predict: 512 }),
       }),
@@ -405,11 +407,9 @@ describe("summarizer 0.1 workflow", () => {
               request.options?.num_predict === 512
                 ? JSON.stringify({
                     durable: true,
+                    nonDurableKind: null,
                     essentialReferentsResolved: true,
                     visiblyIncomplete: false,
-                    alreadyCompact: false,
-                    primarilyReaction: false,
-                    primarilyBanter: false,
                     requiresSynthesis: true,
                   })
                 : JSON.stringify({ summary: "Release is Friday." }),
