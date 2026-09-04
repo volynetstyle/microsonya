@@ -6,6 +6,11 @@ export type WmaParticipant = Readonly<{
   sourceLabel: string;
 }>;
 
+export type PresentationScope =
+  | Readonly<{ kind: "viewer"; viewerId: string }>
+  | Readonly<{ kind: "group"; chatId: string }>
+  | Readonly<{ kind: "public" }>;
+
 /**
  * Resolve identity only at a private presentation boundary. The map is loaded
  * for one authenticated viewer, so no other viewer's aliases can influence it.
@@ -37,6 +42,16 @@ export function renderSummaryInline(
       return resolveParticipantLabel(participant, aliases);
     })
     .join("");
+}
+
+/** Public/group rendering cannot receive viewer aliases. */
+export function renderShareableSummaryInline(
+  inline: readonly SummaryInline[],
+  participants: ReadonlyMap<string, WmaParticipant>,
+  scope: Extract<PresentationScope, { kind: "group" | "public" }>,
+): string {
+  void scope;
+  return renderSummaryInline(inline, participants, new Map());
 }
 
 /** Parse only the small persisted representation accepted by the renderer. */

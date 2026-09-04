@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { parseTelegramChatMessageUpdate } from "../packages/telegram/src/index.js";
 
 describe("telegram message mapping", () => {
-  it("uses forwarded author but destination time for window chronology", () => {
+  it("keeps chat author and forwarded source separate with destination chronology", () => {
     const message = parseTelegramChatMessageUpdate({
       message: {
         message_id: 12,
@@ -23,7 +23,12 @@ describe("telegram message mapping", () => {
       chatId: "42",
       time: 1_800_000,
       author: {
-        id: "99",
+        id: "7",
+        label: "Receiver",
+      },
+      contentSource: {
+        kind: "forwarded_user",
+        sourceId: "99",
         label: "Alice Source",
       },
       parentId: null,

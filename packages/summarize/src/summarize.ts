@@ -430,6 +430,9 @@ function snapshotMessages(
       role,
       authorId: message.author.id,
       authorName: message.author.label,
+      ...(message.contentSource === undefined
+        ? {}
+        : { contentSource: message.contentSource }),
       text: message.text,
       sentAt: message.time,
       replyToId: message.parentId,

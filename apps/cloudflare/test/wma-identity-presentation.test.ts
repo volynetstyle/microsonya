@@ -2,6 +2,7 @@ import { asParticipantId, type SummaryInline } from "@microsonya/shared";
 import { describe, expect, it } from "vitest";
 import {
   parseSummaryInline,
+  renderShareableSummaryInline,
   renderSummaryInline,
   resolveParticipantLabel,
   type WmaParticipant,
@@ -64,6 +65,22 @@ describe("viewer-scoped participant presentation", () => {
       { type: "text", value: " написала." },
     ]);
     expect(parseSummaryInline([{ type: "text", value: 42 }])).toBeUndefined();
+  });
+
+  it("rerenders canonical refs for sharing instead of copying viewer text", () => {
+    const participants = new Map([[karina.id, karina]]);
+    const viewerText = renderSummaryInline(
+      inline,
+      participants,
+      new Map([[karina.id, "Карінка"]]),
+    );
+    const sharedText = renderShareableSummaryInline(inline, participants, {
+      kind: "public",
+    });
+
+    expect(viewerText).toContain("Карінка");
+    expect(sharedText).toContain("Karina");
+    expect(sharedText).not.toContain("Карінка");
   });
 
   it("does not edge-cache alias-rendered WMA resources", () => {

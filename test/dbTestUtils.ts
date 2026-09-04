@@ -13,6 +13,7 @@ export async function openTestDb(): Promise<DbClient> {
       date BIGINT NOT NULL,
       author_id TEXT NOT NULL,
       author_name_ciphertext BYTEA NOT NULL,
+      content_source_ciphertext BYTEA,
       text_ciphertext BYTEA NOT NULL,
       reply_to_message_id INTEGER,
       kind TEXT NOT NULL DEFAULT 'text',

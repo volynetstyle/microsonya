@@ -270,6 +270,12 @@ export class SummariesRepo {
               role: message.role,
               authorId: authorKey,
               authorNameCiphertext: this.encryption.encrypt(message.authorName),
+              forwardOriginCiphertext:
+                message.contentSource === undefined
+                  ? null
+                  : this.encryption.encrypt(
+                      JSON.stringify(message.contentSource),
+                    ),
               textCiphertext: this.encryption.encrypt(message.text),
               sentAt: message.sentAt,
               replyToId: message.replyToId,

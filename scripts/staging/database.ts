@@ -17,24 +17,24 @@ const confirmationValue = "microsonya-staging";
 // Staging commands intentionally load only staging-specific local files. They
 // must never inherit a general .env DATABASE_URL by accident.
 for (const envPath of [
-  resolve(process.cwd(), ".env.staging"),
-  resolve(process.cwd(), ".env.staging.local"),
+  resolve(process.cwd(), ".env"),
+  resolve(process.cwd(), ".env.local"),
 ]) {
   if (existsSync(envPath)) loadEnv({ path: envPath, override: false });
 }
 
 export function stagingDatabaseTarget(): StagingDatabaseTarget {
-  const connectionString = process.env.STAGING_DATABASE_URL;
+  const connectionString = process.env.DATABASE_URL;
 
   if (!connectionString) {
-    if (process.env.STAGING_DATABASE_UR) {
+    if (process.env.DATABASE_UR) {
       throw new Error(
-        "Found STAGING_DATABASE_UR, but the required variable is STAGING_DATABASE_URL (with a final L).",
+        "Found STAGING_DATABASE_UR, but the required variable is DATABASE_URL (with a final L).",
       );
     }
 
     throw new Error(
-      "STAGING_DATABASE_URL is required. Put it in .env.staging or export it in this shell. Refusing to fall back to DATABASE_URL.",
+      "DATABASE_URL is required. Put it in .env or export it in this shell. Refusing to fall back to DATABASE_URL.",
     );
   }
 
@@ -43,12 +43,12 @@ export function stagingDatabaseTarget(): StagingDatabaseTarget {
     url = new URL(connectionString);
   } catch {
     throw new Error(
-      "STAGING_DATABASE_URL must be a valid PostgreSQL connection URL.",
+      "DATABASE_URL must be a valid PostgreSQL connection URL.",
     );
   }
 
   if (!url.protocol.startsWith("postgres")) {
-    throw new Error("STAGING_DATABASE_URL must use a PostgreSQL protocol.");
+    throw new Error("DATABASE_URL must use a PostgreSQL protocol.");
   }
 
   return {

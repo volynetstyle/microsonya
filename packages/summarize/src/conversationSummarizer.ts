@@ -54,6 +54,18 @@ export interface SummaryPromptOptions {
   readonly promptVariant?: SummaryPromptVariant;
 }
 
+type WindowIdentityToken =
+  | {
+      readonly kind: "participant";
+      readonly participantId: string;
+      readonly sourceLabel: string;
+    }
+  | {
+      readonly kind: "source";
+      readonly sourceKey: string;
+      readonly sourceLabel: string;
+    };
+
 const SUMMARY_COMPOSITION_POLICY = `
 Before writing the final summary, internally determine the smallest set of
 durable propositions needed to represent the eligible conversation.
@@ -66,6 +78,24 @@ For every retained proposition preserve:
 - modality and uncertainty;
 - condition or prerequisite;
 - relevant time or deadline.
+
+Before composing prose, keep these concepts separate:
+- chat author: who posted or shared the message into this chat;
+- content source: the original forwarded/shared source, when present;
+- claim speaker: the entity responsible for a quoted or reported claim;
+- referent: the concrete object, event, order, shipment, incident, or task.
+
+Assign window-local referents internally. Different referents must not be
+rendered as stages of one event without explicit linking evidence. Adjacency,
+topic similarity, the same merchant, or the same carrier is not linking evidence.
+
+Preserve numeric value, unit, and semantic dimension. Duration is not a count:
+"three days in transit" must not become "sent three times" or "third attempt".
+
+Participant coverage is not an objective. Omit reactions, jokes, prayers,
+rhetorical anxiety, mood, and filler unless they introduce a decision, action,
+request, commitment, deadline, blocker, concrete risk, causal explanation,
+status change, or materially relevant fact. Do not infer psychological states.
 
 Do not expose this intermediate representation. Return only the requested final output.
 
@@ -173,7 +203,7 @@ export function createConversationSummarizer({
       if (delta.length > 0) {
         content += delta;
         const joined = pendingAlias + delta;
-        const trailing = joined.match(/@(\d*)$/u)?.[0] ?? "";
+        const trailing = joined.match(/[@$](\d*)$/u)?.[0] ?? "";
         const stable = joined.slice(0, joined.length - trailing.length);
         pendingAlias = trailing;
         if (stable.length > 0) yield replaceWindowAliases(stable, aliases);
@@ -276,55 +306,71 @@ export function createConversationSummarizer({
  */
 function aliasesByWindowToken(
   window: ConversationWindow,
-): ReadonlyMap<
-  string,
-  { readonly participantId: string; readonly sourceLabel: string }
-> {
+): ReadonlyMap<string, WindowIdentityToken> {
   const aliases = buildWindowAuthorAliases(window);
-  return new Map(
-    window.messages.map((message) => [
-      aliases.get(message.author.id)!,
-      {
-        participantId: message.author.id,
-        sourceLabel: message.author.label,
-      },
-    ]),
-  );
+  const resolved = new Map<string, WindowIdentityToken>();
+  for (const message of window.messages) {
+    resolved.set(aliases.get(message.author.id)!, {
+      kind: "participant",
+      participantId: message.author.id,
+      sourceLabel: message.author.label,
+    });
+    const source = message.contentSource;
+    if (source !== undefined) {
+      const key =
+        "sourceId" in source && source.sourceId !== undefined
+          ? source.sourceId
+          : `${source.kind}:${source.label}`;
+      const existing = [...resolved.entries()].find(
+        ([token, value]) =>
+          token.startsWith("$") &&
+          value.kind === "source" &&
+          value.sourceKey === key,
+      );
+      if (existing === undefined) {
+        const token = `$${[...resolved.keys()].filter((value) => value.startsWith("$")).length + 1}`;
+        resolved.set(token, {
+          kind: "source",
+          sourceKey: key,
+          sourceLabel: source.label,
+        });
+      }
+    }
+  }
+  return resolved;
 }
 
 function replaceWindowAliases(
   text: string,
-  aliases: ReadonlyMap<
-    string,
-    { readonly participantId: string; readonly sourceLabel: string }
-  >,
+  aliases: ReadonlyMap<string, WindowIdentityToken>,
 ): string {
   return text.replace(
-    /@(\d+)\b/gu,
+    /[@$](\d+)\b/gu,
     (token) => aliases.get(token)?.sourceLabel ?? token,
   );
 }
 
 function summaryFromWindowAliases(
   text: string,
-  aliases: ReadonlyMap<
-    string,
-    { readonly participantId: string; readonly sourceLabel: string }
-  >,
+  aliases: ReadonlyMap<string, WindowIdentityToken>,
 ): Summary {
   const inline: SummaryInline[] = [];
   let textStart = 0;
-  for (const match of text.matchAll(/@(\d+)\b/gu)) {
+  for (const match of text.matchAll(/[@$](\d+)\b/gu)) {
     const token = match[0];
     const participant = aliases.get(token);
     if (participant === undefined || match.index === undefined) continue;
     if (match.index > textStart) {
       inline.push({ type: "text", value: text.slice(textStart, match.index) });
     }
-    inline.push({
-      type: "participant",
-      participantId: asParticipantId(participant.participantId),
-    });
+    if (participant.kind === "participant") {
+      inline.push({
+        type: "participant",
+        participantId: asParticipantId(participant.participantId),
+      });
+    } else {
+      inline.push({ type: "text", value: participant.sourceLabel });
+    }
     textStart = match.index + token.length;
   }
   if (inline.length === 0) return Object.freeze({ text });

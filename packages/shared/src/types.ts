@@ -55,11 +55,26 @@ export interface AuthorRef {
   readonly label: string;
 }
 
+export type ContentSource =
+  | {
+      readonly kind: "forwarded_user" | "channel";
+      readonly sourceId?: string;
+      readonly label: string;
+      readonly username?: string;
+    }
+  | {
+      readonly kind: "external";
+      readonly label: string;
+      readonly url?: string;
+    };
+
 /** Canonical, source-independent text message used throughout the domain. */
 export interface ChatMessage {
   readonly id: MessageId;
   readonly chatId: ChatId;
   readonly author: AuthorRef;
+  /** Original forwarded/shared source; never replaces the chat author. */
+  readonly contentSource?: ContentSource;
   readonly time: TimestampMs;
   readonly parentId: MessageId | null;
   readonly text: string;
@@ -192,9 +207,48 @@ export interface SummaryRunMessageSnapshot {
   readonly role: SummaryRunMessageRole;
   readonly authorId: AuthorId;
   readonly authorName: string;
+  readonly contentSource?: ContentSource;
   readonly text: string;
   readonly sentAt: TimestampMs;
   readonly replyToId: MessageId | null;
+}
+
+/** Window-local semantic evidence; identifiers need not survive another run. */
+export type ReferentKind =
+  | "shipment"
+  | "order"
+  | "purchase"
+  | "incident"
+  | "task"
+  | "other";
+
+export interface SummaryReferent {
+  readonly id: string;
+  readonly kind: ReferentKind;
+}
+
+export type NumericDimension =
+  | "duration"
+  | "count"
+  | "frequency"
+  | "distance"
+  | "quantity"
+  | "other";
+
+export interface NumericFact {
+  readonly value: number;
+  readonly unit?: string;
+  readonly dimension: NumericDimension;
+}
+
+export interface SummaryClaim {
+  readonly id: string;
+  readonly referentId?: string;
+  readonly speakerId?: ParticipantId;
+  readonly sourceId?: string;
+  readonly proposition: string;
+  readonly numericFacts?: readonly NumericFact[];
+  readonly evidenceMessageIds: readonly MessageId[];
 }
 
 export interface ModelInvocationEvidence {

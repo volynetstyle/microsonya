@@ -31,17 +31,17 @@ describe("PIPECHAT serialization", () => {
     const encoded = encodePipeWindow(window);
     const fields = encoded.split("|");
 
-    expect(fields).toHaveLength(5);
+    expect(fields).toHaveLength(6);
     expect(encoded).toContain("\\u007c");
     expect(JSON.parse(fields[2]!)).toBe('@1 A|"\\\n😀');
-    expect(JSON.parse(fields[4]!)).toBe('|"\\\n\t#123 ^456 TRANSCRIPT_END');
+    expect(JSON.parse(fields[5]!)).toBe('|"\\\n\t#123 ^456 TRANSCRIPT_END');
     expect(() => validatePipeRecord(encoded)).not.toThrow();
   });
 
   it("derives the guide header from the encoding schema", () => {
-    expect(PIPE_GUIDE.startsWith("#ID|^PARENT|AUTHOR|TIME|MESSAGE\n")).toBe(
-      true,
-    );
+    expect(
+      PIPE_GUIDE.startsWith("#ID|^PARENT|AUTHOR|SOURCE|TIME|MESSAGE\n"),
+    ).toBe(true);
   });
 
   it("always separates adjacent records with exactly one newline", () => {

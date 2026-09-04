@@ -3,17 +3,17 @@ import { spawn } from "node:child_process";
 import { resolve } from "node:path";
 import { config as loadEnv } from "dotenv";
 
-const stagingEnvPath = resolve(process.cwd(), ".env.staging");
+const stagingEnvPath = resolve(process.cwd(), ".env");
 if (!existsSync(stagingEnvPath)) {
-  throw new Error("test:pipeline:staging requires a local .env.staging file.");
+  throw new Error("test:pipeline:staging requires a local .env file.");
 }
 
 loadEnv({ path: stagingEnvPath, override: false });
 const databaseUrl =
-  process.env.STAGING_PIPELINE_DATABASE_URL ?? process.env.STAGING_DATABASE_URL;
+  process.env.STAGING_PIPELINE_DATABASE_URL ?? process.env.DATABASE_URL;
 if (!databaseUrl) {
   throw new Error(
-    "Set STAGING_PIPELINE_DATABASE_URL (or the temporary STAGING_DATABASE_URL fallback) in .env.staging.",
+    "Set STAGING_PIPELINE_DATABASE_URL (or the temporary DATABASE_URL fallback) in .env.",
   );
 }
 

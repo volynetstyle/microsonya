@@ -24,16 +24,23 @@ const journal = JSON.parse(
 const repositoryMigrations = await Promise.all(
   journal.entries.map(async (entry) => ({
     ...entry,
-    hash: createHash("sha256")
-      .update(
-        await readFile(
-          resolve(`packages/db/src/migrations/${entry.tag}.sql`),
-          "utf8",
-        ),
-      )
-      .digest("hex"),
+    hashes: (() => {
+      return [] as string[];
+    })(),
   })),
 );
+
+for (const migration of repositoryMigrations) {
+  const contents = await readFile(
+    resolve(`packages/db/src/migrations/${migration.tag}.sql`),
+    "utf8",
+  );
+  migration.hashes.push(createHash("sha256").update(contents).digest("hex"));
+  const lf = contents.replace(/\r\n/g, "\n");
+  if (lf !== contents) {
+    migration.hashes.push(createHash("sha256").update(lf).digest("hex"));
+  }
+}
 
 const appliedMigrations = await withStagingClient(async (client) => {
   const exists = await client.query<{ exists: boolean }>(
@@ -53,7 +60,7 @@ if (appliedMigrations.length > repositoryMigrations.length) {
 
 for (const [index, applied] of appliedMigrations.entries()) {
   const expected = repositoryMigrations[index];
-  if (!expected || applied.hash !== expected.hash) {
+  if (!expected || !expected.hashes.includes(applied.hash)) {
     throw new Error(
       `Migration history diverges at position ${index + 1}; refusing to propose a migration.`,
     );

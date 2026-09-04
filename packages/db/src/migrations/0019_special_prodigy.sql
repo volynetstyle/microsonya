@@ -1,0 +1,1 @@
+ALTER TABLE "messages" ADD COLUMN "content_source_ciphertext" "bytea";

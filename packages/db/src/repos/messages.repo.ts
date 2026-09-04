@@ -5,6 +5,7 @@ import {
   asTimestampMs,
   type ChatId,
   type ChatMessage,
+  type ContentSource,
   type MessageId,
 } from "@microsonya/shared";
 import type { MicrosonyaDb } from "../client.js";
@@ -27,6 +28,13 @@ function mapMessageRow(
     id: asMessageId(row.messageId),
     chatId: requestedChatId,
     author,
+    ...(row.contentSourceCiphertext === null
+      ? {}
+      : {
+          contentSource: parseContentSource(
+            encryption.decrypt(row.contentSourceCiphertext),
+          ),
+        }),
     time: asTimestampMs(row.date),
     parentId:
       row.replyToMessageId === null ? null : asMessageId(row.replyToMessageId),
@@ -52,6 +60,10 @@ export class MessagesRepo {
           date: message.time,
           authorId: this.authorKey(message.author.id),
           authorNameCiphertext: this.encryption.encrypt(message.author.label),
+          contentSourceCiphertext:
+            message.contentSource === undefined
+              ? null
+              : this.encryption.encrypt(JSON.stringify(message.contentSource)),
           textCiphertext: this.encryption.encrypt(message.text),
           replyToMessageId: message.parentId,
           kind: "text",
@@ -63,6 +75,12 @@ export class MessagesRepo {
             date: message.time,
             authorId: this.authorKey(message.author.id),
             authorNameCiphertext: this.encryption.encrypt(message.author.label),
+            contentSourceCiphertext:
+              message.contentSource === undefined
+                ? null
+                : this.encryption.encrypt(
+                    JSON.stringify(message.contentSource),
+                  ),
             textCiphertext: this.encryption.encrypt(message.text),
             replyToMessageId: message.parentId,
             kind: "text",
@@ -162,6 +180,20 @@ export class MessagesRepo {
   private authorKey(authorId: string): string {
     return this.encryption.lookup(authorId, "telegram-author-id");
   }
+}
+
+function parseContentSource(value: string): ContentSource {
+  const source = JSON.parse(value) as Partial<ContentSource>;
+  if (
+    (source.kind !== "forwarded_user" &&
+      source.kind !== "channel" &&
+      source.kind !== "external") ||
+    typeof source.label !== "string" ||
+    source.label.length === 0
+  ) {
+    throw new TypeError("Stored content source is invalid.");
+  }
+  return Object.freeze(source as ContentSource);
 }
 
 /** Serializes the short durable-ingress transaction for one Telegram chat. */

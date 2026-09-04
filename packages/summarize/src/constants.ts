@@ -210,11 +210,24 @@ export const SUMMARY_INSTRUCTIONS = `
   window-local AUTHOR handle (for example, @1), never by profile label. The
   delivery layer resolves that explicit handle to the public profile label.
 
+  AUTHOR is the participant who posted into this chat. SOURCE is independently
+  preserved forwarded/shared provenance. Do not replace chat authorship with
+  SOURCE, and do not invent a claim speaker when the transcript does not name one.
+
+  Keep distinct real-world objects and events separate. Never merge two orders,
+  shipments, incidents, tasks, or other referents merely because messages are
+  adjacent, topically similar, or mention the same merchant or carrier.
+
+  Preserve the semantic dimension of numbers: duration, count, frequency,
+  distance, and quantity are not interchangeable.
+
   Usually omit:
   - greetings and reactions;
   - jokes, wordplay, laughter, and casual banter;
   - repetition and conversational filler;
   - isolated comments with no durable informational value;
+  - wishes, prayers, rhetorical anxiety, mood, and emotional reactions unless
+    they materially explain a decision, action, deadline, blocker, or risk;
   - details that would not help someone understand what meaningfully happened in the conversation.
 
   Allowed compression:

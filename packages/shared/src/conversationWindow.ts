@@ -98,6 +98,10 @@ function copyAndValidateMessage(
   const time = asTimestampMs(candidate.time);
   const parentId = validateParentId(candidate.parentId, index);
   const author = copyAndValidateAuthor(candidate.author, index);
+  const contentSource = copyAndValidateContentSource(
+    candidate.contentSource,
+    index,
+  );
 
   if (typeof candidate.text !== "string") {
     throw new TypeError(
@@ -109,10 +113,36 @@ function copyAndValidateMessage(
     id,
     chatId,
     author,
+    ...(contentSource === undefined ? {} : { contentSource }),
     time,
     parentId,
     text: candidate.text,
   });
+}
+
+function copyAndValidateContentSource(
+  source: ChatMessage["contentSource"],
+  index: number,
+): ChatMessage["contentSource"] {
+  if (source === undefined) return;
+  if (typeof source !== "object" || source === null) {
+    throw new TypeError(
+      `ConversationWindow content source at index ${index} must be an object.`,
+    );
+  }
+  if (
+    source.kind !== "forwarded_user" &&
+    source.kind !== "channel" &&
+    source.kind !== "external"
+  ) {
+    throw new TypeError(`Unknown content source kind at index ${index}.`);
+  }
+  if (typeof source.label !== "string" || source.label.trim().length === 0) {
+    throw new TypeError(
+      `ConversationWindow content source label at index ${index} must be non-empty.`,
+    );
+  }
+  return Object.freeze({ ...source });
 }
 
 function copyAndValidateAuthor(author: AuthorRef, index: number): AuthorRef {

@@ -2,17 +2,17 @@
 
 This repository treats the staging PostgreSQL project as a real acceptance target, not as a loose copy of development. It is intentionally separate from production and has its own direct/pooler connection string, Worker bindings, Queue/DLQ, and Telegram test bot.
 
-The commands below never read `DATABASE_URL` as a fallback. They require `STAGING_DATABASE_URL`, so a missing staging variable fails closed instead of silently touching the default database.
+The commands below never read `DATABASE_URL` as a fallback. They require `DATABASE_URL`, so a missing staging variable fails closed instead of silently touching the default database.
 
 ## One-time setup
 
-Create a dedicated Supabase project for staging, then add its connection string only to the local secret store or CI environment. For local use, the staging commands automatically read `.env.staging` and then `.env.staging.local`; they intentionally do not read `.env`.
+Create a dedicated Supabase project for staging, then add its connection string only to the local secret store or CI environment. For local use, the staging commands automatically read `.env` and then `.env.local`; they intentionally do not read `.env`.
 
 ```powershell
 @'
-STAGING_DATABASE_URL=postgresql://...
+DATABASE_URL=postgresql://...
 MICROSONYA_STAGING_CONFIRM=microsonya-staging
-'@ | Set-Content .env.staging
+'@ | Set-Content .env
 ```
 
 Alternatively, export the variables in the current shell. Do not commit either value; both staging file names are Git-ignored.
@@ -21,7 +21,7 @@ Alternatively, export the variables in the current shell. Do not commit either v
 $env:MICROSONYA_STAGING_CONFIRM = "microsonya-staging"
 ```
 
-`STAGING_DATABASE_URL` may be a direct PostgreSQL URL or a Supabase pooler URL. The acceptance scripts print only host, port, database, and user; they never print passwords or query parameters.
+`DATABASE_URL` may be a direct PostgreSQL URL or a Supabase pooler URL. The acceptance scripts print only host, port, database, and user; they never print passwords or query parameters.
 
 ## Acceptance sequence
 
@@ -79,7 +79,7 @@ Run the multi-Worker production-build harness only after database acceptance pas
 pnpm test:pipeline:staging
 ```
 
-It loads only `.env.staging` and requires `STAGING_PIPELINE_DATABASE_URL`; during the transition it accepts the existing `STAGING_DATABASE_URL` as an explicit compatibility fallback. The harness injects that exact target as each Worker's programmatic Hyperdrive `localConnectionString`, so every local Worker connects to the database asserted by the test without a second process-global override.
+It loads only `.env` and requires `STAGING_PIPELINE_DATABASE_URL`; during the transition it accepts the existing `DATABASE_URL` as an explicit compatibility fallback. The harness injects that exact target as each Worker's programmatic Hyperdrive `localConnectionString`, so every local Worker connects to the database asserted by the test without a second process-global override.
 
 The test sends an ordinary Telegram message before `/summary`, verifies that `messages` contains it, mocks both the model and Telegram delivery, and then verifies a completed `summary_run_lifecycle` record with persisted output and delivery metadata.
 

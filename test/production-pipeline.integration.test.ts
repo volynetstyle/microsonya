@@ -9,13 +9,13 @@ import { setupServer } from "msw/node";
 import { createTestHarness } from "wrangler";
 
 if (process.env.MICROSONYA_PIPELINE_INTEGRATION === "1") {
-  loadEnv({ path: resolve(process.cwd(), ".env.staging"), override: false });
+  loadEnv({ path: resolve(process.cwd(), ".env"), override: false });
 }
 
 const databaseUrl =
   process.env.PIPELINE_DATABASE_URL ??
   process.env.STAGING_PIPELINE_DATABASE_URL ??
-  process.env.STAGING_DATABASE_URL;
+  process.env.DATABASE_URL;
 if (process.env.MICROSONYA_PIPELINE_INTEGRATION === "1" && !databaseUrl) {
   throw new Error(
     "test:pipeline requires STAGING_PIPELINE_DATABASE_URL (or an explicit PIPELINE_DATABASE_URL).",

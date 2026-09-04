@@ -16,6 +16,7 @@ export const PIPE_FIELDS = [
   "#ID",
   "^PARENT",
   "AUTHOR",
+  "SOURCE",
   "TIME",
   "MESSAGE",
 ] as const;
@@ -34,6 +35,8 @@ export const PIPE_GUIDE = [
   "",
   "AUTHOR and MESSAGE are JSON-encoded strings.",
   "AUTHOR starts with a stable window-local alias; source user IDs are hidden.",
+  "SOURCE is an independently encoded forwarded/shared content source or an empty string.",
+  "AUTHOR is who posted into this chat. SOURCE never replaces AUTHOR.",
   "TIME is normalized ISO 8601 UTC.",
   "",
   "Parent structure provides conversational context but does not by itself prove",
@@ -152,16 +155,49 @@ export function encodeReplyContextCapsules(
 export function encodePipeWindow(window: ConversationWindow): string {
   const { messages } = window;
   const aliases = buildWindowAuthorAliases(window);
+  const sourceAliases = buildWindowSourceAliases(window);
   const records = new Array<string>(messages.length);
 
   for (let index = 0; index < messages.length; index += 1) {
     const message = messages[index]!;
     const author = encodeWindowAuthor(message.author, aliases);
+    const source = encodeWindowSource(message.contentSource, sourceAliases);
     records[index] =
-      `#${message.id}|^${message.parentId ?? 0}|${encodePipeString(author)}|${encodePipeTime(message.time)}|${encodePipeString(message.text)}`;
+      `#${message.id}|^${message.parentId ?? 0}|${encodePipeString(author)}|${encodePipeString(source)}|${encodePipeTime(message.time)}|${encodePipeString(message.text)}`;
   }
 
   return records.join("\n");
+}
+
+function buildWindowSourceAliases(
+  window: ConversationWindow,
+): ReadonlyMap<string, string> {
+  const aliases = new Map<string, string>();
+  for (const message of window.messages) {
+    const source = message.contentSource;
+    if (source === undefined) continue;
+    const key =
+      "sourceId" in source && source.sourceId !== undefined
+        ? source.sourceId
+        : `${source.kind}:${source.label}`;
+    if (!aliases.has(key)) aliases.set(key, `$${aliases.size + 1}`);
+  }
+  return aliases;
+}
+
+function encodeWindowSource(
+  source: ConversationWindow["messages"][number]["contentSource"],
+  aliases: ReadonlyMap<string, string>,
+): string {
+  if (source === undefined) return "";
+  const key =
+    "sourceId" in source && source.sourceId !== undefined
+      ? source.sourceId
+      : `${source.kind}:${source.label}`;
+  const alias = aliases.get(key);
+  if (alias === undefined)
+    throw new TypeError("Content source is not in the window.");
+  return `${alias} ${source.kind} ${source.label}`;
 }
 
 /** Maps every source identity to one stable, window-local model alias. */
@@ -202,10 +238,18 @@ export function validatePipeRecord(record: string): void {
     );
   }
 
-  const [idField, parentField, authorField, timeField, messageField] = fields;
+  const [
+    idField,
+    parentField,
+    authorField,
+    sourceField,
+    timeField,
+    messageField,
+  ] = fields;
   parsePrefixedInteger(idField!, "#", "ID", false);
   parsePrefixedInteger(parentField!, "^", "parent", true);
   parseJsonString(authorField!, "AUTHOR");
+  parseJsonString(sourceField!, "SOURCE");
   parsePipeTime(timeField!);
   parseJsonString(messageField!, "MESSAGE");
 }

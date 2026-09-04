@@ -40,6 +40,7 @@ export const messages = pgTable(
     date: bigint("date", { mode: "number" }).notNull(),
     authorId: text("author_id").notNull(),
     authorNameCiphertext: bytea("author_name_ciphertext").notNull(),
+    contentSourceCiphertext: bytea("content_source_ciphertext"),
     textCiphertext: bytea("text_ciphertext").notNull(),
     replyToMessageId: integer("reply_to_message_id"),
     kind: text("kind").notNull().default("text"),
@@ -220,6 +221,7 @@ export const summaryRunMessages = pgTable(
     textCiphertext: bytea("text_ciphertext").notNull(),
     sentAt: bigint("sent_at", { mode: "number" }).notNull(),
     replyToId: integer("reply_to_id"),
+    /** Encrypted canonical ContentSource JSON; legacy column name retained. */
     forwardOriginCiphertext: bytea("forward_origin_ciphertext"),
   },
   (table) => [

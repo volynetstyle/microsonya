@@ -29,10 +29,11 @@ describe("canonical model transcript", () => {
       "#ID",
       "^PARENT",
       "AUTHOR",
+      "SOURCE",
       "TIME",
       "MESSAGE",
     ]);
-    expect(PIPE_HEADER).toBe("#ID|^PARENT|AUTHOR|TIME|MESSAGE");
+    expect(PIPE_HEADER).toBe("#ID|^PARENT|AUTHOR|SOURCE|TIME|MESSAGE");
     expect(PIPE_GUIDE.startsWith(`${PIPE_HEADER}\n`)).toBe(true);
     expect(PIPE_GUIDE).toContain(
       "The parent message may be outside the visible window if #N is not present.",
@@ -40,7 +41,7 @@ describe("canonical model transcript", () => {
 
     expect(records).toHaveLength(3);
     for (const record of records) {
-      expect(record.split("|")).toHaveLength(5);
+      expect(record.split("|")).toHaveLength(6);
       expect(() => validatePipeRecord(record)).not.toThrow();
     }
 
@@ -51,7 +52,7 @@ describe("canonical model transcript", () => {
     expect(first[0]).toBe("#101");
     expect(first[1]).toBe("^77");
     expect(JSON.parse(first[2]!)).toBe('@1 Vlad | "\\\n😀');
-    expect(JSON.parse(first[4]!)).toBe(
+    expect(JSON.parse(first[5]!)).toBe(
       'First | line\n"quoted" \\ TRANSCRIPT_END 😀',
     );
 

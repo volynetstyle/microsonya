@@ -33,15 +33,23 @@ export function parseTelegramChatMessageUpdate(
     isControlMessage(message, text)
   )
     return undefined;
-  const source = messageSource(message, chat);
-  if (source.id === selfAuthorId) return undefined;
+  const author = actor(record(message.from) ?? chat);
+  if (author.id === selfAuthorId) return undefined;
+  const contentSource = forwardedSource(message);
+  if (
+    contentSource !== undefined &&
+    "sourceId" in contentSource &&
+    contentSource.sourceId === selfAuthorId
+  )
+    return undefined;
   const parentId = positiveInteger(
     record(message.reply_to_message)?.message_id,
   );
   return Object.freeze({
     id: asMessageId(messageId),
     chatId: asChatId(chatId),
-    author: Object.freeze({ id: asAuthorId(source.id), label: source.label }),
+    author: Object.freeze({ id: asAuthorId(author.id), label: author.label }),
+    ...(contentSource === undefined ? {} : { contentSource }),
     time: asTimestampMs(date * 1_000),
     parentId: parentId === undefined ? null : asMessageId(parentId),
     text,
@@ -57,37 +65,47 @@ function isControlMessage(message: RecordValue, text: string): boolean {
     })
   );
 }
-function messageSource(
-  message: RecordValue,
-  chat: RecordValue,
-): { id: string; label: string } {
+function forwardedSource(message: RecordValue): ChatMessage["contentSource"] {
   const origin = record(message.forward_origin);
   const user = record(origin?.sender_user ?? message.forward_from);
-  if (user) return actor(user);
+  if (user) return sourceActor("forwarded_user", user);
   const forwardedChat = record(
     origin?.sender_chat ?? origin?.chat ?? message.forward_from_chat,
   );
-  if (forwardedChat) return actor(forwardedChat);
+  if (forwardedChat) return sourceActor("channel", forwardedChat);
   const hidden =
     typeof origin?.sender_user_name === "string"
       ? origin.sender_user_name
       : typeof message.forward_sender_name === "string"
         ? message.forward_sender_name
         : undefined;
-  if (hidden) return { id: hidden, label: hidden };
-  return actor(record(message.from) ?? chat);
+  if (hidden) return { kind: "forwarded_user", label: hidden };
+  return undefined;
+}
+function sourceActor(
+  kind: "forwarded_user" | "channel",
+  value: RecordValue,
+): NonNullable<ChatMessage["contentSource"]> {
+  const identity = actor(value);
+  return {
+    kind,
+    sourceId: identity.id,
+    label: identity.label,
+    ...(typeof value.username === "string" && value.username.length > 0
+      ? { username: value.username }
+      : {}),
+  };
 }
 function actor(value: RecordValue): { id: string; label: string } {
   const id = identifier(value.id) ?? "unknown";
-  const parts = [
-    value.title,
-    value.first_name,
-    value.last_name,
-    value.username,
-  ].filter(
+  const names = [value.title, value.first_name, value.last_name].filter(
     (part): part is string => typeof part === "string" && part.length > 0,
   );
-  return { id, label: parts.join(" ") || id };
+  const username =
+    typeof value.username === "string" && value.username.length > 0
+      ? value.username
+      : undefined;
+  return { id, label: names.join(" ") || (username ? `@${username}` : id) };
 }
 function record(value: unknown): RecordValue | undefined {
   return typeof value === "object" && value !== null && !Array.isArray(value)

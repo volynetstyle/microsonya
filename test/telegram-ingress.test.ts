@@ -59,7 +59,12 @@ describe("canonical Cloudflare Telegram ingress", () => {
       }),
     ).toMatchObject({
       time: 1_900_000,
-      author: { id: "99", label: "Source" },
+      author: { id: "7", label: "Receiver" },
+      contentSource: {
+        kind: "forwarded_user",
+        sourceId: "99",
+        label: "Source",
+      },
     });
   });
 });
