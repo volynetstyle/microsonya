@@ -346,7 +346,10 @@ async function run(
     const summarizerInvocation = [...modelInvocations]
       .reverse()
       .find(({ stage: invocationStage }) => invocationStage === "summarizer");
-    const checkpointAfter = terminalRun?.covers.lastId ?? checkpointBefore;
+    const checkpointAfter =
+      selected?.consumption === "checkpoint"
+        ? (terminalRun?.covers.lastId ?? checkpointBefore)
+        : checkpointBefore;
     const summaryText = terminalRun?.finalText;
 
     await deps.summaries.saveAttempt(

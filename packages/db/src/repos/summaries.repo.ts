@@ -105,6 +105,7 @@ export class SummariesRepo {
         .where(
           and(
             eq(summaryRuns.chatId, this.chatKey(chatId)),
+            inArray(summaryRuns.mode, ["recent", "today"]),
             inArray(summaryRuns.status, ["summarized", "skipped"]),
           ),
         )
