@@ -22,7 +22,7 @@ export interface SelectedConversation {
   readonly contextMessages: readonly ChatMessage[];
   readonly consumption: WindowConsumption;
   readonly checkpointBefore: MessageId | null;
-  readonly checkpointCandidate: MessageId | null;
+  readonly consumptionUpperBound: MessageId | null;
   readonly upperExclusive: MessageId;
 }
 
@@ -143,7 +143,7 @@ export function selectSummaryWindow(
     contextMessages: frozenContextMessages,
     consumption,
     checkpointBefore: checkpointBefore ?? null,
-    checkpointCandidate:
+    consumptionUpperBound:
       consumption === "checkpoint"
         ? eligibleMessages[eligibleMessages.length - 1]!.id
         : (checkpointBefore ?? null),

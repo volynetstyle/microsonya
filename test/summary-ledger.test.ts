@@ -25,6 +25,38 @@ import {
 import { openTestDb } from "./dbTestUtils.js";
 
 describe("production summary ledger", () => {
+  it("reconstructs a count skip as a complete accepted outcome", async () => {
+    const client = await openTestDb();
+    const summaries = new SummariesRepo(
+      client.db,
+      createLedgerEncryption(Buffer.alloc(32, 5)),
+    );
+    const executionId = asSummaryId("execution-count-skip");
+    try {
+      await client.db.insert(summaryRuns).values({
+        id: "attempt-count-skip",
+        orchestrationRunId: executionId,
+        orchestrationAttempt: 1,
+        chatId: "encrypted-chat-key",
+        commandMessageId: 101,
+        createdAt: 1_700_000_000_000,
+        startedAt: 1_700_000_000_000,
+        completedAt: 1_700_000_000_010,
+        mode: "count",
+        status: "skipped",
+        action: "SKIP_NO_VALUE",
+        policyHash: "policy",
+        inputHash: "input",
+      });
+
+      await expect(
+        summaries.findAcceptedOutcomeByExecutionId(executionId),
+      ).resolves.toEqual({ kind: "skipped", reason: "SKIP_NO_VALUE" });
+    } finally {
+      await client.close();
+    }
+  });
+
   it("does not accept orchestration evidence from an expired lease", async () => {
     const client = await openTestDb();
     const encryption = createLedgerEncryption(Buffer.alloc(32, 6));
@@ -271,7 +303,7 @@ describe("production summary ledger", () => {
         status: "deferred",
         action: "DEFER_INCOMPLETE",
         checkpointBefore: asMessageId(12),
-        checkpointAfter: asMessageId(12),
+        consumedThroughMessageId: asMessageId(12),
         summaryText: undefined,
         candidate: undefined,
         modelInvocations: terminal.modelInvocations.map((invocation) => ({
@@ -327,7 +359,7 @@ function fixtureAttempt(): SummaryRunAttempt {
     startedAt: createdAt,
     completedAt: asTimestampMs(1_700_000_000_050),
     checkpointBefore: asMessageId(10),
-    checkpointAfter: asMessageId(12),
+    consumedThroughMessageId: asMessageId(12),
     eligibleCount: 2,
     contextCount: 1,
     mode: "recent",

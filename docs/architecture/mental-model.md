@@ -2,13 +2,15 @@
 
 ## How to read this document
 
-Это причинная модель **текущего рабочего дерева**, исследованного 2026-09-05, с базовым commit `07a86f10db85d789f4d9a28c57adb79b96158592`. Обозначение «0.2» взято из задания: корневой `package.json` пока содержит `0.1.1`, а часть пакетов и комментариев — `0.1`. На момент исследования уже существовали локальные изменения `packages/db/src/repos/summaries.repo.ts`, `packages/summarize/src/summarize.ts` и `test/count-checkpoint.test.ts`; описанная ниже изоляция count учитывает именно их. Это карта исходников, а не подтверждение версии, развёрнутой в Cloudflare.
+Это причинная модель **текущего рабочего дерева**, обновлённого 2026-09-05, с базовым commit `d88acb83856104329789c44904dbb1861c7bb984`. Документ описывает dirty tree с незакоммиченным vocabulary refactor типов, semantic ledger и lifecycle API, а также repo-context файлами `AGENTS.md` и `.agents/skills/microsonya-architecture/SKILL.md`. Обозначение «0.2» взято из задания: корневой `package.json` пока содержит `0.1.1`, а часть пакетов и комментариев — `0.1`. Это карта исходников, а не подтверждение версии, развёрнутой в Cloudflare.
 
 Первые разделы позволяют провести команду через систему. Разделы про окно, checkpoint и recovery объясняют, что произойдёт при следующей команде или сбое. Invariants, карточки и примеры дают точки для проверки понимания.
 
 Немаркированные утверждения — **FACT**, установленные по реализации; короткие ссылки рядом указывают место проверки. **INFERENCE** означает явно обозначенный вывод из взаимодействия компонентов, а не гарантию теста. Неподтверждённые deployment/product semantics собраны как **UNKNOWN / requires clarification**. Гипотезы не используются для заполнения основной карты.
 
-Термин **run** без уточнения ниже означает mutable operational run в `summary_run_lifecycle`. **Attempt** — запись результата одной попытки в `summary_runs`; совпадение названия таблицы с доменным типом `SummaryRun` историческое. **Checkpoint** — вычисляемая граница потребления истории, а не статус доставки и не отдельная таблица cursor.
+Канонический словарь TypeScript: **SummaryCommand** — пользовательский запрос; **SummaryExecution** — mutable operational execution в `summary_run_lifecycle`; **SummaryAttempt** — immutable evidence одной processing-попытки в физической таблице `summary_runs`; **AcceptedOutcome** — полностью восстанавливаемый semantic result; **SelectedConversation** — eligible + context для попытки; **consumption boundary** — вычисляемая граница обработанной eligible-истории; **delivery payload** — сохранённый в lifecycle текст для recovery доставки. Имена физических таблиц пока исторические и намеренно не менялись.
+
+Старые экспортируемые имена `SummaryRun`, `SummaryRunAttempt`, `OperationalSummaryRun` и `SummariesRepo` существуют только как deprecated migration aliases. Production-код использует `AcceptedOutcomeRecord`, `SummaryAttempt`, `SummaryExecution` и `SummaryAttemptsRepository`. **Checkpoint** в старых именах schema и prose означает consumption boundary, а не статус доставки и не отдельную cursor row.
 
 ## System in 60 seconds
 
@@ -33,7 +35,7 @@ flowchart LR
     I -->|"send runId"| Q["Queue"]
     Q -->|"queue handler"| I
     I -->|"process RPC"| P["Processor"]
-    P -->|"claim / saveSummary / complete RPC"| L
+    P -->|"claim / storeDeliveryPayload / complete RPC"| L
     P -->|"history, checkpoint, attempt evidence"| DB
     P -->|"Ollama API"| AI["AI models"]
     P -->|"preview and final delivery"| TG
@@ -944,15 +946,15 @@ Expected invariant, if known: UNKNOWN / requires clarification — единог�
 
 Confidence: high.
 
-### DRIFT-02 — Count + SKIP outcome cannot be reused as presentation
+### RESOLVED-02 — Count + SKIP outcome is reusable as presentation
 
-Observation: read-only count skip сохраняется как `status='skipped'`, но без `terminalRun` и `summaryText`. Если run упадёт после `saveAttempt` и до lifecycle `saveSummary`, `findOrchestratedOutcome` найдёт этот row, а `presentPersistedAttempt` не имеет ветки для skipped action без text и бросит `PERSISTED_ATTEMPT_UNPRESENTABLE`. Обычный checkpoint-mode skip сохраняет text, потому что проходит раннюю terminal persistence ветку.
+Resolution: read-only count skip по-прежнему сохраняется без `summaryText`, но `findAcceptedOutcomeByExecutionId()` восстанавливает закрытый `AcceptedOutcome` как `{ kind: "skipped", reason }`. `presentAcceptedOutcome()` формирует disposition message из причины, поэтому restart не вызывает classifier или summarizer и не требует искусственного текста в attempt row.
 
-Evidence: [summarize.ts](../../packages/summarize/src/summarize.ts) — construction/persistence of `terminalRun`; [summaries.repo.ts](../../packages/db/src/repos/summaries.repo.ts) — `findOrchestratedOutcome()`; [processor/worker.ts](../../apps/cloudflare/src/processor/worker.ts) — `presentPersistedAttempt()`.
+Evidence: [types.ts](../../packages/shared/src/types.ts) — closed `AcceptedOutcome`; [summaries.repo.ts](../../packages/db/src/repos/summaries.repo.ts) — `findAcceptedOutcomeByExecutionId()`/`toAcceptedOutcome()`; [processor/worker.ts](../../apps/cloudflare/src/processor/worker.ts) — `presentAcceptedOutcome()`.
 
-Expected invariant, if known: INV-09 говорит, что persisted non-error outcome reusable без нового model work; для count + SKIP текущая representation это нарушает.
+Preserved invariant: INV-09 — любой найденный `AcceptedOutcome` представим без нового model work.
 
-Confidence: high. Существующий [count-checkpoint.test.ts](../../test/count-checkpoint.test.ts) проверяет `SUMMARIZE`, а не `SKIP_*` recovery.
+Confidence: high. Repository mapping and processor presentation use exhaustive discriminated-union branches.
 
 ### DRIFT-03 — Pure transition table is not the complete runtime state machine
 

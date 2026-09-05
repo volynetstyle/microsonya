@@ -143,14 +143,14 @@ export class SummaryRunsEntrypoint extends WorkerEntrypoint<Env> {
     );
   }
 
-  async saveSummary(
+  async storeDeliveryPayload(
     runId: SummaryId,
     leaseToken: string,
     summary: string,
     metadata: { readonly model?: string; readonly promptVersion?: string },
   ): Promise<boolean> {
     return withRepository(this.env, (repository) =>
-      repository.saveSummary(
+      repository.storeDeliveryPayload(
         runId,
         leaseToken,
         summary,
@@ -170,12 +170,12 @@ export class SummaryRunsEntrypoint extends WorkerEntrypoint<Env> {
       return claim === undefined
         ? undefined
         : {
-          runId: claim.id,
-          chatId: claim.command.chatId,
-          ...(claim.command.messageThreadId === undefined
-            ? {}
-            : { messageThreadId: claim.command.messageThreadId }),
-          summary: claim.summary,
+            runId: claim.id,
+            chatId: claim.command.chatId,
+            ...(claim.command.messageThreadId === undefined
+              ? {}
+              : { messageThreadId: claim.command.messageThreadId }),
+            summary: claim.summary,
             deliveryAttempt: claim.deliveryAttempt,
             leaseToken: claim.leaseToken,
           };

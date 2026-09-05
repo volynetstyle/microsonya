@@ -94,7 +94,7 @@ describe("summary runtime ledger evidence", () => {
       status: "deferred",
       action: "DEFER_INCOMPLETE",
       checkpointBefore: null,
-      checkpointAfter: null,
+      consumedThroughMessageId: null,
       eligibleCount: 1,
       contextCount: 0,
       summaryText: undefined,
@@ -133,7 +133,7 @@ describe("summary runtime ledger evidence", () => {
       status: "error",
       errorCode: "MODEL_PROVIDER_ERROR",
       checkpointBefore: null,
-      checkpointAfter: null,
+      consumedThroughMessageId: null,
     });
   });
 

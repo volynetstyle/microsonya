@@ -1,15 +1,12 @@
 import { tracing, WorkerEntrypoint } from "cloudflare:workers";
-import {
-  MessagesRepo,
-  SummariesRepo,
-  type PersistedSummaryAttempt,
-} from "@microsonya/db";
+import { MessagesRepo, SummaryAttemptsRepository } from "@microsonya/db";
 import { OllamaClient, OllamaError } from "@microsonya/model";
 import type { ProcessSummaryRunResult } from "@microsonya/contracts";
 import {
   asSummaryId,
   asTimestampMs,
   type DeferReason,
+  type AcceptedOutcome,
   type SummaryId,
 } from "@microsonya/shared";
 import {
@@ -37,7 +34,7 @@ const LEASE_HEARTBEAT_MS = 30_000;
 
 type Services = {
   readonly messages: MessagesRepo;
-  readonly summaries: SummariesRepo;
+  readonly summaryAttempts: SummaryAttemptsRepository;
   readonly ollama: OllamaClient;
 };
 
@@ -66,7 +63,7 @@ async function withServices<T>(
   return withWorkerDatabase(env, (db, encryption) =>
     operation({
       messages: new MessagesRepo(db, encryption),
-      summaries: new SummariesRepo(db, encryption),
+      summaryAttempts: new SummaryAttemptsRepository(db, encryption),
       ollama: new OllamaClient({
         baseUrl: env.OLLAMA_BASE_URL,
         apiKey: env.OLLAMA_API_KEY,
@@ -75,18 +72,16 @@ async function withServices<T>(
   );
 }
 
-function presentPersistedAttempt(attempt: PersistedSummaryAttempt): string {
-  if (attempt.summaryText !== undefined) return attempt.summaryText;
-  if (attempt.status === "empty") {
-    return EMPTY_SUMMARY_MESSAGE;
-  }
-  if (attempt.status === "deferred" && attempt.action?.startsWith("DEFER_")) {
+function presentAcceptedOutcome(outcome: AcceptedOutcome): string {
+  if (outcome.kind === "summarized") return outcome.text;
+  if (outcome.kind === "empty") return EMPTY_SUMMARY_MESSAGE;
+  if (outcome.kind === "deferred") {
     return presentDisposition({
       kind: "deferred",
-      reason: attempt.action as DeferReason,
+      reason: outcome.reason as DeferReason,
     });
   }
-  throw new TypeError("Persisted summary attempt has no presentation.");
+  return presentDisposition({ kind: "skipped", reason: outcome.reason });
 }
 
 export function presentGeneratedDisposition(
@@ -173,10 +168,12 @@ export class SummaryProcessorEntrypoint extends WorkerEntrypoint<Env> {
         () =>
           withServices(this.env, async (deps) => {
             phase = "outcome.lookup";
-            const persisted =
-              await deps.summaries.findOrchestratedOutcome(runId);
-            if (persisted !== undefined)
-              return presentPersistedAttempt(persisted);
+            const acceptedOutcome =
+              await deps.summaryAttempts.findAcceptedOutcomeByExecutionId(
+                runId,
+              );
+            if (acceptedOutcome !== undefined)
+              return presentAcceptedOutcome(acceptedOutcome);
             const attemptId = asSummaryId(
               `${runId}:attempt:${claimed.attempt}`,
             );
@@ -198,18 +195,17 @@ export class SummaryProcessorEntrypoint extends WorkerEntrypoint<Env> {
             progressiveSession = new ProgressiveSummarySession(
               progressiveTransport,
               undefined,
-              isPrivate
-                ? PRIVATE_PROGRESSIVE_POLICY
-                : GROUP_PROGRESSIVE_POLICY,
+              isPrivate ? PRIVATE_PROGRESSIVE_POLICY : GROUP_PROGRESSIVE_POLICY,
             );
             const summarizer = createSummarizer({
               messages: deps.messages,
               summaries: {
-                findLastRun: (chatId) =>
-                  deps.summaries.findLastCheckpoint(chatId),
-                saveRun: (run) => deps.summaries.saveRun(run),
-                saveAttempt: (attempt) =>
-                  deps.summaries.saveAttempt(attempt, {
+                findLatestConsumptionBoundary: (chatId) =>
+                  deps.summaryAttempts.findLatestConsumptionBoundary(chatId),
+                recordAcceptedOutcome: (outcome) =>
+                  deps.summaryAttempts.recordAcceptedOutcome(outcome),
+                recordAttempt: (attempt) =>
+                  deps.summaryAttempts.recordAttempt(attempt, {
                     runId,
                     attempt: claimed.attempt,
                     leaseToken: claimed.leaseToken,
@@ -258,7 +254,7 @@ export class SummaryProcessorEntrypoint extends WorkerEntrypoint<Env> {
         span.setAttribute("microsonya.run_id", runId);
         span.setAttribute("microsonya.model", "configured-profile");
         span.setAttribute("microsonya.prompt_version", "summarize-package");
-        return this.env.SUMMARY_RUNS.saveSummary(
+        return this.env.SUMMARY_RUNS.storeDeliveryPayload(
           runId,
           claimed.leaseToken,
           summary,
@@ -585,11 +581,14 @@ async function callTelegramApi(
   method: string,
   body: Readonly<Record<string, unknown>>,
 ): Promise<unknown> {
-  const response = await fetch(`https://api.telegram.org/bot${token}/${method}`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify(body),
-  });
+  const response = await fetch(
+    `https://api.telegram.org/bot${token}/${method}`,
+    {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(body),
+    },
+  );
   const payload: unknown = await response.json();
   if (!response.ok) {
     throw new DeliveryError(

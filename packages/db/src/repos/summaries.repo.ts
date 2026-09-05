@@ -4,13 +4,15 @@ import {
   asMessageId,
   asSummaryId,
   asTimestampMs,
+  type AcceptedOutcome,
+  type AcceptedOutcomeRecord,
   type ChatId,
+  type DeferReason,
+  type SkipReason,
   type SummaryAction,
   type SummaryMode,
   type SummaryId,
-  type SummaryRun,
-  type SummaryRunAttempt,
-  type SummaryRunAttemptStatus,
+  type SummaryAttempt,
 } from "@microsonya/shared";
 import type { MicrosonyaDb } from "../client.js";
 import type { DataEncryption } from "../encryption.js";
@@ -23,13 +25,6 @@ import {
   wmaChatCatalog,
 } from "../schema.js";
 
-export interface PersistedSummaryAttempt {
-  readonly id: SummaryId;
-  readonly status: Exclude<SummaryRunAttemptStatus, "error">;
-  readonly action?: SummaryAction;
-  readonly summaryText?: string;
-}
-
 export interface OrchestrationAttemptRef {
   readonly runId: SummaryId;
   readonly attempt: number;
@@ -38,16 +33,18 @@ export interface OrchestrationAttemptRef {
 }
 
 export interface SummaryCheckpoint {
-  readonly covers: SummaryRun["covers"];
+  readonly covers: AcceptedOutcomeRecord["covers"];
 }
 
-export class SummariesRepo {
+export class SummaryAttemptsRepository {
   constructor(
     private readonly db: MicrosonyaDb,
     private readonly encryption: DataEncryption,
   ) {}
 
-  async findLastRun(chatId: ChatId): Promise<SummaryRun | undefined> {
+  async findLatestAcceptedOutcome(
+    chatId: ChatId,
+  ): Promise<AcceptedOutcomeRecord | undefined> {
     const row = (
       await this.db
         .select()
@@ -91,7 +88,7 @@ export class SummariesRepo {
   }
 
   /** Reads only checkpoint metadata; presentation ciphertext is not required. */
-  async findLastCheckpoint(
+  async findLatestConsumptionBoundary(
     chatId: ChatId,
   ): Promise<SummaryCheckpoint | undefined> {
     const row = (
@@ -129,9 +126,9 @@ export class SummariesRepo {
     });
   }
 
-  async findOrchestratedOutcome(
-    orchestrationRunId: SummaryId,
-  ): Promise<PersistedSummaryAttempt | undefined> {
+  async findAcceptedOutcomeByExecutionId(
+    executionId: SummaryId,
+  ): Promise<AcceptedOutcome | undefined> {
     const row = (
       await this.db
         .select({
@@ -143,7 +140,7 @@ export class SummariesRepo {
         .from(summaryRuns)
         .where(
           and(
-            eq(summaryRuns.orchestrationRunId, orchestrationRunId),
+            eq(summaryRuns.orchestrationRunId, executionId),
             inArray(summaryRuns.status, [
               "summarized",
               "deferred",
@@ -156,19 +153,12 @@ export class SummariesRepo {
         .limit(1)
     ).at(0);
     if (row === undefined) return undefined;
-    return Object.freeze({
-      id: asSummaryId(row.id),
-      status: asCompletedAttemptStatus(row.status),
-      ...(row.action === null ? {} : { action: asSummaryAction(row.action) }),
-      ...(row.summaryTextCiphertext === null
-        ? {}
-        : { summaryText: this.encryption.decrypt(row.summaryTextCiphertext) }),
-    });
+    return toAcceptedOutcome(row, this.encryption);
   }
 
   /** Inserts the attempt and every child evidence row in one transaction. */
-  async saveAttempt(
-    attempt: SummaryRunAttempt,
+  async recordAttempt(
+    attempt: SummaryAttempt,
     orchestration?: OrchestrationAttemptRef,
   ): Promise<void> {
     if (attempt.status === "summarized" && attempt.summaryText === undefined) {
@@ -212,7 +202,7 @@ export class SummariesRepo {
           startedAt: attempt.startedAt,
           completedAt: attempt.completedAt,
           checkpointBefore: attempt.checkpointBefore,
-          checkpointAfter: attempt.checkpointAfter,
+          checkpointAfter: attempt.consumedThroughMessageId,
           eligibleCount: attempt.eligibleCount,
           contextCount: attempt.contextCount,
           mode: attempt.mode,
@@ -326,7 +316,7 @@ export class SummariesRepo {
     });
   }
 
-  async saveRun(run: SummaryRun): Promise<void> {
+  async recordAcceptedOutcome(run: AcceptedOutcomeRecord): Promise<void> {
     await this.db
       .insert(summaryRuns)
       .values({
@@ -367,6 +357,36 @@ export class SummariesRepo {
         },
       })
       .execute();
+  }
+
+  /** @deprecated Use findLatestAcceptedOutcome. */
+  findLastRun(chatId: ChatId): Promise<AcceptedOutcomeRecord | undefined> {
+    return this.findLatestAcceptedOutcome(chatId);
+  }
+
+  /** @deprecated Use findLatestConsumptionBoundary. */
+  findLastCheckpoint(chatId: ChatId): Promise<SummaryCheckpoint | undefined> {
+    return this.findLatestConsumptionBoundary(chatId);
+  }
+
+  /** @deprecated Use findAcceptedOutcomeByExecutionId. */
+  findOrchestratedOutcome(
+    executionId: SummaryId,
+  ): Promise<AcceptedOutcome | undefined> {
+    return this.findAcceptedOutcomeByExecutionId(executionId);
+  }
+
+  /** @deprecated Use recordAttempt. */
+  saveAttempt(
+    attempt: SummaryAttempt,
+    orchestration?: OrchestrationAttemptRef,
+  ): Promise<void> {
+    return this.recordAttempt(attempt, orchestration);
+  }
+
+  /** @deprecated Use recordAcceptedOutcome. */
+  saveRun(outcome: AcceptedOutcomeRecord): Promise<void> {
+    return this.recordAcceptedOutcome(outcome);
   }
 
   private chatKey(chatId: ChatId): string {
@@ -415,13 +435,16 @@ export class SummariesRepo {
   }
 }
 
+/** @deprecated Use SummaryAttemptsRepository. */
+export { SummaryAttemptsRepository as SummariesRepo };
+
 function rounded(value: number): number {
   return Math.max(0, Math.round(value));
 }
 
 function findLastEligible(
-  messages: SummaryRunAttempt["messages"],
-): SummaryRunAttempt["messages"][number] | undefined {
+  messages: SummaryAttempt["messages"],
+): SummaryAttempt["messages"][number] | undefined {
   for (let index = messages.length - 1; index >= 0; index -= 1) {
     const message = messages[index];
     if (message?.role === "eligible") return message;
@@ -458,23 +481,41 @@ function asSummaryMode(value: string): SummaryMode {
   throw new TypeError(`Unknown summary mode: ${value}`);
 }
 
-function asSummaryStatus(value: string): SummaryRun["status"] {
+function asSummaryStatus(value: string): AcceptedOutcomeRecord["status"] {
   if (value === "summarized" || value === "skipped") return value;
   throw new TypeError(`Unknown summary status: ${value}`);
 }
 
-function asCompletedAttemptStatus(
-  value: string,
-): PersistedSummaryAttempt["status"] {
-  if (
-    value === "summarized" ||
-    value === "deferred" ||
-    value === "skipped" ||
-    value === "empty"
-  ) {
-    return value;
+function toAcceptedOutcome(
+  row: {
+    readonly status: string;
+    readonly action: string | null;
+    readonly summaryTextCiphertext: Buffer | null;
+  },
+  encryption: DataEncryption,
+): AcceptedOutcome {
+  if (row.status === "empty") return Object.freeze({ kind: "empty" });
+  const action = asSummaryAction(row.action);
+  if (row.status === "summarized" && action === "SUMMARIZE") {
+    return Object.freeze({
+      kind: "summarized",
+      action,
+      text: decryptRequired(
+        encryption,
+        row.summaryTextCiphertext,
+        "Accepted summary text",
+      ),
+    });
   }
-  throw new TypeError(`Unknown completed summary attempt status: ${value}`);
+  if (row.status === "skipped" && action.startsWith("SKIP_")) {
+    return Object.freeze({ kind: "skipped", reason: action as SkipReason });
+  }
+  if (row.status === "deferred" && action.startsWith("DEFER_")) {
+    return Object.freeze({ kind: "deferred", reason: action as DeferReason });
+  }
+  throw new TypeError(
+    `Persisted attempt is not a recoverable accepted outcome: ${row.status}/${action}.`,
+  );
 }
 
 function asSummaryAction(value: string | null): SummaryAction {

@@ -88,7 +88,7 @@ describe("SummaryRun authoritative storage", () => {
       const claim = claims.find((run) => run !== undefined);
       expect(claim).toBeDefined();
       expect(
-        await repo.saveSummary(
+        await repo.storeDeliveryPayload(
           created.id,
           claim!.leaseToken,
           "Durable result",
@@ -177,7 +177,7 @@ describe("SummaryRun authoritative storage", () => {
         "processor-test",
       );
       expect(secondClaim).toBeDefined();
-      await repo.saveSummary(
+      await repo.storeDeliveryPayload(
         created.id,
         secondClaim!.leaseToken,
         "Persisted",
@@ -261,7 +261,7 @@ describe("SummaryRun authoritative storage", () => {
       expect(current).toBeDefined();
       expect(current!.leaseToken).not.toBe(stale!.leaseToken);
       expect(
-        await repo.saveSummary(
+        await repo.storeDeliveryPayload(
           created.id,
           stale!.leaseToken,
           "stale",
@@ -270,7 +270,7 @@ describe("SummaryRun authoritative storage", () => {
         ),
       ).toBe(false);
       expect(
-        await repo.saveSummary(
+        await repo.storeDeliveryPayload(
           created.id,
           current!.leaseToken,
           "current",
@@ -306,7 +306,7 @@ describe("SummaryRun authoritative storage", () => {
         10_000,
         "processor",
       );
-      await repo.saveSummary(
+      await repo.storeDeliveryPayload(
         created.id,
         processing!.leaseToken,
         "summary",

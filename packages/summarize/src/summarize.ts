@@ -10,8 +10,8 @@ import {
   type SummaryAction,
   type SummaryCommand,
   type SummaryId,
-  type SummaryRunAttempt,
-  type SummaryRun,
+  type SummaryAttempt,
+  type AcceptedOutcomeRecord,
   type TimestampMs,
   type WindowDisposition,
 } from "@microsonya/shared";
@@ -49,10 +49,20 @@ export interface MessageReader {
   listByChat(chatId: ChatId): Promise<readonly ChatMessage[]>;
 }
 
-export interface SummaryRunStore {
-  findLastRun(chatId: ChatId): Promise<Pick<SummaryRun, "covers"> | undefined>;
-  saveRun(run: SummaryRun): Promise<void>;
-  saveAttempt?(attempt: SummaryRunAttempt): Promise<void>;
+export interface SummaryAttemptStore {
+  findLatestConsumptionBoundary?(
+    chatId: ChatId,
+  ): Promise<Pick<AcceptedOutcomeRecord, "covers"> | undefined>;
+  recordAcceptedOutcome?(outcome: AcceptedOutcomeRecord): Promise<void>;
+  recordAttempt?(attempt: SummaryAttempt): Promise<void>;
+  /** @deprecated Use findLatestConsumptionBoundary. */
+  findLastRun?(
+    chatId: ChatId,
+  ): Promise<Pick<AcceptedOutcomeRecord, "covers"> | undefined>;
+  /** @deprecated Use recordAcceptedOutcome. */
+  saveRun?(outcome: AcceptedOutcomeRecord): Promise<void>;
+  /** @deprecated Use recordAttempt. */
+  saveAttempt?(attempt: SummaryAttempt): Promise<void>;
 }
 
 /** Command-facing workflow facade. Model-facing contracts consume only W. */
@@ -65,7 +75,7 @@ export interface Summarizer {
 
 export interface SummarizerDeps {
   readonly messages: MessageReader;
-  readonly summaries: SummaryRunStore;
+  readonly summaries: SummaryAttemptStore;
   readonly ollama?: Pick<OllamaClient, "chat">;
   readonly classifier?: SummaryDecisionClassifier;
   readonly conversationSummarizer?: ConversationSummarizer;
@@ -174,7 +184,7 @@ async function run(
 
     const [all, previous] = await Promise.all([
       deps.messages.listByChat(command.chatId),
-      deps.summaries.findLastRun(command.chatId),
+      findLatestConsumptionBoundary(deps.summaries, command.chatId),
     ]);
 
     telemetry?.record({
@@ -250,9 +260,9 @@ async function run(
       });
     }
 
-    const terminalRun =
+    const acceptedOutcome =
       disposition.kind === "summarized"
-        ? toSummaryRun(
+        ? toAcceptedOutcomeRecord(
             selected,
             command,
             result.decision.action,
@@ -272,8 +282,8 @@ async function run(
       await persistAttempt(
         disposition.kind,
         undefined,
-        terminalRun ??
-          toSummaryRun(
+        acceptedOutcome ??
+          toAcceptedOutcomeRecord(
             selected,
             command,
             result.decision.action,
@@ -297,7 +307,7 @@ async function run(
     });
     if (!attemptPersisted) {
       stage = "attempt.save";
-      await persistAttempt(disposition.kind, undefined, terminalRun);
+      await persistAttempt(disposition.kind, undefined, acceptedOutcome);
       attemptPersisted = true;
     }
     recordRun(disposition.kind);
@@ -326,12 +336,15 @@ async function run(
   }
 
   async function persistAttempt(
-    status: SummaryRunAttempt["status"],
+    status: SummaryAttempt["status"],
     errorCode?: SummaryErrorCode,
-    terminalRun?: SummaryRun,
+    acceptedOutcome?: AcceptedOutcomeRecord,
   ): Promise<void> {
-    if (deps.summaries.saveAttempt === undefined) {
-      if (terminalRun !== undefined) await deps.summaries.saveRun(terminalRun);
+    const recordAttempt =
+      deps.summaries.recordAttempt ?? deps.summaries.saveAttempt;
+    if (recordAttempt === undefined) {
+      if (acceptedOutcome !== undefined)
+        await recordAcceptedOutcome(deps.summaries, acceptedOutcome);
       return;
     }
 
@@ -346,21 +359,21 @@ async function run(
     const summarizerInvocation = [...modelInvocations]
       .reverse()
       .find(({ stage: invocationStage }) => invocationStage === "summarizer");
-    const checkpointAfter =
+    const consumedThroughMessageId =
       selected?.consumption === "checkpoint"
-        ? (terminalRun?.covers.lastId ?? checkpointBefore)
+        ? (acceptedOutcome?.covers.lastId ?? checkpointBefore)
         : checkpointBefore;
-    const summaryText = terminalRun?.finalText;
+    const summaryText = acceptedOutcome?.finalText;
 
-    await deps.summaries.saveAttempt(
+    await recordAttempt(
       Object.freeze({
-        id: terminalRun?.id ?? createSummaryId(),
+        id: acceptedOutcome?.id ?? createSummaryId(),
         chatId: command.chatId,
         commandMessageId: command.commandMessageId,
         startedAt: startedWallClock,
         completedAt,
         checkpointBefore,
-        checkpointAfter,
+        consumedThroughMessageId,
         eligibleCount: messageCount,
         contextCount: contextMessageCount,
         mode: command.mode,
@@ -412,14 +425,40 @@ async function run(
   }
 }
 
-function hashInput(snapshots: SummaryRunAttempt["messages"]): string {
+function findLatestConsumptionBoundary(
+  store: SummaryAttemptStore,
+  chatId: ChatId,
+): Promise<Pick<AcceptedOutcomeRecord, "covers"> | undefined> {
+  const find = store.findLatestConsumptionBoundary ?? store.findLastRun;
+  if (find === undefined) {
+    throw new TypeError(
+      "Summary attempt store cannot read consumption boundary.",
+    );
+  }
+  return find.call(store, chatId);
+}
+
+function recordAcceptedOutcome(
+  store: SummaryAttemptStore,
+  outcome: AcceptedOutcomeRecord,
+): Promise<void> {
+  const record = store.recordAcceptedOutcome ?? store.saveRun;
+  if (record === undefined) {
+    throw new TypeError(
+      "Summary attempt store cannot record accepted outcome.",
+    );
+  }
+  return record.call(store, outcome);
+}
+
+function hashInput(snapshots: SummaryAttempt["messages"]): string {
   return sha256(JSON.stringify(snapshots));
 }
 
 function snapshotMessages(
   messages: readonly WindowMessage[],
-): SummaryRunAttempt["messages"] {
-  const snapshots = new Array<SummaryRunAttempt["messages"][number]>(
+): SummaryAttempt["messages"] {
+  const snapshots = new Array<SummaryAttempt["messages"][number]>(
     messages.length,
   );
   for (let ordinal = 0; ordinal < messages.length; ordinal += 1) {
@@ -445,11 +484,11 @@ function modelMetrics(telemetry?: SummarizationTelemetryTrace) {
 
 function mineDatasetCandidate(input: {
   action?: SummaryAction;
-  status: SummaryRunAttempt["status"];
+  status: SummaryAttempt["status"];
   consecutiveDeferCount: number;
-  snapshots: SummaryRunAttempt["messages"];
+  snapshots: SummaryAttempt["messages"];
   inputHash: string;
-}): SummaryRunAttempt["candidate"] {
+}): SummaryAttempt["candidate"] {
   const reasons = new Set<string>();
   let priority = 0;
   const eligibleText: string[] = [];
@@ -535,13 +574,13 @@ const SKIP_PRESENTATION = {
     "У цьому вікні поки немає достатньо конкретної інформації для корисного підсумку.",
 } as const;
 
-function toSummaryRun(
+function toAcceptedOutcomeRecord(
   selected: SelectedConversation,
   command: SummaryCommand,
-  action: SummaryRun["action"],
+  action: AcceptedOutcomeRecord["action"],
   disposition: Exclude<WindowDisposition, { kind: "deferred" }>,
   deps: Pick<SummarizerDeps, "createSummaryId" | "now">,
-): SummaryRun {
+): AcceptedOutcomeRecord {
   const messages = selected.eligibleMessages;
   const covers = coverageOf(messages);
 

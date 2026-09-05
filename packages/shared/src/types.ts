@@ -137,8 +137,8 @@ export interface SummaryCommand {
   readonly count?: number;
 }
 
-/** Persisted result of a terminal summarized or skipped workflow. */
-export interface SummaryRun {
+/** Persisted semantic result that can be recovered without model work. */
+export interface AcceptedOutcomeRecord {
   readonly id: SummaryId;
   readonly chatId: ChatId;
   readonly commandMessageId: MessageId;
@@ -150,21 +150,21 @@ export interface SummaryRun {
   readonly finalText: string;
 }
 
-export type SummaryRunAttemptStatus =
+export type SummaryAttemptStatus =
   | "summarized"
   | "deferred"
   | "skipped"
   | "empty"
   | "error";
 
-export type SummaryRunMessageRole = "eligible" | "context";
+export type SummaryAttemptMessageRole = "eligible" | "context";
 
 /** Immutable copy of the exact message state visible to one production run. */
-export interface SummaryRunMessageSnapshot {
+export interface SummaryAttemptMessageSnapshot {
   readonly ordinal: number;
   readonly chatId: ChatId;
   readonly messageId: MessageId;
-  readonly role: SummaryRunMessageRole;
+  readonly role: SummaryAttemptMessageRole;
   readonly authorId: AuthorId;
   readonly authorName: string;
   readonly text: string;
@@ -196,19 +196,19 @@ export interface DatasetCandidateEvidence {
  * Observed evidence for exactly one /summary attempt. It is deliberately not
  * a label: production output becomes ground truth only after human review.
  */
-export interface SummaryRunAttempt {
+export interface SummaryAttempt {
   readonly id: SummaryId;
   readonly chatId: ChatId;
   readonly commandMessageId: MessageId;
   readonly startedAt: TimestampMs;
   readonly completedAt: TimestampMs;
   readonly checkpointBefore: MessageId | null;
-  readonly checkpointAfter: MessageId | null;
+  readonly consumedThroughMessageId: MessageId | null;
   readonly eligibleCount: number;
   readonly contextCount: number;
   readonly mode: SummaryMode;
   readonly action?: SummaryAction;
-  readonly status: SummaryRunAttemptStatus;
+  readonly status: SummaryAttemptStatus;
   readonly classifierModel?: string;
   readonly summarizerModel?: string;
   readonly classifierPromptHash?: string;
@@ -220,10 +220,38 @@ export interface SummaryRunAttempt {
   readonly summaryText?: string;
   readonly errorCode?: string;
   readonly inputHash: string;
-  readonly messages: readonly SummaryRunMessageSnapshot[];
+  readonly messages: readonly SummaryAttemptMessageSnapshot[];
   readonly modelInvocations: readonly ModelInvocationEvidence[];
   readonly candidate?: DatasetCandidateEvidence;
 }
+
+/** Fully recoverable semantic outcome of one execution. */
+export type AcceptedOutcome =
+  | {
+      readonly kind: "summarized";
+      readonly text: string;
+      readonly action: "SUMMARIZE";
+    }
+  | {
+      readonly kind: "skipped";
+      readonly reason: SkipReason;
+    }
+  | {
+      readonly kind: "deferred";
+      readonly reason: DeferReason;
+    }
+  | { readonly kind: "empty" };
+
+/** @deprecated Use AcceptedOutcomeRecord. */
+export type SummaryRun = AcceptedOutcomeRecord;
+/** @deprecated Use SummaryAttemptStatus. */
+export type SummaryRunAttemptStatus = SummaryAttemptStatus;
+/** @deprecated Use SummaryAttemptMessageRole. */
+export type SummaryRunMessageRole = SummaryAttemptMessageRole;
+/** @deprecated Use SummaryAttemptMessageSnapshot. */
+export type SummaryRunMessageSnapshot = SummaryAttemptMessageSnapshot;
+/** @deprecated Use SummaryAttempt. */
+export type SummaryRunAttempt = SummaryAttempt;
 
 export interface SummaryFeedback {
   readonly id: SummaryId;

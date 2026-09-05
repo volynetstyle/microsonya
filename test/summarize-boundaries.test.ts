@@ -135,7 +135,7 @@ describe("summary conversation-window selection", () => {
     expect(selected.consumption).toBe("checkpoint");
     expect(selected.eligibleMessages).toHaveLength(MAX_MESSAGES);
     expect(selected.eligibleMessages[0]?.id).toBe(101);
-    expect(selected.checkpointCandidate).toBe(100 + MAX_MESSAGES);
+    expect(selected.consumptionUpperBound).toBe(100 + MAX_MESSAGES);
   });
 
   it("treats an explicit count as a read-only history selection", () => {
@@ -152,7 +152,7 @@ describe("summary conversation-window selection", () => {
 
     expect(selected.eligibleMessages.map(({ id }) => id)).toEqual([103, 104]);
     expect(selected.consumption).toBe("read-only");
-    expect(selected.checkpointCandidate).toBe(100);
+    expect(selected.consumptionUpperBound).toBe(100);
   });
 
   it("marks reply parents as context-only in model input", () => {

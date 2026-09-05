@@ -26,11 +26,11 @@ import {
 } from "@microsonya/shared";
 import type {
   LifecycleHealthSnapshot,
-  OperationalSummaryRun,
+  SummaryExecution,
   SummaryRunLifecycleStatus,
   SummaryRunRetryStage,
 } from "@microsonya/run-lifecycle";
-import { assertSummaryRunTransition } from "@microsonya/run-lifecycle";
+import { assertSummaryExecutionTransition } from "@microsonya/run-lifecycle";
 import type { MicrosonyaDb } from "../client.js";
 import type { DataEncryption } from "../encryption.js";
 import { summaryRunLifecycle } from "../schema.js";
@@ -43,7 +43,7 @@ export interface CreateLifecycleRunRequest {
   readonly command: SummaryCommand;
 }
 
-export interface LifecycleRun extends OperationalSummaryRun {
+export interface LifecycleRun extends SummaryExecution {
   readonly command: SummaryCommand;
   readonly leaseExpiresAt?: TimestampMs;
   readonly summary?: string;
@@ -117,7 +117,7 @@ export class SummaryLifecycleRepo {
     to: SummaryRunLifecycleStatus,
     now: TimestampMs,
   ): Promise<boolean> {
-    assertSummaryRunTransition(from, to);
+    assertSummaryExecutionTransition(from, to);
     const rows = await this.db
       .update(summaryRunLifecycle)
       .set({ status: to, updatedAt: now })
@@ -227,7 +227,7 @@ export class SummaryLifecycleRepo {
     return row === undefined ? undefined : { ...this.map(row), leaseToken };
   }
 
-  async saveSummary(
+  async storeDeliveryPayload(
     id: SummaryId,
     leaseToken: string,
     summary: string,
