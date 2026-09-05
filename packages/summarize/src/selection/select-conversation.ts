@@ -5,7 +5,7 @@ import {
   type MessageId,
   type SummaryCommand,
 } from "@microsonya/shared";
-import { DAY_MS, MAX_MESSAGES } from "./constants.js";
+import { DAY_MS, MAX_MESSAGES } from "../evaluation/policy.js";
 
 /** Whether a selected window is allowed to advance the canonical checkpoint. */
 export type WindowConsumption = "checkpoint" | "read-only";

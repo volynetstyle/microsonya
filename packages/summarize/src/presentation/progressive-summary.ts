@@ -166,10 +166,13 @@ export class ProgressiveScheduler {
       this.lastPublishAt === undefined
         ? this.policy.firstMaxWaitMs
         : this.policy.maxStalenessMs;
-    this.timer = setTimeout(() => {
-      this.timer = undefined;
-      if (this.latest.length > this.publishedLength) this.flush();
-    }, Math.max(0, base + wait - this.now()));
+    this.timer = setTimeout(
+      () => {
+        this.timer = undefined;
+        if (this.latest.length > this.publishedLength) this.flush();
+      },
+      Math.max(0, base + wait - this.now()),
+    );
   }
 
   private flush(): void {
@@ -235,7 +238,8 @@ export class ProgressiveSummarySession {
     if (this.stateValue === "finalizing" || this.stateValue === "completed") {
       return this.text;
     }
-    if (this.stateValue !== "streaming") throw new Error("Progressive session cannot be finalized.");
+    if (this.stateValue !== "streaming")
+      throw new Error("Progressive session cannot be finalized.");
     this.stateValue = "finalizing";
     this.scheduler.flushNow(this.text);
     try {
@@ -250,7 +254,8 @@ export class ProgressiveSummarySession {
   /** Commits only after the caller has durably saved the canonical summary. */
   async commit(): Promise<string> {
     if (this.stateValue === "completed") return this.text;
-    if (this.stateValue !== "finalizing") throw new Error("Progressive session is not finalized.");
+    if (this.stateValue !== "finalizing")
+      throw new Error("Progressive session is not finalized.");
     try {
       await this.publisher.commit(this.text);
       this.stateValue = "completed";

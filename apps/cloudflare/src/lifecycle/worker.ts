@@ -1,5 +1,5 @@
 import { WorkerEntrypoint } from "cloudflare:workers";
-import { SummaryLifecycleRepo } from "@microsonya/db";
+import { SummaryExecutionRepository } from "@microsonya/db";
 import { asSummaryId, asTimestampMs, type SummaryId } from "@microsonya/shared";
 import type {
   CreateSummaryRunRequest,
@@ -19,10 +19,10 @@ const DEFAULT_LEASE_MS = 2 * 60_000;
 
 async function withRepository<T>(
   env: Env,
-  operation: (repository: SummaryLifecycleRepo) => Promise<T>,
+  operation: (repository: SummaryExecutionRepository) => Promise<T>,
 ): Promise<T> {
   return withWorkerDatabase(env, (db, encryption) =>
-    operation(new SummaryLifecycleRepo(db, encryption)),
+    operation(new SummaryExecutionRepository(db, encryption)),
   );
 }
 
@@ -307,7 +307,7 @@ export default {
 } satisfies ExportedHandler<Env, unknown>;
 
 async function prepareRunForEnqueue(
-  repository: SummaryLifecycleRepo,
+  repository: SummaryExecutionRepository,
   run: {
     readonly id: SummaryId;
     readonly status: SummaryRunLifecycleStatus;

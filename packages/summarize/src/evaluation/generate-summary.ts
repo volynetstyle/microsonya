@@ -10,11 +10,14 @@ import {
   SUMMARY_RESPONSE_SCHEMA,
   SUMMARY_STREAM_OUTPUT_INSTRUCTIONS,
   SUMMARY_STRUCTURED_OUTPUT_INSTRUCTIONS,
-} from "./constants.js";
-import { buildModelInputPrompt, buildModelPolicyPrompt } from "./prompt.js";
-import type { ModelWindowMessageRole } from "./prompt.js";
-import { parseModelOutput } from "./modelOutput.js";
-import type { SummarizationTelemetryTrace } from "./telemetry.js";
+} from "./policy.js";
+import {
+  buildModelInputPrompt,
+  buildModelPolicyPrompt,
+} from "./model-prompt.js";
+import type { ModelWindowMessageRole } from "./model-prompt.js";
+import { parseModelOutput } from "./model-output.js";
+import type { SummarizationTelemetryTrace } from "../workflow/telemetry.js";
 
 export interface ConversationSummarizer {
   summarize(

@@ -1,4 +1,4 @@
-import { and, desc, eq, gt, inArray, sql } from "drizzle-orm";
+import { and, desc, eq, gt, inArray, or } from "drizzle-orm";
 import {
   SUMMARY_ACTIONS,
   asMessageId,
@@ -6,6 +6,7 @@ import {
   asTimestampMs,
   type AcceptedOutcome,
   type AcceptedOutcomeRecord,
+  type RecordAttemptResult,
   type ChatId,
   type DeferReason,
   type SkipReason,
@@ -17,13 +18,17 @@ import {
 import type { MicrosonyaDb } from "../client.js";
 import type { DataEncryption } from "../encryption.js";
 import {
-  datasetCandidates,
   modelInvocations,
   summaryRunMessages,
   summaryRunLifecycle,
   summaryRuns,
-  wmaChatCatalog,
 } from "../schema.js";
+import {
+  findLatestConsumptionBoundary as readLatestConsumptionBoundary,
+  type ConsumptionBoundary,
+} from "./consumption-boundary.repository.js";
+import { insertDatasetCandidate } from "./dataset-candidate.repository.js";
+import { upsertWmaCatalogProjection } from "./wma-catalog.repository.js";
 
 export interface OrchestrationAttemptRef {
   readonly runId: SummaryId;
@@ -32,11 +37,9 @@ export interface OrchestrationAttemptRef {
   readonly acceptedAt: ReturnType<typeof asTimestampMs>;
 }
 
-export interface SummaryCheckpoint {
-  readonly covers: AcceptedOutcomeRecord["covers"];
-}
+export type SummaryCheckpoint = ConsumptionBoundary;
 
-export class SummaryAttemptsRepository {
+export class SummaryAttemptRepository {
   constructor(
     private readonly db: MicrosonyaDb,
     private readonly encryption: DataEncryption,
@@ -91,39 +94,7 @@ export class SummaryAttemptsRepository {
   async findLatestConsumptionBoundary(
     chatId: ChatId,
   ): Promise<SummaryCheckpoint | undefined> {
-    const row = (
-      await this.db
-        .select({
-          fromMessageId: summaryRuns.fromMessageId,
-          toMessageId: summaryRuns.toMessageId,
-          messageCount: summaryRuns.messageCount,
-        })
-        .from(summaryRuns)
-        .where(
-          and(
-            eq(summaryRuns.chatId, this.chatKey(chatId)),
-            inArray(summaryRuns.mode, ["recent", "today"]),
-            inArray(summaryRuns.status, ["summarized", "skipped"]),
-          ),
-        )
-        .orderBy(
-          desc(summaryRuns.commandMessageId),
-          desc(summaryRuns.orchestrationAttempt),
-          desc(summaryRuns.createdAt),
-        )
-        .limit(1)
-    ).at(0);
-    if (row === undefined) return undefined;
-    if (row.fromMessageId === null || row.toMessageId === null) {
-      return undefined;
-    }
-    return Object.freeze({
-      covers: Object.freeze({
-        firstId: asMessageId(row.fromMessageId),
-        lastId: asMessageId(row.toMessageId),
-        count: asMessageCount(row.messageCount),
-      }),
-    });
+    return readLatestConsumptionBoundary(this.db, this.chatKey(chatId));
   }
 
   async findAcceptedOutcomeByExecutionId(
@@ -160,7 +131,7 @@ export class SummaryAttemptsRepository {
   async recordAttempt(
     attempt: SummaryAttempt,
     orchestration?: OrchestrationAttemptRef,
-  ): Promise<void> {
+  ): Promise<RecordAttemptResult> {
     if (attempt.status === "summarized" && attempt.summaryText === undefined) {
       throw new TypeError("A summarized attempt must include summary text.");
     }
@@ -170,7 +141,7 @@ export class SummaryAttemptsRepository {
     );
     const lastEligible = findLastEligible(attempt.messages);
 
-    await this.db.transaction(async (tx) => {
+    return this.db.transaction(async (tx): Promise<RecordAttemptResult> => {
       if (orchestration !== undefined) {
         const accepted = await tx
           .update(summaryRunLifecycle)
@@ -185,7 +156,7 @@ export class SummaryAttemptsRepository {
             ),
           )
           .returning({ id: summaryRunLifecycle.id });
-        if (accepted.length !== 1) return;
+        if (accepted.length !== 1) return { status: "ownershipLost" };
       }
       const inserted = await tx
         .insert(summaryRuns)
@@ -235,7 +206,32 @@ export class SummaryAttemptsRepository {
         .onConflictDoNothing()
         .returning({ id: summaryRuns.id });
 
-      if (inserted.length === 0) return;
+      if (inserted.length === 0) {
+        const [existing] = await tx
+          .select()
+          .from(summaryRuns)
+          .where(
+            or(
+              eq(summaryRuns.id, attempt.id),
+              orchestration === undefined
+                ? undefined
+                : and(
+                    eq(summaryRuns.orchestrationRunId, orchestration.runId),
+                    eq(summaryRuns.orchestrationAttempt, orchestration.attempt),
+                  ),
+            ),
+          )
+          .limit(1);
+        if (existing === undefined)
+          throw new Error("Conflicting attempt was not found.");
+        return {
+          status: "alreadyCommitted",
+          outcome:
+            existing.status === "error"
+              ? undefined
+              : toAcceptedOutcome(existing, this.encryption),
+        };
+      }
 
       if (attempt.messages.length > 0) {
         const authorKeys = new Map<string, string>();
@@ -294,25 +290,17 @@ export class SummaryAttemptsRepository {
         );
       }
 
-      if (attempt.candidate !== undefined) {
-        await tx.insert(datasetCandidates).values({
-          runId: attempt.id,
-          priority: attempt.candidate.priority,
-          reasons: [...attempt.candidate.reasons],
-          status: "pending",
-          createdAt: attempt.completedAt,
-        });
-      }
+      await insertDatasetCandidate(tx, attempt);
 
       if (attempt.status === "summarized") {
-        await this.upsertWmaCatalog(
-          tx,
-          encryptedChatId,
-          this.encryption.encrypt(attempt.chatId),
-          attempt.eligibleCount,
-          attempt.completedAt,
-        );
+        await upsertWmaCatalogProjection(tx, {
+          chatId: encryptedChatId,
+          chatIdCiphertext: this.encryption.encrypt(attempt.chatId),
+          messageCount: attempt.eligibleCount,
+          completedAt: attempt.completedAt,
+        });
       }
+      return { status: "committed" };
     });
   }
 
@@ -377,11 +365,11 @@ export class SummaryAttemptsRepository {
   }
 
   /** @deprecated Use recordAttempt. */
-  saveAttempt(
+  async saveAttempt(
     attempt: SummaryAttempt,
     orchestration?: OrchestrationAttemptRef,
   ): Promise<void> {
-    return this.recordAttempt(attempt, orchestration);
+    await this.recordAttempt(attempt, orchestration);
   }
 
   /** @deprecated Use recordAcceptedOutcome. */
@@ -405,38 +393,12 @@ export class SummaryAttemptsRepository {
       ? undefined
       : this.encryption.lookup(value, namespace);
   }
-
-  private async upsertWmaCatalog(
-    db: Pick<MicrosonyaDb, "insert">,
-    chatId: string,
-    chatIdCiphertext: Buffer,
-    messageCount: number,
-    completedAt: number,
-  ): Promise<void> {
-    await db
-      .insert(wmaChatCatalog)
-      .values({
-        chatId,
-        chatIdCiphertext,
-        summaryCount: 1,
-        messageCount,
-        lastSummaryAt: completedAt,
-        updatedAt: completedAt,
-      })
-      .onConflictDoUpdate({
-        target: wmaChatCatalog.chatId,
-        set: {
-          summaryCount: sql`${wmaChatCatalog.summaryCount} + 1`,
-          messageCount: sql`${wmaChatCatalog.messageCount} + ${messageCount}`,
-          lastSummaryAt: sql`greatest(${wmaChatCatalog.lastSummaryAt}, ${completedAt})`,
-          updatedAt: completedAt,
-        },
-      });
-  }
 }
 
-/** @deprecated Use SummaryAttemptsRepository. */
-export { SummaryAttemptsRepository as SummariesRepo };
+/** @deprecated Use SummaryAttemptRepository. */
+export { SummaryAttemptRepository as SummariesRepo };
+/** @deprecated Use SummaryAttemptRepository. */
+export { SummaryAttemptRepository as SummaryAttemptsRepository };
 
 function rounded(value: number): number {
   return Math.max(0, Math.round(value));
@@ -469,7 +431,6 @@ function asMessageCount(value: unknown): number {
       "Summary message count must be a non-negative integer.",
     );
   }
-
   return value as number;
 }
 

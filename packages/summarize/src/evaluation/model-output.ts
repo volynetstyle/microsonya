@@ -3,7 +3,7 @@ import type {
   ModelOutputFailure,
   ModelStage,
   SummarizationTelemetryTrace,
-} from "./telemetry.js";
+} from "../workflow/telemetry.js";
 
 export class ModelOutputError extends Error {
   readonly code: ModelOutputFailure;

@@ -242,6 +242,15 @@ export type AcceptedOutcome =
     }
   | { readonly kind: "empty" };
 
+/** The outcome belongs to the existing row when an insert is deduplicated. */
+export type RecordAttemptResult =
+  | { readonly status: "committed" }
+  | {
+      readonly status: "alreadyCommitted";
+      readonly outcome: AcceptedOutcome | undefined;
+    }
+  | { readonly status: "ownershipLost" };
+
 /** @deprecated Use AcceptedOutcomeRecord. */
 export type SummaryRun = AcceptedOutcomeRecord;
 /** @deprecated Use SummaryAttemptStatus. */

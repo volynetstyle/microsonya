@@ -1,10 +1,9 @@
-import { createHash, randomUUID } from "node:crypto";
+import { randomUUID } from "node:crypto";
 import { OllamaError, type OllamaClient } from "@microsonya/model";
 import {
   asSummaryId,
   asTimestampMs,
   type ChatId,
-  type ChatMessage,
   type ConversationWindow,
   type MessageId,
   type SummaryAction,
@@ -18,80 +17,43 @@ import {
 import {
   createClassifier,
   type SummaryDecisionClassifier,
-} from "./classifier.js";
+} from "../evaluation/classify-conversation.js";
 import {
   createConversationSummarizer,
   type ConversationSummarizer,
-} from "./conversationSummarizer.js";
+} from "../evaluation/generate-summary.js";
 import {
   processWindow,
   type FastClassifier,
   type WindowProcessorDeps,
-} from "./orchestrator.js";
+} from "../evaluation/evaluate-conversation.js";
 import type {
   SummarizationTelemetryService,
   SummarizationTelemetryTrace,
   SummaryErrorCode,
 } from "./telemetry.js";
-import { ModelOutputError } from "./modelOutput.js";
-import {
-  CHECKPOINT_POLICY_VERSION,
-  shouldAdvanceCheckpoint,
-} from "./checkpointPolicy.js";
+import { ModelOutputError } from "../evaluation/model-output.js";
+import { validateSemanticOutput } from "../acceptance/validate-semantic-output.js";
+import { shouldAdvanceCheckpoint } from "../acceptance/consumption-policy.js";
 import {
   pendingSummaryWindowSelector,
   type SelectedConversation,
   type SummaryWindowSelector,
   type WindowMessage,
-} from "./summaryWindow.js";
-
-export interface MessageReader {
-  listByChat(chatId: ChatId): Promise<readonly ChatMessage[]>;
-}
-
-export interface SummaryAttemptStore {
-  findLatestConsumptionBoundary?(
-    chatId: ChatId,
-  ): Promise<Pick<AcceptedOutcomeRecord, "covers"> | undefined>;
-  recordAcceptedOutcome?(outcome: AcceptedOutcomeRecord): Promise<void>;
-  recordAttempt?(attempt: SummaryAttempt): Promise<void>;
-  /** @deprecated Use findLatestConsumptionBoundary. */
-  findLastRun?(
-    chatId: ChatId,
-  ): Promise<Pick<AcceptedOutcomeRecord, "covers"> | undefined>;
-  /** @deprecated Use recordAcceptedOutcome. */
-  saveRun?(outcome: AcceptedOutcomeRecord): Promise<void>;
-  /** @deprecated Use recordAttempt. */
-  saveAttempt?(attempt: SummaryAttempt): Promise<void>;
-}
-
-/** Command-facing workflow facade. Model-facing contracts consume only W. */
-export interface Summarizer {
-  process(
-    command: SummaryCommand,
-    signal?: AbortSignal,
-  ): Promise<WindowDisposition | null>;
-}
-
-export interface SummarizerDeps {
-  readonly messages: MessageReader;
-  readonly summaries: SummaryAttemptStore;
-  readonly ollama?: Pick<OllamaClient, "chat">;
-  readonly classifier?: SummaryDecisionClassifier;
-  readonly conversationSummarizer?: ConversationSummarizer;
-  readonly fastClassifier?: FastClassifier;
-  readonly telemetry?: SummarizationTelemetryService;
-  readonly createSummaryId?: () => SummaryId;
-  readonly now?: () => TimestampMs;
-  /** Optional policy hook; the default implements the v0.1 pending window. */
-  readonly windowSelector?: SummaryWindowSelector;
-  readonly progressive?: WindowProcessorDeps["progressive"];
-}
+} from "../selection/select-conversation.js";
+import { acceptOutcome } from "../acceptance/accept-outcome.js";
+import { AttemptCommitConflict } from "./attempt-commit.js";
+import type {
+  Summarizer,
+  SummarizerDeps,
+  SummaryAttemptStore,
+} from "./ports.js";
+import { buildAttemptRecord } from "./build-attempt-record.js";
 export type {
   SelectedConversation,
   SummaryWindowSelector,
   WindowMessage,
-} from "./summaryWindow.js";
+} from "../selection/select-conversation.js";
 
 const EMPTY_MODEL_METRICS = Object.freeze({
   modelCalls: 0,
@@ -99,7 +61,7 @@ const EMPTY_MODEL_METRICS = Object.freeze({
   summarizerMs: 0,
 });
 
-export function createSummarizer(deps: SummarizerDeps): Summarizer {
+export function createSummaryWorkflow(deps: SummarizerDeps): Summarizer {
   const classifier =
     deps.classifier ?? createClassifier({ ollama: requireOllama(deps) });
 
@@ -238,16 +200,18 @@ async function run(
         now: deps.now,
         telemetry,
         roles: selected.messages,
+        eligibleMessages: selected.eligibleMessages,
         progressive: deps.progressive,
       },
       signal,
     );
     signal?.throwIfAborted();
     action = result.decision.action;
-    const disposition = withEligibleCoverage(
-      result.disposition,
-      selected.eligibleMessages,
-    );
+    const disposition = result.disposition;
+    stage = "outcome.accept";
+    if (disposition.kind === "summarized") {
+      validateSemanticOutput(disposition.summary.text);
+    }
 
     if (disposition.kind === "deferred") {
       const checkpoint = previous?.covers.lastId;
@@ -262,13 +226,14 @@ async function run(
 
     const acceptedOutcome =
       disposition.kind === "summarized"
-        ? toAcceptedOutcomeRecord(
+        ? acceptOutcome({
             selected,
             command,
-            result.decision.action,
+            action: result.decision.action,
             disposition,
-            deps,
-          )
+            createSummaryId,
+            now,
+          })
         : undefined;
 
     if (
@@ -283,13 +248,14 @@ async function run(
         disposition.kind,
         undefined,
         acceptedOutcome ??
-          toAcceptedOutcomeRecord(
+          acceptOutcome({
             selected,
             command,
-            result.decision.action,
+            action: result.decision.action,
             disposition,
-            deps,
-          ),
+            createSummaryId,
+            now,
+          }),
       );
       attemptPersisted = true;
       checkpointAdvanced = true;
@@ -351,8 +317,6 @@ async function run(
     const completedAt = now();
     const model = modelMetrics(telemetry);
     const modelInvocations = telemetry?.modelInvocations(errorCode) ?? [];
-    const snapshots = snapshotMessages(selected?.messages ?? []);
-    const inputHash = hashInput(snapshots);
     const classifierInvocation = [...modelInvocations]
       .reverse()
       .find(({ stage: invocationStage }) => invocationStage === "classifier");
@@ -365,8 +329,9 @@ async function run(
         : checkpointBefore;
     const summaryText = acceptedOutcome?.finalText;
 
-    await recordAttempt(
-      Object.freeze({
+    const recorded = await recordAttempt.call(
+      deps.summaries,
+      buildAttemptRecord({
         id: acceptedOutcome?.id ?? createSummaryId(),
         chatId: command.chatId,
         commandMessageId: command.commandMessageId,
@@ -383,24 +348,19 @@ async function run(
         summarizerModel: summarizerInvocation?.model,
         classifierPromptHash: classifierInvocation?.promptHash,
         summaryPromptHash: summarizerInvocation?.promptHash,
-        policyHash: sha256(CHECKPOINT_POLICY_VERSION),
         classifierLatencyMs: model.classifierMs,
         summarizerLatencyMs: model.summarizerMs,
         totalLatencyMs: elapsed(),
         summaryText,
         errorCode,
-        inputHash,
-        messages: snapshots,
+        selectedMessages: selected?.messages ?? [],
+        consecutiveDeferCount,
         modelInvocations,
-        candidate: mineDatasetCandidate({
-          action,
-          status,
-          consecutiveDeferCount,
-          snapshots,
-          inputHash,
-        }),
       }),
     );
+    if (recorded !== undefined && recorded.status !== "committed") {
+      throw new AttemptCommitConflict(recorded);
+    }
   }
 
   function recordRun(
@@ -451,209 +411,21 @@ function recordAcceptedOutcome(
   return record.call(store, outcome);
 }
 
-function hashInput(snapshots: SummaryAttempt["messages"]): string {
-  return sha256(JSON.stringify(snapshots));
-}
-
-function snapshotMessages(
-  messages: readonly WindowMessage[],
-): SummaryAttempt["messages"] {
-  const snapshots = new Array<SummaryAttempt["messages"][number]>(
-    messages.length,
-  );
-  for (let ordinal = 0; ordinal < messages.length; ordinal += 1) {
-    const { message, role } = messages[ordinal]!;
-    snapshots[ordinal] = Object.freeze({
-      ordinal,
-      chatId: message.chatId,
-      messageId: message.id,
-      role,
-      authorId: message.author.id,
-      authorName: message.author.label,
-      text: message.text,
-      sentAt: message.time,
-      replyToId: message.parentId,
-    });
-  }
-  return Object.freeze(snapshots);
-}
-
 function modelMetrics(telemetry?: SummarizationTelemetryTrace) {
   return telemetry?.modelMetrics() ?? EMPTY_MODEL_METRICS;
-}
-
-function mineDatasetCandidate(input: {
-  action?: SummaryAction;
-  status: SummaryAttempt["status"];
-  consecutiveDeferCount: number;
-  snapshots: SummaryAttempt["messages"];
-  inputHash: string;
-}): SummaryAttempt["candidate"] {
-  const reasons = new Set<string>();
-  let priority = 0;
-  const eligibleText: string[] = [];
-  let hasReplyContext = false;
-  for (const snapshot of input.snapshots) {
-    if (snapshot.role === "eligible") eligibleText.push(snapshot.text);
-    else hasReplyContext = true;
-  }
-  const joinedEligibleText = eligibleText.join("\n");
-
-  if (input.status === "error") {
-    reasons.add("RUN_ERROR");
-    priority += 100;
-  }
-
-  if (input.consecutiveDeferCount >= 3) {
-    reasons.add("DEFER_STREAK");
-    priority += input.consecutiveDeferCount * 10;
-  }
-  if (hasReplyContext) {
-    reasons.add("REPLY_PROVENANCE");
-    priority += 5;
-  }
-  const numericTokens = joinedEligibleText.match(/\b\d+(?:[.:,]\d+)?\b/g) ?? [];
-  if (numericTokens.length >= 3) {
-    reasons.add("NUMERIC_RICH");
-    priority += 5;
-  }
-  if (
-    input.action?.startsWith("SKIP_") &&
-    (joinedEligibleText.length >= 500 || numericTokens.length >= 3)
-  ) {
-    reasons.add("SKIP_HIGH_INFORMATION");
-    priority += 100;
-  }
-
-  const sampleBucket = Number.parseInt(input.inputHash.slice(0, 8), 16) % 100;
-  if (reasons.size === 0) {
-    const sampleRate = input.status === "deferred" ? 20 : 3;
-    if (sampleBucket < sampleRate) {
-      reasons.add(
-        input.status === "deferred" ? "BOUNDARY_SAMPLE" : "NORMAL_SAMPLE",
-      );
-      priority += 1;
-    }
-  }
-
-  return reasons.size === 0
-    ? undefined
-    : Object.freeze({ priority, reasons: Object.freeze([...reasons]) });
-}
-
-function sha256(value: string): string {
-  return createHash("sha256").update(value, "utf8").digest("hex");
-}
-
-export function presentDisposition(disposition: WindowDisposition): string {
-  switch (disposition.kind) {
-    case "summarized":
-      return disposition.summary.text;
-    case "deferred":
-      return DEFER_PRESENTATION[disposition.reason];
-    case "skipped":
-      return SKIP_PRESENTATION[disposition.reason];
-  }
-}
-
-const DEFER_PRESENTATION = {
-  DEFER_COMPACT:
-    "У цих повідомленнях є корисна інформація, але вона вже достатньо стисла. Залишаю її для наступного підсумку.",
-  DEFER_INCOMPLETE:
-    "Обговорення ще розвивається. Зачекаю на результат або уточнення, щоб підсумок був кориснішим.",
-  DEFER_CONTEXT:
-    "У видимих повідомленнях бракує контексту для надійного підсумку без здогадок. Залишаю їх для наступного вікна.",
-} as const;
-
-const SKIP_PRESENTATION = {
-  SKIP_REACTIONS:
-    "Тут переважно короткі реакції та підтвердження, тож окремий підсумок не створюю.",
-  SKIP_BANTER:
-    "Тут переважно невимушене спілкування без інформації, яку варто переносити в історію підсумків.",
-  SKIP_NO_VALUE:
-    "У цьому вікні поки немає достатньо конкретної інформації для корисного підсумку.",
-} as const;
-
-function toAcceptedOutcomeRecord(
-  selected: SelectedConversation,
-  command: SummaryCommand,
-  action: AcceptedOutcomeRecord["action"],
-  disposition: Exclude<WindowDisposition, { kind: "deferred" }>,
-  deps: Pick<SummarizerDeps, "createSummaryId" | "now">,
-): AcceptedOutcomeRecord {
-  const messages = selected.eligibleMessages;
-  const covers = coverageOf(messages);
-
-  if (disposition.kind === "summarized") {
-    return Object.freeze({
-      id: disposition.summary.id,
-      chatId: disposition.summary.chatId,
-      commandMessageId: command.commandMessageId,
-      createdAt: disposition.summary.createdAt,
-      covers: disposition.summary.covers,
-      mode: command.mode,
-      status: "summarized",
-      action,
-      finalText: disposition.summary.text,
-    });
-  }
-
-  return Object.freeze({
-    id: (deps.createSummaryId ?? defaultSummaryId)(),
-    chatId: selected.window.chatId,
-    commandMessageId: command.commandMessageId,
-    createdAt: (deps.now ?? defaultNow)(),
-    covers,
-    mode: command.mode,
-    status: "skipped",
-    action,
-    finalText: presentDisposition(disposition),
-  });
-}
-
-function withEligibleCoverage(
-  disposition: WindowDisposition,
-  eligibleMessages: readonly ChatMessage[],
-): WindowDisposition {
-  if (disposition.kind !== "summarized") return disposition;
-  const covers = coverageOf(eligibleMessages);
-  if (sameCoverage(disposition.summary.covers, covers)) return disposition;
-  return Object.freeze({
-    kind: "summarized" as const,
-    summary: Object.freeze({
-      ...disposition.summary,
-      covers,
-    }),
-  });
-}
-
-function coverageOf(messages: readonly ChatMessage[]) {
-  return Object.freeze({
-    firstId: messages[0]!.id,
-    lastId: messages.at(-1)!.id,
-    count: messages.length,
-  });
-}
-
-function sameCoverage(
-  left: ReturnType<typeof coverageOf>,
-  right: ReturnType<typeof coverageOf>,
-): boolean {
-  return (
-    left.firstId === right.firstId &&
-    left.lastId === right.lastId &&
-    left.count === right.count
-  );
 }
 
 function requireOllama(deps: SummarizerDeps): Pick<OllamaClient, "chat"> {
   if (!deps.ollama) {
     throw new TypeError(
-      "createSummarizer requires ollama when model-facing dependencies are not injected.",
+      "createSummaryWorkflow requires ollama when model-facing dependencies are not injected.",
     );
   }
   return deps.ollama;
 }
+
+/** @deprecated Use createSummaryWorkflow. */
+export const createSummarizer = createSummaryWorkflow;
 
 function defaultSummaryId(): SummaryId {
   return asSummaryId(randomUUID());

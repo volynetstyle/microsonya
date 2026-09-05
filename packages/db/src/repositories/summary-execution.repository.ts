@@ -34,7 +34,7 @@ import { assertSummaryExecutionTransition } from "@microsonya/run-lifecycle";
 import type { MicrosonyaDb } from "../client.js";
 import type { DataEncryption } from "../encryption.js";
 import { summaryRunLifecycle } from "../schema.js";
-import { lockTelegramIngress } from "./messages.repo.js";
+import { lockTelegramIngress } from "./message-history.repository.js";
 
 type LifecycleRow = typeof summaryRunLifecycle.$inferSelect;
 
@@ -53,7 +53,7 @@ export interface LifecycleLease extends LifecycleRun {
   readonly leaseToken: string;
 }
 
-export class SummaryLifecycleRepo {
+export class SummaryExecutionRepository {
   constructor(
     private readonly db: MicrosonyaDb,
     private readonly encryption: DataEncryption,
@@ -596,6 +596,9 @@ export class SummaryLifecycleRepo {
     });
   }
 }
+
+/** @deprecated Use SummaryExecutionRepository. */
+export { SummaryExecutionRepository as SummaryLifecycleRepo };
 
 function asLifecycleStatus(value: string): SummaryRunLifecycleStatus {
   if (

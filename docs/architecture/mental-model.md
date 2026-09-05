@@ -2,6 +2,8 @@
 
 ## How to read this document
 
+Последняя проверка acceptance/commit boundaries: 2026-09-05, baseline `b1446664e9f9dff7e994dca0732d0e08c00f2db1` плюс текущие незакоммиченные изменения. Эта проверка обновляет указанный ниже первоначальный baseline для затронутых workflow, ledger и Processor.
+
 Это причинная модель **текущего рабочего дерева**, обновлённого 2026-09-05, с базовым commit `d88acb83856104329789c44904dbb1861c7bb984`. Документ описывает dirty tree с незакоммиченным vocabulary refactor типов, semantic ledger и lifecycle API, а также repo-context файлами `AGENTS.md` и `.agents/skills/microsonya-architecture/SKILL.md`. Обозначение «0.2» взято из задания: корневой `package.json` пока содержит `0.1.1`, а часть пакетов и комментариев — `0.1`. Это карта исходников, а не подтверждение версии, развёрнутой в Cloudflare.
 
 Первые разделы позволяют провести команду через систему. Разделы про окно, checkpoint и recovery объясняют, что произойдёт при следующей команде или сбое. Invariants, карточки и примеры дают точки для проверки понимания.
@@ -23,6 +25,14 @@ Ingress также является Queue consumer: он вызывает Proces
 Затем Processor отдельно сохраняет текст доставки в lifecycle, получает delivery lease, завершает Telegram delivery и только после неё записывает `completed`. Preview может быть виден в Telegram ещё во время генерации. Cron восстанавливает зависшие runs из БД. Повторный запуск переиспользует уже сохранённый outcome; атомарности между PostgreSQL и Telegram нет.
 
 ## System context
+
+## Реализованные границы модулей (dirty tree 2026-09-05)
+
+`packages/summarize` теперь физически повторяет причинную цепочку: `selection` единолично строит `SelectedConversation` и consumption upper bound; `evaluation` классифицирует и при необходимости вызывает модель; `acceptance` валидирует и превращает terminal disposition в полный `AcceptedOutcomeRecord`; `workflow` связывает порты и чистой функцией `buildAttemptRecord()` строит durable evidence; `presentation` владеет пользовательским текстом. Совместимые старые exports оставлены deprecated aliases, production использует `createSummaryWorkflow()`.
+
+DB repositories разделены по durable responsibility в `packages/db/src/repositories`: message history, summary attempt/transaction coordinator, summary execution lifecycle, consumption-boundary query, dataset candidate и WMA catalog projection. `SummaryAttemptRepository.recordAttempt()` остаётся одной транзакцией: helper-файлы разделяют SQL/ownership, но не атомарность fencing, attempt, snapshots, model evidence, dataset candidate и WMA projection.
+
+Cloudflare Ingress `worker.ts` только маршрутизирует HTTP и Queue. Webhook verification/parsing orchestration, message persistence, durable summary-command acceptance и Queue consumption находятся в отдельных adapter-файлах. Processor `worker.ts` является только Service Binding entrypoint; processing coordination, accepted-outcome recovery, lease heartbeat, failure policy, Telegram delivery transport и payload validation физически разделены. Это ownership decomposition, а не новые distributed services.
 
 **Вопрос схемы 1: где находятся транспортные и durable boundaries?** Lifecycle и Processor — отдельные Workers с RPC entrypoints; PostgreSQL — общая БД через Hyperdrive. Durable Objects в этом пути нет.
 
@@ -101,7 +111,7 @@ flowchart TD
 
 Idempotency key — `telegram:<chatId>:<commandMessageId>`, а не Telegram `update_id`. HTTP OK для summary возвращается после `create` и успешного `Queue.send`; `markQueued` выполняется через `waitUntil`. Транзакции message save и run creation используют общий advisory lock по chat, но выполняются отдельно. Этот lock сериализует начавшиеся короткие записи, не гарантирует, что все более ранние Telegram сообщения уже пришли.
 
-Evidence: [ingress/worker.ts](../../apps/cloudflare/src/ingress/worker.ts) — `handleTelegramIngress()`; [chatMessage.ts](../../packages/telegram/src/chatMessage.ts) — `parseTelegramChatMessageUpdate()`; [summaryCommand.ts](../../packages/telegram/src/summaryCommand.ts) — `parseSummaryArgs()`; [ingress/queue.ts](../../apps/cloudflare/src/ingress/queue.ts) — `processSummaryMessage()`.
+Evidence: [telegram-webhook-handler.ts](../../apps/cloudflare/src/ingress/telegram-webhook-handler.ts) — `handleTelegramWebhook()`; [chatMessage.ts](../../packages/telegram/src/chatMessage.ts) — `parseTelegramChatMessageUpdate()`; [summaryCommand.ts](../../packages/telegram/src/summaryCommand.ts) — `parseSummaryArgs()`; [summary-queue-consumer.ts](../../apps/cloudflare/src/ingress/summary-queue-consumer.ts) — `processSummaryMessage()`.
 
 ## Successful summary sequence
 
@@ -343,7 +353,7 @@ flowchart TD
 
 **Eligible** — выбранные сообщения, о которых эта команда принимает semantic решение. **Context** — найденные прямые reply parents вне eligible. Parent может лежать за checkpoint или за time boundary; поиск context не повторяет eligible filters и не делает рекурсивного обхода ancestors. Если parent отсутствует в истории, он не выдумывается и не загружается из Telegram. Сам факт отсутствующего parent не принуждает `DEFER_CONTEXT`: решение принимается из model predicates.
 
-**Window** объединяет eligible и context; `createConversationWindow` проверяет непустоту, один chat, уникальность message IDs и chronological order, копирует и замораживает данные. **Coverage** содержит только eligible: facade `withEligibleCoverage()` корректирует первоначальный coverage `processWindow`, который строится по всему window. `saveAttempt` независимо выводит `from_message_id`/`to_message_id` из snapshots с role `eligible`.
+**Window** объединяет eligible и context; `createConversationWindow` проверяет непустоту, один chat, уникальность message IDs и chronological order, копирует и замораживает данные. **Coverage** с самого начала строится только из `SelectedConversation.eligibleMessages`; отдельной корректирующей функции после evaluation нет. `recordAttempt` независимо выводит `from_message_id`/`to_message_id` из snapshots с role `eligible`.
 
 **checkpointCandidate** — подсказка selector: последний chronological eligible ID в consuming mode, иначе прежний checkpoint. Это не committed cursor и не прямой аргумент SQL update; facade конструирует `checkpointAfter` из terminal coverage/consumption. Общий model window может превышать 128: лимит применяется к eligible, затем добавляются parents. Token/character budget для добавленного context selector не считает.
 
@@ -388,7 +398,7 @@ flowchart TD
 
 Монотонность здесь условная: query выбирает последнюю команду, не максимальный message ID. Порядок обработки ранее созданных команд и chronological input поддерживает ожидаемый рост, но произвольные несогласованные `(time, id)`, поздняя доставка старых команд или прямые записи в ledger не превращаются автоматически в монотонный cursor. Эти пределы нельзя скрывать общей формулировкой «checkpoint всегда растёт».
 
-Evidence: [summarize.ts](../../packages/summarize/src/summarize.ts) — `run()`, `persistAttempt()`, `withEligibleCoverage()`; [checkpointPolicy.ts](../../packages/summarize/src/checkpointPolicy.ts); [summaries.repo.ts](../../packages/db/src/repos/summaries.repo.ts) — `findLastCheckpoint()`; [count-checkpoint.test.ts](../../test/count-checkpoint.test.ts); [summary-ledger-runtime.test.ts](../../test/summary-ledger-runtime.test.ts).
+Evidence: [execute-summary-attempt.ts](../../packages/summarize/src/workflow/execute-summary-attempt.ts) — `run()`, `persistAttempt()`; [consumption-policy.ts](../../packages/summarize/src/acceptance/consumption-policy.ts); [summary-attempt.repository.ts](../../packages/db/src/repositories/summary-attempt.repository.ts) — consumption-boundary lookup and `recordAttempt()`; [count-checkpoint.test.ts](../../test/count-checkpoint.test.ts); [summary-ledger-runtime.test.ts](../../test/summary-ledger-runtime.test.ts).
 
 ## Failure and recovery model
 
@@ -448,7 +458,7 @@ Queue configuration принимает batch size 1, делает до трёх 
 
 Error attempt намеренно не считается reusable outcome: новый claim заново читает текущую history/checkpoint и вызывает models. Unique `(orchestration_run_id, orchestration_attempt)` и deterministic attempt ID `<runId>:attempt:<attempt>` делают повторный save одной orchestration attempt no-op. Они не дедуплицируют model calls, произошедшие до commit.
 
-Evidence: [ingress/queue.ts](../../apps/cloudflare/src/ingress/queue.ts) — `rescheduleLogicalRun()`; [processor/worker.ts](../../apps/cloudflare/src/processor/worker.ts) — `classifyFailure()`; [lifecycle/worker.ts](../../apps/cloudflare/src/lifecycle/worker.ts) — scheduled handler; [summaryLifecycle.repo.ts](../../packages/db/src/repos/summaryLifecycle.repo.ts); [reconciler-matrix.test.ts](../../test/reconciler-matrix.test.ts); [queue-runtime.test.ts](../../apps/cloudflare/test/queue-runtime.test.ts).
+Evidence: [summary-queue-consumer.ts](../../apps/cloudflare/src/ingress/summary-queue-consumer.ts) — `rescheduleLogicalRun()`; [failure-policy.ts](../../apps/cloudflare/src/processor/failure-policy.ts) — `classifyFailure()`; [lifecycle/worker.ts](../../apps/cloudflare/src/lifecycle/worker.ts) — scheduled handler; [summary-execution.repository.ts](../../packages/db/src/repositories/summary-execution.repository.ts); [reconciler-matrix.test.ts](../../test/reconciler-matrix.test.ts); [queue-runtime.test.ts](../../apps/cloudflare/test/queue-runtime.test.ts).
 
 ## Failure walkthrough
 
@@ -516,7 +526,9 @@ flowchart LR
     TG -.->|"crash before markCompleted"| R3["Delivery can repeat"]
 ```
 
-`saveAttempt` начинает transaction с conditional update lifecycle `updated_at`. Если token/attempt/status/expiry больше не действительны, функция возвращает без insert и без ошибки. Если fence принят, parent attempt, snapshots, model invocations, candidate и WMA catalog upsert находятся в той же transaction. Checkpoint не требует второго cursor write: qualifying parent attempt уже является evidence.
+Канонический `recordAttempt` начинает transaction с conditional update lifecycle `updated_at`. Недействительный lease возвращает `ownershipLost` без insert. Insert conflict возвращает `alreadyCommitted` с outcome именно существующей записи (для error evidence outcome отсутствует). Успешная запись возвращает `committed`. Fence, parent attempt, snapshots, model invocations, candidate и WMA catalog upsert остаются в одной transaction. Legacy `saveAttempt` адаптирует ответ к `void`; production использует `recordAttempt`.
+
+Workflow проверяет semantic output до record: пустая строка, NUL и служебные теги отклоняются с error evidence без consumption/WMA projection. После commit Processor отдельно проверяет Telegram payload, включая 4096-лимит. При `alreadyCommitted` Processor прекращает новое preview и представляет существующий outcome; при `ownershipLost` возвращается к retry. Evidence: [semantic-acceptance.test.ts](../../test/semantic-acceptance.test.ts), [summary-ledger.test.ts](../../test/summary-ledger.test.ts).
 
 `saveSummary` дублирует presentation в mutable lifecycle row, чтобы delivery мог продолжаться без расшифровки/интерпретации ledger outcome на каждом retry. Это отдельный CAS после validation. `markCompleted` фиксирует delivery receipt отдельно после Telegram. Нельзя изображать `saveAttempt + send + completed` одной атомарной операцией.
 
@@ -593,7 +605,7 @@ Statement: reply context видят classifier/summarizer, но `covers`, from/t
 Enforced by:
 
 - role-aware selector и prompt envelope;
-- `withEligibleCoverage()` перед attempt construction;
+- `processWindow()` получает `selected.eligibleMessages` и сразу строит eligible coverage; исправляющей `withEligibleCoverage()` больше нет;
 - `saveAttempt` отдельно ищет first/last snapshot с role eligible.
 
 Evidence: [summarize-v01.test.ts](../../test/summarize-v01.test.ts) — reply-parent test; [summarize-boundaries.test.ts](../../test/summarize-boundaries.test.ts).
@@ -706,7 +718,7 @@ Important invariants: команда не попадает в canonical messages
 
 Failure semantics: malformed Queue job ACK; Processor RPC exception Queue-retry; Queue reschedule failure retry original; failed Queue send during webhook leaves idempotent run for webhook retry/cron.
 
-Key entry points: [ingress/worker.ts](../../apps/cloudflare/src/ingress/worker.ts) — `handleTelegramIngress()`; [ingress/queue.ts](../../apps/cloudflare/src/ingress/queue.ts) — `handleSummaryQueue()`.
+Key entry points: [ingress/worker.ts](../../apps/cloudflare/src/ingress/worker.ts) — transport-only routing; [telegram-webhook-handler.ts](../../apps/cloudflare/src/ingress/telegram-webhook-handler.ts) — `handleTelegramWebhook()`; [summary-command-ingress.ts](../../apps/cloudflare/src/ingress/summary-command-ingress.ts) — durable command acceptance; [summary-queue-consumer.ts](../../apps/cloudflare/src/ingress/summary-queue-consumer.ts) — `handleSummaryQueue()`.
 
 ### SummaryLifecycleRepo and Lifecycle Worker
 
@@ -802,7 +814,7 @@ Important invariants: terminal attempt persists before return; deferred/error pr
 
 Failure semantics: если основной failure случился до attempt persistence, facade пытается записать error evidence; failure этой диагностической записи логируется и исходная ошибка пробрасывается.
 
-Key entry points: [summarize.ts](../../packages/summarize/src/summarize.ts) — `createSummarizer()`, `run()`.
+Key entry points: [execute-summary-attempt.ts](../../packages/summarize/src/workflow/execute-summary-attempt.ts) — `createSummaryWorkflow()`, `run()`; [select-conversation.ts](../../packages/summarize/src/selection/select-conversation.ts); [evaluate-conversation.ts](../../packages/summarize/src/evaluation/evaluate-conversation.ts); [accept-outcome.ts](../../packages/summarize/src/acceptance/accept-outcome.ts); [build-attempt-record.ts](../../packages/summarize/src/workflow/build-attempt-record.ts).
 
 ### SummariesRepo
 
@@ -936,6 +948,22 @@ History после `checkpointBefore=m1`: `m2="👍"`, `m3="ага"`; command `c
 
 ## Architecture drift observations
 
+### Classification and next decisions
+
+| Наблюдение                        | Класс                      | Состояние / следующее действие                                                                                                                |
+| --------------------------------- | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| count + SKIP recovery             | Дефект                     | Исправлена реконструкция; полный fault-injection Processor со счётчиками model calls ещё нужен                                                |
+| Semantic validation после commit  | Дефект acceptance boundary | Исправлено: semantic validation до record, channel validation после                                                                           |
+| Coverage с последующей коррекцией | Ответственность            | Коррекция удалена; workflow передаёт eligible при создании coverage                                                                           |
+| Тихая потеря lease                | Контракт persistence       | Канонический record явно возвращает ownershipLost; fence внутри transaction                                                                   |
+| Writer/reader checkpoint          | Согласованность            | Нужна общая matrix modes/actions; текущие count/skip/defer тесты не доказывают все порядки arrival                                            |
+| Transition table и SQL            | Назначение моделей         | Таблица задаёт generic status transitions; specialized SQL claims имеют дополнительные guards, отдельная полная эквивалентность не заявляется |
+| Defer streak                      | Наблюдаемость              | Сейчас facade-local; выбор durable streak или переименования метрики ещё не реализован                                                        |
+| WMA до Telegram                   | Продуктовая семантика      | Принятый ledger result доступен независимо от Telegram; это не delivery receipt                                                               |
+| Полное чтение истории             | Стоимость                  | Отложить SQL pushdown до согласования selection/ordering; нужна differential проверка                                                         |
+
+Ordering остаётся открытым: chronological prefix по `(time, id)` является ID-prefix только при совместимом порядке времён и IDs. Например, при cap=2 порядок IDs `1, 3, 2` по времени выбирает `1, 3`; boundary=3 исключит необработанный ID=2. `MAX(to_message_id)` это не исправляет. Выбор ID-prefix, hole-aware consumption или явного rejection для несогласованного порядка требует отдельной политики; current behavior не объявляется корректным для произвольных late/backfilled messages.
+
 ### DRIFT-01 — Repository version labels disagree
 
 Observation: задание называет систему 0.2, root/app packages указывают `0.1.1`, часть packages — `0.1.0`, а comments/README называют policy/runtime `v0.1`.
@@ -986,15 +1014,15 @@ Expected invariant, if known: UNKNOWN / requires clarification — comments по
 
 Confidence: high.
 
-### DRIFT-06 — Presentation validation follows canonical attempt persistence
+### RESOLVED-06 — Semantic acceptance precedes canonical attempt persistence
 
-Observation: Summarizer коммитит `status='summarized'`, encrypted text, checkpoint evidence и WMA catalog update до возврата в Processor. Только затем `validateSummary()` проверяет empty/4096/NUL/protocol leakage. Failed validation переводит lifecycle в `failed_permanent`, но не отменяет attempt/checkpoint/catalog transaction; WMA query может показать этот ledger summary.
+Resolution: `validateSemanticOutput()` отклоняет empty/NUL/protocol leakage до записи summarized attempt. Workflow сохраняет error evidence с прежней boundary. Telegram length проверяется отдельно через `validateTelegramPayload()` после semantic commit; длинный accepted text остаётся в ledger/WMA.
 
-Evidence: [summarize.ts](../../packages/summarize/src/summarize.ts) — attempt persistence before return; [processor/worker.ts](../../apps/cloudflare/src/processor/worker.ts) — `presentGeneratedDisposition()` then `validateSummary()`; [summaries.repo.ts](../../packages/db/src/repos/summaries.repo.ts) — catalog update.
+Evidence: [validate-semantic-output.ts](../../packages/summarize/src/acceptance/validate-semantic-output.ts), [validate-telegram-payload.ts](../../apps/cloudflare/src/processor/presentation/validate-telegram-payload.ts), [semantic-acceptance.test.ts](../../test/semantic-acceptance.test.ts).
 
-Expected invariant, if known: UNKNOWN / requires clarification — код явно не доставляет invalid presentation, но не устанавливает, должен ли такой model output считаться accepted semantic checkpoint/WMA summary.
+Invariant: семантически отвергнутый output не потребляет историю. Ограничение Telegram не определяет принятие semantic result. Legacy записи не исправляются ретроактивно; прямые legacy writers не приобретают новую acceptance policy автоматически.
 
-Confidence: high как порядок effects; medium как нарушение намерения.
+Confidence: high для workflow/ledger boundary, проверено на test DB. Streaming preview остаётся внешним эффектом до acceptance.
 
 ### DRIFT-07 — Production defer streak is scoped to one processing invocation
 
@@ -1060,7 +1088,7 @@ Relevant files: [feedback.repo.ts](../../packages/db/src/repos/feedback.repo.ts)
 | Checkpoint advancement                | `summarize.ts`, `checkpointPolicy.ts`                       | `SummariesRepo.findLastCheckpoint`, schema/tests                     |
 | Attempt atomicity/evidence            | `packages/db/src/repos/summaries.repo.ts`                   | schema/migrations, summary-ledger tests                              |
 | Run/retry/lease states                | `SummaryLifecycleRepo`                                      | `packages/run-lifecycle`, Lifecycle Worker, storage/reconciler tests |
-| Queue ACK/retry                       | `apps/cloudflare/src/ingress/queue.ts`                      | ingress wrangler config, Workers queue tests                         |
+| Queue ACK/retry                       | `apps/cloudflare/src/ingress/summary-queue-consumer.ts`     | ingress wrangler config, Workers queue tests                         |
 | Delivery/progressive output           | Processor Worker, `telegram/progressiveTransport.ts`        | `summarize/progressive.ts`, progressive tests                        |
 | WMA visibility/access                 | `wma/src-api/bootstrap.ts`, `chat-access.ts`                | catalog writer, edge-cache policy, WMA tests                         |
 

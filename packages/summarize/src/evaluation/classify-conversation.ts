@@ -5,11 +5,11 @@ import {
   type SummaryDecision,
 } from "@microsonya/shared";
 import { z } from "zod";
-import { buildModelPrompt } from "./prompt.js";
-import { ModelOutputError, parseModelOutput } from "./modelOutput.js";
-import { COMPACTION_DECISION_INSTRUCTIONS } from "./predicateV3.js";
-import type { ModelWindowMessageRole } from "./prompt.js";
-import type { SummarizationTelemetryTrace } from "./telemetry.js";
+import { buildModelPrompt } from "./model-prompt.js";
+import { ModelOutputError, parseModelOutput } from "./model-output.js";
+import { COMPACTION_DECISION_INSTRUCTIONS } from "./decision-policy.js";
+import type { ModelWindowMessageRole } from "./model-prompt.js";
+import type { SummarizationTelemetryTrace } from "../workflow/telemetry.js";
 
 /**
  * | Label | Семантика |

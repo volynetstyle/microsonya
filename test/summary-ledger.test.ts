@@ -25,6 +25,38 @@ import {
 import { openTestDb } from "./dbTestUtils.js";
 
 describe("production summary ledger", () => {
+  it("returns the existing outcome on duplicate commit without updating projections", async () => {
+    const client = await openTestDb();
+    const repo = new SummariesRepo(
+      client.db,
+      createLedgerEncryption(Buffer.alloc(32, 5)),
+    );
+    const original = fixtureAttempt();
+    try {
+      expect(await repo.recordAttempt(original)).toEqual({
+        status: "committed",
+      });
+      expect(
+        await repo.recordAttempt({
+          ...original,
+          summaryText: "A different generated result",
+        }),
+      ).toEqual({
+        status: "alreadyCommitted",
+        outcome: {
+          kind: "summarized",
+          action: "SUMMARIZE",
+          text: original.summaryText,
+        },
+      });
+      const catalog = await client.db.select().from(wmaChatCatalog);
+      expect(catalog).toHaveLength(1);
+      expect(catalog[0]?.summaryCount).toBe(1);
+      expect(await client.db.select().from(summaryRuns)).toHaveLength(1);
+    } finally {
+      await client.close();
+    }
+  });
   it("reconstructs a count skip as a complete accepted outcome", async () => {
     const client = await openTestDb();
     const summaries = new SummariesRepo(
@@ -88,12 +120,22 @@ describe("production summary ledger", () => {
         10,
         "processor",
       );
-      await summaries.saveAttempt(attempt, {
+      const recorded = await summaries.recordAttempt(attempt, {
         runId: run.id,
         attempt: claim!.attempt,
         leaseToken: claim!.leaseToken,
         acceptedAt: asTimestampMs(1_013),
       });
+      expect(recorded).toEqual({ status: "ownershipLost" });
+      for (const table of [
+        summaryRuns,
+        summaryRunMessages,
+        modelInvocations,
+        datasetCandidates,
+        wmaChatCatalog,
+      ]) {
+        expect(await client.db.select().from(table)).toEqual([]);
+      }
       expect(await summaries.findOrchestratedOutcome(run.id)).toBeUndefined();
     } finally {
       await client.close();

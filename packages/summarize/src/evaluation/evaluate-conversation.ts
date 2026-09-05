@@ -3,16 +3,20 @@ import {
   asSummaryId,
   asTimestampMs,
   type ConversationWindow,
+  type ChatMessage,
   type SummaryDecision,
   type SummaryId,
   type TimestampMs,
   type WindowDisposition,
 } from "@microsonya/shared";
-import type { SummaryDecisionClassifier } from "./classifier.js";
-import type { ConversationSummarizer } from "./conversationSummarizer.js";
-import type { ModelWindowMessageRole } from "./prompt.js";
-import type { SummarizationTelemetryTrace } from "./telemetry.js";
-import { analyzeStructure, type StructuralAnalysis } from "./views.js";
+import type { SummaryDecisionClassifier } from "./classify-conversation.js";
+import type { ConversationSummarizer } from "./generate-summary.js";
+import type { ModelWindowMessageRole } from "./model-prompt.js";
+import type { SummarizationTelemetryTrace } from "../workflow/telemetry.js";
+import {
+  analyzeStructure,
+  type StructuralAnalysis,
+} from "./analyze-conversation.js";
 
 export type FastRule = string;
 
@@ -37,6 +41,7 @@ export const abstainingFastClassifier: FastClassifier = Object.freeze({
 });
 
 export interface WindowProcessorDeps {
+  readonly eligibleMessages?: readonly ChatMessage[];
   readonly classifier: SummaryDecisionClassifier;
   readonly summarizer: ConversationSummarizer;
   readonly fastClassifier?: FastClassifier;
@@ -116,7 +121,10 @@ export async function processWindow(
   let disposition: WindowDisposition;
   if (decision.action === "SUMMARIZE") {
     let generated: { readonly text: string };
-    if (deps.progressive !== undefined && deps.summarizer.stream !== undefined) {
+    if (
+      deps.progressive !== undefined &&
+      deps.summarizer.stream !== undefined
+    ) {
       await deps.progressive.begin();
       try {
         for await (const delta of deps.summarizer.stream(
@@ -141,7 +149,7 @@ export async function processWindow(
       );
     }
     signal?.throwIfAborted();
-    const messages = window.messages;
+    const messages = deps.eligibleMessages ?? window.messages;
     disposition = Object.freeze({
       kind: "summarized",
       summary: Object.freeze({

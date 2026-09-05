@@ -9,8 +9,8 @@ import type {
   TimestampMs,
 } from "@microsonya/shared";
 import { asSummaryId, asTimestampMs } from "@microsonya/shared";
-import type { StructuralAnalysis } from "./views.js";
-import type { ClassificationPredicates } from "./classifier.js";
+import type { StructuralAnalysis } from "../evaluation/analyze-conversation.js";
+import type { ClassificationPredicates } from "../evaluation/classify-conversation.js";
 
 export type ModelStage = "classifier" | "summarizer";
 export type ModelOutputFailure =

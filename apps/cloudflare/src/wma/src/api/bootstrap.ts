@@ -6,14 +6,16 @@ const initData = () => window.Telegram?.WebApp?.initData ?? "";
 
 type FixtureResource = "chats" | "overview" | "detail";
 
-function withDevFixture<T>(resource: FixtureResource, live: () => Promise<T>) {
+async function withDevFixture<T>(
+  resource: FixtureResource,
+  live: () => Promise<T>,
+) {
   if (!import.meta.env.DEV) return live();
   // Capture the story at request time. Vitest and visual harnesses may advance
   // history while this dev-only module is still loading asynchronously.
   const fixture = new URLSearchParams(location.search).get("fixture");
-  return import("./fixtures").then(
-    ({ fixtureResponse }) => fixtureResponse<T>(resource, fixture) ?? live(),
-  );
+  const { fixtureResponse } = await import("./fixtures");
+  return await (fixtureResponse<T>(resource, fixture) ?? live());
 }
 
 export function fixtureHref(path: string): string {

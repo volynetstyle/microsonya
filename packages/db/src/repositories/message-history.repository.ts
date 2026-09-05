@@ -34,7 +34,7 @@ function mapMessageRow(
   });
 }
 
-export class MessagesRepo {
+export class MessageHistoryRepository {
   constructor(
     private readonly db: MicrosonyaDb,
     private readonly encryption: DataEncryption,
@@ -163,6 +163,9 @@ export class MessagesRepo {
     return this.encryption.lookup(authorId, "telegram-author-id");
   }
 }
+
+/** @deprecated Use MessageHistoryRepository. */
+export { MessageHistoryRepository as MessagesRepo };
 
 /** Serializes the short durable-ingress transaction for one Telegram chat. */
 export async function lockTelegramIngress(

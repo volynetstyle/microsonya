@@ -4,7 +4,7 @@ import type { MicrosonyaDb } from "../client.js";
 import type { DataEncryption } from "../encryption.js";
 import { datasetCandidates, summaryFeedback } from "../schema.js";
 
-export class SummaryFeedbackRepo {
+export class SummaryFeedbackRepository {
   constructor(
     private readonly db: MicrosonyaDb,
     private readonly encryption: DataEncryption,
@@ -65,3 +65,6 @@ export class SummaryFeedbackRepo {
     });
   }
 }
+
+/** @deprecated Use SummaryFeedbackRepository. */
+export { SummaryFeedbackRepository as SummaryFeedbackRepo };

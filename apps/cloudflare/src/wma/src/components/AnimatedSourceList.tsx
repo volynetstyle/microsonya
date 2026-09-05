@@ -1,9 +1,10 @@
-import { For, onSettled } from "solid-js";
+import { For, onCleanup, onSettled } from "solid-js";
 import type { WmaSummaryDetail } from "../api/contracts";
 
 type SourceMessage = WmaSummaryDetail["moments"][number];
-const GRADIENT_DISTANCE = 50;
+const EDGE_DISTANCE = 50; // единый inset: и для gradient opacity, и для keyboard scroll margin
 export const SOURCE_ITEM_MOTION_MS = 200;
+const MOTION_FALLBACK_MS = SOURCE_ITEM_MOTION_MS + 50;
 const TIME_FORMATTER = new Intl.DateTimeFormat("uk-UA", {
   hour: "2-digit",
   minute: "2-digit",
@@ -16,8 +17,8 @@ export function sourceGradientOpacities(
   if (maxScroll <= 0) return { top: 0, bottom: 0 };
   const position = Math.max(0, Math.min(scrollTop, maxScroll));
   return {
-    top: Math.min(position / GRADIENT_DISTANCE, 1),
-    bottom: Math.min((maxScroll - position) / GRADIENT_DISTANCE, 1),
+    top: Math.min(position / EDGE_DISTANCE, 1),
+    bottom: Math.min((maxScroll - position) / EDGE_DISTANCE, 1),
   };
 }
 
@@ -30,6 +31,7 @@ export function AnimatedSourceList(props: {
     CSS.supports("animation-timeline: scroll()") &&
     CSS.supports("animation-range: 0px 50px") &&
     CSS.supports("animation-range: calc(100% - 50px) 100%");
+
   let list!: HTMLOListElement;
   let topGradient!: HTMLSpanElement;
   let bottomGradient!: HTMLSpanElement;
@@ -37,11 +39,15 @@ export function AnimatedSourceList(props: {
   let selectedItem: HTMLLIElement | undefined;
   let gradientFrame: number | undefined;
   let visibilityFrame: number | undefined;
-  let maxScroll = 0;
   const pendingVisibility = new Map<HTMLElement, boolean>();
+  const motionTimeouts = new WeakMap<HTMLElement, number>();
 
+  // scrollHeight читается заново на каждый commit — дешевле, чем держать
+  // это в синхронизации с ResizeObserver, который на clientHeight-constant
+  // контейнере не гарантирует срабатывание при изменении scrollHeight.
   const commitGradients = () => {
     gradientFrame = undefined;
+    const maxScroll = Math.max(0, list.scrollHeight - list.clientHeight);
     const opacity = sourceGradientOpacities(list.scrollTop, maxScroll);
     topGradient.style.opacity = String(opacity.top);
     bottomGradient.style.opacity = String(opacity.bottom);
@@ -52,26 +58,46 @@ export function AnimatedSourceList(props: {
     gradientFrame = requestAnimationFrame(commitGradients);
   };
 
-  const measureScrollRange = () => {
-    maxScroll = Math.max(0, list.scrollHeight - list.clientHeight);
-    commitGradients();
+  const clearMotionTimeout = (item: HTMLElement) => {
+    const timeoutId = motionTimeouts.get(item);
+    if (timeoutId === undefined) return;
+    clearTimeout(timeoutId);
+    motionTimeouts.delete(item);
   };
 
   const selectItem = (item: HTMLLIElement, index: number) => {
     if (selectedItem === item) return;
-    selectedItem?.removeAttribute("data-selected");
+    if (selectedItem) {
+      selectedItem.removeAttribute("data-selected");
+      selectedItem.removeAttribute("aria-selected");
+    }
     selectedItem = item;
     selectedIndex = index;
     item.toggleAttribute("data-selected", true);
+    item.setAttribute("aria-selected", "true");
+    list.setAttribute("aria-activedescendant", item.id);
   };
 
   const stageVisibility = (item: HTMLElement, inView: boolean) => {
     const current =
       pendingVisibility.get(item) ?? item.hasAttribute("data-in-view");
     if (current === inView) return;
+
     item.toggleAttribute("data-motion-active", true);
+    // transitionend может не прийти вообще (prefers-reduced-motion,
+    // display:none во время анимации, свойство не совпало и т.д.) —
+    // fallback-таймер гарантирует, что data-motion-active не залипнет
+    // навсегда независимо от того, отработал ли переход.
+    clearMotionTimeout(item);
+    const timeoutId = window.setTimeout(() => {
+      motionTimeouts.delete(item);
+      item.removeAttribute("data-motion-active");
+    }, MOTION_FALLBACK_MS);
+    motionTimeouts.set(item, timeoutId);
+
     pendingVisibility.set(item, inView);
     if (visibilityFrame !== undefined) return;
+
     visibilityFrame = requestAnimationFrame(() => {
       visibilityFrame = undefined;
       for (const [target, visible] of pendingVisibility)
@@ -93,44 +119,41 @@ export function AnimatedSourceList(props: {
       `[data-source-index="${next}"]`,
     );
     if (!item) return;
+
     selectItem(item, next);
+
     const itemTop = item.offsetTop;
     const itemBottom = itemTop + item.offsetHeight;
-    const viewportTop = list.scrollTop;
-    const viewportBottom = viewportTop + list.clientHeight;
-    if (itemTop < viewportTop + 50) {
-      list.scrollTo({ top: itemTop - 50, behavior: "smooth" });
-    } else if (itemBottom > viewportBottom - 50) {
+    const visibleTop = list.scrollTop + EDGE_DISTANCE;
+    const visibleBottom = list.scrollTop + list.clientHeight - EDGE_DISTANCE;
+
+    if (itemTop < visibleTop) {
+      list.scrollTo({ top: itemTop - EDGE_DISTANCE, behavior: "smooth" });
+    } else if (itemBottom > visibleBottom) {
       list.scrollTo({
-        top: itemBottom - list.clientHeight + 50,
+        top: itemBottom - list.clientHeight + EDGE_DISTANCE,
         behavior: "smooth",
       });
     }
   };
 
+  const observer =
+    typeof IntersectionObserver === "undefined"
+      ? undefined
+      : new IntersectionObserver(
+          (entries) => {
+            for (const entry of entries)
+              stageVisibility(entry.target as HTMLElement, entry.isIntersecting);
+          },
+          { root: list, threshold: 0.01, rootMargin: "-24px 0px -24px 0px" },
+        );
+
+  const resizeObserver =
+    nativeScrollTimeline || typeof ResizeObserver === "undefined"
+      ? undefined
+      : new ResizeObserver(scheduleGradientUpdate);
+
   onSettled(() => {
-    const items = list.querySelectorAll<HTMLElement>(".source-message");
-    const observer =
-      typeof IntersectionObserver === "undefined"
-        ? undefined
-        : new IntersectionObserver(
-            (entries) => {
-              for (const entry of entries)
-                stageVisibility(
-                  entry.target as HTMLElement,
-                  entry.isIntersecting,
-                );
-            },
-            { root: list, threshold: 0.5 },
-          );
-    for (const item of items) {
-      if (observer) observer.observe(item);
-      else item.toggleAttribute("data-in-view", true);
-    }
-    const resizeObserver =
-      nativeScrollTimeline || typeof ResizeObserver === "undefined"
-        ? undefined
-        : new ResizeObserver(measureScrollRange);
     resizeObserver?.observe(list);
     if (!nativeScrollTimeline && !resizeObserver) scheduleGradientUpdate();
     return () => {
@@ -147,6 +170,7 @@ export function AnimatedSourceList(props: {
       <ol
         ref={list}
         class="source-message-list"
+        role="listbox"
         tabindex="0"
         aria-label="Повідомлення-джерела"
         onScroll={nativeScrollTimeline ? undefined : scheduleGradientUpdate}
@@ -165,21 +189,38 @@ export function AnimatedSourceList(props: {
             const sentAt = new Date(message.sentAt);
             return (
               <li
+                id={`source-message-${index()}`}
+                role="option"
                 class="source-message"
                 data-source-index={index()}
                 style={{
                   "--source-item-duration": `${SOURCE_ITEM_MOTION_MS}ms`,
                   "--source-item-delay": `${Math.min(index(), 6) * 25}ms`,
                 }}
-                onPointerEnter={(event) =>
-                  selectItem(event.currentTarget, index())
-                }
+                ref={(element) => {
+                  // Подписка на конкретный элемент, а не querySelectorAll-снапшот
+                  // после первого рендера: если props.messages дополняется без
+                  // remount (пагинация, докачка), новые <li> тоже попадают под
+                  // наблюдение. onCleanup здесь выполняется в скоупе конкретного
+                  // item внутри <For> — сработает при его удалении из списка.
+                  if (!observer) {
+                    element.toggleAttribute("data-in-view", true);
+                    return;
+                  }
+                  observer.observe(element);
+                  onCleanup(() => {
+                    observer.unobserve(element);
+                    clearMotionTimeout(element);
+                  });
+                }}
                 onTransitionEnd={(event) => {
                   if (
                     event.target === event.currentTarget &&
                     event.propertyName === "transform"
-                  )
+                  ) {
+                    clearMotionTimeout(event.currentTarget);
                     event.currentTarget.removeAttribute("data-motion-active");
+                  }
                 }}
               >
                 <span class="source-avatar" aria-hidden="true">

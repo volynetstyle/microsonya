@@ -12,8 +12,8 @@ import {
   selectConversationWindow,
   selectMessages,
 } from "../packages/summarize/src/index.js";
-import { MAX_MESSAGES } from "../packages/summarize/src/constants.js";
-import { buildModelPrompt } from "../packages/summarize/src/prompt.js";
+import { MAX_MESSAGES } from "../packages/summarize/src/evaluation/policy.js";
+import { buildModelPrompt } from "../packages/summarize/src/evaluation/model-prompt.js";
 
 const command: SummaryCommand = {
   chatId: asChatId("chat"),
