@@ -8,18 +8,21 @@ import {
   type ChatMessage,
   type SummaryCommand,
   type SummaryDecision,
-  type SummaryRun,
+  type AcceptedOutcomeRecord,
 } from "../packages/shared/src/index.js";
-import { createSummarizer } from "../packages/summarize/src/index.js";
+import { createSummaryWorkflow } from "../packages/summarize/src/index.js";
 
 describe("runtime summary invariants", () => {
   it("does not persist or advance after a provider failure", async () => {
     const saveRun = vi.fn();
-    const summarizer = createSummarizer({
+    const summarizer = createSummaryWorkflow({
       messages: {
         listByChat: async () => [message(1, "Deploy moved to Thursday.")],
       },
-      summaries: { findLastRun: async () => undefined, saveRun },
+      summaries: {
+        findLatestConsumptionBoundary: async () => undefined,
+        recordAcceptedOutcome: saveRun,
+      },
       classifier: {
         classify: async () => {
           throw new DOMException("Provider timed out", "TimeoutError");
@@ -45,7 +48,7 @@ describe("runtime summary invariants", () => {
     ]);
 
     let observedText = "";
-    const summarizer = createSummarizer({
+    const summarizer = createSummaryWorkflow({
       messages,
       summaries,
       classifier: {
@@ -62,7 +65,7 @@ describe("runtime summary invariants", () => {
     await summarizer.process(command(201));
     expect(observedText).toBe("Deploy переносимо на завтра.");
     await expect(
-      summaries.findLastRun(asChatId("chat")),
+      summaries.findLatestConsumptionBoundary(asChatId("chat")),
     ).resolves.toMatchObject({
       action: "SKIP_NO_VALUE",
       covers: { lastId: 200 },
@@ -70,7 +73,7 @@ describe("runtime summary invariants", () => {
   });
 
   it("commits one result for concurrent summary commands in the same chat", async () => {
-    const runs: SummaryRun[] = [];
+    const runs: AcceptedOutcomeRecord[] = [];
     const classifier = vi.fn(async () => {
       await Promise.resolve();
       return {
@@ -78,7 +81,7 @@ describe("runtime summary invariants", () => {
         evidence: { source: "model" as const, model: "test" },
       };
     });
-    const summarizer = createSummarizer({
+    const summarizer = createSummaryWorkflow({
       messages: {
         listByChat: async () => [
           message(1, "Deploy завершили."),
@@ -86,8 +89,8 @@ describe("runtime summary invariants", () => {
         ],
       },
       summaries: {
-        findLastRun: async () => runs.at(-1),
-        saveRun: async (run) => {
+        findLatestConsumptionBoundary: async () => runs.at(-1),
+        recordAcceptedOutcome: async (run) => {
           runs.push(run);
         },
       },
@@ -119,7 +122,7 @@ describe("runtime summary invariants", () => {
     await messages.save(
       message(100, "Backend deploy is blocked by migration 42."),
     );
-    await summaries.saveRun({
+    await summaries.recordAcceptedOutcome({
       id: asSummaryId("previous"),
       chatId: asChatId("chat"),
       commandMessageId: asMessageId(101),
@@ -135,7 +138,7 @@ describe("runtime summary invariants", () => {
     );
 
     const observedWindows: ChatMessage[][] = [];
-    const summarizer = createSummarizer({
+    const summarizer = createSummaryWorkflow({
       messages,
       summaries,
       classifier: {
@@ -156,7 +159,7 @@ describe("runtime summary invariants", () => {
       { id: 117, parentId: 100 },
     ]);
     await expect(
-      summaries.findLastRun(asChatId("chat")),
+      summaries.findLatestConsumptionBoundary(asChatId("chat")),
     ).resolves.toMatchObject({
       id: "previous",
       covers: { lastId: 100 },
@@ -210,15 +213,15 @@ class TestMessagesRepo {
 }
 
 class TestSummariesRepo {
-  readonly #runs: SummaryRun[] = [];
+  readonly #runs: AcceptedOutcomeRecord[] = [];
 
-  async saveRun(run: SummaryRun): Promise<void> {
+  async recordAcceptedOutcome(run: AcceptedOutcomeRecord): Promise<void> {
     this.#runs.push(structuredClone(run));
   }
 
-  async findLastRun(
+  async findLatestConsumptionBoundary(
     chatId: ReturnType<typeof asChatId>,
-  ): Promise<SummaryRun | undefined> {
+  ): Promise<AcceptedOutcomeRecord | undefined> {
     return structuredClone(
       this.#runs.filter((run) => run.chatId === chatId).at(-1),
     );

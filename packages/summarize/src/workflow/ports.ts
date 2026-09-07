@@ -17,26 +17,18 @@ import type {
   WindowProcessorDeps,
 } from "../evaluation/evaluate-conversation.js";
 import type { SummaryWindowSelector } from "../selection/select-conversation.js";
-import type { SummarizationTelemetryService } from "./telemetry.js";
+import type { SummaryExecutionObserver } from "./execution-journal.js";
 
 export interface MessageHistoryReader {
   listByChat(chatId: ChatId): Promise<readonly ChatMessage[]>;
 }
 
 export interface SummaryAttemptStore {
-  findLatestConsumptionBoundary?(
+  findLatestConsumptionBoundary(
     chatId: ChatId,
   ): Promise<Pick<AcceptedOutcomeRecord, "covers"> | undefined>;
   recordAcceptedOutcome?(outcome: AcceptedOutcomeRecord): Promise<void>;
   recordAttempt?(attempt: SummaryAttempt): Promise<RecordAttemptResult | void>;
-  /** @deprecated Use findLatestConsumptionBoundary. */
-  findLastRun?(
-    chatId: ChatId,
-  ): Promise<Pick<AcceptedOutcomeRecord, "covers"> | undefined>;
-  /** @deprecated Use recordAcceptedOutcome. */
-  saveRun?(outcome: AcceptedOutcomeRecord): Promise<void>;
-  /** @deprecated Use recordAttempt. */
-  saveAttempt?(attempt: SummaryAttempt): Promise<void>;
 }
 
 export interface SummaryWorkflow {
@@ -53,16 +45,9 @@ export interface SummaryWorkflowDependencies {
   readonly classifier?: SummaryDecisionClassifier;
   readonly conversationSummarizer?: ConversationSummarizer;
   readonly fastClassifier?: FastClassifier;
-  readonly telemetry?: SummarizationTelemetryService;
+  readonly executionObserver?: SummaryExecutionObserver;
   readonly createSummaryId?: () => SummaryId;
   readonly now?: () => TimestampMs;
   readonly windowSelector?: SummaryWindowSelector;
   readonly progressive?: WindowProcessorDeps["progressive"];
 }
-
-/** @deprecated Use MessageHistoryReader. */
-export type MessageReader = MessageHistoryReader;
-/** @deprecated Use SummaryWorkflow. */
-export type Summarizer = SummaryWorkflow;
-/** @deprecated Use SummaryWorkflowDependencies. */
-export type SummarizerDeps = SummaryWorkflowDependencies;

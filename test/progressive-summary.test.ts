@@ -4,6 +4,7 @@ import {
   asAuthorId,
   asChatId,
   asMessageId,
+  asSummaryId,
   asTimestampMs,
   createConversationWindow,
 } from "../packages/shared/src/index.js";
@@ -13,6 +14,7 @@ import {
   ProgressiveScheduler,
   ProgressiveSummarySession,
   SerializedPublisher,
+  SummaryExecutionJournal,
   streamSummaryRun,
   type ProgressiveTransport,
 } from "../packages/summarize/src/index.js";
@@ -33,10 +35,14 @@ function transport(overrides: Partial<ProgressiveTransport> = {}) {
 
 describe("progressive summary runtime", () => {
   it("exposes model output as plain append-only chunks", async () => {
+    const journal = new SummaryExecutionJournal(
+      () => asSummaryId("invocation-1"),
+      () => asTimestampMs(2),
+    );
     const fetch = vi.fn<typeof globalThis.fetch>(
       async () =>
         new Response(
-          `${JSON.stringify({ message: { content: "Перша " }, done: false })}\n${JSON.stringify({ message: { content: "частина." }, done: true })}\n`,
+          `${JSON.stringify({ message: { content: "Перша " }, done: false })}\n${JSON.stringify({ message: { content: "частина." }, done: true, done_reason: "stop", prompt_eval_count: 120, eval_count: 12 })}\n`,
           { status: 200 },
         ),
     );
@@ -55,7 +61,8 @@ describe("progressive summary runtime", () => {
     ]);
 
     const chunks: string[] = [];
-    for await (const chunk of summarizer.stream!(window)) chunks.push(chunk);
+    for await (const chunk of summarizer.stream!(window, undefined, journal))
+      chunks.push(chunk);
     expect(chunks).toEqual(["Перша ", "частина."]);
     const request = JSON.parse(String(fetch.mock.calls[0]?.[1]?.body));
     expect(request).toMatchObject({
@@ -74,6 +81,15 @@ describe("progressive summary runtime", () => {
       ],
     });
     expect(request).not.toHaveProperty("format");
+    expect(journal.snapshot().modelInvocations).toContainEqual(
+      expect.objectContaining({
+        stage: "summarizer",
+        outputText: chunks.join(""),
+        inputTokens: 120,
+        outputTokens: 12,
+        status: "succeeded",
+      }),
+    );
   });
 
   it("coalesces desired snapshots while preserving serialized prefix order", async () => {

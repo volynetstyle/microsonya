@@ -1,4 +1,4 @@
-import type { AuthorId, ConversationWindow } from "@microsonya/shared";
+import type { ConversationWindow } from "@microsonya/shared";
 
 export interface ModelWindowMessageRole {
   readonly message: { readonly id: number };
@@ -29,7 +29,8 @@ export const PIPE_GUIDE = [
   "The parent message may be outside the visible window if #N is not present.",
   "",
   "AUTHOR and MESSAGE are JSON-encoded strings.",
-  "AUTHOR starts with a stable window-local alias; source user IDs are hidden.",
+  "AUTHOR is the visible author label; source user IDs are hidden.",
+  "Use that visible label for attribution; never invent or emit internal author IDs.",
   "TIME is normalized ISO 8601 UTC.",
   "",
   "Parent structure provides conversational context but does not by itself prove",
@@ -77,25 +78,17 @@ function encodeInputRoles(roles: readonly ModelWindowMessageRole[]): string {
 
 /**
  * Encodes one immutable ConversationWindow for every model-facing consumer.
- * Author aliases are stable by first appearance and distinguish equal labels.
+ * Only visible author labels cross the model boundary. Internal identities stay
+ * private and cannot leak into generated text as synthetic @N aliases.
  */
 export function encodePipeWindow(window: ConversationWindow): string {
   const { messages } = window;
-  const aliases = new Map<AuthorId, string>();
   const records = new Array<string>(messages.length);
 
   for (let index = 0; index < messages.length; index += 1) {
     const message = messages[index]!;
-    let alias = aliases.get(message.author.id);
-    if (alias === undefined) {
-      alias = `@${aliases.size + 1}`;
-      aliases.set(message.author.id, alias);
-    }
-    const author = message.author.label
-      ? `${alias} ${message.author.label}`
-      : alias;
     records[index] =
-      `#${message.id}|^${message.parentId ?? 0}|${encodePipeString(author)}|${encodePipeTime(message.time)}|${encodePipeString(message.text)}`;
+      `#${message.id}|^${message.parentId ?? 0}|${encodePipeString(message.author.label)}|${encodePipeTime(message.time)}|${encodePipeString(message.text)}`;
   }
 
   return records.join("\n");

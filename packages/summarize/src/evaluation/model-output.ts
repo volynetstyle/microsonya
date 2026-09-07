@@ -1,9 +1,6 @@
 import { z } from "zod";
-import type {
-  ModelOutputFailure,
-  ModelStage,
-  SummarizationTelemetryTrace,
-} from "../workflow/telemetry.js";
+import type { ModelOutputFailure, ModelStage } from "../workflow/telemetry.js";
+import type { SummaryExecutionRecorder } from "../workflow/execution-journal.js";
 
 export class ModelOutputError extends Error {
   readonly code: ModelOutputFailure;
@@ -35,10 +32,10 @@ export function parseModelOutput<T>(options: {
   readonly model: string;
   readonly durationMs: number;
   readonly attempt?: number;
-  readonly telemetry?: SummarizationTelemetryTrace;
+  readonly execution?: SummaryExecutionRecorder;
 }): T {
-  const { raw, schema, stage, model, durationMs, attempt, telemetry } = options;
-  telemetry?.record({
+  const { raw, schema, stage, model, durationMs, attempt, execution } = options;
+  execution?.record({
     type: "model.response.raw",
     stage,
     model,
@@ -77,19 +74,19 @@ function invalidModelOutput<T>(
     model,
     durationMs,
     attempt,
-    telemetry,
+    execution,
   }: {
     readonly raw: string;
     readonly stage: ModelStage;
     readonly model: string;
     readonly durationMs: number;
     readonly attempt?: number;
-    readonly telemetry?: SummarizationTelemetryTrace;
+    readonly execution?: SummaryExecutionRecorder;
   },
   reason: ModelOutputFailure,
   cause?: unknown,
 ): ModelOutputError {
-  telemetry?.record({
+  execution?.record({
     type: "model.response.invalid",
     stage,
     model,

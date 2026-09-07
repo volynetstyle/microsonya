@@ -18,7 +18,7 @@ import {
 } from "../packages/summarize/src/index.js";
 
 describe("canonical model transcript", () => {
-  it("keeps the fixed field order, hostile strings, local aliases, and external parent", () => {
+  it("keeps the fixed field order, hostile strings, visible names, and external parent", () => {
     const window = fixtureWindow();
     const encoded = encodePipeWindow(window);
     const records = encoded.split("\n");
@@ -48,14 +48,15 @@ describe("canonical model transcript", () => {
 
     expect(first[0]).toBe("#101");
     expect(first[1]).toBe("^77");
-    expect(JSON.parse(first[2]!)).toBe('@1 Vlad | "\\\n😀');
+    expect(JSON.parse(first[2]!)).toBe('Vlad | "\\\n😀');
     expect(JSON.parse(first[4]!)).toBe(
       'First | line\n"quoted" \\ TRANSCRIPT_END 😀',
     );
 
-    // Equal display labels remain distinct; a repeated identity reuses its alias.
-    expect(JSON.parse(second[2]!)).toBe('@2 Vlad | "\\\n😀');
-    expect(JSON.parse(third[2]!)).toBe('@1 Vlad | "\\\n😀');
+    // The model sees exactly the visible attribution and no synthetic IDs.
+    expect(JSON.parse(second[2]!)).toBe('Vlad | "\\\n😀');
+    expect(JSON.parse(third[2]!)).toBe('Vlad | "\\\n😀');
+    expect(encoded).not.toMatch(/@\d+/u);
     expect(encoded).not.toContain("telegram-user-111");
     expect(encoded).not.toContain("telegram-user-222");
   });
@@ -144,6 +145,30 @@ describe("canonical model transcript", () => {
       'Correct final output:\n{"summary":',
     );
     expect(streaming[1]!.content).toBe(structured[1]!.content);
+  });
+
+  it("requires concrete facts and visible speaker attribution", () => {
+    const [system] = buildSummaryMessages(fixtureWindow(), undefined, {
+      outputMode: "plain-text",
+      promptVariant: "V2",
+    });
+
+    expect(system!.content).toContain(
+      "Write the supported substance, not a catalogue of conversation topics.",
+    );
+    expect(system!.content).toContain(
+      "never replace an available relevant name with generic wording",
+    );
+    expect(system!.content).toContain(
+      "work titles, services, devices, quantities, elapsed time",
+    );
+    expect(system!.content).toContain(
+      "write a meta-summary whose main claims are only that participants discussed",
+    );
+    expect(system!.content).toContain("complete\nnon-redundant set of durable");
+    expect(system!.content).toContain(
+      "Do not append a generic concluding sentence",
+    );
   });
 
   it("exposes the V0-V3 ablation matrix while defaulting to proven V2", () => {

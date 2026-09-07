@@ -9,7 +9,7 @@ import { buildModelPrompt } from "./model-prompt.js";
 import { ModelOutputError, parseModelOutput } from "./model-output.js";
 import { COMPACTION_DECISION_INSTRUCTIONS } from "./decision-policy.js";
 import type { ModelWindowMessageRole } from "./model-prompt.js";
-import type { SummarizationTelemetryTrace } from "../workflow/telemetry.js";
+import type { SummaryExecutionRecorder } from "../workflow/execution-journal.js";
 
 /**
  * | Label | Семантика |
@@ -22,9 +22,6 @@ import type { SummarizationTelemetryTrace } from "../workflow/telemetry.js";
  * | `SKIP_REACTIONS` | Вікно складається лише з greetings, acknowledgements, reactions, laughter, emoji або коротких відповідей |
  * | `SKIP_NO_VALUE` | Є якась тема чи оцінка, але немає конкретної durable information |
  */
-/** @deprecated Prefer the domain name SummaryAction. */
-export type CompactionAction = SummaryAction;
-
 const classifierOutputSchema = z
   .object({
     durable: z.boolean(),
@@ -43,7 +40,7 @@ export interface SummaryDecisionClassifier {
   classify(
     window: ConversationWindow,
     signal?: AbortSignal,
-    telemetry?: SummarizationTelemetryTrace,
+    execution?: SummaryExecutionRecorder,
     roles?: readonly ModelWindowMessageRole[],
   ): Promise<SummaryDecision>;
 }
@@ -56,13 +53,13 @@ export function createClassifier(
   deps: ClassifierDeps,
 ): SummaryDecisionClassifier {
   return {
-    classify: async (window, signal, telemetry, roles) => {
+    classify: async (window, signal, execution, roles) => {
       signal?.throwIfAborted();
       const prompt = buildClassifierPrompt(window, roles);
       for (let attempt = 1; attempt <= 2; attempt += 1) {
         const numPredict =
           CLASSIFIER_PROFILE.options.num_predict * (attempt === 1 ? 1 : 2);
-        telemetry?.record({
+        execution?.record({
           type: "model.request",
           stage: "classifier",
           model: CLASSIFIER_PROFILE.model,
@@ -88,7 +85,7 @@ export function createClassifier(
         signal?.throwIfAborted();
 
         const durationMs = performance.now() - startedAt;
-        telemetry?.record({
+        execution?.record({
           type: "model.response.envelope",
           stage: "classifier",
           model: CLASSIFIER_PROFILE.model,
@@ -112,10 +109,10 @@ export function createClassifier(
             model: CLASSIFIER_PROFILE.model,
             durationMs,
             attempt,
-            telemetry,
+            execution,
           });
           const action = decideFromPredicates(predicates);
-          telemetry?.record({
+          execution?.record({
             type: "model.response",
             stage: "classifier",
             model: CLASSIFIER_PROFILE.model,
@@ -138,7 +135,7 @@ export function createClassifier(
             (error.code === "MODEL_OUTPUT_EMPTY" ||
               response.done_reason === "length");
           if (retryableOutputFailure && attempt === 1) {
-            telemetry?.record({
+            execution?.record({
               type: "model.request.retry",
               stage: "classifier",
               model: CLASSIFIER_PROFILE.model,

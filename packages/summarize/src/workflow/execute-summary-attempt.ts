@@ -29,9 +29,13 @@ import {
 } from "../evaluation/evaluate-conversation.js";
 import type {
   SummarizationTelemetryService,
-  SummarizationTelemetryTrace,
   SummaryErrorCode,
 } from "./telemetry.js";
+import {
+  combineSummaryExecutionRecorders,
+  SummaryExecutionJournal,
+  startOptionalExecutionObserver,
+} from "./execution-journal.js";
 import { ModelOutputError } from "../evaluation/model-output.js";
 import { validateSemanticOutput } from "../acceptance/validate-semantic-output.js";
 import { shouldAdvanceCheckpoint } from "../acceptance/consumption-policy.js";
@@ -44,8 +48,8 @@ import {
 import { acceptOutcome } from "../acceptance/accept-outcome.js";
 import { AttemptCommitConflict } from "./attempt-commit.js";
 import type {
-  Summarizer,
-  SummarizerDeps,
+  SummaryWorkflow,
+  SummaryWorkflowDependencies,
   SummaryAttemptStore,
 } from "./ports.js";
 import { buildAttemptRecord } from "./build-attempt-record.js";
@@ -55,13 +59,9 @@ export type {
   WindowMessage,
 } from "../selection/select-conversation.js";
 
-const EMPTY_MODEL_METRICS = Object.freeze({
-  modelCalls: 0,
-  classifierMs: 0,
-  summarizerMs: 0,
-});
-
-export function createSummaryWorkflow(deps: SummarizerDeps): Summarizer {
+export function createSummaryWorkflow(
+  deps: SummaryWorkflowDependencies,
+): SummaryWorkflow {
   const classifier =
     deps.classifier ?? createClassifier({ ollama: requireOllama(deps) });
 
@@ -109,7 +109,7 @@ async function serializeByChat<T>(
 }
 
 async function run(
-  deps: SummarizerDeps,
+  deps: SummaryWorkflowDependencies,
   classifier: SummaryDecisionClassifier,
   conversationSummarizer: ConversationSummarizer,
   deferStreakByChat: Map<
@@ -124,11 +124,13 @@ async function run(
   const createSummaryId = deps.createSummaryId ?? defaultSummaryId;
   const startedWallClock = now();
   const elapsed = () => performance.now() - startedAt;
-  const telemetry = deps.telemetry?.start({
+  const journal = new SummaryExecutionJournal();
+  const telemetry = startOptionalExecutionObserver(deps.executionObserver, {
     traceId: `${command.chatId}:${command.commandMessageId}:${randomUUID()}`,
     chatId: command.chatId,
     commandMessageId: command.commandMessageId,
   });
+  const execution = combineSummaryExecutionRecorders(journal, telemetry);
   let stage = "start";
   let action: SummaryAction | undefined;
   let messageCount = 0;
@@ -140,7 +142,7 @@ async function run(
   let attemptPersisted = false;
 
   try {
-    telemetry?.record({ type: "summary.start", mode: command.mode });
+    execution.record({ type: "summary.start", mode: command.mode });
     signal?.throwIfAborted();
     stage = "messages.load";
 
@@ -149,7 +151,7 @@ async function run(
       findLatestConsumptionBoundary(deps.summaries, command.chatId),
     ]);
 
-    telemetry?.record({
+    execution.record({
       type: "messages.loaded",
       messageCount: all.length,
       hasPreviousRun: previous !== undefined,
@@ -166,7 +168,7 @@ async function run(
     messageCount = selected?.eligibleMessages.length ?? 0;
     contextMessageCount = selected?.contextMessages.length ?? 0;
 
-    telemetry?.record({
+    execution.record({
       type: "messages.selected",
       messageCount: selected?.eligibleMessages.length ?? 0,
       contextMessageCount: selected?.contextMessages.length ?? 0,
@@ -177,7 +179,7 @@ async function run(
 
     if (selected === null) {
       deferStreakByChat.delete(command.chatId);
-      telemetry?.record({
+      execution.record({
         type: "summary.finish",
         durationMs: elapsed(),
         status: "empty",
@@ -198,7 +200,7 @@ async function run(
         fastClassifier: deps.fastClassifier,
         createSummaryId: deps.createSummaryId,
         now: deps.now,
-        telemetry,
+        execution,
         roles: selected.messages,
         eligibleMessages: selected.eligibleMessages,
         progressive: deps.progressive,
@@ -260,13 +262,13 @@ async function run(
       attemptPersisted = true;
       checkpointAdvanced = true;
       deferStreakByChat.delete(command.chatId);
-      telemetry?.record({
+      execution.record({
         type: "summary.saved",
         durationMs: performance.now() - saveStartedAt,
       });
     }
 
-    telemetry?.record({
+    execution.record({
       type: "summary.finish",
       durationMs: elapsed(),
       status: disposition.kind,
@@ -280,7 +282,7 @@ async function run(
     return disposition;
   } catch (error) {
     const errorCode = classifySummaryError(error, stage);
-    telemetry?.record({
+    execution.record({
       type: "summary.error",
       durationMs: elapsed(),
       stage: error instanceof ModelOutputError ? error.stage : stage,
@@ -306,8 +308,7 @@ async function run(
     errorCode?: SummaryErrorCode,
     acceptedOutcome?: AcceptedOutcomeRecord,
   ): Promise<void> {
-    const recordAttempt =
-      deps.summaries.recordAttempt ?? deps.summaries.saveAttempt;
+    const recordAttempt = deps.summaries.recordAttempt;
     if (recordAttempt === undefined) {
       if (acceptedOutcome !== undefined)
         await recordAcceptedOutcome(deps.summaries, acceptedOutcome);
@@ -315,8 +316,8 @@ async function run(
     }
 
     const completedAt = now();
-    const model = modelMetrics(telemetry);
-    const modelInvocations = telemetry?.modelInvocations(errorCode) ?? [];
+    const model = journal.snapshot(errorCode);
+    const modelInvocations = model.modelInvocations;
     const classifierInvocation = [...modelInvocations]
       .reverse()
       .find(({ stage: invocationStage }) => invocationStage === "classifier");
@@ -367,8 +368,8 @@ async function run(
     status: "summarized" | "deferred" | "skipped" | "empty" | "error",
     errorCode?: SummaryErrorCode,
   ): void {
-    const model = modelMetrics(telemetry);
-    telemetry?.record({
+    const model = journal.snapshot(errorCode);
+    execution.record({
       type: "summary.run",
       action,
       messageCount,
@@ -389,20 +390,14 @@ function findLatestConsumptionBoundary(
   store: SummaryAttemptStore,
   chatId: ChatId,
 ): Promise<Pick<AcceptedOutcomeRecord, "covers"> | undefined> {
-  const find = store.findLatestConsumptionBoundary ?? store.findLastRun;
-  if (find === undefined) {
-    throw new TypeError(
-      "Summary attempt store cannot read consumption boundary.",
-    );
-  }
-  return find.call(store, chatId);
+  return store.findLatestConsumptionBoundary(chatId);
 }
 
 function recordAcceptedOutcome(
   store: SummaryAttemptStore,
   outcome: AcceptedOutcomeRecord,
 ): Promise<void> {
-  const record = store.recordAcceptedOutcome ?? store.saveRun;
+  const record = store.recordAcceptedOutcome;
   if (record === undefined) {
     throw new TypeError(
       "Summary attempt store cannot record accepted outcome.",
@@ -411,11 +406,9 @@ function recordAcceptedOutcome(
   return record.call(store, outcome);
 }
 
-function modelMetrics(telemetry?: SummarizationTelemetryTrace) {
-  return telemetry?.modelMetrics() ?? EMPTY_MODEL_METRICS;
-}
-
-function requireOllama(deps: SummarizerDeps): Pick<OllamaClient, "chat"> {
+function requireOllama(
+  deps: SummaryWorkflowDependencies,
+): Pick<OllamaClient, "chat"> {
   if (!deps.ollama) {
     throw new TypeError(
       "createSummaryWorkflow requires ollama when model-facing dependencies are not injected.",
@@ -423,9 +416,6 @@ function requireOllama(deps: SummarizerDeps): Pick<OllamaClient, "chat"> {
   }
   return deps.ollama;
 }
-
-/** @deprecated Use createSummaryWorkflow. */
-export const createSummarizer = createSummaryWorkflow;
 
 function defaultSummaryId(): SummaryId {
   return asSummaryId(randomUUID());

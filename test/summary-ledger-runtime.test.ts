@@ -4,24 +4,97 @@ import {
   asAuthorId,
   asChatId,
   asMessageId,
+  asSummaryId,
   asTimestampMs,
-  type SummaryRunAttempt,
+  type SummaryAttempt,
 } from "../packages/shared/src/index.js";
 import {
+  combineSummaryExecutionRecorders,
+  SummaryExecutionJournal,
+  startOptionalExecutionObserver,
   SummarizationTelemetryService,
-  createSummarizer,
+  createSummaryWorkflow,
 } from "../packages/summarize/src/index.js";
 
 describe("summary runtime ledger evidence", () => {
-  it("captures ledger evidence when verbose event emission is disabled", () => {
+  it("produces identical evidence with no-op and full observability", () => {
+    const createJournal = () =>
+      new SummaryExecutionJournal(
+        () => asSummaryId("invocation-1"),
+        () => asTimestampMs(123),
+      );
+    const withoutObservability = createJournal();
+    const withObservability = createJournal();
+    const emitted: unknown[] = [];
+    const trace = new SummarizationTelemetryService((event) =>
+      emitted.push(event),
+    ).start({
+      traceId: "trace-1",
+      chatId: asChatId("chat-1"),
+      commandMessageId: asMessageId(100),
+    });
+    const observed = combineSummaryExecutionRecorders(withObservability, trace);
+    const event = {
+      type: "model.request" as const,
+      stage: "classifier" as const,
+      model: "test-model",
+      attempt: 1,
+      messageCount: 1,
+      promptChars: 14,
+      prompt: "private prompt",
+    };
+
+    withoutObservability.record(event);
+    observed.record(event);
+
+    expect(withObservability.snapshot()).toEqual(
+      withoutObservability.snapshot(),
+    );
+    expect(emitted).toHaveLength(1);
+  });
+
+  it("isolates observer startup and recording failures", () => {
+    const context = {
+      traceId: "trace-1",
+      chatId: asChatId("chat-1"),
+      commandMessageId: asMessageId(100),
+    };
+    const failsToStart = startOptionalExecutionObserver(
+      {
+        start: () => {
+          throw new Error("observer startup failed");
+        },
+      },
+      context,
+    );
+    const failsToRecord = startOptionalExecutionObserver(
+      {
+        start: () => ({
+          record: () => {
+            throw new Error("observer recording failed");
+          },
+        }),
+      },
+      context,
+    );
+
+    expect(failsToStart).toBeUndefined();
+    expect(() =>
+      failsToRecord?.record({ type: "summary.start", mode: "recent" }),
+    ).not.toThrow();
+  });
+
+  it("captures ledger evidence independently when event emission is disabled", () => {
+    const journal = new SummaryExecutionJournal();
     const trace = new SummarizationTelemetryService(null).start({
       traceId: "production-trace",
       chatId: asChatId("chat-1"),
       commandMessageId: asMessageId(100),
     });
+    const execution = combineSummaryExecutionRecorders(journal, trace);
 
     expect(trace.emitsEvents).toBe(false);
-    trace.record({
+    execution.record({
       type: "model.request",
       stage: "classifier",
       model: "gpt-oss:120b-cloud",
@@ -30,7 +103,7 @@ describe("summary runtime ledger evidence", () => {
       promptChars: 7,
       prompt: "private",
     });
-    trace.record({
+    execution.record({
       type: "model.response.envelope",
       stage: "classifier",
       model: "gpt-oss:120b-cloud",
@@ -41,7 +114,7 @@ describe("summary runtime ledger evidence", () => {
       thinkingChars: 0,
       content: "{}",
     });
-    trace.record({
+    execution.record({
       type: "model.response",
       stage: "classifier",
       model: "gpt-oss:120b-cloud",
@@ -51,24 +124,25 @@ describe("summary runtime ledger evidence", () => {
       action: "SKIP_NO_VALUE",
     });
 
-    expect(trace.modelMetrics()).toMatchObject({
+    const record = journal.snapshot();
+    expect(record).toMatchObject({
       modelCalls: 1,
       classifierMs: 4,
     });
-    expect(trace.modelInvocations()).toMatchObject([
+    expect(record.modelInvocations).toMatchObject([
       { status: "succeeded", outputText: "{}" },
     ]);
   });
 
   it("persists a deferred attempt without moving its checkpoint", async () => {
-    const attempts: SummaryRunAttempt[] = [];
+    const attempts: SummaryAttempt[] = [];
     const saveRun = vi.fn();
-    const summarizer = createSummarizer({
+    const summarizer = createSummaryWorkflow({
       messages: { listByChat: async () => [message()] },
       summaries: {
-        findLastRun: async () => undefined,
-        saveRun,
-        saveAttempt: async (attempt) => void attempts.push(attempt),
+        findLatestConsumptionBoundary: async () => undefined,
+        recordAcceptedOutcome: saveRun,
+        recordAttempt: async (attempt) => void attempts.push(attempt),
       },
       classifier: {
         classify: async () => ({
@@ -107,13 +181,13 @@ describe("summary runtime ledger evidence", () => {
   });
 
   it("persists provider failure evidence while preserving the checkpoint", async () => {
-    const attempts: SummaryRunAttempt[] = [];
-    const summarizer = createSummarizer({
+    const attempts: SummaryAttempt[] = [];
+    const summarizer = createSummaryWorkflow({
       messages: { listByChat: async () => [message()] },
       summaries: {
-        findLastRun: async () => undefined,
-        saveRun: vi.fn(),
-        saveAttempt: async (attempt) => void attempts.push(attempt),
+        findLatestConsumptionBoundary: async () => undefined,
+        recordAcceptedOutcome: vi.fn(),
+        recordAttempt: async (attempt) => void attempts.push(attempt),
       },
       classifier: {
         classify: async () => {
@@ -139,6 +213,7 @@ describe("summary runtime ledger evidence", () => {
 
   it("captures exact model metadata as evidence independently of log redaction", () => {
     const emitted: unknown[] = [];
+    const journal = new SummaryExecutionJournal();
     const trace = new SummarizationTelemetryService(
       (event) => emitted.push(event),
       { includePrompt: false, includeModelResponse: false },
@@ -147,10 +222,11 @@ describe("summary runtime ledger evidence", () => {
       chatId: asChatId("chat-1"),
       commandMessageId: asMessageId(100),
     });
+    const execution = combineSummaryExecutionRecorders(journal, trace);
     const prompt = "CLASSIFICATION_POLICY\nprivate input";
     const raw = '{"durable":true}';
 
-    trace.record({
+    execution.record({
       type: "model.request",
       stage: "classifier",
       model: "gpt-oss:120b-cloud",
@@ -159,7 +235,7 @@ describe("summary runtime ledger evidence", () => {
       promptChars: prompt.length,
       prompt,
     });
-    trace.record({
+    execution.record({
       type: "model.response.envelope",
       stage: "classifier",
       model: "gpt-oss:120b-cloud",
@@ -172,7 +248,7 @@ describe("summary runtime ledger evidence", () => {
       thinkingChars: 0,
       content: raw,
     });
-    trace.record({
+    execution.record({
       type: "model.response",
       stage: "classifier",
       model: "gpt-oss:120b-cloud",
@@ -191,7 +267,7 @@ describe("summary runtime ledger evidence", () => {
       },
     });
 
-    expect(trace.modelInvocations()).toEqual([
+    expect(journal.snapshot().modelInvocations).toEqual([
       expect.objectContaining({
         stage: "classifier",
         model: "gpt-oss:120b-cloud",
@@ -209,13 +285,13 @@ describe("summary runtime ledger evidence", () => {
   });
 
   it("persists summary text for a non-checkpoint count run", async () => {
-    const attempts: SummaryRunAttempt[] = [];
-    const summarizer = createSummarizer({
+    const attempts: SummaryAttempt[] = [];
+    const summarizer = createSummaryWorkflow({
       messages: { listByChat: async () => [message()] },
       summaries: {
-        findLastRun: async () => undefined,
-        saveRun: vi.fn(),
-        saveAttempt: async (attempt) => void attempts.push(attempt),
+        findLatestConsumptionBoundary: async () => undefined,
+        recordAcceptedOutcome: vi.fn(),
+        recordAttempt: async (attempt) => void attempts.push(attempt),
       },
       classifier: {
         classify: async () => ({

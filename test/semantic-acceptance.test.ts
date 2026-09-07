@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createSummarizer } from "../packages/summarize/src/index.js";
+import { createSummaryWorkflow } from "../packages/summarize/src/index.js";
 import {
   asAuthorId,
   asChatId,
@@ -7,8 +7,8 @@ import {
   asTimestampMs,
 } from "../packages/shared/src/index.js";
 import {
-  SummaryAttemptsRepository,
-  createLedgerEncryption,
+  SummaryAttemptRepository,
+  createDataEncryption,
   summaryRuns,
   wmaChatCatalog,
 } from "../packages/db/src/index.js";
@@ -24,12 +24,12 @@ describe("semantic acceptance before ledger commit", () => {
   ])("records only error evidence for rejected output %j", async (text) => {
     const client = await openTestDb();
     try {
-      const repo = new SummaryAttemptsRepository(
+      const repo = new SummaryAttemptRepository(
         client.db,
-        createLedgerEncryption(Buffer.alloc(32, 4)),
+        createDataEncryption(Buffer.alloc(32, 4)),
       );
       const chatId = asChatId("acceptance-chat");
-      const workflow = createSummarizer({
+      const workflow = createSummaryWorkflow({
         messages: {
           listByChat: async () => [
             {
@@ -76,13 +76,13 @@ describe("semantic acceptance before ledger commit", () => {
   it("accepts a long semantic result independently of Telegram limits", async () => {
     const client = await openTestDb();
     try {
-      const repo = new SummaryAttemptsRepository(
+      const repo = new SummaryAttemptRepository(
         client.db,
-        createLedgerEncryption(Buffer.alloc(32, 4)),
+        createDataEncryption(Buffer.alloc(32, 4)),
       );
       const chatId = asChatId("long-acceptance-chat");
       const text = "Useful factual summary. ".repeat(300);
-      const workflow = createSummarizer({
+      const workflow = createSummaryWorkflow({
         messages: {
           listByChat: async () => [
             {

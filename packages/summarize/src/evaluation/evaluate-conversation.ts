@@ -12,7 +12,7 @@ import {
 import type { SummaryDecisionClassifier } from "./classify-conversation.js";
 import type { ConversationSummarizer } from "./generate-summary.js";
 import type { ModelWindowMessageRole } from "./model-prompt.js";
-import type { SummarizationTelemetryTrace } from "../workflow/telemetry.js";
+import type { SummaryExecutionRecorder } from "../workflow/execution-journal.js";
 import {
   analyzeStructure,
   type StructuralAnalysis,
@@ -47,7 +47,7 @@ export interface WindowProcessorDeps {
   readonly fastClassifier?: FastClassifier;
   readonly createSummaryId?: () => SummaryId;
   readonly now?: () => TimestampMs;
-  readonly telemetry?: SummarizationTelemetryTrace;
+  readonly execution?: SummaryExecutionRecorder;
   readonly roles?: readonly ModelWindowMessageRole[];
   readonly progressive?: {
     begin(): Promise<void>;
@@ -67,14 +67,14 @@ export async function decideWindow(
   classifier: SummaryDecisionClassifier,
   signal?: AbortSignal,
   fastClassifier: FastClassifier = abstainingFastClassifier,
-  telemetry?: SummarizationTelemetryTrace,
+  execution?: SummaryExecutionRecorder,
   roles?: readonly ModelWindowMessageRole[],
 ): Promise<SummaryDecision> {
   signal?.throwIfAborted();
   const analysis = analyzeStructure(window);
-  telemetry?.record({ type: "window.analyzed", analysis });
+  execution?.record({ type: "window.analyzed", analysis });
   const fast = fastClassifier.classify(window, analysis);
-  telemetry?.record({
+  execution?.record({
     type: "window.fast-classifier",
     result: fast.kind === "abstain" ? "abstain" : "resolved",
     ...(fast.kind === "resolved"
@@ -92,7 +92,7 @@ export async function decideWindow(
     });
   }
 
-  return classifier.classify(window, signal, telemetry, roles);
+  return classifier.classify(window, signal, execution, roles);
 }
 
 export async function processWindow(
@@ -106,11 +106,11 @@ export async function processWindow(
     deps.classifier,
     signal,
     deps.fastClassifier,
-    deps.telemetry,
+    deps.execution,
     deps.roles,
   );
   signal?.throwIfAborted();
-  deps.telemetry?.record({
+  deps.execution?.record({
     type: "window.decision",
     action: decision.action,
     source: decision.evidence.source,
@@ -130,7 +130,7 @@ export async function processWindow(
         for await (const delta of deps.summarizer.stream(
           window,
           signal,
-          deps.telemetry,
+          deps.execution,
           deps.roles,
         )) {
           deps.progressive.append(delta);
@@ -144,7 +144,7 @@ export async function processWindow(
       generated = await deps.summarizer.summarize(
         window,
         signal,
-        deps.telemetry,
+        deps.execution,
         deps.roles,
       );
     }
@@ -184,7 +184,7 @@ export async function processWindow(
         break;
     }
   }
-  deps.telemetry?.record({
+  deps.execution?.record({
     type: "window.disposition",
     kind: disposition.kind,
     ...(disposition.kind === "summarized"

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
-  SummariesRepo,
-  createLedgerEncryption,
+  SummaryAttemptRepository,
+  createDataEncryption,
   summaryRuns,
 } from "../packages/db/src/index.js";
 import {
@@ -11,7 +11,7 @@ import {
   asTimestampMs,
   type SummaryMode,
 } from "../packages/shared/src/index.js";
-import { createSummarizer } from "../packages/summarize/src/index.js";
+import { createSummaryWorkflow } from "../packages/summarize/src/index.js";
 import { openTestDb } from "./dbTestUtils.js";
 
 describe("read-only count checkpoint isolation", () => {
@@ -19,9 +19,9 @@ describe("read-only count checkpoint isolation", () => {
     "keeps pending messages eligible after count (previous mode: %s)",
     async (previousMode) => {
       const client = await openTestDb();
-      const repo = new SummariesRepo(
+      const repo = new SummaryAttemptRepository(
         client.db,
-        createLedgerEncryption(Buffer.alloc(32, 9)),
+        createDataEncryption(Buffer.alloc(32, 9)),
       );
       const chatId = asChatId("count-checkpoint");
       const date = asTimestampMs(new Date(2026, 8, 5, 12).getTime());
@@ -34,12 +34,13 @@ describe("read-only count checkpoint isolation", () => {
         text: `Fact ${id}`,
       }));
       const seen: number[][] = [];
-      const summarizer = createSummarizer({
+      const summarizer = createSummaryWorkflow({
         messages: { listByChat: async () => messages },
         summaries: {
-          findLastRun: (id) => repo.findLastCheckpoint(id),
-          saveRun: (run) => repo.saveRun(run),
-          saveAttempt: (attempt) => repo.saveAttempt(attempt),
+          findLatestConsumptionBoundary: (id) =>
+            repo.findLatestConsumptionBoundary(id),
+          recordAcceptedOutcome: (run) => repo.recordAcceptedOutcome(run),
+          recordAttempt: (attempt) => repo.recordAttempt(attempt),
         },
         classifier: {
           classify: async (window) => {

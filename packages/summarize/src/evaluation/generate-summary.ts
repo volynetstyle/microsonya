@@ -17,19 +17,19 @@ import {
 } from "./model-prompt.js";
 import type { ModelWindowMessageRole } from "./model-prompt.js";
 import { parseModelOutput } from "./model-output.js";
-import type { SummarizationTelemetryTrace } from "../workflow/telemetry.js";
+import type { SummaryExecutionRecorder } from "../workflow/execution-journal.js";
 
 export interface ConversationSummarizer {
   summarize(
     window: ConversationWindow,
     signal?: AbortSignal,
-    telemetry?: SummarizationTelemetryTrace,
+    execution?: SummaryExecutionRecorder,
     roles?: readonly ModelWindowMessageRole[],
   ): Promise<Summary>;
   stream?(
     window: ConversationWindow,
     signal?: AbortSignal,
-    telemetry?: SummarizationTelemetryTrace,
+    execution?: SummaryExecutionRecorder,
     roles?: readonly ModelWindowMessageRole[],
   ): AsyncIterable<string>;
 }
@@ -48,8 +48,18 @@ export interface SummaryPromptOptions {
 }
 
 const SUMMARY_COMPOSITION_POLICY = `
-Before writing the final summary, internally determine the smallest set of
-durable propositions needed to represent the eligible conversation.
+Before writing the final summary, internally determine the complete
+non-redundant set of durable propositions supported by eligible messages.
+Compression may remove repetition and filler, but must not erase a distinct
+problem, state change, purchase, delivery update, recommendation, disagreement,
+or other concrete thread merely because several threads can share a broad topic.
+
+Before returning, check every eligible message against that proposition set:
+- retain every distinct concrete fact that is useful beyond the immediate turn;
+- attach the visible speaker when ownership or attribution distinguishes it;
+- keep different entities, works, products, orders, and technical problems separate;
+- omit only repetition, filler, reactions, or genuinely low-value banter;
+- ensure every sentence states supported content rather than describing the chat.
 
 For every retained proposition preserve:
 - subject or entity;
@@ -78,6 +88,9 @@ report != established fact.
 Do not fuse propositions from different speakers, entities, conditions,
 modalities, or time states into one assertion unless the relation between them
 is explicit. Fluent prose is not evidence for a semantic relation.
+
+Do not append a generic concluding sentence that merely lists the conversation's
+topics; it adds no information beyond the concrete propositions.
 `.trim();
 
 /**
@@ -130,7 +143,7 @@ export function createConversationSummarizer({
   const stream = async function* (
     window: ConversationWindow,
     signal?: AbortSignal,
-    telemetry?: SummarizationTelemetryTrace,
+    execution?: SummaryExecutionRecorder,
     roles?: readonly ModelWindowMessageRole[],
   ): AsyncIterable<string> {
     signal?.throwIfAborted();
@@ -139,7 +152,7 @@ export function createConversationSummarizer({
       promptVariant,
     });
     const prompt = messages.map(({ content }) => content).join("\n\n");
-    telemetry?.record({
+    execution?.record({
       type: "model.request",
       stage: "summarizer",
       model: SUMMARIZER_PROFILE.model,
@@ -149,6 +162,11 @@ export function createConversationSummarizer({
     });
     const startedAt = performance.now();
     let content = "";
+    let done = false;
+    let doneReason: string | undefined;
+    let promptEvalCount: number | undefined;
+    let evalCount: number | undefined;
+    let thinking = "";
     for await (const event of ollama.chat(
       {
         ...SUMMARIZER_PROFILE,
@@ -159,6 +177,11 @@ export function createConversationSummarizer({
       { signal },
     )) {
       signal?.throwIfAborted();
+      done = event.done;
+      doneReason = event.done_reason;
+      promptEvalCount = event.prompt_eval_count;
+      evalCount = event.eval_count;
+      thinking += event.message.thinking ?? "";
       const delta = event.message.content;
       if (delta.length > 0) {
         content += delta;
@@ -169,7 +192,22 @@ export function createConversationSummarizer({
     if (content.trim().length === 0) {
       throw new TypeError("Streaming summarizer returned empty output.");
     }
-    telemetry?.record({
+    execution?.record({
+      type: "model.response.envelope",
+      stage: "summarizer",
+      model: SUMMARIZER_PROFILE.model,
+      attempt: 1,
+      durationMs,
+      done,
+      doneReason,
+      promptEvalCount,
+      evalCount,
+      contentChars: content.length,
+      thinkingChars: thinking.length,
+      content,
+      thinking,
+    });
+    execution?.record({
       type: "model.response",
       stage: "summarizer",
       model: SUMMARIZER_PROFILE.model,
@@ -182,14 +220,14 @@ export function createConversationSummarizer({
 
   return {
     stream,
-    summarize: async (window, signal, telemetry, roles) => {
+    summarize: async (window, signal, execution, roles) => {
       signal?.throwIfAborted();
       const messages = buildSummaryMessages(window, roles, {
         outputMode: "structured",
         promptVariant,
       });
       const prompt = messages.map(({ content }) => content).join("\n\n");
-      telemetry?.record({
+      execution?.record({
         type: "model.request",
         stage: "summarizer",
         model: SUMMARIZER_PROFILE.model,
@@ -210,7 +248,7 @@ export function createConversationSummarizer({
       signal?.throwIfAborted();
 
       const durationMs = performance.now() - startedAt;
-      telemetry?.record({
+      execution?.record({
         type: "model.response.envelope",
         stage: "summarizer",
         model: SUMMARIZER_PROFILE.model,
@@ -232,9 +270,9 @@ export function createConversationSummarizer({
         model: SUMMARIZER_PROFILE.model,
         durationMs,
         attempt: 1,
-        telemetry,
+        execution,
       });
-      telemetry?.record({
+      execution?.record({
         type: "model.response",
         stage: "summarizer",
         model: SUMMARIZER_PROFILE.model,

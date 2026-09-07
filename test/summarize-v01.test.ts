@@ -8,10 +8,10 @@ import {
   type ChatMessage,
   type ConversationWindow,
   type SummaryCommand,
-  type SummaryRun,
+  type AcceptedOutcomeRecord,
 } from "../packages/shared/src/index.js";
 import {
-  createSummarizer,
+  createSummaryWorkflow,
   SummarizationTelemetryService,
   type SummarizationTelemetryEvent,
 } from "../packages/summarize/src/index.js";
@@ -45,11 +45,14 @@ describe("summarizer 0.1 workflow", () => {
         };
       },
     );
-    const summarizer = createSummarizer({
+    const summarizer = createSummaryWorkflow({
       messages: { listByChat },
-      summaries: { findLastRun: async () => undefined, saveRun },
+      summaries: {
+        findLatestConsumptionBoundary: async () => undefined,
+        recordAcceptedOutcome: saveRun,
+      },
       ollama: { chat: chat as never },
-      telemetry: new SummarizationTelemetryService(
+      executionObserver: new SummarizationTelemetryService(
         (event) => events.push(event),
         { includePrompt: false },
       ),
@@ -157,9 +160,12 @@ describe("summarizer 0.1 workflow", () => {
 
   it("persists a skipped boundary so low-value messages are not reconsidered", async () => {
     const saveRun = vi.fn(async () => undefined);
-    const summarizer = createSummarizer({
+    const summarizer = createSummaryWorkflow({
       messages: { listByChat: async () => [message(5, "👍")] },
-      summaries: { findLastRun: async () => undefined, saveRun },
+      summaries: {
+        findLatestConsumptionBoundary: async () => undefined,
+        recordAcceptedOutcome: saveRun,
+      },
       classifier: {
         classify: async () => ({
           action: "SKIP_REACTIONS",
@@ -186,9 +192,12 @@ describe("summarizer 0.1 workflow", () => {
 
   it("does not persist a deferred window so it remains eligible later", async () => {
     const saveRun = vi.fn(async () => undefined);
-    const summarizer = createSummarizer({
+    const summarizer = createSummaryWorkflow({
       messages: { listByChat: async () => [message(5, "Checking now")] },
-      summaries: { findLastRun: async () => undefined, saveRun },
+      summaries: {
+        findLatestConsumptionBoundary: async () => undefined,
+        recordAcceptedOutcome: saveRun,
+      },
       classifier: {
         classify: async () => ({
           action: "DEFER_INCOMPLETE",
@@ -209,9 +218,12 @@ describe("summarizer 0.1 workflow", () => {
 
   it("reports a consecutive defer streak for the same persisted checkpoint", async () => {
     const events: SummarizationTelemetryEvent[] = [];
-    const summarizer = createSummarizer({
+    const summarizer = createSummaryWorkflow({
       messages: { listByChat: async () => [message(5, "Checking now")] },
-      summaries: { findLastRun: async () => undefined, saveRun: vi.fn() },
+      summaries: {
+        findLatestConsumptionBoundary: async () => undefined,
+        recordAcceptedOutcome: vi.fn(),
+      },
       classifier: {
         classify: async () => ({
           action: "DEFER_COMPACT",
@@ -219,7 +231,7 @@ describe("summarizer 0.1 workflow", () => {
         }),
       },
       conversationSummarizer: { summarize: vi.fn() },
-      telemetry: new SummarizationTelemetryService((event) =>
+      executionObserver: new SummarizationTelemetryService((event) =>
         events.push(event),
       ),
     });
@@ -237,14 +249,17 @@ describe("summarizer 0.1 workflow", () => {
   it("uses an old reply parent as model context but persists coverage for eligible content only", async () => {
     const saveRun = vi.fn(async () => undefined);
     const previous = previousRun(1);
-    const summarizer = createSummarizer({
+    const summarizer = createSummaryWorkflow({
       messages: {
         listByChat: async () => [
           message(1, "Deploy is blocked by migration 42"),
           message(2, "Migration is complete; deploy can start", 1),
         ],
       },
-      summaries: { findLastRun: async () => previous, saveRun },
+      summaries: {
+        findLatestConsumptionBoundary: async () => previous,
+        recordAcceptedOutcome: saveRun,
+      },
       classifier: {
         classify: async (window) => {
           expect(window.messages.map(({ id }) => id)).toEqual([1, 2]);
@@ -278,13 +293,13 @@ describe("summarizer 0.1 workflow", () => {
     const events: SummarizationTelemetryEvent[] = [];
     const previous = previousRun(1);
     const saveFailure = new Error("database unavailable");
-    const summarizer = createSummarizer({
+    const summarizer = createSummaryWorkflow({
       messages: {
         listByChat: async () => [message(1, "old"), message(2, "new")],
       },
       summaries: {
-        findLastRun: async () => previous,
-        saveRun: async () => Promise.reject(saveFailure),
+        findLatestConsumptionBoundary: async () => previous,
+        recordAcceptedOutcome: async () => Promise.reject(saveFailure),
       },
       classifier: {
         classify: async () => ({
@@ -293,7 +308,7 @@ describe("summarizer 0.1 workflow", () => {
         }),
       },
       conversationSummarizer: { summarize: vi.fn() },
-      telemetry: new SummarizationTelemetryService((event) =>
+      executionObserver: new SummarizationTelemetryService((event) =>
         events.push(event),
       ),
     });
@@ -315,11 +330,11 @@ describe("summarizer 0.1 workflow", () => {
 
   it("returns null without calling either model when selection is empty", async () => {
     const chat = vi.fn();
-    const summarizer = createSummarizer({
+    const summarizer = createSummaryWorkflow({
       messages: { listByChat: async () => [] },
       summaries: {
-        findLastRun: async () => undefined,
-        saveRun: vi.fn(),
+        findLatestConsumptionBoundary: async () => undefined,
+        recordAcceptedOutcome: vi.fn(),
       },
       ollama: { chat: chat as never },
     });
@@ -331,14 +346,17 @@ describe("summarizer 0.1 workflow", () => {
   it("does not save a canonical checkpoint for a read-only count window", async () => {
     const saveRun = vi.fn(async () => undefined);
     const previous = previousRun(1);
-    const summarizer = createSummarizer({
+    const summarizer = createSummaryWorkflow({
       messages: {
         listByChat: async () => [
           message(2, "old history"),
           message(3, "new history"),
         ],
       },
-      summaries: { findLastRun: async () => previous, saveRun },
+      summaries: {
+        findLatestConsumptionBoundary: async () => previous,
+        recordAcceptedOutcome: saveRun,
+      },
       classifier: {
         classify: async () => ({
           action: "SKIP_NO_VALUE",
@@ -355,16 +373,16 @@ describe("summarizer 0.1 workflow", () => {
   it("attributes an invalid classifier contract to classifier.output", async () => {
     const events: SummarizationTelemetryEvent[] = [];
     const saveRun = vi.fn();
-    const summarizer = createSummarizer({
+    const summarizer = createSummaryWorkflow({
       messages: { listByChat: async () => [message(1, "Release is Friday")] },
       summaries: {
-        findLastRun: async () => undefined,
-        saveRun,
+        findLatestConsumptionBoundary: async () => undefined,
+        recordAcceptedOutcome: saveRun,
       },
       ollama: {
         chat: (async () => ({ message: { content: "" } })) as never,
       },
-      telemetry: new SummarizationTelemetryService(
+      executionObserver: new SummarizationTelemetryService(
         (event) => events.push(event),
         { includeModelResponse: false },
       ),
@@ -417,11 +435,11 @@ describe("summarizer 0.1 workflow", () => {
         };
       },
     };
-    const summarizer = createSummarizer({
+    const summarizer = createSummaryWorkflow({
       messages: { listByChat: async () => [message(1, "Release is Friday")] },
       summaries: {
-        findLastRun: async () => undefined,
-        saveRun: vi.fn(async () => undefined),
+        findLatestConsumptionBoundary: async () => undefined,
+        recordAcceptedOutcome: vi.fn(async () => undefined),
       },
       ollama: ollama as never,
     });
@@ -446,14 +464,17 @@ describe("summarizer 0.1 workflow", () => {
         text: "Release: Friday 15:00 UTC. Owner: Olia. Rollback: plan B.",
       };
     });
-    const summarizer = createSummarizer({
+    const summarizer = createSummaryWorkflow({
       messages: {
         listByChat: async () => [
           message(1, "Release is Friday at 15:00 UTC."),
           message(2, "Deploy owner is Olia; rollback is plan B."),
         ],
       },
-      summaries: { findLastRun: async () => undefined, saveRun },
+      summaries: {
+        findLatestConsumptionBoundary: async () => undefined,
+        recordAcceptedOutcome: saveRun,
+      },
       classifier: {
         classify: async () => ({
           action: "SUMMARIZE",
@@ -461,7 +482,7 @@ describe("summarizer 0.1 workflow", () => {
         }),
       },
       conversationSummarizer: { summarize },
-      telemetry: new SummarizationTelemetryService(sink),
+      executionObserver: new SummarizationTelemetryService(sink),
       createSummaryId: () => asSummaryId("proof-summary"),
       now: () => asTimestampMs(200_000_001),
     });
@@ -512,7 +533,7 @@ function message(
   };
 }
 
-function previousRun(lastId: number): SummaryRun {
+function previousRun(lastId: number): AcceptedOutcomeRecord {
   return {
     id: asSummaryId("previous"),
     chatId: asChatId("chat"),

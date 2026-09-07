@@ -206,6 +206,25 @@ export const SUMMARY_INSTRUCTIONS = `
   - important numbers, dates, times, constraints, and uncertainty;
   - who said, believed, requested, planned, decided, or did something when attribution matters.
 
+  Write the supported substance, not a catalogue of conversation topics.
+  State the concrete supported fact and its visible speaker instead of saying
+  only that participants discussed the corresponding topic.
+
+  Attribution rules:
+  - visible author labels are evidence and may be used in the summary;
+  - preserve a person's visible name when it identifies who owns a problem,
+    order, experience, opinion, request, proposal, plan, commitment, or action;
+  - never replace an available relevant name with generic wording such as
+    "учасник", "користувач", "хтось", or "дехто" merely to make the text shorter;
+  - do not list a speaker only when their identity genuinely adds no useful
+    distinction to the retained proposition;
+  - keep different speakers' claims separate, especially when they disagree.
+
+  Preserve concrete anchors that distinguish the retained facts: product and
+  work titles, services, devices, quantities, elapsed time, delivery state,
+  error or licensing constraints, and stated alternatives. Do not replace
+  these with broader topic labels when the concrete value is visible.
+
   Usually omit:
   - greetings and reactions;
   - jokes, wordplay, laughter, and casual banter;
@@ -225,6 +244,9 @@ export const SUMMARY_INSTRUCTIONS = `
   - turn possibilities into plans, plans into commitments, commitments into completed facts, or uncertain/reported claims into established facts;
   - move a statement, belief, intention, or action from one speaker to another;
   - treat reply structure as proof of semantic relation or causality.
+  - write a meta-summary whose main claims are only that participants discussed,
+    joked about, reacted to, mentioned, or shared something;
+  - flatten distinct concrete problems or purchases into generic categories.
 
   A message may depend on context outside the visible window.
   If missing context is necessary to interpret it safely, retain only what remains useful and supported without that context, or omit it.
@@ -243,64 +265,4 @@ export const SUMMARY_STRUCTURED_OUTPUT_INSTRUCTIONS = `
 
 export const SUMMARY_STREAM_OUTPUT_INSTRUCTIONS = `
   Return only the summary as plain text. Do not use JSON or Markdown.
-`.trim();
-
-export const SUMMARY_DECISION_RESPONSE_INSTRUCTIONS = `
-Explain the provided summarization decision to the user.
-
-The decision has already been made by another component.
-Do NOT reconsider, override, or second-guess it.
-Do NOT perform summarization.
-
-Your task is only to communicate the decision naturally and usefully.
-
-The caller provides:
-- the summarization decision;
-- optional context about the visible window;
-- formatting or style requirements.
-
-Interpret decisions as follows:
-
-SUMMARIZE
-The window contains meaningful information with enough compression value
-to justify producing a summary now.
-
-DEFER_COMPACT
-Meaningful information exists, but it is already too compact for a summary
-to provide useful compression. It should remain available for a later window.
-
-DEFER_INCOMPLETE
-Meaningful information exists, but the exchange is still developing.
-Waiting for more context is likely to produce a better summary.
-
-DEFER_CONTEXT
-Potentially meaningful information exists, but the visible context is
-insufficient to summarize it safely without guessing.
-
-SKIP_REACTIONS
-The window consists mainly of reactions, acknowledgements, laughter,
-or similarly low-information conversational responses.
-
-SKIP_BANTER
-The window consists mainly of casual banter, jokes, or social interaction
-without enough durable informational value for summary history.
-
-SKIP_NO_VALUE
-The visible window contains too little durable information to justify
-creating or retaining a summary.
-
-When explaining a non-SUMMARIZE decision:
-- clearly state why a summary was not produced;
-- distinguish temporary deferral from permanent skipping;
-- do not imply that DEFER content is unimportant;
-- do not claim that SKIP content is meaningless in the conversation,
-  only that it has insufficient value for summary history;
-- do not invent facts about the conversation;
-- do not expose internal thresholds, scores, implementation details,
-  or model reasoning unless explicitly requested.
-
-Keep the explanation proportional to the request.
-A normal response should usually require only one or two concise sentences.
-
-Follow the output format requested by the caller.
 `.trim();
