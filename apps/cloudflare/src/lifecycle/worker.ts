@@ -9,7 +9,7 @@ import type {
 import {
   decideReconciliation,
   type ReconciliationAction,
-  type SummaryRunLifecycleStatus,
+  type SummaryExecutionStatus,
 } from "@microsonya/run-lifecycle";
 import { errorName, logTelemetry } from "../observability.js";
 import { withWorkerDatabase } from "../runtime/worker-db.js";
@@ -310,7 +310,7 @@ async function prepareRunForEnqueue(
   repository: SummaryExecutionRepository,
   run: {
     readonly id: SummaryId;
-    readonly status: SummaryRunLifecycleStatus;
+    readonly status: SummaryExecutionStatus;
   },
   action: ReconciliationAction,
   now: ReturnType<typeof asTimestampMs>,

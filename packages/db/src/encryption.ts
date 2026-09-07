@@ -14,9 +14,6 @@ export type DataEncryption = {
   lookup(value: string, namespace: string): string;
 };
 
-/** @deprecated Use DataEncryption. Kept for source compatibility. */
-export type LedgerEncryption = DataEncryption;
-
 export function createDataEncryption(key: Buffer): DataEncryption {
   if (key.byteLength !== 32) {
     throw new TypeError("Summary ledger encryption key must be 32 bytes.");
@@ -60,9 +57,3 @@ export function dataEncryptionFromBase64(value: string): DataEncryption {
   const key = Buffer.from(value, "base64");
   return createDataEncryption(key);
 }
-
-/** @deprecated Use createDataEncryption. */
-export const createLedgerEncryption = createDataEncryption;
-
-/** @deprecated Use dataEncryptionFromBase64. */
-export const ledgerEncryptionFromBase64 = dataEncryptionFromBase64;

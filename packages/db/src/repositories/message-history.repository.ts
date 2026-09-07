@@ -164,9 +164,6 @@ export class MessageHistoryRepository {
   }
 }
 
-/** @deprecated Use MessageHistoryRepository. */
-export { MessageHistoryRepository as MessagesRepo };
-
 /** Serializes the short durable-ingress transaction for one Telegram chat. */
 export async function lockTelegramIngress(
   db: MicrosonyaDb,

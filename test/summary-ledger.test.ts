@@ -1,11 +1,11 @@
 import { eq } from "drizzle-orm";
 import { describe, expect, it } from "vitest";
 import {
-  SummaryFeedbackRepo,
-  SummariesRepo,
-  SummaryLifecycleRepo,
-  MessagesRepo,
-  createLedgerEncryption,
+  SummaryFeedbackRepository,
+  SummaryAttemptRepository,
+  SummaryExecutionRepository,
+  MessageHistoryRepository,
+  createDataEncryption,
   datasetCandidates,
   messages as messageRows,
   modelInvocations,
@@ -20,16 +20,16 @@ import {
   asMessageId,
   asSummaryId,
   asTimestampMs,
-  type SummaryRunAttempt,
+  type SummaryAttempt,
 } from "../packages/shared/src/index.js";
 import { openTestDb } from "./dbTestUtils.js";
 
 describe("production summary ledger", () => {
   it("returns the existing outcome on duplicate commit without updating projections", async () => {
     const client = await openTestDb();
-    const repo = new SummariesRepo(
+    const repo = new SummaryAttemptRepository(
       client.db,
-      createLedgerEncryption(Buffer.alloc(32, 5)),
+      createDataEncryption(Buffer.alloc(32, 5)),
     );
     const original = fixtureAttempt();
     try {
@@ -59,9 +59,9 @@ describe("production summary ledger", () => {
   });
   it("reconstructs a count skip as a complete accepted outcome", async () => {
     const client = await openTestDb();
-    const summaries = new SummariesRepo(
+    const summaries = new SummaryAttemptRepository(
       client.db,
-      createLedgerEncryption(Buffer.alloc(32, 5)),
+      createDataEncryption(Buffer.alloc(32, 5)),
     );
     const executionId = asSummaryId("execution-count-skip");
     try {
@@ -91,9 +91,9 @@ describe("production summary ledger", () => {
 
   it("does not accept orchestration evidence from an expired lease", async () => {
     const client = await openTestDb();
-    const encryption = createLedgerEncryption(Buffer.alloc(32, 6));
-    const summaries = new SummariesRepo(client.db, encryption);
-    const lifecycle = new SummaryLifecycleRepo(client.db, encryption);
+    const encryption = createDataEncryption(Buffer.alloc(32, 6));
+    const summaries = new SummaryAttemptRepository(client.db, encryption);
+    const lifecycle = new SummaryExecutionRepository(client.db, encryption);
     const attempt = fixtureAttempt();
     try {
       const run = await lifecycle.create(
@@ -136,7 +136,9 @@ describe("production summary ledger", () => {
       ]) {
         expect(await client.db.select().from(table)).toEqual([]);
       }
-      expect(await summaries.findOrchestratedOutcome(run.id)).toBeUndefined();
+      expect(
+        await summaries.findAcceptedOutcomeByExecutionId(run.id),
+      ).toBeUndefined();
     } finally {
       await client.close();
     }
@@ -144,10 +146,10 @@ describe("production summary ledger", () => {
 
   it("atomically stores encrypted immutable evidence and a review candidate", async () => {
     const client = await openTestDb();
-    const encryption = createLedgerEncryption(Buffer.alloc(32, 7));
-    const summaries = new SummariesRepo(client.db, encryption);
-    const messages = new MessagesRepo(client.db, encryption);
-    const feedback = new SummaryFeedbackRepo(client.db, encryption);
+    const encryption = createDataEncryption(Buffer.alloc(32, 7));
+    const summaries = new SummaryAttemptRepository(client.db, encryption);
+    const messages = new MessageHistoryRepository(client.db, encryption);
+    const feedback = new SummaryFeedbackRepository(client.db, encryption);
     const attempt = fixtureAttempt();
 
     try {
@@ -159,7 +161,7 @@ describe("production summary ledger", () => {
         parentId: asMessageId(10),
         text: "Deploy at 18:00",
       });
-      await summaries.saveAttempt(attempt);
+      await summaries.recordAttempt(attempt);
       await messages.save({
         id: asMessageId(11),
         chatId: attempt.chatId,
@@ -274,7 +276,9 @@ describe("production summary ledger", () => {
         expect(rawDatabaseEvidence).not.toContain(privateValue);
       }
 
-      await expect(summaries.saveAttempt(attempt)).resolves.toBeUndefined();
+      await expect(summaries.recordAttempt(attempt)).resolves.toMatchObject({
+        status: "alreadyCommitted",
+      });
       const unchanged = await client.db
         .select()
         .from(summaryRunMessages)
@@ -332,13 +336,13 @@ describe("production summary ledger", () => {
 
   it("records a defer without advancing the terminal checkpoint", async () => {
     const client = await openTestDb();
-    const encryption = createLedgerEncryption(Buffer.alloc(32, 8));
-    const summaries = new SummariesRepo(client.db, encryption);
+    const encryption = createDataEncryption(Buffer.alloc(32, 8));
+    const summaries = new SummaryAttemptRepository(client.db, encryption);
     const terminal = fixtureAttempt();
 
     try {
-      await summaries.saveAttempt(terminal);
-      await summaries.saveAttempt({
+      await summaries.recordAttempt(terminal);
+      await summaries.recordAttempt({
         ...terminal,
         id: asSummaryId("run-deferred"),
         commandMessageId: asMessageId(102),
@@ -354,7 +358,9 @@ describe("production summary ledger", () => {
         })),
       });
 
-      const lastTerminal = await summaries.findLastRun(terminal.chatId);
+      const lastTerminal = await summaries.findLatestAcceptedOutcome(
+        terminal.chatId,
+      );
       expect(lastTerminal?.id).toBe(terminal.id);
       expect(lastTerminal?.covers.lastId).toBe(12);
 
@@ -373,13 +379,13 @@ describe("production summary ledger", () => {
   });
   it("rejects summarized evidence without summary text", async () => {
     const client = await openTestDb();
-    const summaries = new SummariesRepo(
+    const summaries = new SummaryAttemptRepository(
       client.db,
-      createLedgerEncryption(Buffer.alloc(32, 8)),
+      createDataEncryption(Buffer.alloc(32, 8)),
     );
     try {
       await expect(
-        summaries.saveAttempt({
+        summaries.recordAttempt({
           ...fixtureAttempt(),
           id: asSummaryId("run-without-summary"),
           summaryText: undefined,
@@ -391,7 +397,7 @@ describe("production summary ledger", () => {
   });
 });
 
-function fixtureAttempt(): SummaryRunAttempt {
+function fixtureAttempt(): SummaryAttempt {
   const chatId = asChatId("chat-ledger");
   const createdAt = asTimestampMs(1_700_000_000_000);
   return {

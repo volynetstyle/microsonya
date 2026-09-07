@@ -1,7 +1,7 @@
 import { count, eq, sql } from "drizzle-orm";
 import { describe, expect, it } from "vitest";
 import {
-  SummaryLifecycleRepo,
+  SummaryExecutionRepository,
   createDataEncryption,
   summaryRunLifecycle,
 } from "../packages/db/src/index.js";
@@ -23,7 +23,7 @@ const command = Object.freeze({
 describe("SummaryRun authoritative storage", () => {
   it("physically collapses concurrent duplicate ingress to one run", async () => {
     const client = await openTestDb();
-    const repo = new SummaryLifecycleRepo(
+    const repo = new SummaryExecutionRepository(
       client.db,
       createDataEncryption(Buffer.alloc(32, 23)),
     );
@@ -55,7 +55,7 @@ describe("SummaryRun authoritative storage", () => {
 
   it("allows exactly one concurrent lease claim and persists delivery", async () => {
     const client = await openTestDb();
-    const repo = new SummaryLifecycleRepo(
+    const repo = new SummaryExecutionRepository(
       client.db,
       createDataEncryption(Buffer.alloc(32, 24)),
     );
@@ -125,7 +125,7 @@ describe("SummaryRun authoritative storage", () => {
 
   it("makes crashed processing and delivery leases recoverable", async () => {
     const client = await openTestDb();
-    const repo = new SummaryLifecycleRepo(
+    const repo = new SummaryExecutionRepository(
       client.db,
       createDataEncryption(Buffer.alloc(32, 25)),
     );
@@ -207,7 +207,7 @@ describe("SummaryRun authoritative storage", () => {
 
   it("fences an expired processing owner and renews only the current token", async () => {
     const client = await openTestDb();
-    const repo = new SummaryLifecycleRepo(
+    const repo = new SummaryExecutionRepository(
       client.db,
       createDataEncryption(Buffer.alloc(32, 26)),
     );
@@ -285,7 +285,7 @@ describe("SummaryRun authoritative storage", () => {
 
   it("allows exactly one concurrent delivery claim", async () => {
     const client = await openTestDb();
-    const repo = new SummaryLifecycleRepo(
+    const repo = new SummaryExecutionRepository(
       client.db,
       createDataEncryption(Buffer.alloc(32, 27)),
     );
@@ -327,7 +327,7 @@ describe("SummaryRun authoritative storage", () => {
 
   it("enforces one processing lease per chat for different commands", async () => {
     const client = await openTestDb();
-    const repo = new SummaryLifecycleRepo(
+    const repo = new SummaryExecutionRepository(
       client.db,
       createDataEncryption(Buffer.alloc(32, 28)),
     );

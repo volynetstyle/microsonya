@@ -2,6 +2,7 @@ export type TelemetryComponent = "ingress" | "lifecycle" | "processor" | "wma";
 
 export type TelemetryOutcome =
   | "created"
+  | "existing"
   | "completed"
   | "failed_permanent"
   | "malformed"

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   decideReconciliation,
-  type OperationalSummaryRun,
+  type SummaryExecution,
 } from "../packages/run-lifecycle/src/index.js";
 import { asSummaryId, asTimestampMs } from "../packages/shared/src/index.js";
 
@@ -9,8 +9,8 @@ const now = asTimestampMs(10_000);
 const staleBefore = asTimestampMs(5_000);
 
 function run(
-  status: OperationalSummaryRun["status"],
-  overrides: Partial<OperationalSummaryRun> & {
+  status: SummaryExecution["status"],
+  overrides: Partial<SummaryExecution> & {
     leaseExpiresAt?: ReturnType<typeof asTimestampMs>;
   } = {},
 ) {

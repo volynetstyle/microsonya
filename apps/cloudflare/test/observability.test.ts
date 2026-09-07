@@ -6,6 +6,7 @@ import {
 } from "../src/observability.js";
 import { recordSummarizationEvent } from "../src/processor/telemetry.js";
 import type { SummarizationTelemetryEvent } from "@microsonya/summarize";
+import { createSummaryCommandObservability } from "../src/ingress/summary-command-observability.js";
 
 describe("Worker observability contract", () => {
   it("emits queryable JSON without arbitrary error text", () => {
@@ -70,6 +71,54 @@ describe("Worker observability contract", () => {
       "Error",
     );
     expect(errorName("untrusted failure text")).toBe("UNKNOWN_ERROR");
+  });
+
+  it("projects one accepted-run observation to a log and a metric", () => {
+    const info = vi.spyOn(console, "info").mockImplementation(() => undefined);
+    const writeDataPoint = vi.fn();
+    const observability = createSummaryCommandObservability({
+      writeDataPoint,
+    } as unknown as AnalyticsEngineDataset);
+
+    observability.runAccepted({
+      runId: "run-123",
+      disposition: "created",
+      durationMs: 42,
+    });
+
+    expect(JSON.parse(String(info.mock.calls[0]?.[0]))).toEqual({
+      component: "ingress",
+      event: "summary.run.accepted",
+      runId: "run-123",
+      disposition: "created",
+      totalMs: 42,
+    });
+    expect(writeDataPoint).toHaveBeenCalledWith({
+      indexes: ["ingress:created"],
+      blobs: ["summary.run.accepted", "created"],
+      doubles: [42],
+    });
+    info.mockRestore();
+  });
+
+  it("logs a queued-marker failure without exposing error text", () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const observability = createSummaryCommandObservability({
+      writeDataPoint: vi.fn(),
+    } as unknown as AnalyticsEngineDataset);
+
+    observability.markQueuedFailed({
+      runId: "run-123",
+      error: new TypeError("private database details"),
+    });
+
+    expect(JSON.parse(String(warn.mock.calls[0]?.[0]))).toEqual({
+      component: "ingress",
+      event: "summary.run.mark_queued_failed",
+      runId: "run-123",
+      errorName: "TypeError",
+    });
+    warn.mockRestore();
   });
 
   it("projects model telemetry without conversation or model text", () => {

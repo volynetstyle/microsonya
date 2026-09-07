@@ -31,10 +31,6 @@ export interface SummaryExecution {
   readonly deliveredAt?: TimestampMs;
   readonly telegramMessageId?: number;
 }
-/** @deprecated Use SummaryExecutionStatus. */
-export type SummaryRunLifecycleStatus = SummaryExecutionStatus;
-/** @deprecated Use SummaryExecution. */
-export type OperationalSummaryRun = SummaryExecution;
 const TRANSITIONS: Readonly<
   Record<SummaryExecutionStatus, readonly SummaryExecutionStatus[]>
 > = Object.freeze({
@@ -67,12 +63,6 @@ export function isTerminalSummaryExecutionStatus(
 ): boolean {
   return status === "completed" || status === "failed_permanent";
 }
-/** @deprecated Use canTransitionSummaryExecution. */
-export const canTransitionSummaryRun = canTransitionSummaryExecution;
-/** @deprecated Use assertSummaryExecutionTransition. */
-export const assertSummaryRunTransition = assertSummaryExecutionTransition;
-/** @deprecated Use isTerminalSummaryExecutionStatus. */
-export const isTerminalSummaryRunStatus = isTerminalSummaryExecutionStatus;
 export type RunHealth =
   | { readonly kind: "terminal" }
   | { readonly kind: "active"; readonly ageMs: number }

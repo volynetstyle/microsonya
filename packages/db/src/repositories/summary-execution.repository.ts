@@ -27,7 +27,7 @@ import {
 import type {
   LifecycleHealthSnapshot,
   SummaryExecution,
-  SummaryRunLifecycleStatus,
+  SummaryExecutionStatus,
   SummaryRunRetryStage,
 } from "@microsonya/run-lifecycle";
 import { assertSummaryExecutionTransition } from "@microsonya/run-lifecycle";
@@ -113,8 +113,8 @@ export class SummaryExecutionRepository {
 
   async transition(
     id: SummaryId,
-    from: SummaryRunLifecycleStatus,
-    to: SummaryRunLifecycleStatus,
+    from: SummaryExecutionStatus,
+    to: SummaryExecutionStatus,
     now: TimestampMs,
   ): Promise<boolean> {
     assertSummaryExecutionTransition(from, to);
@@ -597,10 +597,7 @@ export class SummaryExecutionRepository {
   }
 }
 
-/** @deprecated Use SummaryExecutionRepository. */
-export { SummaryExecutionRepository as SummaryLifecycleRepo };
-
-function asLifecycleStatus(value: string): SummaryRunLifecycleStatus {
+function asLifecycleStatus(value: string): SummaryExecutionStatus {
   if (
     [
       "created",
@@ -613,7 +610,7 @@ function asLifecycleStatus(value: string): SummaryRunLifecycleStatus {
       "failed_permanent",
     ].includes(value)
   ) {
-    return value as SummaryRunLifecycleStatus;
+    return value as SummaryExecutionStatus;
   }
   throw new TypeError(`Unknown SummaryRun lifecycle status: ${value}`);
 }

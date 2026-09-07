@@ -65,6 +65,3 @@ export class SummaryFeedbackRepository {
     });
   }
 }
-
-/** @deprecated Use SummaryFeedbackRepository. */
-export { SummaryFeedbackRepository as SummaryFeedbackRepo };

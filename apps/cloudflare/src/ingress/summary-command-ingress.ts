@@ -4,7 +4,10 @@ import type {
 } from "@microsonya/contracts";
 import type { SummaryCommand } from "@microsonya/shared";
 import { tracing } from "cloudflare:workers";
-import { logTelemetry, recordTelemetryMetric } from "../observability.js";
+import {
+  createSummaryCommandObservability,
+  type SummaryCommandObservability,
+} from "./summary-command-observability.js";
 
 type SummaryCommandEnv = Pick<Env, "SUMMARY_RUNS" | "ANALYTICS"> & {
   readonly SUMMARY_JOBS: Queue<SummaryJob>;
@@ -16,35 +19,44 @@ export async function acceptSummaryCommand(
   context: ExecutionContext,
   startedAt: number,
 ): Promise<void> {
+  return tracing.enterSpan("summary.command.accept", (span) => {
+    span.setAttribute("microsonya.command_mode", command.mode);
+    return acceptSummaryCommandCore(env, command, context, startedAt);
+  });
+}
+
+async function acceptSummaryCommandCore(
+  env: SummaryCommandEnv,
+  command: SummaryCommand,
+  context: ExecutionContext,
+  startedAt: number,
+): Promise<void> {
   const request: CreateSummaryRunRequest = {
     idempotencyKey: `telegram:${command.chatId}:${command.commandMessageId}`,
     command,
   };
-  const run = await tracing.enterSpan("summary_run.create", (span) => {
-    span.setAttribute("microsonya.command_mode", command.mode);
-    return env.SUMMARY_RUNS.create(request);
-  });
+  const observability = createSummaryCommandObservability(env.ANALYTICS);
+  const run = await env.SUMMARY_RUNS.create(request);
+
   await env.SUMMARY_JOBS.send({ runId: run.runId } satisfies SummaryJob);
-  context.waitUntil(
-    env.SUMMARY_RUNS.markQueued(run.runId).catch((error: unknown) => {
-      logTelemetry("warn", "ingress", "summary.run.mark_queued_failed", {
-        runId: run.runId,
-        errorName: error instanceof Error ? error.name : "UNKNOWN_ERROR",
-      });
-      return false;
-    }),
-  );
-  const durationMs = Date.now() - startedAt;
-  logTelemetry("info", "ingress", "summary.run.accepted", {
+
+  context.waitUntil(markSummaryRunQueued(env, run.runId, observability));
+
+  observability.runAccepted({
     runId: run.runId,
     disposition: "created",
-    totalMs: durationMs,
+    durationMs: Date.now() - startedAt,
   });
-  recordTelemetryMetric(
-    env.ANALYTICS,
-    "ingress",
-    "summary.run.accepted",
-    "created",
-    durationMs,
-  );
+}
+
+async function markSummaryRunQueued(
+  env: SummaryCommandEnv,
+  runId: string,
+  observability: SummaryCommandObservability,
+): Promise<void> {
+  try {
+    await env.SUMMARY_RUNS.markQueued(runId);
+  } catch (error: unknown) {
+    observability.markQueuedFailed({ runId, error });
+  }
 }

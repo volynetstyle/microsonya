@@ -2,9 +2,39 @@ import {
   SummarizationTelemetryService,
   type SummarizationTelemetryEvent,
 } from "@microsonya/summarize";
-import { recordAnalyticsPoint } from "../observability.js";
-import { logTelemetry } from "../observability.js";
+import {
+  logTelemetry,
+  recordAnalyticsPoint,
+  recordTelemetryMetric,
+} from "../observability.js";
 import type { SummaryId } from "@microsonya/shared";
+import type { ProcessSummaryRunResult } from "@microsonya/contracts";
+
+export function recordSummaryProcessFinished(
+  analytics: AnalyticsEngineDataset,
+  event: Readonly<{
+    runId: SummaryId;
+    result: ProcessSummaryRunResult;
+    durationMs: number;
+  }>,
+): void {
+  const outcome =
+    event.result.disposition === "permanent-failure"
+      ? "failed_permanent"
+      : event.result.disposition;
+  recordTelemetryMetric(
+    analytics,
+    "processor",
+    "summary.process",
+    outcome,
+    event.durationMs,
+  );
+  logTelemetry("info", "processor", "summary.process.finish", {
+    runId: event.runId,
+    disposition: event.result.disposition,
+    totalMs: event.durationMs,
+  });
+}
 
 /**
  * Fixed Analytics Engine schema for the summarization pipeline.

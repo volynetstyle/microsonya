@@ -3,7 +3,7 @@ import { asSummaryId, asTimestampMs } from "../packages/shared/src/index.js";
 import {
   EXTERNAL_DELIVERY_GUARANTEE,
   assessRunHealth,
-  canTransitionSummaryRun,
+  canTransitionSummaryExecution,
 } from "../packages/run-lifecycle/src/index.js";
 import {
   PROCESSOR_CRASH_MATRIX,
@@ -19,7 +19,7 @@ describe("SummaryRun lifecycle proof", () => {
     ["delivering", "completed"],
     ["retry_wait", "processing"],
   ] as const)("allows %s -> %s", (from, to) => {
-    expect(canTransitionSummaryRun(from, to)).toBe(true);
+    expect(canTransitionSummaryExecution(from, to)).toBe(true);
   });
 
   it.each([
@@ -28,7 +28,7 @@ describe("SummaryRun lifecycle proof", () => {
     ["completed", "processing"],
     ["failed_permanent", "queued"],
   ] as const)("rejects %s -> %s", (from, to) => {
-    expect(canTransitionSummaryRun(from, to)).toBe(false);
+    expect(canTransitionSummaryExecution(from, to)).toBe(false);
   });
 
   it("classifies stale non-terminal work independently of HTTP health", () => {
