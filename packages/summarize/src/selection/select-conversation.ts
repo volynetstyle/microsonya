@@ -64,7 +64,10 @@ export function selectSummaryWindow(
 
   const isCount = command.mode === "count";
 
-  const consumption: WindowConsumption = isCount ? "read-only" : "checkpoint";
+  // Only a bare /summary is catch-up. Historical queries never authorize a
+  // cursor transition, even when they happen to resolve to the same window.
+  const consumption: WindowConsumption =
+    command.mode === "recent" ? "checkpoint" : "read-only";
 
   // Preserve the current process-local day-boundary policy exactly.
   const since =

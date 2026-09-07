@@ -13,6 +13,7 @@ import {
   type SummaryAction,
   type SummaryMode,
   type SummaryId,
+  type SummaryInputIdentity,
   type SummaryAttempt,
 } from "@microsonya/shared";
 import type { MicrosonyaDb } from "../client.js";
@@ -86,6 +87,53 @@ export class SummaryAttemptRepository {
         this.encryption,
         row.summaryTextCiphertext,
         "Terminal summary text",
+      ),
+    });
+  }
+
+  async findReusableOutcome(
+    identity: SummaryInputIdentity,
+  ): Promise<AcceptedOutcomeRecord | undefined> {
+    const row = (
+      await this.db
+        .select()
+        .from(summaryRuns)
+        .where(
+          and(
+            eq(summaryRuns.chatId, this.chatKey(identity.scope)),
+            eq(summaryRuns.fromMessageId, identity.start),
+            eq(summaryRuns.commandMessageId, identity.end),
+            eq(summaryRuns.messageCount, identity.eligibleCount),
+            eq(
+              summaryRuns.inputHash,
+              this.encryption.lookup(identity.inputHash, "summary-input-hash"),
+            ),
+            eq(summaryRuns.policyHash, identity.policyHash),
+            inArray(summaryRuns.status, ["summarized", "skipped"]),
+          ),
+        )
+        .orderBy(desc(summaryRuns.createdAt))
+        .limit(1)
+    ).at(0);
+    if (row === undefined || row.summaryTextCiphertext === null)
+      return undefined;
+    return Object.freeze({
+      id: asSummaryId(row.id),
+      chatId: identity.scope,
+      commandMessageId: asMessageId(row.commandMessageId),
+      createdAt: asTimestampMs(row.createdAt),
+      covers: Object.freeze({
+        firstId: asMessageId(row.fromMessageId),
+        lastId: asMessageId(row.toMessageId),
+        count: asMessageCount(row.messageCount),
+      }),
+      mode: asSummaryMode(row.mode),
+      status: asSummaryStatus(row.status),
+      action: asSummaryAction(row.action),
+      finalText: decryptRequired(
+        this.encryption,
+        row.summaryTextCiphertext,
+        "Reusable summary text",
       ),
     });
   }
@@ -347,36 +395,6 @@ export class SummaryAttemptRepository {
       .execute();
   }
 
-  /** @deprecated Use findLatestAcceptedOutcome. */
-  findLastRun(chatId: ChatId): Promise<AcceptedOutcomeRecord | undefined> {
-    return this.findLatestAcceptedOutcome(chatId);
-  }
-
-  /** @deprecated Use findLatestConsumptionBoundary. */
-  findLastCheckpoint(chatId: ChatId): Promise<SummaryCheckpoint | undefined> {
-    return this.findLatestConsumptionBoundary(chatId);
-  }
-
-  /** @deprecated Use findAcceptedOutcomeByExecutionId. */
-  findOrchestratedOutcome(
-    executionId: SummaryId,
-  ): Promise<AcceptedOutcome | undefined> {
-    return this.findAcceptedOutcomeByExecutionId(executionId);
-  }
-
-  /** @deprecated Use recordAttempt. */
-  async saveAttempt(
-    attempt: SummaryAttempt,
-    orchestration?: OrchestrationAttemptRef,
-  ): Promise<void> {
-    await this.recordAttempt(attempt, orchestration);
-  }
-
-  /** @deprecated Use recordAcceptedOutcome. */
-  saveRun(outcome: AcceptedOutcomeRecord): Promise<void> {
-    return this.recordAcceptedOutcome(outcome);
-  }
-
   private chatKey(chatId: ChatId): string {
     return this.encryption.lookup(chatId, "telegram-chat-id");
   }
@@ -394,11 +412,6 @@ export class SummaryAttemptRepository {
       : this.encryption.lookup(value, namespace);
   }
 }
-
-/** @deprecated Use SummaryAttemptRepository. */
-export { SummaryAttemptRepository as SummariesRepo };
-/** @deprecated Use SummaryAttemptRepository. */
-export { SummaryAttemptRepository as SummaryAttemptsRepository };
 
 function rounded(value: number): number {
   return Math.max(0, Math.round(value));

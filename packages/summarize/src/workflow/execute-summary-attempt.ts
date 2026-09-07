@@ -10,6 +10,8 @@ import {
   type SummaryCommand,
   type SummaryId,
   type SummaryAttempt,
+  type SummaryInputIdentity,
+  type SkipReason,
   type AcceptedOutcomeRecord,
   type TimestampMs,
   type WindowDisposition,
@@ -53,6 +55,7 @@ import type {
   SummaryAttemptStore,
 } from "./ports.js";
 import { buildAttemptRecord } from "./build-attempt-record.js";
+import { identifySummaryInput } from "./summary-input.js";
 export type {
   SelectedConversation,
   SummaryWindowSelector,
@@ -189,6 +192,45 @@ async function run(
       attemptPersisted = true;
       recordRun("empty");
       return null;
+    }
+
+    const reusable = await findReusableOutcome(
+      deps.summaries,
+      identifySummaryInput(selected),
+    );
+    if (reusable !== undefined) {
+      action = reusable.action;
+      const disposition = dispositionFromReusableOutcome(
+        reusable,
+        selected,
+        createSummaryId,
+        now,
+      );
+      const acceptedOutcome = acceptOutcome({
+        selected,
+        command,
+        action,
+        disposition,
+        createSummaryId,
+        now,
+      });
+      if (
+        selected.consumption === "checkpoint" &&
+        shouldAdvanceCheckpoint(action)
+      ) {
+        checkpointAdvanced = true;
+        deferStreakByChat.delete(command.chatId);
+      }
+      stage = "attempt.save";
+      await persistAttempt(disposition.kind, undefined, acceptedOutcome);
+      attemptPersisted = true;
+      execution.record({
+        type: "summary.finish",
+        durationMs: elapsed(),
+        status: disposition.kind,
+      });
+      recordRun(disposition.kind);
+      return disposition;
     }
 
     stage = "window.process";
@@ -404,6 +446,44 @@ function recordAcceptedOutcome(
     );
   }
   return record.call(store, outcome);
+}
+
+function findReusableOutcome(
+  store: SummaryAttemptStore,
+  identity: SummaryInputIdentity,
+): Promise<AcceptedOutcomeRecord | undefined> {
+  return store.findReusableOutcome?.(identity) ?? Promise.resolve(undefined);
+}
+
+function dispositionFromReusableOutcome(
+  outcome: AcceptedOutcomeRecord,
+  selected: SelectedConversation,
+  createSummaryId: () => SummaryId,
+  now: () => TimestampMs,
+): Exclude<WindowDisposition, { kind: "deferred" }> {
+  if (outcome.status === "summarized") {
+    return Object.freeze({
+      kind: "summarized" as const,
+      summary: Object.freeze({
+        id: createSummaryId(),
+        chatId: selected.window.chatId,
+        covers: Object.freeze({
+          firstId: selected.eligibleMessages[0]!.id,
+          lastId: selected.eligibleMessages.at(-1)!.id,
+          count: selected.eligibleMessages.length,
+        }),
+        text: outcome.finalText,
+        createdAt: now(),
+      }),
+    });
+  }
+  if (!outcome.action.startsWith("SKIP_")) {
+    throw new TypeError("Reusable skipped outcome has a non-skip action.");
+  }
+  return Object.freeze({
+    kind: "skipped" as const,
+    reason: outcome.action as SkipReason,
+  });
 }
 
 function requireOllama(

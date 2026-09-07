@@ -4,3 +4,4 @@ export * from "./ports.js";
 export * from "./telemetry.js";
 export * from "./execution-journal.js";
 export * from "./build-attempt-record.js";
+export * from "./summary-input.js";

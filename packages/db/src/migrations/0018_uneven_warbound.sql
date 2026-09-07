@@ -1,0 +1,1 @@
+CREATE INDEX "idx_summary_runs_exact_reuse" ON "summary_runs" USING btree ("chat_id","from_message_id","command_message_id","message_count","input_hash","policy_hash","created_at" DESC NULLS LAST) WHERE "summary_runs"."status" in ('summarized', 'skipped');

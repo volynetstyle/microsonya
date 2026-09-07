@@ -7,6 +7,7 @@ import type {
   SummaryAttempt,
   SummaryCommand,
   SummaryId,
+  SummaryInputIdentity,
   TimestampMs,
   WindowDisposition,
 } from "@microsonya/shared";
@@ -29,6 +30,9 @@ export interface SummaryAttemptStore {
   ): Promise<Pick<AcceptedOutcomeRecord, "covers"> | undefined>;
   recordAcceptedOutcome?(outcome: AcceptedOutcomeRecord): Promise<void>;
   recordAttempt?(attempt: SummaryAttempt): Promise<RecordAttemptResult | void>;
+  findReusableOutcome?(
+    identity: SummaryInputIdentity,
+  ): Promise<AcceptedOutcomeRecord | undefined>;
 }
 
 export interface SummaryWorkflow {

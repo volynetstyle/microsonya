@@ -150,6 +150,17 @@ export interface AcceptedOutcomeRecord {
   readonly finalText: string;
 }
 
+/** Exact immutable input identity used for semantic outcome reuse. */
+export interface SummaryInputIdentity {
+  readonly scope: ChatId;
+  readonly start: MessageId;
+  /** Position immediately excluding messages at and after this boundary. */
+  readonly end: MessageId;
+  readonly eligibleCount: number;
+  readonly inputHash: string;
+  readonly policyHash: string;
+}
+
 export type SummaryAttemptStatus =
   | "summarized"
   | "deferred"
@@ -250,17 +261,6 @@ export type RecordAttemptResult =
       readonly outcome: AcceptedOutcome | undefined;
     }
   | { readonly status: "ownershipLost" };
-
-/** @deprecated Use AcceptedOutcomeRecord. */
-export type SummaryRun = AcceptedOutcomeRecord;
-/** @deprecated Use SummaryAttemptStatus. */
-export type SummaryRunAttemptStatus = SummaryAttemptStatus;
-/** @deprecated Use SummaryAttemptMessageRole. */
-export type SummaryRunMessageRole = SummaryAttemptMessageRole;
-/** @deprecated Use SummaryAttemptMessageSnapshot. */
-export type SummaryRunMessageSnapshot = SummaryAttemptMessageSnapshot;
-/** @deprecated Use SummaryAttempt. */
-export type SummaryRunAttempt = SummaryAttempt;
 
 export interface SummaryFeedback {
   readonly id: SummaryId;

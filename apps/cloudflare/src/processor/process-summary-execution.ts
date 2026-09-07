@@ -18,8 +18,11 @@ import {
   TelegramPrivateDraftTransport,
 } from "@microsonya/telegram";
 import { EMPTY_SUMMARY_MESSAGE } from "./policy.js";
-import { logTelemetry, recordTelemetryMetric } from "../observability.js";
-import { createProcessorTelemetry } from "./telemetry.js";
+import { logTelemetry } from "../observability.js";
+import {
+  createProcessorTelemetry,
+  recordSummaryProcessFinished,
+} from "./telemetry.js";
 import { withWorkerDatabase } from "../runtime/worker-db.js";
 import { validateTelegramPayload } from "./presentation/validate-telegram-payload.js";
 import {
@@ -92,21 +95,10 @@ export class SummaryExecutionProcessor {
       const result = await this.processRun(runId);
       span.setAttribute("microsonya.status", result.disposition);
       const durationMs = Date.now() - startedAt;
-      const outcome =
-        result.disposition === "permanent-failure"
-          ? "failed_permanent"
-          : result.disposition;
-      recordTelemetryMetric(
-        this.env.ANALYTICS,
-        "processor",
-        "summary.process",
-        outcome,
-        durationMs,
-      );
-      logTelemetry("info", "processor", "summary.process.finish", {
+      recordSummaryProcessFinished(this.env.ANALYTICS, {
         runId,
-        disposition: result.disposition,
-        totalMs: durationMs,
+        result,
+        durationMs,
       });
       return result;
     });
@@ -161,13 +153,17 @@ export class SummaryExecutionProcessor {
               await deps.summaryAttempts.findAcceptedOutcomeByExecutionId(
                 runId,
               );
+
             if (acceptedOutcome !== undefined)
               return presentAcceptedOutcome(acceptedOutcome);
+
             const attemptId = asSummaryId(
               `${runId}:attempt:${claimed.attempt}`,
             );
+
             const telegram = createTelegramApi(this.env.TELEGRAM_BOT_TOKEN);
             const isPrivate = !claimed.command.chatId.startsWith("-");
+
             progressiveTransport = isPrivate
               ? new TelegramPrivateDraftTransport(
                   telegram,
@@ -181,16 +177,20 @@ export class SummaryExecutionProcessor {
                     ? {}
                     : { messageThreadId: claimed.command.messageThreadId }),
                 });
+
             progressiveSession = new ProgressiveSummarySession(
               progressiveTransport,
               undefined,
               isPrivate ? PRIVATE_PROGRESSIVE_POLICY : GROUP_PROGRESSIVE_POLICY,
             );
+
             const summarizer = createSummaryWorkflow({
               messages: deps.messages,
               summaries: {
                 findLatestConsumptionBoundary: (chatId) =>
                   deps.summaryAttempts.findLatestConsumptionBoundary(chatId),
+                findReusableOutcome: (identity) =>
+                  deps.summaryAttempts.findReusableOutcome(identity),
                 recordAcceptedOutcome: (outcome) =>
                   deps.summaryAttempts.recordAcceptedOutcome(outcome),
                 recordAttempt: (attempt) =>
@@ -204,7 +204,10 @@ export class SummaryExecutionProcessor {
               ollama: deps.ollama,
               createSummaryId: () => attemptId,
               now: () => asTimestampMs(Date.now()),
-              telemetry: createProcessorTelemetry(this.env.ANALYTICS, runId),
+              executionObserver: createProcessorTelemetry(
+                this.env.ANALYTICS,
+                runId,
+              ),
               progressive: progressiveSession,
             });
             phase = "summary.generate";

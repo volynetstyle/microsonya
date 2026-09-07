@@ -68,12 +68,11 @@ describe("read-only count checkpoint isolation", () => {
         await summarizer.process(command(4, "count"));
         seen.length = 0;
         await summarizer.process(command(5, "recent"));
-        expect(seen).toEqual([previousMode === undefined ? [1, 2, 3] : [2, 3]]);
+        const priorWasCatchup = previousMode === "recent";
+        expect(seen).toEqual([priorWasCatchup ? [2, 3] : [1, 2, 3]]);
         const rows = await client.db.select().from(summaryRuns);
         const count = rows.find((row) => row.mode === "count")!;
-        expect(count.checkpointBefore).toBe(
-          previousMode === undefined ? null : 1,
-        );
+        expect(count.checkpointBefore).toBe(priorWasCatchup ? 1 : null);
         expect(count.checkpointAfter).toBe(count.checkpointBefore);
         expect(count.toMessageId).toBe(3);
         expect(count.summaryTextCiphertext).not.toBeNull();

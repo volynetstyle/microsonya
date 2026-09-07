@@ -155,6 +155,21 @@ describe("summary conversation-window selection", () => {
     expect(selected.consumptionUpperBound).toBe(100);
   });
 
+  it("treats today as a read-only historical query", () => {
+    const selected = pendingSummaryWindowSelector.select({
+      messages: [message(101), message(102)],
+      command: {
+        ...command,
+        commandMessageId: asMessageId(103),
+        mode: "today",
+      },
+      checkpointBefore: asMessageId(100),
+    })!;
+
+    expect(selected.consumption).toBe("read-only");
+    expect(selected.consumptionUpperBound).toBe(100);
+  });
+
   it("marks reply parents as context-only in model input", () => {
     const selected = selectConversationWindow(
       [

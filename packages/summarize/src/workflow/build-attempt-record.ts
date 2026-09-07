@@ -1,11 +1,14 @@
-import { createHash } from "node:crypto";
 import type {
   MessageId,
   SummaryAction,
   SummaryAttempt,
 } from "@microsonya/shared";
 import type { WindowMessage } from "../selection/select-conversation.js";
-import { CHECKPOINT_POLICY_VERSION } from "../acceptance/consumption-policy.js";
+import {
+  hashSummaryInput,
+  snapshotMessages,
+  SUMMARY_POLICY_HASH,
+} from "./summary-input.js";
 import type { SummaryErrorCode } from "./telemetry.js";
 
 export type BuildAttemptRecordInput = Omit<
@@ -25,7 +28,7 @@ export function buildAttemptRecord(
   input: BuildAttemptRecordInput,
 ): SummaryAttempt {
   const messages = snapshotMessages(input.selectedMessages);
-  const inputHash = sha256(JSON.stringify(messages));
+  const inputHash = hashSummaryInput(messages);
   const {
     selectedMessages: _selectedMessages,
     consecutiveDeferCount,
@@ -33,7 +36,7 @@ export function buildAttemptRecord(
   } = input;
   return Object.freeze({
     ...record,
-    policyHash: sha256(CHECKPOINT_POLICY_VERSION),
+    policyHash: SUMMARY_POLICY_HASH,
     inputHash,
     messages,
     candidate: mineDatasetCandidate({
@@ -44,26 +47,6 @@ export function buildAttemptRecord(
       inputHash,
     }),
   });
-}
-
-function snapshotMessages(
-  messages: readonly WindowMessage[],
-): SummaryAttempt["messages"] {
-  return Object.freeze(
-    messages.map(({ message, role }, ordinal) =>
-      Object.freeze({
-        ordinal,
-        chatId: message.chatId,
-        messageId: message.id,
-        role,
-        authorId: message.author.id,
-        authorName: message.author.label,
-        text: message.text,
-        sentAt: message.time,
-        replyToId: message.parentId,
-      }),
-    ),
-  );
 }
 
 function mineDatasetCandidate(input: {
@@ -119,8 +102,4 @@ function mineDatasetCandidate(input: {
   return reasons.size === 0
     ? undefined
     : Object.freeze({ priority, reasons: Object.freeze([...reasons]) });
-}
-
-function sha256(value: string): string {
-  return createHash("sha256").update(value, "utf8").digest("hex");
 }

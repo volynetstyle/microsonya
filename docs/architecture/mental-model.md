@@ -2,9 +2,9 @@
 
 ## How to read this document
 
-Последняя проверка acceptance/commit boundaries: 2026-09-05, baseline `b1446664e9f9dff7e994dca0732d0e08c00f2db1` плюс текущие незакоммиченные изменения. Эта проверка обновляет указанный ниже первоначальный baseline для затронутых workflow, ledger и Processor.
+Последняя проверка summary window/cache/checkpoint boundaries: 2026-09-07, baseline `4cbea1921b036a3c6e18a452337b7bb601d20571` плюс текущие незакоммиченные изменения. В текущем dirty tree дополнительно проверены exact snapshot reuse, historical read-only semantics и Processor → repository wiring; остальные workflow, ledger и lifecycle сохраняют предыдущие проверки 2026-09-05/07.
 
-Это причинная модель **текущего рабочего дерева**, обновлённого 2026-09-05, с базовым commit `d88acb83856104329789c44904dbb1861c7bb984`. Документ описывает dirty tree с незакоммиченным vocabulary refactor типов, semantic ledger и lifecycle API, а также repo-context файлами `AGENTS.md` и `.agents/skills/microsonya-architecture/SKILL.md`. Обозначение «0.2» взято из задания: корневой `package.json` пока содержит `0.1.1`, а часть пакетов и комментариев — `0.1`. Это карта исходников, а не подтверждение версии, развёрнутой в Cloudflare.
+Это причинная модель **текущего рабочего дерева**. На 2026-09-07 дерево dirty: помимо описанного здесь ingress observability refactor присутствуют несвязанные незакоммиченные изменения WMA и repository guidance. Обозначение «0.2» взято из задания: корневой `package.json` пока содержит `0.1.1`, а часть пакетов и комментариев — `0.1`. Это карта исходников, а не подтверждение версии, развёрнутой в Cloudflare.
 
 Первые разделы позволяют провести команду через систему. Разделы про окно, checkpoint и recovery объясняют, что произойдёт при следующей команде или сбое. Invariants, карточки и примеры дают точки для проверки понимания.
 
@@ -12,7 +12,7 @@
 
 Канонический словарь TypeScript: **SummaryCommand** — пользовательский запрос; **SummaryExecution** — mutable operational execution в `summary_run_lifecycle`; **SummaryAttempt** — immutable evidence одной processing-попытки в физической таблице `summary_runs`; **AcceptedOutcome** — полностью восстанавливаемый semantic result; **SelectedConversation** — eligible + context для попытки; **consumption boundary** — вычисляемая граница обработанной eligible-истории; **delivery payload** — сохранённый в lifecycle текст для recovery доставки. Имена физических таблиц пока исторические и намеренно не менялись.
 
-Старые экспортируемые имена `SummaryRun`, `SummaryRunAttempt`, `OperationalSummaryRun` и `SummariesRepo` существуют только как deprecated migration aliases. Production-код использует `AcceptedOutcomeRecord`, `SummaryAttempt`, `SummaryExecution` и `SummaryAttemptsRepository`. **Checkpoint** в старых именах schema и prose означает consumption boundary, а не статус доставки и не отдельную cursor row.
+Канонические имена контрактов — `AcceptedOutcomeRecord`, `SummaryAttempt`, `SummaryExecution`, `SummaryAttemptRepository`, `SummaryExecutionRepository` и `MessageHistoryRepository`. Старые migration aliases удалены. **Checkpoint** в старых именах schema и prose означает consumption boundary, а не статус доставки и не отдельную cursor row.
 
 ## System in 60 seconds
 
@@ -20,15 +20,15 @@ Microsonya принимает Telegram updates и сохраняет текст 
 
 Ingress также является Queue consumer: он вызывает Processor через Service Binding. Processor получает у Lifecycle lease, читает историю и последний canonical checkpoint, выбирает окно, затем получает от classifier решение. `SUMMARIZE` вызывает генерацию; `DEFER_*` оставляет материал на будущее; `SKIP_*` намеренно пропускает материал.
 
-Одна транзакция `saveAttempt` сохраняет результат, точные snapshots входа и сопутствующие evidence. Для `recent`/`today` сохранённый `summarized` или `skipped` attempt становится основанием checkpoint. `count` сохраняет результат для чтения, но checkpoint не меняет.
+Одна транзакция `recordAttempt` сохраняет результат, точные snapshots входа и сопутствующие evidence. Только catch-up intent `recent` (голая `/summary`) разрешает сохранённому `summarized` или `skipped` attempt стать основанием checkpoint. Исторические `today` и `count` сохраняют результат для чтения, но checkpoint не меняют.
 
 Затем Processor отдельно сохраняет текст доставки в lifecycle, получает delivery lease, завершает Telegram delivery и только после неё записывает `completed`. Preview может быть виден в Telegram ещё во время генерации. Cron восстанавливает зависшие runs из БД. Повторный запуск переиспользует уже сохранённый outcome; атомарности между PostgreSQL и Telegram нет.
 
 ## System context
 
-## Реализованные границы модулей (dirty tree 2026-09-05)
+## Реализованные границы модулей (dirty tree 2026-09-07)
 
-`packages/summarize` теперь физически повторяет причинную цепочку: `selection` единолично строит `SelectedConversation` и consumption upper bound; `evaluation` классифицирует и при необходимости вызывает модель; `acceptance` валидирует и превращает terminal disposition в полный `AcceptedOutcomeRecord`; `workflow` связывает порты и чистой функцией `buildAttemptRecord()` строит durable evidence; `presentation` владеет пользовательским текстом. Совместимые старые exports оставлены deprecated aliases, production использует `createSummaryWorkflow()`.
+`packages/summarize` физически повторяет причинную цепочку: `selection` единолично строит `SelectedConversation` и consumption upper bound; `evaluation` классифицирует и при необходимости вызывает модель; `acceptance` валидирует и превращает terminal disposition в полный `AcceptedOutcomeRecord`; `workflow` связывает порты и чистой функцией `buildAttemptRecord()` строит durable evidence; `presentation` владеет пользовательским текстом. Workflow принимает нейтральный `SummaryExecutionObserver`; execution evidence независимо собирает `SummaryExecutionJournal`. Единственная публичная фабрика workflow — `createSummaryWorkflow()`.
 
 DB repositories разделены по durable responsibility в `packages/db/src/repositories`: message history, summary attempt/transaction coordinator, summary execution lifecycle, consumption-boundary query, dataset candidate и WMA catalog projection. `SummaryAttemptRepository.recordAttempt()` остаётся одной транзакцией: helper-файлы разделяют SQL/ownership, но не атомарность fencing, attempt, snapshots, model evidence, dataset candidate и WMA projection.
 
@@ -177,7 +177,7 @@ sequenceDiagram
     I->>Q: ACK
 ```
 
-На обычном streaming пути группа получает редактируемое сообщение с ` ▍` до persistence, а финальный commit убирает маркер. В личном чате preview использует `sendMessageDraft`, commit — `sendMessage`. После recovery process-local session отсутствует: Processor использует обычный `sendTelegramMessage()` с сохранённым текстом. Во время вычисления отдельный timer продлевает processing lease; для delivery аналогичного heartbeat в Processor нет.
+На обычном streaming пути группа получает редактируемое сообщение с ` ▍` до persistence, а финальный commit убирает маркер. Stream chunks собираются без переписывания уже опубликованного префикса; после последнего chunk итоговый content и доступные usage fields записываются в execution journal как model-response envelope. В личном чате preview использует `sendMessageDraft`, commit — `sendMessage`. После recovery process-local session отсутствует: Processor использует обычный `sendTelegramMessage()` с сохранённым текстом. Во время вычисления отдельный timer продлевает processing lease; для delivery аналогичного heartbeat в Processor нет.
 
 Evidence: [processor/worker.ts](../../apps/cloudflare/src/processor/worker.ts) — `processRun()`, `withProcessingLeaseHeartbeat()`, `deliverInsideSpan()`; [progressive.ts](../../packages/summarize/src/progressive.ts) — `finalize()`/`commit()`; [progressiveTransport.ts](../../packages/telegram/src/progressiveTransport.ts).
 
@@ -238,12 +238,16 @@ flowchart LR
         WIN["SelectedConversation, roles, coverage"]
         MAP["pendingByChat and deferStreakByChat"]
         STREAM["stream buffer, preview message ID, heartbeat timer"]
-        TEL["telemetry accumulator before saveAttempt"]
+        EXEC["typed execution event recorder"]
+        JOURNAL["execution journal before saveAttempt"]
+        OBS["optional telemetry projection"]
     end
     MSG -.-> WIN
     CK -.-> WIN
     WIN -.->|"snapshot at attempt save"| SNAP
-    TEL -.->|"evidence at attempt save"| MOD
+    EXEC -.->|"required projection"| JOURNAL
+    EXEC -.->|"optional projection"| OBS
+    JOURNAL -.->|"evidence at attempt save"| MOD
 ```
 
 | Entity                  | Что означает                                                                                                       | Кто создаёт / изменяет                                                                                    | Кто читает                                                              |
@@ -252,7 +256,7 @@ flowchart LR
 | `summary_run_lifecycle` | Команда, mutable status, processing/delivery counters, lease, retry schedule, текст доставки и receipt             | Lifecycle RPC/reconciler → `SummaryLifecycleRepo`; также `saveAttempt` обновляет `updated_at` при fencing | Processor через RPC; reconciler/health; `saveAttempt` guard             |
 | `summary_runs`          | Результат attempt: status/action, mode, границы eligible, checkpoint evidence, encrypted summary, timings/hashes   | `SummariesRepo.saveAttempt`; legacy `saveRun`; исторические migrations                                    | Checkpoint lookup, outcome reuse, WMA                                   |
 | `summary_run_messages`  | Неизменяемый на active insert path snapshot всего model window с порядком и `eligible/context`                     | `saveAttempt` вместе с parent attempt                                                                     | WMA detail; evidence inspection/tests                                   |
-| `model_invocations`     | Evidence вызовов моделей: profile, prompt hash, результат/predicates, latency, error                               | `saveAttempt` из telemetry accumulator                                                                    | Evidence inspection/tests; основная processing policy обратно не читает |
+| `model_invocations`     | Evidence вызовов моделей: profile, prompt hash, результат/predicates, latency, error                               | `saveAttempt` из execution journal, независимо от telemetry                                               | Evidence inspection/tests; основная processing policy обратно не читает |
 | `wma_chat_catalog`      | Агрегат по отображаемым summarized attempts: число summary, сумма message count, последняя дата, encrypted chat ID | `saveAttempt` только для нового `summarized`; migrations 0013–0016                                        | WMA home и overview                                                     |
 | `summary_feedback`      | Отдельный feedback, включая corrected text; не замена canonical summary                                            | `SummaryFeedbackRepo.save`; вызов из live Worker endpoints не найден                                      | Evidence/review consumers; основной runtime не читает                   |
 | `dataset_candidates`    | Производная очередь кандидатов для review, причины и приоритет                                                     | `saveAttempt` и `SummaryFeedbackRepo.save`                                                                | Review/evidence consumers; WMA summary flow не читает                   |
@@ -269,16 +273,16 @@ Evidence: [schema.ts](../../packages/db/src/schema.ts); [messages.repo.ts](../..
 
 ## Source of truth map
 
-| Concept                    | Source of truth                                                                                    | Derived from                                                                                     | Writers                                                          | Readers                                                |
-| -------------------------- | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------- | ------------------------------------------------------ |
-| Messages                   | `messages` для доступной сохранённой истории; `summary_run_messages` для входа конкретного attempt | Telegram normalization; snapshot selection                                                       | Ingress/`MessagesRepo`; `saveAttempt`                            | Summarizer; WMA snapshots                              |
-| Summary run status         | `summary_run_lifecycle.status`                                                                     | CAS transitions и claims                                                                         | `SummaryLifecycleRepo`                                           | `claimWork`, reconciliation, health                    |
-| Summary result             | `summary_runs.summary_text_ciphertext`, status/action и snapshots                                  | Classifier/disposition/generation                                                                | `saveAttempt`                                                    | Outcome reuse, WMA                                     |
-| Checkpoint                 | Результат `findLastCheckpoint(chatId)`                                                             | Последний по command ordering `recent/today` + `summarized/skipped` attempt, его `to_message_id` | Отдельного writer нет; qualifying attempt меняет результат query | Adapter Processor → `createSummarizer`                 |
-| Window                     | Во время вычисления `SelectedConversation`; после записи — snapshot rows как evidence того входа   | History + command boundaries + checkpoint + direct parents                                       | `selectSummaryWindow`, затем `saveAttempt`                       | Classifier/summarizer; WMA detail                      |
-| Delivery state             | Lifecycle status, summary ciphertext, `delivery_attempt`, `delivered_at`, `telegram_message_id`    | Presentation результата и подтверждение Telegram                                                 | `saveSummary`, claims, `markCompleted`, retry/failure methods    | Processor, reconciliation                              |
-| WMA summary representation | Ledger summary + ledger snapshots; каталог для агрегатов                                           | Только displayable `summarized`, включая count; без проверки lifecycle completed                 | Projection в `saveAttempt`, API mapping, caches                  | WMA UI                                                 |
-| Retry schedule             | `retry_stage`, `next_retry_at`, lease expiry в lifecycle                                           | Error policy или lease recovery                                                                  | Processor через RPC; reconciler                                  | Claims и cron; Queue delay лишь транспортная подсказка |
+| Concept                    | Source of truth                                                                                    | Derived from                                                                               | Writers                                                          | Readers                                                |
+| -------------------------- | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ---------------------------------------------------------------- | ------------------------------------------------------ |
+| Messages                   | `messages` для доступной сохранённой истории; `summary_run_messages` для входа конкретного attempt | Telegram normalization; snapshot selection                                                 | Ingress/`MessagesRepo`; `saveAttempt`                            | Summarizer; WMA snapshots                              |
+| Summary run status         | `summary_run_lifecycle.status`                                                                     | CAS transitions и claims                                                                   | `SummaryLifecycleRepo`                                           | `claimWork`, reconciliation, health                    |
+| Summary result             | `summary_runs.summary_text_ciphertext`, status/action и snapshots                                  | Classifier/disposition/generation                                                          | `saveAttempt`                                                    | Outcome reuse, WMA                                     |
+| Checkpoint                 | Результат `findLastCheckpoint(chatId)`                                                             | Последний по command ordering `recent` + `summarized/skipped` attempt, его `to_message_id` | Отдельного writer нет; qualifying attempt меняет результат query | Adapter Processor → `createSummarizer`                 |
+| Window                     | Во время вычисления `SelectedConversation`; после записи — snapshot rows как evidence того входа   | History + command boundaries + checkpoint + direct parents                                 | `selectSummaryWindow`, затем `saveAttempt`                       | Classifier/summarizer; WMA detail                      |
+| Delivery state             | Lifecycle status, summary ciphertext, `delivery_attempt`, `delivered_at`, `telegram_message_id`    | Presentation результата и подтверждение Telegram                                           | `saveSummary`, claims, `markCompleted`, retry/failure methods    | Processor, reconciliation                              |
+| WMA summary representation | Ledger summary + ledger snapshots; каталог для агрегатов                                           | Только displayable `summarized`, включая count; без проверки lifecycle completed           | Projection в `saveAttempt`, API mapping, caches                  | WMA UI                                                 |
+| Retry schedule             | `retry_stage`, `next_retry_at`, lease expiry в lifecycle                                           | Error policy или lease recovery                                                            | Processor через RPC; reconciler                                  | Claims и cron; Queue delay лишь транспортная подсказка |
 
 У checkpoint есть два похожих представления: `checkpoint_after` записан как evidence решения attempt, но **SQL reader не берёт `max(checkpoint_after)`**. Он фильтрует mode/status и возвращает eligible range последней подходящей строки. Поэтому проверять только `checkpoint_after` недостаточно для изменения consumption semantics.
 
@@ -327,8 +331,8 @@ flowchart TD
     H["Stored messages for chat"] --> F["Eligible filter: nonempty text and id below commandMessageId"]
     CP["Previous checkpoint"] --> MODE{"Consumption mode"}
     F --> MODE
-    MODE -->|"recent / today: checkpoint"| P["id above checkpoint, time at or after since, earliest prefix up to 128"]
-    MODE -->|"count: read-only"| S["Ignore checkpoint and since, latest suffix up to N capped at 128"]
+    MODE -->|"recent: catch-up/checkpoint"| P["id above checkpoint, time at or after since, earliest prefix up to 128"]
+    MODE -->|"today / count: read-only"| S["Ignore checkpoint; apply the historical intent's own time/count boundary"]
     P --> E["Eligible messages: chronological time then id"]
     S --> E
     E --> RP["Direct reply parent IDs absent from eligible"]
@@ -346,7 +350,7 @@ flowchart TD
 | Mode                   | Eligible lower boundary                                                    | Upper boundary                  | Направление и лимит                                    | Consumption  |
 | ---------------------- | -------------------------------------------------------------------------- | ------------------------------- | ------------------------------------------------------ | ------------ |
 | `recent` (`/summary`)  | `id > checkpointBefore`, если он есть; `time >= command.date - 86_400_000` | `id < command.commandMessageId` | Старейшие 128 по `(time, id)`                          | `checkpoint` |
-| `today`                | Такой же ID guard; `time >= new Date(command.date).setHours(0,0,0,0)`      | Такой же ID guard               | Старейшие 128 по `(time, id)`                          | `checkpoint` |
+| `today`                | Нет checkpoint filter; `time >= new Date(command.date).setHours(0,0,0,0)`  | Такой же ID guard               | Старейшие 128 по `(time, id)`                          | `read-only`  |
 | `count` (`/summary N`) | Нет checkpoint/time filter                                                 | Такой же ID guard               | Новейшие N, потом chronological order; N ограничен 128 | `read-only`  |
 
 `recent` не означает «вся когда-либо непрочитанная история»: у него rolling-day filter. `today` использует local day boundary JavaScript процесса, а не timezone Telegram user/chat; явной настройки timezone здесь нет. Command date и ID фиксируются при создании run, но история до этого ID не snapshot-ится тогда: поздно пришедшее старое сообщение может попасть в повторное вычисление до первого persisted outcome.
@@ -365,7 +369,7 @@ Evidence: [summaryWindow.ts](../../packages/summarize/src/summaryWindow.ts) — 
 
 ```mermaid
 flowchart TD
-    LOOK["findLastCheckpoint: mode recent/today and status summarized/skipped"] --> B["checkpointBefore: selected row to_message_id"]
+    LOOK["findLastCheckpoint: mode recent and status summarized/skipped"] --> B["checkpointBefore: selected row to_message_id"]
     B --> W["Select window: eligible plus context"]
     W --> MODE{"Consumption"}
     MODE -->|"checkpoint"| ACT{"Disposition"}
@@ -382,9 +386,9 @@ flowchart TD
     LOOK --> NEXT["Next summary reads derived canonical checkpoint"]
 ```
 
-Правило lookup дословно по query: chat lookup key; `mode IN ('recent','today')`; `status IN ('summarized','skipped')`; сортировка `command_message_id DESC`, `orchestration_attempt DESC`, `created_at DESC`; одна строка; вернуть её `from_message_id`, `to_message_id`, `message_count`. Если qualifying row нет либо её range содержит null, результата нет. Проверки lifecycle `completed`, action, policy hash или `checkpoint_after` в этом query нет. Чтение не требует расшифровки summary text.
+Правило lookup дословно по query: chat lookup key; `mode = 'recent'`; `status IN ('summarized','skipped')`; сортировка `command_message_id DESC`, `orchestration_attempt DESC`, `created_at DESC`; одна строка; вернуть её `from_message_id`, `to_message_id`, `message_count`. Если qualifying row нет либо её range содержит null, результата нет. Проверки lifecycle `completed`, action, policy hash или `checkpoint_after` в этом query нет. Чтение не требует расшифровки summary text.
 
-| Outcome attempt | `recent` / `today`                                                      | `count`                                                             | Что остаётся для последующей команды                                |
+| Outcome attempt | `recent` (catch-up)                                                     | `today` / `count` (historical)                                      | Что остаётся для последующей команды                                |
 | --------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------- |
 | `summarized`    | После принятого commit становится checkpoint evidence                   | Текст и coverage сохраняются, checkpoint прежний                    | Consuming history после новой границы; count ничего не убирает      |
 | `skipped`       | Сохраняется terminal attempt с текстом объяснения, граница потребляется | Attempt сохраняется без продвижения; см. drift о presentation reuse | Consuming skip не классифицируется повторно                         |
@@ -392,7 +396,7 @@ flowchart TD
 | `empty`         | Attempt без выбранных snapshots, checkpoint прежний                     | То же                                                               | Нового потребления нет                                              |
 | `error`         | Если удаётся, записывается evidence ошибки; checkpoint прежний          | То же                                                               | Новый processing attempt может вычислять заново                     |
 
-Политика `shouldAdvanceCheckpoint()` допускает успешный `SUMMARIZE` и `SKIP_*`, запрещает `DEFER_*`/`EMPTY`; facade дополнительно требует `selected.consumption === 'checkpoint'`. Для count сохранение summarized result отделено от consumption. Reader дополнительно исключает mode count, даже если такой row имеет status summarized и высокий `to_message_id`.
+Политика `shouldAdvanceCheckpoint()` допускает успешный `SUMMARIZE` и `SKIP_*`, запрещает `DEFER_*`/`EMPTY`; facade дополнительно требует `selected.consumption === 'checkpoint'`. Это свойство выводится из request intent (`recent`), а не из геометрии окна или способа получения artifact. Поэтому exact cache hit продвигает catch-up, но не продвигает совпавший с ним `today`/`count`. Reader принимает только mode `recent`.
 
 После commit attempt, но до `saveSummary`, Telegram delivery и `markCompleted`, canonical checkpoint уже может быть новым. Поздняя validation/delivery failure его не откатывает. Это граница **принятого semantic результата**, а не «пользователь прочитал сообщение». При повторе того же run Processor сначала ищет non-error outcome; он не делает новую selection от уже продвинутого checkpoint.
 
@@ -457,6 +461,8 @@ Queue configuration принимает batch size 1, делает до трёх 
 После получения processing lease Processor ищет последнюю non-error строку `summary_runs` для этого orchestration run, сортируя по orchestration attempt. Для `summarized` он расшифровывает сохранённый текст; для `empty` строит стандартное «нет новых сообщений»; для `deferred` восстанавливает presentation из action. Затем всё равно выполняются validation, lifecycle `saveSummary`, delivery claim и delivery.
 
 Error attempt намеренно не считается reusable outcome: новый claim заново читает текущую history/checkpoint и вызывает models. Unique `(orchestration_run_id, orchestration_attempt)` и deterministic attempt ID `<runId>:attempt:<attempt>` делают повторный save одной orchestration attempt no-op. Они не дедуплицируют model calls, произошедшие до commit.
+
+Независимо от orchestration retry workflow выполняет semantic lookup после resolve/select и до classifier. Exact key равен `(scope=chatId, start=firstEligibleId, end=commandMessageId, eligibleCount, inputHash, policyHash)`. `inputHash` вычисляется над immutable eligible+context snapshots с ролями; поэтому edit, изменение reply context или состава сообщений превращает overlap/exact geometry в cache miss. `policyHash` версионирует совместимость summary policy. При hit создаётся новая attempt evidence и новый artifact identity, но текст/skip action переиспользуется без model calls. Overlap, containment и hull сами по себе reuse не разрешают: final summary lossy и не имеет алгебры окон.
 
 Evidence: [summary-queue-consumer.ts](../../apps/cloudflare/src/ingress/summary-queue-consumer.ts) — `rescheduleLogicalRun()`; [failure-policy.ts](../../apps/cloudflare/src/processor/failure-policy.ts) — `classifyFailure()`; [lifecycle/worker.ts](../../apps/cloudflare/src/lifecycle/worker.ts) — scheduled handler; [summary-execution.repository.ts](../../packages/db/src/repositories/summary-execution.repository.ts); [reconciler-matrix.test.ts](../../test/reconciler-matrix.test.ts); [queue-runtime.test.ts](../../apps/cloudflare/test/queue-runtime.test.ts).
 
@@ -582,17 +588,19 @@ Telegram package делится на inbound parsing и outbound progressive tra
 
 Cloudflare bindings связывают Workers. Queue consumer объявлен у Ingress Worker, Processor доступен как Service Binding RPC, Lifecycle — Service Binding RPC и cron Worker. Hyperdrive предоставляет connection string к PostgreSQL, но repositories используют `drizzle-orm/node-postgres`, а request-scoped client закрывается после каждой operation.
 
+Application observability отделена от acceptance orchestration: ingress use cases сообщают typed domain observations, а их адаптеры fan-out'ят события в structured log и Analytics Engine. Custom spans обозначают application operations; инфраструктурные Queue/Service Binding/HTTP spans остаются ответственностью Cloudflare runtime, поэтому Queue consumer не создаёт дочерний span на каждое сообщение. Это не меняет durability protocol и не превращает `markQueued` в telemetry: он остаётся явной background best-effort lifecycle operation. Полные репозиторные правила находятся в [observability.md](./observability.md).
+
 ## Architectural invariants
 
-### INV-01 — Count summaries are read-only
+### INV-01 — Historical summaries are read-only
 
-Statement: `/summary N` может сохранить summary и его eligible range, но не становится источником canonical checkpoint.
+Statement: `/summary today` и `/summary N` могут сохранить summary и eligible range, но не становятся источником canonical checkpoint.
 
 Enforced by:
 
-- selector присваивает count `consumption: 'read-only'`;
+- selector присваивает `today`/`count` `consumption: 'read-only'`;
 - facade сохраняет `checkpointAfter === checkpointBefore`;
-- `findLastCheckpoint` фильтрует modes до `recent`/`today`.
+- `findLastCheckpoint` фильтрует mode до `recent`; `today` и `count` read-only.
 
 Evidence: [summaryWindow.ts](../../packages/summarize/src/summaryWindow.ts), [summarize.ts](../../packages/summarize/src/summarize.ts), [summaries.repo.ts](../../packages/db/src/repos/summaries.repo.ts), [count-checkpoint.test.ts](../../test/count-checkpoint.test.ts).
 
@@ -624,7 +632,7 @@ Violation would cause: незавершённый или неразобранн�
 
 ### INV-04 — Intentional skip consumes only a checkpoint-mode window
 
-Statement: `SKIP_*` создаёт terminal checkpoint evidence для `recent`/`today`, чтобы low-value eligible messages не классифицировались бесконечно; count skip остаётся read-only.
+Statement: `SKIP_*` создаёт terminal checkpoint evidence только для catch-up `recent`, чтобы low-value eligible messages не классифицировались бесконечно; historical `today`/`count` skip остаётся read-only.
 
 Enforced by: `shouldAdvanceCheckpoint(SKIP_*)`, consumption guard в facade и reader mode filter.
 
@@ -702,13 +710,33 @@ Evidence: [run-lifecycle/index.ts](../../packages/run-lifecycle/src/index.ts) �
 
 Violation would cause: документация и recovery logic обещали бы невозможную гарантию без transactional outbox/idempotency support Telegram.
 
+### INV-12 — Observability is not a source of durable evidence
+
+Statement: отключение или замена telemetry sink не меняет domain result и persisted `SummaryAttempt` evidence. Model invocations, prompt hashes, output statistics и model timings собирает обязательный per-run `SummaryExecutionJournal`; telemetry получает те же typed execution events только как optional projection.
+
+Enforced by: `SummaryExecutionJournal`, composite execution recorder в `createSummaryWorkflow()` и отсутствие evidence getters у `SummarizationTelemetryTrace`.
+
+Evidence: [execution-journal.ts](../../packages/summarize/src/workflow/execution-journal.ts); [execute-summary-attempt.ts](../../packages/summarize/src/workflow/execute-summary-attempt.ts); [summary-ledger-runtime.test.ts](../../test/summary-ledger-runtime.test.ts).
+
+Violation would cause: no-op или неисправный observability adapter обеднял бы audit/regression provenance persisted attempt.
+
+### INV-13 — Final summaries are reusable only by exact snapshot identity
+
+Statement: overlap, containment или одинаковая геометрия окна не являются cache hit. Reuse разрешён только при равенстве scope, half-open boundaries, eligible count, полного snapshot `inputHash` и совместимого `policyHash`.
+
+Enforced by: `identifySummaryInput()` до model processing и `SummaryAttemptRepository.findReusableOutcome()` с conjunctive lookup по всем частям identity; partial index `idx_summary_runs_exact_reuse` обслуживает terminal lookup. Hit всё равно сохраняет новую attempt и применяет checkpoint transition из intent текущего request.
+
+Evidence: [summary-input.ts](../../packages/summarize/src/workflow/summary-input.ts); [execute-summary-attempt.ts](../../packages/summarize/src/workflow/execute-summary-attempt.ts); [summary-attempt.repository.ts](../../packages/db/src/repositories/summary-attempt.repository.ts); [summary-cache.test.ts](../../test/summary-cache.test.ts); [window-algebra.test.ts](../../test/window-algebra.test.ts).
+
+Violation would cause: lossy summary одного окна подменял бы вычисление другого либо cache hit исторического запроса ошибочно управлял бы cursor.
+
 ## Component cards
 
 ### Ingress Worker
 
 Responsibility: проверить webhook transport, нормализовать обычное сообщение, распознать команду, создать durable run и передать его identity в Queue. Queue handler этого же Worker переводит Processor disposition в ACK/retry/reschedule.
 
-Owns: Telegram webhook acceptance order, idempotency-key construction, Queue message protocol usage и webhook response boundary.
+Owns: Telegram webhook acceptance order, idempotency-key construction, Queue message protocol usage, typed ingress observations и webhook response boundary.
 
 Does NOT own: selection/classification/checkpoint policy, lifecycle transition SQL, model calls или final summary validation.
 
@@ -718,7 +746,7 @@ Important invariants: команда не попадает в canonical messages
 
 Failure semantics: malformed Queue job ACK; Processor RPC exception Queue-retry; Queue reschedule failure retry original; failed Queue send during webhook leaves idempotent run for webhook retry/cron.
 
-Key entry points: [ingress/worker.ts](../../apps/cloudflare/src/ingress/worker.ts) — transport-only routing; [telegram-webhook-handler.ts](../../apps/cloudflare/src/ingress/telegram-webhook-handler.ts) — `handleTelegramWebhook()`; [summary-command-ingress.ts](../../apps/cloudflare/src/ingress/summary-command-ingress.ts) — durable command acceptance; [summary-queue-consumer.ts](../../apps/cloudflare/src/ingress/summary-queue-consumer.ts) — `handleSummaryQueue()`.
+Key entry points: [ingress/worker.ts](../../apps/cloudflare/src/ingress/worker.ts) — transport-only routing; [telegram-webhook-handler.ts](../../apps/cloudflare/src/ingress/telegram-webhook-handler.ts) — `handleTelegramWebhook()`; [summary-command-ingress.ts](../../apps/cloudflare/src/ingress/summary-command-ingress.ts) — durable command acceptance; [summary-command-observability.ts](../../apps/cloudflare/src/ingress/summary-command-observability.ts) — command observation projection; [summary-queue-consumer.ts](../../apps/cloudflare/src/ingress/summary-queue-consumer.ts) — `handleSummaryQueue()`; [summary-queue-observability.ts](../../apps/cloudflare/src/ingress/summary-queue-observability.ts) — Queue observation projection.
 
 ### SummaryLifecycleRepo and Lifecycle Worker
 
@@ -792,9 +820,9 @@ Owns: predicate schema/order policy, prompt contract, model profile use и seman
 
 Does NOT own: message eligibility, checkpoint consumption, attempt persistence, lifecycle retry classification или Telegram delivery.
 
-Reads: один и тот же immutable window плюс role annotations. Outputs: `SummaryDecision` и optional summary text. Durable writes отсутствуют; invocation evidence собирается telemetry service и позже сохраняется facade.
+Reads: один и тот же immutable window плюс role annotations. Outputs: `SummaryDecision` и optional summary text. Durable writes отсутствуют; model-boundary events направляются в execution recorder, обязательный journal проецирует из них invocation evidence, а optional telemetry observer не участвует в persistence.
 
-Important invariants: fast classifier по умолчанию abstains; model predicates validated strictly; action выводится code; context-only rows помечены в prompt.
+Important invariants: fast classifier по умолчанию abstains; model predicates validated strictly; action выводится code; context-only rows помечены в prompt; structured и streaming generation получают одинаковые transcript/roles и semantic policy; summary сохраняет конкретные полезные propositions, релевантные visible author labels и named anchors вместо topic-only meta-summary.
 
 Failure semantics: classifier повторяет один truncated/empty-output attempt с большим output budget; provider/schema failure пробрасывается facade/Processor.
 
@@ -808,13 +836,13 @@ Owns: semantic workflow ordering, attempt construction, checkpoint advancement p
 
 Does NOT own: distributed single-chat exclusion, SQL transaction implementation, Queue/lifecycle status или final delivery completion.
 
-Reads: `MessageReader`, `SummaryRunStore.findLastRun` adapter. Writes: `saveAttempt`/legacy `saveRun`; telemetry accumulator. Upstream: Processor. Downstream: selector, models, `SummariesRepo`.
+Reads: `MessageReader`, `SummaryRunStore.findLastRun` adapter. Writes: `saveAttempt`/legacy `saveRun`; per-run execution journal; optional telemetry projection. Upstream: Processor. Downstream: selector, models, `SummariesRepo`.
 
 Important invariants: terminal attempt persists before return; deferred/error preserve checkpoint; role snapshots match visible window.
 
 Failure semantics: если основной failure случился до attempt persistence, facade пытается записать error evidence; failure этой диагностической записи логируется и исходная ошибка пробрасывается.
 
-Key entry points: [execute-summary-attempt.ts](../../packages/summarize/src/workflow/execute-summary-attempt.ts) — `createSummaryWorkflow()`, `run()`; [select-conversation.ts](../../packages/summarize/src/selection/select-conversation.ts); [evaluate-conversation.ts](../../packages/summarize/src/evaluation/evaluate-conversation.ts); [accept-outcome.ts](../../packages/summarize/src/acceptance/accept-outcome.ts); [build-attempt-record.ts](../../packages/summarize/src/workflow/build-attempt-record.ts).
+Key entry points: [execute-summary-attempt.ts](../../packages/summarize/src/workflow/execute-summary-attempt.ts) — `createSummaryWorkflow()`, `run()`; [execution-journal.ts](../../packages/summarize/src/workflow/execution-journal.ts) — durable provenance projection; [select-conversation.ts](../../packages/summarize/src/selection/select-conversation.ts); [evaluate-conversation.ts](../../packages/summarize/src/evaluation/evaluate-conversation.ts); [accept-outcome.ts](../../packages/summarize/src/acceptance/accept-outcome.ts); [build-attempt-record.ts](../../packages/summarize/src/workflow/build-attempt-record.ts).
 
 ### SummariesRepo
 
@@ -857,7 +885,7 @@ Key entry points: [wma worker.ts](../../apps/cloudflare/src/wma/src-api/worker.t
 | Window vs coverage                                | Window — всё, что видят models, включая context. Coverage — только eligible range, за который отвечает disposition/checkpoint evidence.                                                                           |
 | Eligible vs context                               | Eligible классифицируется и может потребляться. Context-only parent помогает разрешать ссылку, но prompt запрещает считать его новым событием или включать в coverage.                                            |
 | `checkpointCandidate` vs `checkpointAfter`        | Candidate вычисляет selector до semantic outcome. After записывает facade как evidence фактического consumption результата; deferred/error/count оставляют before.                                                |
-| `checkpoint_after` column vs canonical checkpoint | Column описывает одну attempt. Canonical checkpoint — query выбранной `recent/today` + `summarized/skipped` строки и её `to_message_id`.                                                                          |
+| `checkpoint_after` column vs canonical checkpoint | Column описывает одну attempt. Canonical checkpoint — query выбранной `recent` + `summarized/skipped` строки и её `to_message_id`.                                                                                |
 | Summary result vs presentation                    | Result — semantic disposition/summary и evidence в ledger. Presentation — текст пользователю: generated summary либо canned empty/defer/skip explanation; lifecycle хранит именно deliverable text.               |
 | Attempt persistence vs `saveSummary`              | Первая transaction делает outcome/checkpoint/snapshots durable. Второй CAS отдельно копирует validated presentation в lifecycle и переводит run в `summary_ready`.                                                |
 | Processing completion vs delivery completion      | `summary_ready` означает durable deliverable text после semantic work. `completed` означает, что Telegram call вернул message ID и receipt был записан.                                                           |
@@ -1092,4 +1120,4 @@ Relevant files: [feedback.repo.ts](../../packages/db/src/repos/feedback.repo.ts)
 | Delivery/progressive output           | Processor Worker, `telegram/progressiveTransport.ts`        | `summarize/progressive.ts`, progressive tests                        |
 | WMA visibility/access                 | `wma/src-api/bootstrap.ts`, `chat-access.ts`                | catalog writer, edge-cache policy, WMA tests                         |
 
-Основной executable evidence расположен в `test/summarize-v01.test.ts`, `test/summarize-boundaries.test.ts`, `test/count-checkpoint.test.ts`, `test/summary-ledger*.test.ts`, `test/summary-lifecycle-storage.test.ts`, `test/reconciler-matrix.test.ts`, `test/telegram-*.test.ts`, `test/runtime-e2e.test.ts` и `apps/cloudflare/test/queue-runtime.test.ts`. Physical schema задают [schema.ts](../../packages/db/src/schema.ts) и migrations `0000..0017`; текущее schema после всех migrations содержит `messages`, `summary_runs`, `summary_run_lifecycle`, `summary_run_messages`, `model_invocations`, `summary_feedback`, `dataset_candidates`, `wma_chat_catalog`.
+Основной executable evidence расположен в `test/summarize-v01.test.ts`, `test/summarize-boundaries.test.ts`, `test/count-checkpoint.test.ts`, `test/summary-ledger*.test.ts`, `test/summary-lifecycle-storage.test.ts`, `test/reconciler-matrix.test.ts`, `test/telegram-*.test.ts`, `test/runtime-e2e.test.ts` и `apps/cloudflare/test/queue-runtime.test.ts`. Physical schema задают [schema.ts](../../packages/db/src/schema.ts) и migrations `0000..0018`; текущее schema после всех migrations содержит `messages`, `summary_runs`, `summary_run_lifecycle`, `summary_run_messages`, `model_invocations`, `summary_feedback`, `dataset_candidates`, `wma_chat_catalog`.

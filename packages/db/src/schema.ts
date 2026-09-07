@@ -92,6 +92,17 @@ export const summaryRuns = pgTable(
       table.createdAt.desc(),
       table.id.desc(),
     ),
+    index("idx_summary_runs_exact_reuse")
+      .on(
+        table.chatId,
+        table.fromMessageId,
+        table.commandMessageId,
+        table.messageCount,
+        table.inputHash,
+        table.policyHash,
+        table.createdAt.desc(),
+      )
+      .where(sql`${table.status} in ('summarized', 'skipped')`),
     uniqueIndex("idx_summary_runs_orchestration_attempt").on(
       table.orchestrationRunId,
       table.orchestrationAttempt,

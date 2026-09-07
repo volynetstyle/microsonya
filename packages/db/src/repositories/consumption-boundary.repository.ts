@@ -22,7 +22,7 @@ export async function findLatestConsumptionBoundary(
       .where(
         and(
           eq(summaryRuns.chatId, encryptedChatId),
-          inArray(summaryRuns.mode, ["recent", "today"]),
+          eq(summaryRuns.mode, "recent"),
           inArray(summaryRuns.status, ["summarized", "skipped"]),
         ),
       )
