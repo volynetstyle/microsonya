@@ -8,10 +8,10 @@ import {
   asTimestampMs,
   type ChatMessage,
   type SummaryCommand,
-  type SummaryRunAttempt,
+  type SummaryAttempt,
 } from "../packages/shared/src/index.js";
 import {
-  createSummarizer,
+  createSummaryWorkflow,
   SummarizationTelemetryService,
 } from "../packages/summarize/src/index.js";
 
@@ -109,9 +109,9 @@ function createRunner(scenario: Scenario, messageCount: number) {
   });
 
   const summaries = {
-    findLastRun: async () => undefined,
-    saveRun: async () => undefined,
-    saveAttempt: async (attempt: SummaryRunAttempt) => {
+    findLatestConsumptionBoundary: async () => undefined,
+    recordAcceptedOutcome: async () => undefined,
+    recordAttempt: async (attempt: SummaryAttempt) => {
       // Mirror the privacy transforms at the Postgres boundary, but omit SQL.
       encryption.lookup(attempt.chatId, "telegram-chat-id");
       encryption.lookup(attempt.inputHash, "summary-input-hash");
@@ -148,13 +148,13 @@ function createRunner(scenario: Scenario, messageCount: number) {
       }
     },
   };
-  const summarizer = createSummarizer({
+  const summarizer = createSummaryWorkflow({
     messages: {
       listByChat: async (chatId) => conversation(chatId, messageCount),
     },
     summaries,
     ollama,
-    telemetry: new SummarizationTelemetryService(null),
+    executionObserver: new SummarizationTelemetryService(null),
   });
   return {
     async run(): Promise<void> {

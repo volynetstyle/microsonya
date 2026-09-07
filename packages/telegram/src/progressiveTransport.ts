@@ -7,7 +7,10 @@ export interface ProgressiveTransport {
 }
 
 export interface TelegramApi {
-  call(method: string, body: Readonly<Record<string, unknown>>): Promise<unknown>;
+  call(
+    method: string,
+    body: Readonly<Record<string, unknown>>,
+  ): Promise<unknown>;
 }
 
 export class TelegramPrivateDraftTransport implements ProgressiveTransport {
