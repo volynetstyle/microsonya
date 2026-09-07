@@ -1,6 +1,8 @@
-import { createSignal, flush, onSettled, type Accessor } from "solid-js";
+import { createSignal, onSettled, type Accessor } from "solid-js";
+import { createViewTransition } from "./view-transition";
 
 export type RouteDefinition = Readonly<{ path: string; depth: number }>;
+
 type Options = Readonly<{
   routes: readonly RouteDefinition[];
   transformUrl?: (url: URL) => URL;
@@ -64,15 +66,13 @@ export function useViewTransitionRouter(options: Options): Accessor<string> {
   );
 
   onSettled(() => {
-    const root = document.documentElement;
     const history = window.history;
-    const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
     const previousRestoration = history.scrollRestoration;
     const scrollPositions = new Map<number, ScrollPosition>();
     let index = historyIndex(history.state) ?? 0;
-    let scrollFrame = 0;
+    let renderedIndex = index;
     let disposed = false;
-    let activeTransition: ViewTransition | undefined;
+    const transition = createViewTransition();
 
     if (historyIndex(history.state) === undefined) {
       history.replaceState(
@@ -84,16 +84,9 @@ export function useViewTransitionRouter(options: Options): Accessor<string> {
     history.scrollRestoration = "manual";
 
     const rememberScroll = () =>
-      scrollPositions.set(index, { left: scrollX, top: scrollY });
+      scrollPositions.set(renderedIndex, { left: scrollX, top: scrollY });
     const restoreScroll = ({ left, top }: ScrollPosition) =>
       scrollTo({ left, top, behavior: "instant" });
-    const handleScroll = () => {
-      if (scrollFrame) return;
-      scrollFrame = requestAnimationFrame(() => {
-        scrollFrame = 0;
-        rememberScroll();
-      });
-    };
 
     const navigate = (
       nextPath: string,
@@ -102,60 +95,21 @@ export function useViewTransitionRouter(options: Options): Accessor<string> {
     ) => {
       if (disposed) return;
       if (nextPath === pathname()) {
+        transition.cancel();
+        renderedIndex = index;
         restoreScroll(scroll);
         return;
       }
-      const update = () => {
-        if (disposed) return;
-        setPathname(nextPath);
-        /*
-         * Solid 2 batches reactive propagation. ViewTransition needs the route DOM
-         * synchronously updated before it captures the new snapshot.
-         */
-        flush();
-        /**
-         * end
-         */
-        restoreScroll(scroll);
-      };
-      const canAnimate =
-        typeof document.startViewTransition === "function" &&
-        root.dataset.motion !== "reduced" &&
-        !reducedMotion.matches;
-
-      activeTransition?.skipTransition();
-      activeTransition = undefined;
-      delete root.dataset.navigationMotion;
-      if (!canAnimate) {
-        update();
-        return;
-      }
-
-      root.dataset.navigationMotion = motion;
-      let transition: ViewTransition;
-      try {
-        transition = document.startViewTransition(update);
-      } catch (error) {
-        delete root.dataset.navigationMotion;
-        console.error("Failed to start route ViewTransition", error);
-        update();
-        return;
-      }
-      activeTransition = transition;
-      const cleanup = () => {
-        if (activeTransition !== transition) return;
-        activeTransition = undefined;
-        delete root.dataset.navigationMotion;
-      };
-      void transition.finished.then(cleanup, (error: unknown) => {
-        cleanup();
-        console.error("Route ViewTransition failed", error);
-      });
-      if (import.meta.env.DEV) {
-        void transition.ready.catch((error: unknown) =>
-          console.warn("Route ViewTransition was skipped", error),
-        );
-      }
+      const nextIndex = index;
+      transition.run(
+        motion,
+        () => setPathname(nextPath),
+        undefined,
+        () => {
+          renderedIndex = nextIndex;
+          restoreScroll(scroll);
+        },
+      );
     };
 
     const handleClick = (event: MouseEvent) => {
@@ -164,13 +118,17 @@ export function useViewTransitionRouter(options: Options): Accessor<string> {
       let url = new URL(anchor.href, location.href);
       if (url.origin !== location.origin || !depths.has(url.pathname)) return;
       url = options.transformUrl?.(url) ?? url;
-      if (url.pathname === pathname()) {
+      if (url.pathname === location.pathname) {
         if (url.href === location.href) event.preventDefault();
         return;
       }
 
       event.preventDefault();
       rememberScroll();
+      // A push after Back discards forward entries and their scroll data.
+      for (const savedIndex of scrollPositions.keys()) {
+        if (savedIndex > index) scrollPositions.delete(savedIndex);
+      }
       index += 1;
       scrollPositions.set(index, ZERO_SCROLL);
       history.pushState(indexedState(null, index), "", url);
@@ -200,18 +158,14 @@ export function useViewTransitionRouter(options: Options): Accessor<string> {
       );
     };
 
-    scrollPositions.set(index, ZERO_SCROLL);
+    rememberScroll();
     document.addEventListener("click", handleClick);
     addEventListener("popstate", handlePopState);
-    addEventListener("scroll", handleScroll, { passive: true });
     return () => {
       disposed = true;
       document.removeEventListener("click", handleClick);
       removeEventListener("popstate", handlePopState);
-      removeEventListener("scroll", handleScroll);
-      if (scrollFrame) cancelAnimationFrame(scrollFrame);
-      activeTransition?.skipTransition();
-      delete root.dataset.navigationMotion;
+      transition.dispose();
       history.scrollRestoration = previousRestoration;
     };
   });

@@ -21,9 +21,7 @@ export function availableSourceWindowHeight({
   );
 }
 
-export function useMeasuredSourceWindow(
-  source: () => HTMLElement,
-): void {
+export function useMeasuredSourceWindow(source: () => HTMLElement): void {
   onSettled(() => {
     const element = source();
     const screen = element.closest<HTMLElement>(".screen");

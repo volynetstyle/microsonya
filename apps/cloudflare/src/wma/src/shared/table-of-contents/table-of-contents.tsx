@@ -102,7 +102,7 @@ export function TableOfContents(props: TableOfContentsProps) {
 
       const open = Boolean(
         children?.length &&
-          (active || ancestorActive || expandedIds.has(node.item.id)),
+        (active || ancestorActive || expandedIds.has(node.item.id)),
       );
 
       result.push({
@@ -158,11 +158,7 @@ export function TableOfContents(props: TableOfContentsProps) {
                   class="toc__link"
                   aria-current={node().active ? "location" : undefined}
                   aria-expanded={
-                    hasChildren()
-                      ? node().open
-                        ? "true"
-                        : "false"
-                      : undefined
+                    hasChildren() ? (node().open ? "true" : "false") : undefined
                   }
                   onClick={() => {
                     const selected = untrack(node).item;

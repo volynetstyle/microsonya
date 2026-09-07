@@ -143,7 +143,10 @@ export function AnimatedSourceList(props: {
       : new IntersectionObserver(
           (entries) => {
             for (const entry of entries)
-              stageVisibility(entry.target as HTMLElement, entry.isIntersecting);
+              stageVisibility(
+                entry.target as HTMLElement,
+                entry.isIntersecting,
+              );
           },
           { root: list, threshold: 0.01, rootMargin: "-24px 0px -24px 0px" },
         );

@@ -1,5 +1,6 @@
 import { observeClientEnvironment } from "../api/environment";
 import type { TelegramWebApp } from "../api/types";
+import { showLatestRelease } from "./release-notes";
 
 export function initTelegramRuntime(): () => void {
   const root = document.documentElement;
@@ -10,6 +11,7 @@ export function initTelegramRuntime(): () => void {
   sync();
   webApp.onEvent("themeChanged", sync);
   if (webApp.isVersionAtLeast("7.7")) webApp.disableVerticalSwipes();
+  void showLatestRelease(webApp);
   return () => {
     stopEnvironment();
     webApp.offEvent("themeChanged", sync);

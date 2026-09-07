@@ -24,6 +24,7 @@ import {
 } from "../components/AsyncStates";
 import { AnimatedSourceList } from "../components/AnimatedSourceList";
 import { useMeasuredSourceWindow } from "../components/source-window";
+import { createViewTransition } from "../shared/navigation/view-transition";
 import * as Accordion from "../shared/accordion";
 import "../components/TopicCard.css";
 import "./Chat.css";
@@ -251,6 +252,52 @@ function ProgressiveLoader(props: {
 /** Source messages are fetched only when the reader explicitly opens them. */
 function SummaryCard(props: { chatRef: string; summary: WmaSummaryCard }) {
   const [showMessages, setShowMessages] = createSignal(false);
+  const transition = createViewTransition();
+  let screen: HTMLDivElement | undefined;
+  let heightFrame = 0;
+  const clearAnimatedHeight = () => {
+    if (heightFrame) cancelAnimationFrame(heightFrame);
+    heightFrame = 0;
+    screen?.classList.remove("summary-screen-resizing");
+    screen?.style.removeProperty("block-size");
+  };
+  const finishAnimatedHeight = (event: TransitionEvent) => {
+    if (
+      event.target === screen &&
+      (event.propertyName === "block-size" || event.propertyName === "height")
+    )
+      clearAnimatedHeight();
+  };
+  onCleanup(() => {
+    clearAnimatedHeight();
+    transition.dispose();
+  });
+  const navigateMessages = (show: boolean) => {
+    if (!screen) {
+      setShowMessages(show);
+      return;
+    }
+    clearAnimatedHeight();
+    const oldHeight = screen.offsetHeight;
+    let newHeight = oldHeight;
+    transition.run(
+      show ? "push" : "pop",
+      () => setShowMessages(show),
+      screen,
+      () => {
+        newHeight = screen!.offsetHeight;
+      },
+      () => {
+        if (!screen || oldHeight === newHeight) return;
+        screen.style.blockSize = `${oldHeight}px`;
+        screen.classList.add("summary-screen-resizing");
+        heightFrame = requestAnimationFrame(() => {
+          heightFrame = 0;
+          screen!.style.blockSize = `${newHeight}px`;
+        });
+      },
+    );
+  };
   const [detailReloadKey, setDetailReloadKey] = createSignal(0);
   const detail = createMemo(async () => {
     detailReloadKey();
@@ -295,82 +342,88 @@ function SummaryCard(props: { chatRef: string; summary: WmaSummaryCard }) {
       </Accordion.Trigger>
 
       <Accordion.Content>
-        <Show
-          when={showMessages()}
-          fallback={
-            <section class="summary-screen">
-              <span class="summary-label">ГОЛОВНЕ</span>
-              <p class="summary-text">{props.summary.summary}</p>
-              <button
-                type="button"
-                class="summary-messages-link"
-                onClick={() => setShowMessages(true)}
-              >
-                <span class="summary-link-icon" aria-hidden="true">
-                  <svg viewBox="0 0 20 20">
-                    <path d="M5.25 4.5h9.5A1.75 1.75 0 0 1 16.5 6.25v6.25a1.75 1.75 0 0 1-1.75 1.75H10l-3.5 2.5v-2.5H5.25A1.75 1.75 0 0 1 3.5 12.5V6.25A1.75 1.75 0 0 1 5.25 4.5Z" />
+        <div
+          ref={screen}
+          onTransitionEnd={finishAnimatedHeight}
+          onTransitionCancel={clearAnimatedHeight}
+        >
+          <Show
+            when={showMessages()}
+            fallback={
+              <section class="summary-screen">
+                <span class="summary-label">ГОЛОВНЕ</span>
+                <p class="summary-text">{props.summary.summary}</p>
+                <button
+                  type="button"
+                  class="summary-messages-link"
+                  onClick={() => navigateMessages(true)}
+                >
+                  <span class="summary-link-icon" aria-hidden="true">
+                    <svg viewBox="0 0 20 20">
+                      <path d="M5.25 4.5h9.5A1.75 1.75 0 0 1 16.5 6.25v6.25a1.75 1.75 0 0 1-1.75 1.75H10l-3.5 2.5v-2.5H5.25A1.75 1.75 0 0 1 3.5 12.5V6.25A1.75 1.75 0 0 1 5.25 4.5Z" />
+                    </svg>
+                  </span>
+                  <span>
+                    <strong>Повідомлення-джерела</strong>
+                    <small>{messageLabel(props.summary.messageCount)}</small>
+                  </span>
+                  <svg
+                    class="summary-link-chevron"
+                    viewBox="0 0 16 16"
+                    aria-hidden="true"
+                  >
+                    <path d="m6 3.5 4.5 4.5L6 12.5" />
                   </svg>
-                </span>
+                </button>
+              </section>
+            }
+          >
+            <MeasuredSourceScreen>
+              <header class="source-header">
+                <button
+                  type="button"
+                  class="summary-messages-back"
+                  onClick={() => navigateMessages(false)}
+                  aria-label="Повернутися до підсумку"
+                >
+                  <svg viewBox="0 0 20 20" aria-hidden="true">
+                    <path d="m12 4.5-5.5 5.5 5.5 5.5" />
+                  </svg>
+                </button>
                 <span>
                   <strong>Повідомлення-джерела</strong>
-                  <small>{messageLabel(props.summary.messageCount)}</small>
+                  <small>Фрагменти, на яких побудовано підсумок</small>
                 </span>
-                <svg
-                  class="summary-link-chevron"
-                  viewBox="0 0 16 16"
-                  aria-hidden="true"
+              </header>
+              <div class="source-list-window">
+                <Errored
+                  fallback={(error) => (
+                    <ErrorState
+                      compact
+                      error={error()}
+                      onRetry={() => setDetailReloadKey((key) => key + 1)}
+                    />
+                  )}
                 >
-                  <path d="m6 3.5 4.5 4.5L6 12.5" />
-                </svg>
-              </button>
-            </section>
-          }
-        >
-          <MeasuredSourceScreen>
-            <header class="source-header">
-              <button
-                type="button"
-                class="summary-messages-back"
-                onClick={() => setShowMessages(false)}
-                aria-label="Повернутися до підсумку"
-              >
-                <svg viewBox="0 0 20 20" aria-hidden="true">
-                  <path d="m12 4.5-5.5 5.5 5.5 5.5" />
-                </svg>
-              </button>
-              <span>
-                <strong>Повідомлення-джерела</strong>
-                <small>Фрагменти, на яких побудовано підсумок</small>
-              </span>
-            </header>
-            <div class="source-list-window">
-              <Errored
-                fallback={(error) => (
-                  <ErrorState
-                    compact
-                    error={error()}
-                    onRetry={() => setDetailReloadKey((key) => key + 1)}
-                  />
-                )}
-              >
-                <Loading fallback={<MessagesSkeleton />}>
-                  <Show
-                    when={(detail()?.moments.length ?? 0) > 0}
-                    fallback={
-                      <EmptyState
-                        compact
-                        title="Джерел не знайдено"
-                        description="Повідомлення могли бути видалені після створення підсумку."
-                      />
-                    }
-                  >
-                    <AnimatedSourceList messages={detail()!.moments} />
-                  </Show>
-                </Loading>
-              </Errored>
-            </div>
-          </MeasuredSourceScreen>
-        </Show>
+                  <Loading fallback={<MessagesSkeleton />}>
+                    <Show
+                      when={(detail()?.moments.length ?? 0) > 0}
+                      fallback={
+                        <EmptyState
+                          compact
+                          title="Джерел не знайдено"
+                          description="Повідомлення могли бути видалені після створення підсумку."
+                        />
+                      }
+                    >
+                      <AnimatedSourceList messages={detail()!.moments} />
+                    </Show>
+                  </Loading>
+                </Errored>
+              </div>
+            </MeasuredSourceScreen>
+          </Show>
+        </div>
       </Accordion.Content>
     </Accordion.Item>
   );
@@ -380,10 +433,7 @@ function MeasuredSourceScreen(props: ParentProps) {
   let element!: HTMLElement;
   useMeasuredSourceWindow(() => element);
   return (
-    <section
-      ref={element}
-      class="summary-screen summary-messages-screen"
-    >
+    <section ref={element} class="summary-screen summary-messages-screen">
       {props.children}
     </section>
   );

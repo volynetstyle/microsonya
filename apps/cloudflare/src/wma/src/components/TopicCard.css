@@ -165,6 +165,11 @@
   border-block-start: 1px solid var(--separator-soft);
 }
 
+.summary-screen-resizing {
+  overflow: clip;
+  transition: block-size 200ms cubic-bezier(0.25, 0.2, 0.75, 0.8);
+}
+
 .summary-label {
   display: block;
   margin-block: 1rem 0.6rem;
@@ -450,8 +455,7 @@
   transition:
     opacity var(--source-item-duration, 200ms) ease
       var(--source-item-delay, 0ms),
-    transform var(--source-item-duration, 200ms)
-      cubic-bezier(0.22, 0.8, 0.3, 1)
+    transform var(--source-item-duration, 200ms) cubic-bezier(0.22, 0.8, 0.3, 1)
       var(--source-item-delay, 0ms);
   backface-visibility: hidden;
   contain: layout paint style;
