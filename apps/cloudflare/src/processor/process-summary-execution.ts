@@ -18,7 +18,7 @@ import {
   TelegramPrivateDraftTransport,
 } from "@microsonya/telegram";
 import { EMPTY_SUMMARY_MESSAGE } from "./policy.js";
-import { logTelemetry } from "../observability.js";
+import { logTelemetry, recordTelemetryMetric } from "../observability.js";
 import {
   createProcessorTelemetry,
   recordSummaryProcessFinished,
@@ -33,7 +33,6 @@ import { classifyFailure, LeaseLostError } from "./failure-policy.js";
 import {
   createTelegramApi,
   DeliveryError,
-  progressiveMessageId,
   sendTelegramMessage,
 } from "./delivery/telegram-delivery.js";
 import { withProcessingLeaseHeartbeat } from "./processing-lease-heartbeat.js";
@@ -284,7 +283,7 @@ export class SummaryExecutionProcessor {
       ) {
         try {
           await progressiveSession.commit();
-          const messageId = progressiveMessageId(progressiveTransport);
+          const messageId = progressiveTransport.finalMessageId;
           if (messageId === undefined) {
             throw new DeliveryError("TELEGRAM_MALFORMED_RESPONSE", true);
           }
@@ -379,6 +378,7 @@ export class SummaryExecutionProcessor {
         : { disposition: "retry", retryAfterSeconds: 5 };
     } catch (error) {
       const failure = classifyFailure(error);
+      recordAmbiguousTelegramDeliveryRetry(this.env.ANALYTICS, failure.code);
       if (!failure.retryable) {
         const failed = await this.env.SUMMARY_RUNS.markFailed(
           runId,
@@ -447,6 +447,7 @@ export class SummaryExecutionProcessor {
     error: unknown,
   ): Promise<ProcessSummaryRunResult> {
     const failure = classifyFailure(error);
+    recordAmbiguousTelegramDeliveryRetry(this.env.ANALYTICS, failure.code);
     logTelemetry(
       failure.retryable ? "warn" : "error",
       "processor",
@@ -479,6 +480,19 @@ export class SummaryExecutionProcessor {
       ? { disposition: "retry", retryAfterSeconds: failure.retryAfterSeconds }
       : { disposition: "retry", retryAfterSeconds: 5 };
   }
+}
+
+function recordAmbiguousTelegramDeliveryRetry(
+  analytics: AnalyticsEngineDataset,
+  failureCode: string,
+): void {
+  if (failureCode !== "TELEGRAM_NETWORK_ERROR") return;
+  recordTelemetryMetric(
+    analytics,
+    "processor",
+    "telegram.delivery.ambiguous_retry",
+    "retry",
+  );
 }
 
 function logTerminalFailure(

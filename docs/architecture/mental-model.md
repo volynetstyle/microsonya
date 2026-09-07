@@ -702,9 +702,9 @@ Violation would cause: home/detail и checkpoint/attempt ledger расходил
 
 ### INV-11 — External delivery is not claimed as exactly-once
 
-Statement: Telegram send/edit и `markCompleted` разделены; повтор после неоднозначного success может повторить delivery.
+Statement: Telegram send/edit и `markCompleted` разделены; повтор после неоднозначного external success может повторить delivery. В частности, `TELEGRAM_NETWORK_ERROR` после отправки request body не доказывает, что Telegram не принял сообщение.
 
-Enforced by: явная константа `best-effort-exactly-once` и receipt persistence после external call.
+Enforced by: явная константа `best-effort-exactly-once` и receipt persistence после external call. Processor проецирует `TELEGRAM_NETWORK_ERROR` в best-effort метрику `telegram.delivery.ambiguous_retry`; она не влияет на retry или durable state.
 
 Evidence: [run-lifecycle/index.ts](../../packages/run-lifecycle/src/index.ts) — `EXTERNAL_DELIVERY_GUARANTEE`; [processor/worker.ts](../../apps/cloudflare/src/processor/worker.ts) — `deliverInsideSpan()`.
 
@@ -1103,6 +1103,14 @@ Evidence: WMA catalog пишется production attempt path; `SummaryFeedbackRe
 Why unresolved: отсутствие caller в repository не доказывает отсутствие внешнего/admin caller или намеренного будущего boundary.
 
 Relevant files: [feedback.repo.ts](../../packages/db/src/repos/feedback.repo.ts), [db index.ts](../../packages/db/src/index.ts), WMA API files.
+
+### Q-06 — Исключён ли Telegram bot token из persisted trace attributes?
+
+Evidence: Telegram Bot API требует token в path исходящего URL, а Processor выполняет `fetch` непосредственно к этому endpoint. Worker tracing может записывать URL attributes для outgoing fetches; query-string redaction не покрывает token в path.
+
+Why unresolved: repository не доказывает фактическую trace sampling/redaction конфигурацию в deployed Cloudflare account. До её проверки это security invariant: Worker, выполняющий Telegram Bot API fetch, не должен persist-ить request URL path в traces.
+
+Relevant files: [telegram-delivery.ts](../../apps/cloudflare/src/processor/delivery/telegram-delivery.ts), Worker observability configuration and deployed traces.
 
 ## Repository pointers
 

@@ -1,5 +1,6 @@
 /** Structural transport contract; kept local so Telegram does not own the renderer. */
 export interface ProgressiveTransport {
+  readonly finalMessageId?: number;
   begin(): Promise<void>;
   update(text: string): Promise<void>;
   commit(text: string): Promise<void>;
@@ -35,7 +36,7 @@ export class TelegramPrivateDraftTransport implements ProgressiveTransport {
     );
   }
 
-  get messageId(): number | undefined {
+  get finalMessageId(): number | undefined {
     return this.committedMessageId;
   }
 
@@ -70,7 +71,7 @@ export class TelegramEditableMessageTransport implements ProgressiveTransport {
     private readonly target: EditableMessageTarget,
   ) {}
 
-  get committedMessageId(): number | undefined {
+  get finalMessageId(): number | undefined {
     return this.messageId;
   }
 

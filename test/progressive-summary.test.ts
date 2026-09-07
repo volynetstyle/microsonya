@@ -231,6 +231,8 @@ describe("Telegram progressive transports", () => {
     await target.update("Підсумок");
     await target.commit("Підсумок");
 
+    expect(target.finalMessageId).toBe(8);
+
     expect(call.mock.calls).toEqual([
       [
         "sendMessageDraft",
@@ -256,6 +258,8 @@ describe("Telegram progressive transports", () => {
     await target.update("ABC");
     await target.update("ABCDEF");
     await target.commit("ABCDEF");
+
+    expect(target.finalMessageId).toBe(99);
 
     expect(call).toHaveBeenNthCalledWith(2, "sendMessage", {
       chat_id: "-100",
