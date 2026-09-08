@@ -1,4 +1,5 @@
 # Microsonya 0.1
+Source available. Free for noncommercial use. Commercial use requires a separate license.
 
 Telegram bot that keeps canonical text messages and creates on-demand Ukrainian
 summaries.
@@ -83,3 +84,13 @@ Set `SUMMARIZATION_LOG_PROMPT=1` temporarily to include the complete PIPECHAT
 window sent to the classifier and summarizer in telemetry. It contains chat
 content and should remain disabled outside diagnostics. Full prompt and model
 response logging is rejected when `NODE_ENV=production`.
+
+## License
+
+Microsonya is source-available under the
+PolyForm Noncommercial License 1.0.0.
+
+You are welcome to inspect, study, modify, and use the source code
+for permitted noncommercial purposes.
+
+Commercial use requires a separate license from the copyright holder.
