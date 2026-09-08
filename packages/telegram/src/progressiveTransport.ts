@@ -86,34 +86,16 @@ export class TelegramEditableMessageTransport implements ProgressiveTransport {
   }
 
   async update(text: string): Promise<void> {
-    const rendered = `${text} ▍`;
     if (this.messageId === undefined) {
-      this.messageId = messageIdFrom(
-        await this.telegram.call("sendMessage", {
-          chat_id: this.target.chatId,
-          text: rendered,
-          reply_parameters: { message_id: this.target.commandMessageId },
-          ...(this.target.messageThreadId === undefined
-            ? {}
-            : { message_thread_id: this.target.messageThreadId }),
-        }),
-      );
+      this.messageId = messageIdFrom(await this.send(text));
       return;
     }
-    await this.edit(rendered);
+    await this.edit(text);
   }
 
   async commit(text: string): Promise<void> {
     if (this.messageId === undefined) {
-      this.messageId = messageIdFrom(
-        await this.telegram.call("sendMessage", {
-          chat_id: this.target.chatId,
-          text,
-          ...(this.target.messageThreadId === undefined
-            ? {}
-            : { message_thread_id: this.target.messageThreadId }),
-        }),
-      );
+      this.messageId = messageIdFrom(await this.send(text));
       return;
     }
     await this.edit(text);
@@ -122,13 +104,21 @@ export class TelegramEditableMessageTransport implements ProgressiveTransport {
   async fail(): Promise<void> {
     const text = "Не вдалося завершити підсумок.";
     if (this.messageId === undefined) {
-      await this.telegram.call("sendMessage", {
-        chat_id: this.target.chatId,
-        text,
-      });
+      await this.send(text);
       return;
     }
     await this.edit(text);
+  }
+
+  private async send(text: string): Promise<unknown> {
+    return this.telegram.call("sendMessage", {
+      chat_id: this.target.chatId,
+      text,
+      reply_parameters: { message_id: this.target.commandMessageId },
+      ...(this.target.messageThreadId === undefined
+        ? {}
+        : { message_thread_id: this.target.messageThreadId }),
+    });
   }
 
   private async edit(text: string): Promise<void> {

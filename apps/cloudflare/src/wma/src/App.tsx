@@ -13,6 +13,7 @@ export default function App() {
       { path: "/chat", depth: 1 },
     ],
   });
+  
   onSettled(() => initTelegramRuntime());
   const ref = () => new URLSearchParams(location.search).get("ref");
 

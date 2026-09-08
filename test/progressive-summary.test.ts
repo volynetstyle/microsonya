@@ -246,7 +246,7 @@ describe("Telegram progressive transports", () => {
     ]);
   });
 
-  it("creates and then edits one group artifact, removing the cursor at commit", async () => {
+  it("creates and then edits one group artifact without a synthetic cursor", async () => {
     const call = vi.fn(async (method: string) =>
       method === "sendMessage" ? { result: { message_id: 99 } } : { ok: true },
     );
@@ -264,18 +264,53 @@ describe("Telegram progressive transports", () => {
     expect(call).toHaveBeenNthCalledWith(2, "sendMessage", {
       chat_id: "-100",
       message_thread_id: 3,
-      text: "ABC ▍",
+      text: "ABC",
       reply_parameters: { message_id: 12 },
     });
     expect(call).toHaveBeenNthCalledWith(3, "editMessageText", {
       chat_id: "-100",
       message_id: 99,
-      text: "ABCDEF ▍",
+      text: "ABCDEF",
     });
     expect(call).toHaveBeenNthCalledWith(4, "editMessageText", {
       chat_id: "-100",
       message_id: 99,
       text: "ABCDEF",
+    });
+  });
+
+  it("keeps a fast group commit attached to the command and topic", async () => {
+    const call = vi.fn(async () => ({ result: { message_id: 99 } }));
+    const target = new TelegramEditableMessageTransport(
+      { call },
+      { chatId: "-100", commandMessageId: 12, messageThreadId: 3 },
+    );
+
+    await target.commit("ABC");
+
+    expect(call).toHaveBeenCalledExactlyOnceWith("sendMessage", {
+      chat_id: "-100",
+      message_thread_id: 3,
+      text: "ABC",
+      reply_parameters: { message_id: 12 },
+    });
+    expect(target.finalMessageId).toBe(99);
+  });
+
+  it("keeps an early group failure attached to the command and topic", async () => {
+    const call = vi.fn(async () => ({ ok: true }));
+    const target = new TelegramEditableMessageTransport(
+      { call },
+      { chatId: "-100", commandMessageId: 12, messageThreadId: 3 },
+    );
+
+    await target.fail();
+
+    expect(call).toHaveBeenCalledExactlyOnceWith("sendMessage", {
+      chat_id: "-100",
+      message_thread_id: 3,
+      text: "Не вдалося завершити підсумок.",
+      reply_parameters: { message_id: 12 },
     });
   });
 });

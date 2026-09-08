@@ -1,9 +1,11 @@
 export type WmaChat = {
   ref: string;
+  url: string;
   title: string;
   summaryCount: number;
   lastSummaryAt: number | null;
 };
+
 export type WmaSummaryCard = {
   id: string;
   createdAt: number;
@@ -11,12 +13,14 @@ export type WmaSummaryCard = {
   summary: string;
   preview: string;
 };
+
 export type WmaChatOverview = {
   chat: { ref: string; title: string };
   stats: { summaryCount: number; messageCount: number };
   summaries: readonly WmaSummaryCard[];
   nextCursor: string | null;
 };
+
 export type WmaSummaryDetail = {
   id: string;
   summary: string;
