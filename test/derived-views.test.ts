@@ -37,9 +37,7 @@ describe("derived conversation views", () => {
     // The same label with a different id begins a new turn.
     expect(turns[1]!.messages[0]!.author.label).toBe("Vlad");
     expect(turns[0]!.messages[0]).toBe(window.messages[0]);
-    expect(Object.isFrozen(turns)).toBe(true);
-    expect(turns.every(Object.isFrozen)).toBe(true);
-    expect(turns.every((turn) => Object.isFrozen(turn.messages))).toBe(true);
+    expect(turns.flatMap((turn) => turn.messages)).toEqual(window.messages);
   });
 
   it("detects an external reply without mutating or replacing W", () => {
@@ -55,7 +53,6 @@ describe("derived conversation views", () => {
     const analysis = analyzeStructure(window);
 
     expect(analysis.hasExternalReply).toBe(true);
-    expect(Object.isFrozen(analysis)).toBe(true);
     expect(window.messages).toBe(messagesReference);
     expect([...window.messages]).toEqual(messageReferences);
     expect(encodePipeWindow(window)).toBe(before);

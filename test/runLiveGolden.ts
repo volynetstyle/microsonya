@@ -13,7 +13,7 @@ import {
   createClassifier,
   createConversationSummarizer,
   ModelOutputError,
-  processWindow,
+  evaluateSummaryWindow,
   shouldAdvanceCheckpoint,
   type SummaryPromptVariant,
 } from "../packages/summarize/src/index.js";
@@ -195,7 +195,7 @@ async function runFixture(
     const window = createConversationWindow(
       fixture.messages.map((text, index) => message(index + 1, text)),
     );
-    const result = await processWindow(
+    const result = await evaluateSummaryWindow(
       window,
       {
         classifier: summarizerOnly

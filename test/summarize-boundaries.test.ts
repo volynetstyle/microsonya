@@ -8,12 +8,11 @@ import {
   type SummaryCommand,
 } from "../packages/shared/src/index.js";
 import {
-  pendingSummaryWindowSelector,
-  selectConversationWindow,
-  selectMessages,
+  defaultSummaryWindowSelector,
+  selectSummaryWindow,
 } from "../packages/summarize/src/index.js";
-import { MAX_MESSAGES } from "../packages/summarize/src/evaluation/policy.js";
-import { buildModelPrompt } from "../packages/summarize/src/evaluation/model-prompt.js";
+import { MAX_MESSAGES } from "../packages/summarize/src/window/limits.js";
+import { buildModelPrompt } from "../packages/summarize/src/model/prompt.js";
 
 const command: SummaryCommand = {
   chatId: asChatId("chat"),
@@ -38,25 +37,83 @@ function message(
 }
 
 describe("summary conversation-window selection", () => {
+  it("matches chronological selection across shuffled histories without mutating input", () => {
+    let seed = 17;
+    const random = () => {
+      seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+      return seed / 2 ** 32;
+    };
+    for (let sample = 0; sample < 20; sample++) {
+      const messages = Array.from({ length: 650 }, (_, index) =>
+        message(index + 1, {
+          time: asTimestampMs(
+            command.date - Math.floor(random() * 172_800_000),
+          ),
+          text: index % 19 === 0 ? " " : `message ${index + 1}`,
+        }),
+      );
+      for (let index = messages.length - 1; index > 0; index--) {
+        const other = Math.floor(random() * (index + 1));
+        [messages[index], messages[other]] = [
+          messages[other]!,
+          messages[index]!,
+        ];
+      }
+      const before = structuredClone(messages);
+      for (const mode of ["recent", "count"] as const) {
+        for (const count of [1, 31, MAX_MESSAGES, MAX_MESSAGES + 100]) {
+          const requested = {
+            ...command,
+            mode,
+            count,
+            commandMessageId: asMessageId(500),
+          };
+          const eligible = messages
+            .filter(
+              (item) =>
+                item.id < requested.commandMessageId &&
+                item.text.trim().length > 0 &&
+                (mode === "count" ||
+                  (item.id > 40 && item.time >= command.date - 86_400_000)),
+            )
+            .sort((a, b) => a.time - b.time || a.id - b.id);
+          const expected =
+            mode === "recent"
+              ? eligible.slice(0, MAX_MESSAGES)
+              : eligible.slice(-Math.min(count, MAX_MESSAGES));
+          const selected = selectSummaryWindow({
+            messages,
+            command: requested,
+            checkpointBefore: asMessageId(40),
+          });
+          expect(selected?.eligibleMessages ?? []).toEqual(expected);
+          expect(messages).toEqual(before);
+        }
+      }
+    }
+  });
+
   it("includes only non-empty messages strictly after the cursor and omits the trigger", () => {
     expect(
-      selectMessages(
-        [
-          message(4),
-          message(5),
-          message(7, { text: "  " }),
-          message(9),
-          message(10, { text: "/summarize" }),
-        ],
-        command,
-        asMessageId(4),
+      (
+        selectSummaryWindow({
+          messages: [
+            message(4),
+            message(5),
+            message(7, { text: "  " }),
+            message(9),
+            message(10, { text: "/summarize" }),
+          ],
+          command: command,
+          checkpointBefore: asMessageId(4),
+        })?.eligibleMessages ?? []
       ).map((item) => item.id),
     ).toEqual([5, 9]);
   });
 
   it("applies the time boundary and command upper boundary", () => {
-    const window = selectConversationWindow(
-      [
+    const window = selectSummaryWindow({
+      messages: [
         message(7, {
           time: asTimestampMs(command.date - 86_400_001),
         }),
@@ -66,24 +123,24 @@ describe("summary conversation-window selection", () => {
         message(9, { time: asTimestampMs(command.date + 1) }),
         message(11, { time: asTimestampMs(command.date - 1_000) }),
       ],
-      command,
-    );
+      command: command,
+    });
 
     expect(window?.window.messages.map((item) => item.id)).toEqual([8, 9]);
     expect(window?.messages.map(({ role }) => role)).toEqual([
       "eligible",
       "eligible",
     ]);
-    expect(Object.isFrozen(window)).toBe(true);
-    expect(Object.isFrozen(window?.messages)).toBe(true);
+    expect(window?.eligibleMessages.map((item) => item.id)).toEqual([8, 9]);
+    expect(window?.contextMessages).toEqual([]);
   });
 
   it("is deterministic when a retry observes messages added after its command", () => {
-    const beforeRetry = pendingSummaryWindowSelector.select({
+    const beforeRetry = defaultSummaryWindowSelector.select({
       messages: [message(7), message(8), message(9)],
       command,
     })!;
-    const retry = pendingSummaryWindowSelector.select({
+    const retry = defaultSummaryWindowSelector.select({
       messages: [message(7), message(8), message(9), message(11), message(12)],
       command,
     })!;
@@ -94,14 +151,14 @@ describe("summary conversation-window selection", () => {
   });
 
   it("marks a parent behind the cursor as context rather than eligible content", () => {
-    const selected = selectConversationWindow(
-      [
+    const selected = selectSummaryWindow({
+      messages: [
         message(4, { text: "old parent" }),
         message(9, { parentId: asMessageId(4), text: "new reply" }),
       ],
-      command,
-      asMessageId(4),
-    )!;
+      command: command,
+      checkpointBefore: asMessageId(4),
+    })!;
 
     expect(
       selected.messages.map(({ message, role }) => ({ id: message.id, role })),
@@ -115,10 +172,10 @@ describe("summary conversation-window selection", () => {
 
   it("lets the ConversationWindow factory reject a mixed-chat repository result", () => {
     expect(() =>
-      selectConversationWindow(
-        [message(1), message(2, { chatId: asChatId("wrong-chat") })],
-        { ...command, commandMessageId: asMessageId(99) },
-      ),
+      selectSummaryWindow({
+        messages: [message(1), message(2, { chatId: asChatId("wrong-chat") })],
+        command: { ...command, commandMessageId: asMessageId(99) },
+      }),
     ).toThrow(/different chat/i);
   });
 
@@ -126,7 +183,7 @@ describe("summary conversation-window selection", () => {
     const messages = Array.from({ length: MAX_MESSAGES + 2 }, (_, index) =>
       message(101 + index, { time: asTimestampMs(command.date - 1_000) }),
     );
-    const selected = pendingSummaryWindowSelector.select({
+    const selected = defaultSummaryWindowSelector.select({
       messages,
       command: { ...command, commandMessageId: asMessageId(10_000) },
       checkpointBefore: asMessageId(100),
@@ -139,7 +196,7 @@ describe("summary conversation-window selection", () => {
   });
 
   it("treats an explicit count as a read-only history selection", () => {
-    const selected = pendingSummaryWindowSelector.select({
+    const selected = defaultSummaryWindowSelector.select({
       messages: [message(101), message(102), message(103), message(104)],
       command: {
         ...command,
@@ -156,7 +213,7 @@ describe("summary conversation-window selection", () => {
   });
 
   it("treats today as a read-only historical query", () => {
-    const selected = pendingSummaryWindowSelector.select({
+    const selected = defaultSummaryWindowSelector.select({
       messages: [message(101), message(102)],
       command: {
         ...command,
@@ -171,14 +228,14 @@ describe("summary conversation-window selection", () => {
   });
 
   it("marks reply parents as context-only in model input", () => {
-    const selected = selectConversationWindow(
-      [
+    const selected = selectSummaryWindow({
+      messages: [
         message(4, { text: "parent" }),
         message(9, { parentId: asMessageId(4), text: "reply" }),
       ],
-      command,
-      asMessageId(4),
-    )!;
+      command: command,
+      checkpointBefore: asMessageId(4),
+    })!;
     const prompt = buildModelPrompt(
       "SUMMARY_POLICY",
       "policy",
