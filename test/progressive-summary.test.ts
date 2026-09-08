@@ -272,11 +272,7 @@ describe("Telegram progressive transports", () => {
       message_id: 99,
       text: "ABCDEF",
     });
-    expect(call).toHaveBeenNthCalledWith(4, "editMessageText", {
-      chat_id: "-100",
-      message_id: 99,
-      text: "ABCDEF",
-    });
+    expect(call).toHaveBeenCalledTimes(3);
   });
 
   it("keeps a fast group commit attached to the command and topic", async () => {
@@ -298,7 +294,7 @@ describe("Telegram progressive transports", () => {
   });
 
   it("keeps an early group failure attached to the command and topic", async () => {
-    const call = vi.fn(async () => ({ ok: true }));
+    const call = vi.fn(async () => ({ result: { message_id: 99 } }));
     const target = new TelegramEditableMessageTransport(
       { call },
       { chatId: "-100", commandMessageId: 12, messageThreadId: 3 },

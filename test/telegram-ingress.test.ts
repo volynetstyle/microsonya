@@ -33,7 +33,7 @@ describe("canonical Cloudflare Telegram ingress", () => {
           message_id: 13,
           date: 1_801,
           text: "/summary today",
-          chat: { id: -42 },
+          chat: { id: -42, type: "supergroup" },
           from: { id: 7, first_name: "Alice" },
         },
       }),
@@ -48,7 +48,7 @@ describe("canonical Cloudflare Telegram ingress", () => {
           message_id: 14,
           date: 1_900,
           text: "Forwarded decision",
-          chat: { id: -42 },
+          chat: { id: -42, type: "supergroup" },
           from: { id: 7, first_name: "Receiver" },
           forward_origin: {
             type: "user",

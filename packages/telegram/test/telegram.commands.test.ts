@@ -4,20 +4,28 @@ import {
   createAppLauncherMessage,
   parseAppCommandUpdate,
   parseSummaryArgs,
-  parseSummaryCommand,
   parseSummaryCommandUpdate,
   SUMMARY_COMMAND_NAME,
-  telegramCommands,
+  TELEGRAM_COMMAND_SETS,
   parseTelegramChatMessageUpdate,
-} from "../packages/telegram/src/index.js";
+} from "../src";
 
 describe("Telegram app command", () => {
   it("registers /app as an ephemeral command", () => {
     expect(APP_COMMAND_NAME).toBe("app");
-    expect(telegramCommands).toContainEqual({
-      command: APP_COMMAND_NAME,
-      description: "Open Microsonya",
-      is_ephemeral: true,
+    expect(TELEGRAM_COMMAND_SETS).toContainEqual({
+      scope: { type: "all_group_chats" },
+      commands: [
+        {
+          command: APP_COMMAND_NAME,
+          description: "Відкрити Microsonya",
+          is_ephemeral: true,
+        },
+        {
+          command: SUMMARY_COMMAND_NAME,
+          description: "Створити підсумок",
+        },
+      ],
     });
   });
 
@@ -105,6 +113,45 @@ describe("Telegram app command", () => {
     });
   });
 
+  it("normalizes a configured username with a leading at-sign", () => {
+    expect(
+      parseAppCommandUpdate(
+        {
+          update_id: 44,
+          message: {
+            message_id: 0,
+            ephemeral_message_id: 93,
+            date: 1_700,
+            text: "/app@MicrosonyaBot",
+            chat: { id: -42, type: "supergroup" },
+            from: { id: 7 },
+            entities: [{ type: "bot_command", offset: 0, length: 18 }],
+          },
+        },
+        "@microsonyabot",
+      ),
+    ).toBeDefined();
+  });
+
+  it("ignores malformed unrelated entities while decoding the command", () => {
+    expect(
+      parseAppCommandUpdate({
+        update_id: 45,
+        message: {
+          message_id: 7,
+          date: 1_700,
+          text: "/app",
+          chat: { id: 7, type: "private" },
+          from: { id: 7 },
+          entities: [
+            { type: "bold", offset: "invalid", length: null },
+            { type: "bot_command", offset: 0, length: 4 },
+          ],
+        },
+      }),
+    ).toBeDefined();
+  });
+
   it("keeps /app usable in a private chat", () => {
     const command = parseAppCommandUpdate({
       update_id: 42,
@@ -133,14 +180,17 @@ describe("Telegram app command", () => {
 describe("Telegram summary command", () => {
   it("parses a targeted command directly into the application request", () => {
     expect(
-      parseSummaryCommand(
+      parseSummaryCommandUpdate(
         {
-          message_id: 5,
-          date: 1_700,
-          text: "/summary@MicrosonyaBot today",
-          chat: { id: 42 },
-          from: { id: 7, first_name: "Alice" },
-          entities: [{ type: "bot_command", offset: 0, length: 22 }],
+          update_id: 1,
+          message: {
+            message_id: 5,
+            date: 1_700,
+            text: "/summary@MicrosonyaBot today",
+            chat: { id: 42, type: "private" },
+            from: { id: 7, first_name: "Alice" },
+            entities: [{ type: "bot_command", offset: 0, length: 22 }],
+          },
         },
         "microsonyaBot",
       ),
@@ -157,23 +207,30 @@ describe("Telegram summary command", () => {
       message_id: 5,
       date: 1_700,
       text: "/summary today",
-      chat: { id: 42 },
+      chat: { id: 42, type: "private" },
       entities: [],
     };
 
-    expect(parseSummaryCommand(message)).toBeUndefined();
-    expect(parseTelegramChatMessageUpdate({ message })?.text).toBeUndefined();
+    expect(
+      parseSummaryCommandUpdate({ update_id: 1, message }),
+    ).toBeUndefined();
+    expect(
+      parseTelegramChatMessageUpdate({ update_id: 1, message })?.text,
+    ).toBeUndefined();
   });
 
   it("ignores commands addressed to another bot", () => {
     expect(
-      parseSummaryCommand(
+      parseSummaryCommandUpdate(
         {
-          message_id: 5,
-          date: 1_700,
-          text: "/summary@other_bot",
-          chat: { id: 42 },
-          entities: [{ type: "bot_command", offset: 0, length: 18 }],
+          update_id: 1,
+          message: {
+            message_id: 5,
+            date: 1_700,
+            text: "/summary@other_bot",
+            chat: { id: 42, type: "private" },
+            entities: [{ type: "bot_command", offset: 0, length: 18 }],
+          },
         },
         "microsonya_bot",
       ),
@@ -182,7 +239,11 @@ describe("Telegram summary command", () => {
 
   it("uses one command name for registration and recognition", () => {
     expect(SUMMARY_COMMAND_NAME).toBe("summary");
-    expect(telegramCommands[0]?.command).toBe(SUMMARY_COMMAND_NAME);
+    expect(
+      TELEGRAM_COMMAND_SETS.every(({ commands }) =>
+        commands.some(({ command }) => command === SUMMARY_COMMAND_NAME),
+      ),
+    ).toBe(true);
   });
 });
 
@@ -211,7 +272,7 @@ describe("untrusted Telegram update boundary", () => {
             message_thread_id: 77,
             date: 1_700,
             text: "/summary 20",
-            chat: { id: 42 },
+            chat: { id: 42, type: "private" },
             entities: [{ type: "bot_command", offset: 0, length: 8 }],
           },
         },
@@ -241,7 +302,7 @@ describe("untrusted Telegram update boundary", () => {
             message_thread_id: 77,
             date: 1_700,
             text,
-            chat: { id: -10042 },
+            chat: { id: -10042, type: "supergroup" },
             entities: [{ type: "bot_command", offset: 0, length: 8 }],
           },
         },

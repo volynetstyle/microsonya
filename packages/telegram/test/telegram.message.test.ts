@@ -1,14 +1,50 @@
 import { describe, expect, it } from "vitest";
-import { parseTelegramChatMessageUpdate } from "../packages/telegram/src/index.js";
+import {
+  parseTelegramChatMessageUpdate,
+  parseTelegramMessageUpdate,
+} from "../src";
 
 describe("telegram message mapping", () => {
+  it("accepts ephemeral message_id zero at the Telegram boundary only", () => {
+    const update = {
+      update_id: 0,
+      message: {
+        message_id: 0,
+        ephemeral_message_id: 7,
+        date: 1_800,
+        text: "ephemeral",
+        chat: { id: -42, type: "supergroup" },
+        from: { id: 7, first_name: "Alice" },
+      },
+    };
+
+    expect(parseTelegramMessageUpdate(update)?.messageId).toBe(0);
+    expect(parseTelegramChatMessageUpdate(update)).toBeUndefined();
+  });
+
+  it("prefers sender_chat over Telegram's compatibility from user", () => {
+    const message = parseTelegramChatMessageUpdate({
+      update_id: 9,
+      message: {
+        message_id: 18,
+        date: 1_802,
+        text: "anonymous admin",
+        chat: { id: -42, type: "supergroup", title: "Destination" },
+        sender_chat: { id: -99, title: "Editorial team" },
+        from: { id: 1087968824, first_name: "GroupAnonymousBot" },
+      },
+    });
+
+    expect(message?.author).toEqual({ id: "-99", label: "Editorial team" });
+  });
   it("uses forwarded author but destination time for window chronology", () => {
     const message = parseTelegramChatMessageUpdate({
+      update_id: 1,
       message: {
         message_id: 12,
         date: 1_800,
         text: "forwarded text",
-        chat: { id: 42 },
+        chat: { id: 42, type: "group" },
         from: { id: 7, first_name: "Receiver" },
         forward_origin: {
           type: "user",
@@ -38,15 +74,21 @@ describe("telegram message mapping", () => {
       message_id: 13,
       date: 1_800,
       text: "/summarize",
-      chat: { id: 42 },
+      chat: { id: 42, type: "group" },
       from: { id: 7, first_name: "Receiver" },
-      forward_sender_name: "Hidden",
-      forward_date: 1_700,
+      forward_origin: {
+        type: "hidden_user",
+        date: 1_700,
+        sender_user_name: "Hidden",
+      },
       entities: [{ type: "bot_command", offset: 0, length: 10 }],
     };
 
     expect(
-      parseTelegramChatMessageUpdate({ message: forwardedCommand }),
+      parseTelegramChatMessageUpdate({
+        update_id: 2,
+        message: forwardedCommand,
+      }),
     ).toBeUndefined();
   });
 
@@ -54,11 +96,12 @@ describe("telegram message mapping", () => {
     expect(
       parseTelegramChatMessageUpdate(
         {
+          update_id: 3,
           message: {
             message_id: 14,
             date: 1_800,
             text: "Previous classifier verdict",
-            chat: { id: 42 },
+            chat: { id: 42, type: "group" },
             forward_origin: {
               type: "user",
               sender_user: { id: 99, first_name: "Microsonya" },
@@ -73,11 +116,12 @@ describe("telegram message mapping", () => {
   it("does not turn non-forwarded Telegram commands into chat messages", () => {
     expect(
       parseTelegramChatMessageUpdate({
+        update_id: 4,
         message: {
           message_id: 13,
           date: 1_800,
           text: "/summarize",
-          chat: { id: 42 },
+          chat: { id: 42, type: "group" },
           entities: [{ type: "bot_command", offset: 0, length: 10 }],
         },
       }),
@@ -87,23 +131,25 @@ describe("telegram message mapping", () => {
   it("maps captions as text and ignores uncaptioned media", () => {
     expect(
       parseTelegramChatMessageUpdate({
+        update_id: 5,
         message: {
           message_id: 14,
           date: 1_800,
           caption: "photo caption",
           photo: [{}],
-          chat: { id: 42 },
+          chat: { id: 42, type: "group" },
         },
       })?.text,
     ).toBe("photo caption");
 
     expect(
       parseTelegramChatMessageUpdate({
+        update_id: 6,
         message: {
           message_id: 15,
           date: 1_800,
           photo: [{}],
-          chat: { id: 42 },
+          chat: { id: 42, type: "group" },
         },
       }),
     ).toBeUndefined();
@@ -112,11 +158,12 @@ describe("telegram message mapping", () => {
   it("maps an explicit parent and canonical null when none exists", () => {
     expect(
       parseTelegramChatMessageUpdate({
+        update_id: 7,
         message: {
           message_id: 16,
           date: 1_800,
           text: "reply",
-          chat: { id: 42 },
+          chat: { id: 42, type: "group" },
           reply_to_message: { message_id: 9 },
         },
       })?.parentId,
@@ -124,11 +171,12 @@ describe("telegram message mapping", () => {
 
     expect(
       parseTelegramChatMessageUpdate({
+        update_id: 8,
         message: {
           message_id: 17,
           date: 1_801,
           text: "root",
-          chat: { id: 42 },
+          chat: { id: 42, type: "group" },
         },
       })?.parentId,
     ).toBeNull();

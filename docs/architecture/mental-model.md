@@ -2,7 +2,7 @@
 
 ## How to read this document
 
-Последняя проверка summary window/cache/checkpoint boundaries: 2026-09-07, baseline `4cbea1921b036a3c6e18a452337b7bb601d20571` плюс текущие незакоммиченные изменения. В текущем dirty tree дополнительно проверены exact snapshot reuse, historical read-only semantics и Processor → repository wiring; остальные workflow, ledger и lifecycle сохраняют предыдущие проверки 2026-09-05/07.
+Последняя проверка summary window/cache/checkpoint boundaries: 2026-09-07, baseline `4cbea1921b036a3c6e18a452337b7bb601d20571` плюс текущие незакоммиченные изменения. Telegram ingress parsing boundary проверена 2026-09-08 на `b83a23e890930b10620b624aa0c1843f1cca6d4a` плюс текущие незакоммиченные изменения. В текущем dirty tree дополнительно проверены exact snapshot reuse, historical read-only semantics, Processor → repository wiring и единая Telegram message/command projection; остальные workflow, ledger и lifecycle сохраняют предыдущие проверки 2026-09-05/07.
 
 Это причинная модель **текущего рабочего дерева**. На 2026-09-07 дерево dirty: помимо описанного здесь ingress observability refactor присутствуют несвязанные незакоммиченные изменения WMA и repository guidance. Обозначение «0.2» взято из задания: корневой `package.json` пока содержит `0.1.1`, а часть пакетов и комментариев — `0.1`. Это карта исходников, а не подтверждение версии, развёрнутой в Cloudflare.
 
@@ -107,11 +107,11 @@ flowchart TD
 
 Ребро `markQueued → claimWork` отражает нормальное состояние перед claim, а не синхронное ожидание: Queue может вызвать Processor раньше фонового `markQueued`. `created` ещё не claimable; Processor вернёт `pending`, а consumer перепубликует job. При утрате queued marker поможет cron.
 
-Проверки webhook: путь `/telegram`, метод POST, secret header. Нормализатор берёт только `update.message`, текст или caption, дату назначения и reply ID. Он не обрабатывает `edited_message`/`channel_post` и не сохраняет slash-команды. `/summary` дополнительно требует command entity с offset 0, подходящего bot target и отсутствия forward provenance. Аргументы: пусто → `recent`, `today` → `today`, целое `1..128` → `count`.
+Проверки webhook: путь `/telegram`, метод POST, secret header. Общий Telegram boundary decoder берёт только `update.message`, допускает `message_id = 0` для ephemeral update, извлекает text/caption, destination date, reply ID, первый валидный `bot_command` с offset 0 и author provenance с приоритетом `sender_chat`. Он не обрабатывает `edited_message`/`channel_post`. Общий command parser проверяет forward provenance и нормализованный bot target; доменные adapters отдельно исключают slash-команды из истории, требуют persistent `message_id > 0` для `ChatMessage` и текущего `/summary`, а `/app` применяет private/ephemeral policy. Аргументы `/summary`: пусто → `recent`, `today` → `today`, целое `1..128` → `count`.
 
 Idempotency key — `telegram:<chatId>:<commandMessageId>`, а не Telegram `update_id`. HTTP OK для summary возвращается после `create` и успешного `Queue.send`; `markQueued` выполняется через `waitUntil`. Транзакции message save и run creation используют общий advisory lock по chat, но выполняются отдельно. Этот lock сериализует начавшиеся короткие записи, не гарантирует, что все более ранние Telegram сообщения уже пришли.
 
-Evidence: [telegram-webhook-handler.ts](../../apps/cloudflare/src/ingress/telegram-webhook-handler.ts) — `handleTelegramWebhook()`; [chatMessage.ts](../../packages/telegram/src/chatMessage.ts) — `parseTelegramChatMessageUpdate()`; [summaryCommand.ts](../../packages/telegram/src/summaryCommand.ts) — `parseSummaryArgs()`; [summary-queue-consumer.ts](../../apps/cloudflare/src/ingress/summary-queue-consumer.ts) — `processSummaryMessage()`.
+Evidence: [telegram-webhook-handler.ts](../../apps/cloudflare/src/ingress/telegram-webhook-handler.ts) — `handleTelegramWebhook()`; [telegram.message.ts](../../packages/telegram/src/telegram.message.ts) — `parseTelegramMessageUpdate()`; [telegram.command.ts](../../packages/telegram/src/telegram.command.ts) — `parseTelegramCommand()`; [chatMessage.ts](../../packages/telegram/src/chatMessage.ts) — `parseTelegramChatMessageUpdate()`; [summaryCommand.ts](../../packages/telegram/src/summaryCommand.ts) — `parseSummaryCommandUpdate()`/`parseSummaryArgs()`; [summary-queue-consumer.ts](../../apps/cloudflare/src/ingress/summary-queue-consumer.ts) — `processSummaryMessage()`.
 
 ## Successful summary sequence
 
@@ -1114,18 +1114,19 @@ Relevant files: [telegram-delivery.ts](../../apps/cloudflare/src/processor/deliv
 
 ## Repository pointers
 
-| Если меняется…                        | Сначала проверить                                           | Затем проверить                                                      |
-| ------------------------------------- | ----------------------------------------------------------- | -------------------------------------------------------------------- |
-| Telegram acceptance / command grammar | `packages/telegram/src/chatMessage.ts`, `summaryCommand.ts` | `apps/cloudflare/src/ingress/worker.ts`, ingress tests               |
-| Message durability/encryption         | `packages/db/src/repos/messages.repo.ts`, `encryption.ts`   | schema/migrations, ledger/encryption tests                           |
-| `recent`/`today`/`count` window       | `packages/summarize/src/summaryWindow.ts`                   | boundary/count tests, checkpoint reader                              |
-| Classification labels                 | `packages/summarize/src/classifier.ts`, `predicateV3.ts`    | orchestrator and classifier tests                                    |
-| Summary text semantics                | `conversationSummarizer.ts`, `constants.ts`, `prompt.ts`    | golden/semantic tests and model profiles                             |
-| Checkpoint advancement                | `summarize.ts`, `checkpointPolicy.ts`                       | `SummariesRepo.findLastCheckpoint`, schema/tests                     |
-| Attempt atomicity/evidence            | `packages/db/src/repos/summaries.repo.ts`                   | schema/migrations, summary-ledger tests                              |
-| Run/retry/lease states                | `SummaryLifecycleRepo`                                      | `packages/run-lifecycle`, Lifecycle Worker, storage/reconciler tests |
-| Queue ACK/retry                       | `apps/cloudflare/src/ingress/summary-queue-consumer.ts`     | ingress wrangler config, Workers queue tests                         |
-| Delivery/progressive output           | Processor Worker, `telegram/progressiveTransport.ts`        | `summarize/progressive.ts`, progressive tests                        |
-| WMA visibility/access                 | `wma/src-api/bootstrap.ts`, `chat-access.ts`                | catalog writer, edge-cache policy, WMA tests                         |
+| Если меняется…                  | Сначала проверить                                                            | Затем проверить                                                      |
+| ------------------------------- | ---------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| Telegram syntax boundary        | `packages/telegram/src/telegram.message.ts`, `telegram.command.ts`           | Telegram adapters and colocated boundary tests                       |
+| Telegram domain acceptance      | `packages/telegram/src/chatMessage.ts`, `appCommand.ts`, `summaryCommand.ts` | `apps/cloudflare/src/ingress/worker.ts`, ingress tests               |
+| Message durability/encryption   | `packages/db/src/repos/messages.repo.ts`, `encryption.ts`                    | schema/migrations, ledger/encryption tests                           |
+| `recent`/`today`/`count` window | `packages/summarize/src/summaryWindow.ts`                                    | boundary/count tests, checkpoint reader                              |
+| Classification labels           | `packages/summarize/src/classifier.ts`, `predicateV3.ts`                     | orchestrator and classifier tests                                    |
+| Summary text semantics          | `conversationSummarizer.ts`, `constants.ts`, `prompt.ts`                     | golden/semantic tests and model profiles                             |
+| Checkpoint advancement          | `summarize.ts`, `checkpointPolicy.ts`                                        | `SummariesRepo.findLastCheckpoint`, schema/tests                     |
+| Attempt atomicity/evidence      | `packages/db/src/repos/summaries.repo.ts`                                    | schema/migrations, summary-ledger tests                              |
+| Run/retry/lease states          | `SummaryLifecycleRepo`                                                       | `packages/run-lifecycle`, Lifecycle Worker, storage/reconciler tests |
+| Queue ACK/retry                 | `apps/cloudflare/src/ingress/summary-queue-consumer.ts`                      | ingress wrangler config, Workers queue tests                         |
+| Delivery/progressive output     | Processor Worker, `telegram/progressiveTransport.ts`                         | `summarize/progressive.ts`, progressive tests                        |
+| WMA visibility/access           | `wma/src-api/bootstrap.ts`, `chat-access.ts`                                 | catalog writer, edge-cache policy, WMA tests                         |
 
 Основной executable evidence расположен в `test/summarize-v01.test.ts`, `test/summarize-boundaries.test.ts`, `test/count-checkpoint.test.ts`, `test/summary-ledger*.test.ts`, `test/summary-lifecycle-storage.test.ts`, `test/reconciler-matrix.test.ts`, `test/telegram-*.test.ts`, `test/runtime-e2e.test.ts` и `apps/cloudflare/test/queue-runtime.test.ts`. Physical schema задают [schema.ts](../../packages/db/src/schema.ts) и migrations `0000..0018`; текущее schema после всех migrations содержит `messages`, `summary_runs`, `summary_run_lifecycle`, `summary_run_messages`, `model_invocations`, `summary_feedback`, `dataset_candidates`, `wma_chat_catalog`.
