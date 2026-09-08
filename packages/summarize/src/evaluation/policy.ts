@@ -18,17 +18,17 @@ export const outputSchema = z
   .strict();
 
 /** Ollama structured-output contract mirroring {@link outputSchema}. */
-export const SUMMARY_RESPONSE_SCHEMA = Object.freeze({
+export const SUMMARY_RESPONSE_SCHEMA = {
   type: "object",
-  properties: Object.freeze({
-    summary: Object.freeze({
+  properties: {
+    summary: {
       type: "string",
       minLength: 1,
-    }),
-  }),
-  required: Object.freeze(["summary"]),
+    },
+  },
+  required: ["summary"],
   additionalProperties: false,
-});
+};
 
 /**
  * Semantic model of summarization

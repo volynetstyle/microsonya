@@ -37,7 +37,7 @@ export function classifyFailure(error: unknown): {
   return classifyUnknownFailure(error);
 }
 
-const KNOWN_TYPE_ERROR_CODES: Readonly<Record<string, string>> = Object.freeze({
+const KNOWN_TYPE_ERROR_CODES: Readonly<Record<string, string>> = {
   "Summary ledger encryption key must be 32 bytes.":
     "CONFIG_DATA_ENCRYPTION_KEY_INVALID",
   "Invalid summary ledger ciphertext envelope.":
@@ -48,4 +48,4 @@ const KNOWN_TYPE_ERROR_CODES: Readonly<Record<string, string>> = Object.freeze({
     "DATA_BYTEA_DRIVER_VALUE_UNSUPPORTED",
   "Terminal summary text is missing ciphertext.":
     "LEGACY_SUMMARY_PRESENTATION_MISSING",
-});
+};

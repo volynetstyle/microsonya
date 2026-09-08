@@ -19,12 +19,7 @@
           "modelCalls": 1,
           "classifierCalls": 1,
           "summarizerCalls": 0,
-          "missingRequired": [
-            "Notion AI",
-            "4 ГБ",
-            "3 ГБ",
-            "інфраструктурою"
-          ],
+          "missingRequired": ["Notion AI", "4 ГБ", "3 ГБ", "інфраструктурою"],
           "forbiddenClaims": []
         },
         {
@@ -37,10 +32,7 @@
           "modelCalls": 2,
           "classifierCalls": 1,
           "summarizerCalls": 1,
-          "missingRequired": [
-            "4 ГБ",
-            "3 ГБ"
-          ],
+          "missingRequired": ["4 ГБ", "3 ГБ"],
           "forbiddenClaims": []
         },
         {
@@ -52,12 +44,7 @@
           "modelCalls": 1,
           "classifierCalls": 1,
           "summarizerCalls": 0,
-          "missingRequired": [
-            "Notion AI",
-            "4 ГБ",
-            "3 ГБ",
-            "інфраструктурою"
-          ],
+          "missingRequired": ["Notion AI", "4 ГБ", "3 ГБ", "інфраструктурою"],
           "forbiddenClaims": []
         },
         {
@@ -69,12 +56,7 @@
           "modelCalls": 1,
           "classifierCalls": 1,
           "summarizerCalls": 0,
-          "missingRequired": [
-            "Notion AI",
-            "4 ГБ",
-            "3 ГБ",
-            "інфраструктурою"
-          ],
+          "missingRequired": ["Notion AI", "4 ГБ", "3 ГБ", "інфраструктурою"],
           "forbiddenClaims": []
         },
         {
@@ -87,11 +69,7 @@
           "modelCalls": 2,
           "classifierCalls": 1,
           "summarizerCalls": 1,
-          "missingRequired": [
-            "4 ГБ",
-            "3 ГБ",
-            "інфраструктурою"
-          ],
+          "missingRequired": ["4 ГБ", "3 ГБ", "інфраструктурою"],
           "forbiddenClaims": []
         }
       ],
@@ -142,11 +120,7 @@
           "modelCalls": 2,
           "classifierCalls": 1,
           "summarizerCalls": 1,
-          "missingRequired": [
-            "quarantine",
-            "replayed",
-            "old lag is zero"
-          ],
+          "missingRequired": ["quarantine", "replayed", "old lag is zero"],
           "forbiddenClaims": []
         },
         {
@@ -177,11 +151,7 @@
           "modelCalls": 2,
           "classifierCalls": 1,
           "summarizerCalls": 1,
-          "missingRequired": [
-            "quarantine",
-            "replayed",
-            "old lag is zero"
-          ],
+          "missingRequired": ["quarantine", "replayed", "old lag is zero"],
           "forbiddenClaims": []
         },
         {
@@ -194,11 +164,7 @@
           "modelCalls": 2,
           "classifierCalls": 1,
           "summarizerCalls": 1,
-          "missingRequired": [
-            "quarantine",
-            "replayed",
-            "old lag is zero"
-          ],
+          "missingRequired": ["quarantine", "replayed", "old lag is zero"],
           "forbiddenClaims": []
         }
       ],
@@ -230,12 +196,7 @@
           "modelCalls": 1,
           "classifierCalls": 1,
           "summarizerCalls": 0,
-          "missingRequired": [
-            "1.8.4",
-            "до 18",
-            "v2",
-            "міграцію"
-          ],
+          "missingRequired": ["1.8.4", "до 18", "v2", "міграцію"],
           "forbiddenClaims": [],
           "propositionMetrics": {
             "passed": 2,
@@ -273,12 +234,7 @@
           "modelCalls": 1,
           "classifierCalls": 1,
           "summarizerCalls": 0,
-          "missingRequired": [
-            "1.8.4",
-            "до 18",
-            "v2",
-            "міграцію"
-          ],
+          "missingRequired": ["1.8.4", "до 18", "v2", "міграцію"],
           "forbiddenClaims": [],
           "propositionMetrics": {
             "passed": 2,
@@ -317,9 +273,7 @@
           "modelCalls": 2,
           "classifierCalls": 1,
           "summarizerCalls": 1,
-          "missingRequired": [
-            "до 18"
-          ],
+          "missingRequired": ["до 18"],
           "forbiddenClaims": [],
           "propositionMetrics": {
             "passed": 2,
@@ -357,12 +311,7 @@
           "modelCalls": 1,
           "classifierCalls": 1,
           "summarizerCalls": 0,
-          "missingRequired": [
-            "1.8.4",
-            "до 18",
-            "v2",
-            "міграцію"
-          ],
+          "missingRequired": ["1.8.4", "до 18", "v2", "міграцію"],
           "forbiddenClaims": [],
           "propositionMetrics": {
             "passed": 2,
@@ -400,12 +349,7 @@
           "modelCalls": 1,
           "classifierCalls": 1,
           "summarizerCalls": 0,
-          "missingRequired": [
-            "1.8.4",
-            "до 18",
-            "v2",
-            "міграцію"
-          ],
+          "missingRequired": ["1.8.4", "до 18", "v2", "міграцію"],
           "forbiddenClaims": [],
           "propositionMetrics": {
             "passed": 2,
@@ -463,11 +407,7 @@
           "modelCalls": 1,
           "classifierCalls": 1,
           "summarizerCalls": 0,
-          "missingRequired": [
-            "userId",
-            "shared entries",
-            "stale"
-          ],
+          "missingRequired": ["userId", "shared entries", "stale"],
           "forbiddenClaims": []
         },
         {
@@ -479,11 +419,7 @@
           "modelCalls": 1,
           "classifierCalls": 1,
           "summarizerCalls": 0,
-          "missingRequired": [
-            "userId",
-            "shared entries",
-            "stale"
-          ],
+          "missingRequired": ["userId", "shared entries", "stale"],
           "forbiddenClaims": []
         },
         {
@@ -495,11 +431,7 @@
           "modelCalls": 1,
           "classifierCalls": 1,
           "summarizerCalls": 0,
-          "missingRequired": [
-            "userId",
-            "shared entries",
-            "stale"
-          ],
+          "missingRequired": ["userId", "shared entries", "stale"],
           "forbiddenClaims": []
         },
         {
@@ -511,11 +443,7 @@
           "modelCalls": 1,
           "classifierCalls": 1,
           "summarizerCalls": 0,
-          "missingRequired": [
-            "userId",
-            "shared entries",
-            "stale"
-          ],
+          "missingRequired": ["userId", "shared entries", "stale"],
           "forbiddenClaims": []
         },
         {
@@ -527,11 +455,7 @@
           "modelCalls": 1,
           "classifierCalls": 1,
           "summarizerCalls": 0,
-          "missingRequired": [
-            "userId",
-            "shared entries",
-            "stale"
-          ],
+          "missingRequired": ["userId", "shared entries", "stale"],
           "forbiddenClaims": []
         }
       ],
@@ -590,10 +514,7 @@
           "modelCalls": 1,
           "classifierCalls": 1,
           "summarizerCalls": 0,
-          "missingRequired": [
-            "free tier",
-            "paid tier"
-          ],
+          "missingRequired": ["free tier", "paid tier"],
           "forbiddenClaims": [],
           "extractionMetrics": {
             "requiredFactRecall": 0,
@@ -662,10 +583,7 @@
           "modelCalls": 1,
           "classifierCalls": 1,
           "summarizerCalls": 0,
-          "missingRequired": [
-            "free tier",
-            "paid tier"
-          ],
+          "missingRequired": ["free tier", "paid tier"],
           "forbiddenClaims": [],
           "extractionMetrics": {
             "requiredFactRecall": 0,
@@ -706,10 +624,7 @@
           "modelCalls": 1,
           "classifierCalls": 1,
           "summarizerCalls": 0,
-          "missingRequired": [
-            "free tier",
-            "paid tier"
-          ],
+          "missingRequired": ["free tier", "paid tier"],
           "forbiddenClaims": [],
           "extractionMetrics": {
             "requiredFactRecall": 0,
@@ -798,10 +713,7 @@
           "modelCalls": 1,
           "classifierCalls": 1,
           "summarizerCalls": 0,
-          "missingRequired": [
-            "free tier",
-            "paid tier"
-          ],
+          "missingRequired": ["free tier", "paid tier"],
           "forbiddenClaims": [],
           "extractionMetrics": {
             "requiredFactRecall": 0,
@@ -879,10 +791,7 @@
           "modelCalls": 2,
           "classifierCalls": 1,
           "summarizerCalls": 1,
-          "missingRequired": [
-            "free tier",
-            "paid tier"
-          ],
+          "missingRequired": ["free tier", "paid tier"],
           "forbiddenClaims": [],
           "extractionMetrics": {
             "requiredFactRecall": 0,
@@ -957,10 +866,7 @@
           "modelCalls": 1,
           "classifierCalls": 1,
           "summarizerCalls": 0,
-          "missingRequired": [
-            "free tier",
-            "paid tier"
-          ],
+          "missingRequired": ["free tier", "paid tier"],
           "forbiddenClaims": [],
           "extractionMetrics": {
             "requiredFactRecall": 0,
@@ -1029,10 +935,7 @@
           "modelCalls": 1,
           "classifierCalls": 1,
           "summarizerCalls": 0,
-          "missingRequired": [
-            "free tier",
-            "paid tier"
-          ],
+          "missingRequired": ["free tier", "paid tier"],
           "forbiddenClaims": [],
           "extractionMetrics": {
             "requiredFactRecall": 0,
@@ -1074,9 +977,7 @@
           "modelCalls": 2,
           "classifierCalls": 1,
           "summarizerCalls": 1,
-          "missingRequired": [
-            "paid tier"
-          ],
+          "missingRequired": ["paid tier"],
           "forbiddenClaims": [],
           "extractionMetrics": {
             "requiredFactRecall": 0.5,

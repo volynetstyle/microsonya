@@ -59,9 +59,7 @@ export type WmaSummaryDetail = {
 
 type WmaEnv = Pick<
   Env,
-  | "HYPERDRIVE"
-  | "MICROSONYA_DATA_ENCRYPTION_KEY"
-  | "TELEGRAM_BOT_TOKEN"
+  "HYPERDRIVE" | "MICROSONYA_DATA_ENCRYPTION_KEY" | "TELEGRAM_BOT_TOKEN"
 >;
 
 type CatalogEntry = {
@@ -121,19 +119,12 @@ export async function getChatOverview(
   chatRef?: string,
   cursor?: string,
 ): Promise<WmaChatOverview> {
-  const chat = await requireAccessibleChat(
-    env,
-    identity,
-    chatRef,
-  );
+  const chat = await requireAccessibleChat(env, identity, chatRef);
 
   const pageCursor = decodeSummaryCursor(cursor);
 
   return withWorkerDatabase(env, async (db, encryption) => {
-    const chatId = encryption.lookup(
-      chat.id,
-      "telegram-chat-id",
-    );
+    const chatId = encryption.lookup(chat.id, "telegram-chat-id");
 
     const cursorCondition =
       pageCursor === undefined
@@ -152,8 +143,7 @@ export async function getChatOverview(
           id: summaryRuns.id,
           createdAt: summaryRuns.createdAt,
           messageCount: summaryRuns.messageCount,
-          summaryTextCiphertext:
-            summaryRuns.summaryTextCiphertext,
+          summaryTextCiphertext: summaryRuns.summaryTextCiphertext,
         })
         .from(summaryRuns)
         .where(
@@ -164,10 +154,7 @@ export async function getChatOverview(
             cursorCondition,
           ),
         )
-        .orderBy(
-          desc(summaryRuns.createdAt),
-          desc(summaryRuns.id),
-        )
+        .orderBy(desc(summaryRuns.createdAt), desc(summaryRuns.id))
         .limit(SUMMARY_PAGE_SIZE + 1),
 
       db
@@ -204,9 +191,7 @@ export async function getChatOverview(
           );
         }
 
-        const summary = encryption.decrypt(
-          row.summaryTextCiphertext,
-        );
+        const summary = encryption.decrypt(row.summaryTextCiphertext);
 
         return {
           id: row.id,
@@ -218,12 +203,8 @@ export async function getChatOverview(
       }),
 
       nextCursor:
-        rows.length > SUMMARY_PAGE_SIZE &&
-        lastRow !== undefined
-          ? encodeSummaryCursor(
-              lastRow.createdAt,
-              lastRow.id,
-            )
+        rows.length > SUMMARY_PAGE_SIZE && lastRow !== undefined
+          ? encodeSummaryCursor(lastRow.createdAt, lastRow.id)
           : null,
     };
   });
@@ -242,24 +223,16 @@ export async function getSummaryDetail(
     throw new TypeError("A summary must be selected.");
   }
 
-  const chatId = await requireAccessibleChatId(
-    env,
-    identity,
-    chatRef,
-  );
+  const chatId = await requireAccessibleChatId(env, identity, chatRef);
 
   return withWorkerDatabase(env, async (db, encryption) => {
-    const storedChatId = encryption.lookup(
-      chatId,
-      "telegram-chat-id",
-    );
+    const storedChatId = encryption.lookup(chatId, "telegram-chat-id");
 
     const run = (
       await db
         .select({
           id: summaryRuns.id,
-          summaryTextCiphertext:
-            summaryRuns.summaryTextCiphertext,
+          summaryTextCiphertext: summaryRuns.summaryTextCiphertext,
         })
         .from(summaryRuns)
         .where(
@@ -281,10 +254,8 @@ export async function getSummaryDetail(
       .select({
         ordinal: summaryRunMessages.ordinal,
         sentAt: summaryRunMessages.sentAt,
-        authorNameCiphertext:
-          summaryRunMessages.authorNameCiphertext,
-        textCiphertext:
-          summaryRunMessages.textCiphertext,
+        authorNameCiphertext: summaryRunMessages.authorNameCiphertext,
+        textCiphertext: summaryRunMessages.textCiphertext,
       })
       .from(summaryRunMessages)
       .where(eq(summaryRunMessages.runId, run.id))
@@ -292,42 +263,32 @@ export async function getSummaryDetail(
 
     return {
       id: run.id,
-      summary: encryption.decrypt(
-        run.summaryTextCiphertext,
-      ),
+      summary: encryption.decrypt(run.summaryTextCiphertext),
       moments: rows.map((row) => ({
         id: `${run.id}:${row.ordinal}`,
         sentAt: row.sentAt,
-        author: encryption.decrypt(
-          row.authorNameCiphertext,
-        ),
+        author: encryption.decrypt(row.authorNameCiphertext),
         body: encryption.decrypt(row.textCiphertext),
       })),
     };
   });
 }
 
-async function loadChatCatalog(
-  env: WmaEnv,
-): Promise<readonly CatalogEntry[]> {
+async function loadChatCatalog(env: WmaEnv): Promise<readonly CatalogEntry[]> {
   return withWorkerDatabase(
     env,
     async (db, encryption): Promise<CatalogEntry[]> => {
       const rows = await db
         .select({
-          chatIdCiphertext:
-            wmaChatCatalog.chatIdCiphertext,
+          chatIdCiphertext: wmaChatCatalog.chatIdCiphertext,
           summaryCount: wmaChatCatalog.summaryCount,
-          lastSummaryAt:
-            wmaChatCatalog.lastSummaryAt,
+          lastSummaryAt: wmaChatCatalog.lastSummaryAt,
         })
         .from(wmaChatCatalog)
         .orderBy(desc(wmaChatCatalog.lastSummaryAt));
 
       return rows.map((row) => ({
-        chatId: encryption.decrypt(
-          row.chatIdCiphertext,
-        ),
+        chatId: encryption.decrypt(row.chatIdCiphertext),
         summaryCount: row.summaryCount,
         lastSummaryAt: row.lastSummaryAt,
       }));
@@ -335,10 +296,7 @@ async function loadChatCatalog(
   );
 }
 
-function resolveChatId(
-  identity: TelegramIdentity,
-  chatRef?: string,
-): string {
+function resolveChatId(identity: TelegramIdentity, chatRef?: string): string {
   const chatId = chatRef ?? identity.chat?.id;
 
   if (!chatId) {
@@ -394,10 +352,7 @@ async function requireAccessibleChat(
   };
 }
 
-function encodeSummaryCursor(
-  createdAt: number,
-  id: string,
-): string {
+function encodeSummaryCursor(createdAt: number, id: string): string {
   return `${createdAt}:${encodeURIComponent(id)}`;
 }
 
@@ -427,9 +382,7 @@ function decodeSummaryCursor(
   let id: string;
 
   try {
-    id = decodeURIComponent(
-      cursor.slice(separator + 1),
-    );
+    id = decodeURIComponent(cursor.slice(separator + 1));
   } catch {
     throw invalidSummaryCursor();
   }
@@ -445,9 +398,7 @@ function invalidSummaryCursor(): TypeError {
   return new TypeError("Invalid summary cursor.");
 }
 
-function isDefined<T>(
-  value: T | undefined,
-): value is T {
+function isDefined<T>(value: T | undefined): value is T {
   return value !== undefined;
 }
 
@@ -463,13 +414,8 @@ async function mapConcurrent<Input, Output>(
   concurrency: number,
   mapper: (value: Input) => Promise<Output>,
 ): Promise<Output[]> {
-  if (
-    !Number.isSafeInteger(concurrency) ||
-    concurrency < 1
-  ) {
-    throw new RangeError(
-      "Concurrency must be a positive integer.",
-    );
+  if (!Number.isSafeInteger(concurrency) || concurrency < 1) {
+    throw new RangeError("Concurrency must be a positive integer.");
   }
 
   const results = new Array<Output>(values.length);
@@ -490,10 +436,7 @@ async function mapConcurrent<Input, Output>(
   await Promise.all(
     Array.from(
       {
-        length: Math.min(
-          concurrency,
-          values.length,
-        ),
+        length: Math.min(concurrency, values.length),
       },
       worker,
     ),

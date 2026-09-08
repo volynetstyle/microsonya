@@ -47,7 +47,7 @@ export function evaluatePipelineSnapshot(
     });
   return violations;
 }
-export const PROCESSOR_CRASH_MATRIX = Object.freeze([
+export const PROCESSOR_CRASH_MATRIX = [
   { point: "before_claim", recovery: "process" },
   { point: "after_claim", recovery: "lease_expiry_then_resume" },
   { point: "after_classification", recovery: "safe_recompute" },
@@ -59,4 +59,4 @@ export const PROCESSOR_CRASH_MATRIX = Object.freeze([
     recovery: "ambiguous_external_side_effect",
   },
   { point: "after_delivery_persist", recovery: "no_op" },
-] as const);
+] as const;

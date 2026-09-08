@@ -40,13 +40,13 @@ export async function findLatestConsumptionBoundary(
   ) {
     return undefined;
   }
-  return Object.freeze({
-    covers: Object.freeze({
+  return {
+    covers: {
       firstId: asMessageId(row.fromMessageId),
       lastId: asMessageId(row.toMessageId),
       count: asMessageCount(row.messageCount),
-    }),
-  });
+    },
+  };
 }
 
 function asMessageCount(value: unknown): number {

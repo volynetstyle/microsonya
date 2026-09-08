@@ -39,10 +39,7 @@
       var value = theme[key];
 
       if (typeof value === "string") {
-        style.setProperty(
-          "--tg-theme-" + key.replaceAll("_", "-"),
-          value,
-        );
+        style.setProperty("--tg-theme-" + key.replaceAll("_", "-"), value);
       }
     }
   }
@@ -56,13 +53,9 @@
   data.tgColorScheme = colorScheme;
   style.colorScheme = colorScheme;
 
-  data.input = matchMedia("(pointer:coarse)").matches
-    ? "touch"
-    : "pointer";
+  data.input = matchMedia("(pointer:coarse)").matches ? "touch" : "pointer";
 
-  data.hover = matchMedia("(hover:hover)").matches
-    ? "available"
-    : "none";
+  data.hover = matchMedia("(hover:hover)").matches ? "available" : "none";
 
   data.motion = matchMedia("(prefers-reduced-motion:reduce)").matches
     ? "reduced"

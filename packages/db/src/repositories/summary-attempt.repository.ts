@@ -68,13 +68,13 @@ export class SummaryAttemptRepository {
     ).at(0);
     if (!row) return undefined;
 
-    const covers = Object.freeze({
+    const covers = {
       firstId: asMessageId(row.fromMessageId),
       lastId: asMessageId(row.toMessageId),
       count: asMessageCount(row.messageCount),
-    });
+    };
 
-    return Object.freeze({
+    return {
       id: asSummaryId(row.id),
       chatId,
       commandMessageId: asMessageId(row.commandMessageId),
@@ -88,7 +88,7 @@ export class SummaryAttemptRepository {
         row.summaryTextCiphertext,
         "Terminal summary text",
       ),
-    });
+    };
   }
 
   async findReusableOutcome(
@@ -117,16 +117,16 @@ export class SummaryAttemptRepository {
     ).at(0);
     if (row === undefined || row.summaryTextCiphertext === null)
       return undefined;
-    return Object.freeze({
+    return {
       id: asSummaryId(row.id),
       chatId: identity.scope,
       commandMessageId: asMessageId(row.commandMessageId),
       createdAt: asTimestampMs(row.createdAt),
-      covers: Object.freeze({
+      covers: {
         firstId: asMessageId(row.fromMessageId),
         lastId: asMessageId(row.toMessageId),
         count: asMessageCount(row.messageCount),
-      }),
+      },
       mode: asSummaryMode(row.mode),
       status: asSummaryStatus(row.status),
       action: asSummaryAction(row.action),
@@ -135,7 +135,7 @@ export class SummaryAttemptRepository {
         row.summaryTextCiphertext,
         "Reusable summary text",
       ),
-    });
+    };
   }
 
   /** Reads only checkpoint metadata; presentation ciphertext is not required. */
@@ -468,10 +468,10 @@ function toAcceptedOutcome(
   },
   encryption: DataEncryption,
 ): AcceptedOutcome {
-  if (row.status === "empty") return Object.freeze({ kind: "empty" });
+  if (row.status === "empty") return { kind: "empty" };
   const action = asSummaryAction(row.action);
   if (row.status === "summarized" && action === "SUMMARIZE") {
-    return Object.freeze({
+    return {
       kind: "summarized",
       action,
       text: decryptRequired(
@@ -479,13 +479,13 @@ function toAcceptedOutcome(
         row.summaryTextCiphertext,
         "Accepted summary text",
       ),
-    });
+    };
   }
   if (row.status === "skipped" && action.startsWith("SKIP_")) {
-    return Object.freeze({ kind: "skipped", reason: action as SkipReason });
+    return { kind: "skipped", reason: action as SkipReason };
   }
   if (row.status === "deferred" && action.startsWith("DEFER_")) {
-    return Object.freeze({ kind: "deferred", reason: action as DeferReason });
+    return { kind: "deferred", reason: action as DeferReason };
   }
   throw new TypeError(
     `Persisted attempt is not a recoverable accepted outcome: ${row.status}/${action}.`,

@@ -123,26 +123,22 @@ export class SummaryExecutionJournal implements SummaryExecutionRecorder {
   }
 
   snapshot(errorCode?: SummaryErrorCode): SummaryExecutionRecord {
-    return Object.freeze({
+    return {
       modelCalls: this.modelCalls,
       classifierMs: this.classifierMs,
       summarizerMs: this.summarizerMs,
-      modelInvocations: Object.freeze(
-        [...this.invocations.values()].map((invocation) =>
-          Object.freeze({
-            ...invocation,
-            status:
-              invocation.status === "pending" && errorCode !== undefined
-                ? ("failed" as const)
-                : invocation.status,
-            errorCode:
-              invocation.status === "pending" && errorCode !== undefined
-                ? errorCode
-                : invocation.errorCode,
-          }),
-        ),
-      ),
-    });
+      modelInvocations: [...this.invocations.values()].map((invocation) => ({
+        ...invocation,
+        status:
+          invocation.status === "pending" && errorCode !== undefined
+            ? ("failed" as const)
+            : invocation.status,
+        errorCode:
+          invocation.status === "pending" && errorCode !== undefined
+            ? errorCode
+            : invocation.errorCode,
+      })),
+    };
   }
 }
 

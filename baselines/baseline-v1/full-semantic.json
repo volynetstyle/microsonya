@@ -82,10 +82,7 @@
           "modelCalls": 2,
           "classifierCalls": 1,
           "summarizerCalls": 1,
-          "missingRequired": [
-            "70к",
-            "12к"
-          ],
+          "missingRequired": ["70к", "12к"],
           "forbiddenClaims": []
         }
       ],
@@ -398,11 +395,7 @@
           "modelCalls": 1,
           "classifierCalls": 1,
           "summarizerCalls": 0,
-          "missingRequired": [
-            "10%",
-            "0.1%",
-            "50%"
-          ],
+          "missingRequired": ["10%", "0.1%", "50%"],
           "forbiddenClaims": []
         }
       ],
@@ -434,11 +427,7 @@
           "modelCalls": 2,
           "classifierCalls": 1,
           "summarizerCalls": 1,
-          "missingRequired": [
-            "quarantine",
-            "replayed",
-            "old lag is zero"
-          ],
+          "missingRequired": ["quarantine", "replayed", "old lag is zero"],
           "forbiddenClaims": []
         }
       ],
@@ -469,12 +458,7 @@
           "modelCalls": 1,
           "classifierCalls": 1,
           "summarizerCalls": 0,
-          "missingRequired": [
-            "Notion AI",
-            "4 ГБ",
-            "3 ГБ",
-            "інфраструктурою"
-          ],
+          "missingRequired": ["Notion AI", "4 ГБ", "3 ГБ", "інфраструктурою"],
           "forbiddenClaims": []
         }
       ],
@@ -506,9 +490,7 @@
           "modelCalls": 2,
           "classifierCalls": 1,
           "summarizerCalls": 1,
-          "missingRequired": [
-            "до 18"
-          ],
+          "missingRequired": ["до 18"],
           "forbiddenClaims": [],
           "propositionMetrics": {
             "passed": 2,
@@ -658,11 +640,7 @@
           "modelCalls": 1,
           "classifierCalls": 1,
           "summarizerCalls": 0,
-          "missingRequired": [
-            "userId",
-            "shared entries",
-            "stale"
-          ],
+          "missingRequired": ["userId", "shared entries", "stale"],
           "forbiddenClaims": []
         }
       ],
@@ -724,9 +702,7 @@
           "modelCalls": 1,
           "classifierCalls": 1,
           "summarizerCalls": 0,
-          "missingRequired": [
-            "іншого сервісу"
-          ],
+          "missingRequired": ["іншого сервісу"],
           "forbiddenClaims": []
         }
       ],
@@ -1583,10 +1559,7 @@
           "modelCalls": 1,
           "classifierCalls": 1,
           "summarizerCalls": 0,
-          "missingRequired": [
-            "free tier",
-            "paid tier"
-          ],
+          "missingRequired": ["free tier", "paid tier"],
           "forbiddenClaims": [],
           "extractionMetrics": {
             "requiredFactRecall": 0,
@@ -1693,10 +1666,7 @@
           "modelCalls": 1,
           "classifierCalls": 1,
           "summarizerCalls": 0,
-          "missingRequired": [
-            "free tier",
-            "paid tier"
-          ],
+          "missingRequired": ["free tier", "paid tier"],
           "forbiddenClaims": [],
           "extractionMetrics": {
             "requiredFactRecall": 0,
@@ -1757,10 +1727,7 @@
           "modelCalls": 2,
           "classifierCalls": 1,
           "summarizerCalls": 1,
-          "missingRequired": [
-            "public metadata",
-            "private profile fields"
-          ],
+          "missingRequired": ["public metadata", "private profile fields"],
           "forbiddenClaims": [],
           "extractionMetrics": {
             "requiredFactRecall": 1,
@@ -1807,10 +1774,7 @@
           "modelCalls": 2,
           "classifierCalls": 1,
           "summarizerCalls": 1,
-          "missingRequired": [
-            "public metadata",
-            "private profile fields"
-          ],
+          "missingRequired": ["public metadata", "private profile fields"],
           "forbiddenClaims": [],
           "extractionMetrics": {
             "requiredFactRecall": 1,

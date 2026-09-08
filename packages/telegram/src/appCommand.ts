@@ -72,12 +72,12 @@ export function parseAppCommandUpdate(
     return undefined;
   }
 
-  return Object.freeze({
+  return {
     chatId: String(chatId),
     userId,
     chatType,
     ...(ephemeralMessageId === undefined ? {} : { ephemeralMessageId }),
-  });
+  };
 }
 
 export function createAppLauncherMessage(
@@ -89,7 +89,7 @@ export function createAppLauncherMessage(
     throw new TypeError("Invalid Telegram bot username.");
   }
 
-  return Object.freeze({
+  return {
     chat_id: command.chatId,
     text: "Microsonya готова до роботи.",
     ...(command.ephemeralMessageId === undefined
@@ -112,7 +112,7 @@ export function createAppLauncherMessage(
         ],
       ],
     },
-  });
+  };
 }
 
 function parseCommandEntity(

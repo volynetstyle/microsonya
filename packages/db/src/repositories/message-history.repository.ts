@@ -18,12 +18,12 @@ function mapMessageRow(
   requestedChatId: ChatId,
   encryption: DataEncryption,
 ): ChatMessage {
-  const author = Object.freeze({
+  const author = {
     id: asAuthorId(row.authorId),
     label: encryption.decrypt(row.authorNameCiphertext),
-  });
+  };
 
-  return Object.freeze({
+  return {
     id: asMessageId(row.messageId),
     chatId: requestedChatId,
     author,
@@ -31,7 +31,7 @@ function mapMessageRow(
     parentId:
       row.replyToMessageId === null ? null : asMessageId(row.replyToMessageId),
     text: encryption.decrypt(row.textCiphertext),
-  });
+  };
 }
 
 export class MessageHistoryRepository {

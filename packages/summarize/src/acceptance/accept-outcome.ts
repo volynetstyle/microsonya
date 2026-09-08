@@ -19,7 +19,7 @@ export function acceptOutcome(input: {
 }): AcceptedOutcomeRecord {
   const { selected, command, action, disposition } = input;
   if (disposition.kind === "summarized") {
-    return Object.freeze({
+    return {
       id: disposition.summary.id,
       chatId: disposition.summary.chatId,
       commandMessageId: command.commandMessageId,
@@ -29,10 +29,10 @@ export function acceptOutcome(input: {
       status: "summarized",
       action,
       finalText: disposition.summary.text,
-    });
+    };
   }
 
-  return Object.freeze({
+  return {
     id: input.createSummaryId(),
     chatId: selected.window.chatId,
     commandMessageId: command.commandMessageId,
@@ -42,13 +42,13 @@ export function acceptOutcome(input: {
     status: "skipped",
     action,
     finalText: presentDisposition(disposition),
-  });
+  };
 }
 
 function coverageOf(messages: readonly ChatMessage[]) {
-  return Object.freeze({
+  return {
     firstId: messages[0]!.id,
     lastId: messages.at(-1)!.id,
     count: messages.length,
-  });
+  };
 }

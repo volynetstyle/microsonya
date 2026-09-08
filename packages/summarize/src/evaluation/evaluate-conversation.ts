@@ -36,9 +36,9 @@ export interface FastClassifier {
 }
 
 /** Structural features are available, but v0.1 has no approved fast rules. */
-export const abstainingFastClassifier: FastClassifier = Object.freeze({
+export const abstainingFastClassifier: FastClassifier = {
   classify: (): FastDecision => ({ kind: "abstain" }),
-});
+};
 
 export interface WindowProcessorDeps {
   readonly eligibleMessages?: readonly ChatMessage[];
@@ -83,13 +83,13 @@ export async function decideWindow(
   });
 
   if (fast.kind === "resolved") {
-    return Object.freeze({
+    return {
       action: fast.action,
-      evidence: Object.freeze({
+      evidence: {
         source: "deterministic" as const,
         rule: fast.rule,
-      }),
-    });
+      },
+    };
   }
 
   return classifier.classify(window, signal, execution, roles);
@@ -150,37 +150,37 @@ export async function processWindow(
     }
     signal?.throwIfAborted();
     const messages = deps.eligibleMessages ?? window.messages;
-    disposition = Object.freeze({
+    disposition = {
       kind: "summarized",
-      summary: Object.freeze({
+      summary: {
         id: (deps.createSummaryId ?? defaultSummaryId)(),
         chatId: window.chatId,
-        covers: Object.freeze({
+        covers: {
           firstId: messages[0]!.id,
           lastId: messages[messages.length - 1]!.id,
           count: messages.length,
-        }),
+        },
         text: generated.text,
         createdAt: (deps.now ?? defaultNow)(),
-      }),
-    });
+      },
+    };
   } else {
     switch (decision.action) {
       case "DEFER_COMPACT":
       case "DEFER_INCOMPLETE":
       case "DEFER_CONTEXT":
-        disposition = Object.freeze({
+        disposition = {
           kind: "deferred",
           reason: decision.action,
-        });
+        };
         break;
       case "SKIP_REACTIONS":
       case "SKIP_BANTER":
       case "SKIP_NO_VALUE":
-        disposition = Object.freeze({
+        disposition = {
           kind: "skipped",
           reason: decision.action,
-        });
+        };
         break;
     }
   }
@@ -193,7 +193,7 @@ export async function processWindow(
     durationMs: performance.now() - startedAt,
   });
 
-  return Object.freeze({ decision, disposition });
+  return { decision, disposition };
 }
 
 function defaultSummaryId(): SummaryId {

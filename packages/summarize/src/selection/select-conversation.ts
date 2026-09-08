@@ -45,10 +45,9 @@ export interface SummaryWindowSelector {
  * - reply parents are context only;
  * - count never advances the canonical checkpoint.
  */
-export const pendingSummaryWindowSelector: SummaryWindowSelector =
-  Object.freeze({
-    select: selectSummaryWindow,
-  });
+export const pendingSummaryWindowSelector: SummaryWindowSelector = {
+  select: selectSummaryWindow,
+};
 
 interface RankedMessage {
   readonly message: ChatMessage;
@@ -125,21 +124,17 @@ export function selectSummaryWindow(
     eligibleMessages,
   );
 
-  const messages = Object.freeze(
-    windowMessages.map((message) =>
-      Object.freeze({
-        message,
-        role: neededParentIds.has(message.id)
-          ? ("context" as const)
-          : ("eligible" as const),
-      }),
-    ),
-  );
+  const messages = windowMessages.map((message) => ({
+    message,
+    role: neededParentIds.has(message.id)
+      ? ("context" as const)
+      : ("eligible" as const),
+  }));
 
-  const frozenEligibleMessages = Object.freeze(eligibleMessages);
-  const frozenContextMessages = Object.freeze(contextMessages);
+  const frozenEligibleMessages = eligibleMessages;
+  const frozenContextMessages = contextMessages;
 
-  return Object.freeze({
+  return {
     window: createConversationWindow(windowMessages),
     messages,
     eligibleMessages: frozenEligibleMessages,
@@ -151,7 +146,7 @@ export function selectSummaryWindow(
         ? eligibleMessages[eligibleMessages.length - 1]!.id
         : (checkpointBefore ?? null),
     upperExclusive: command.commandMessageId,
-  });
+  };
 }
 
 /**

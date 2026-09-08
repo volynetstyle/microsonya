@@ -257,9 +257,9 @@ function parseOptions(args: readonly string[]) {
     }
     return value;
   };
-  return Object.freeze({
+  return {
     iterations: readInteger("--iterations", 1_000),
     warmup: readInteger("--warmup", 100),
     messages: readInteger("--messages", 24),
-  });
+  };
 }

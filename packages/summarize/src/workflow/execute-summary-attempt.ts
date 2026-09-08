@@ -127,13 +127,17 @@ async function run(
   const createSummaryId = deps.createSummaryId ?? defaultSummaryId;
   const startedWallClock = now();
   const elapsed = () => performance.now() - startedAt;
+
   const journal = new SummaryExecutionJournal();
+
   const telemetry = startOptionalExecutionObserver(deps.executionObserver, {
     traceId: `${command.chatId}:${command.commandMessageId}:${randomUUID()}`,
     chatId: command.chatId,
     commandMessageId: command.commandMessageId,
   });
+
   const execution = combineSummaryExecutionRecorders(journal, telemetry);
+
   let stage = "start";
   let action: SummaryAction | undefined;
   let messageCount = 0;
@@ -462,28 +466,28 @@ function dispositionFromReusableOutcome(
   now: () => TimestampMs,
 ): Exclude<WindowDisposition, { kind: "deferred" }> {
   if (outcome.status === "summarized") {
-    return Object.freeze({
+    return {
       kind: "summarized" as const,
-      summary: Object.freeze({
+      summary: {
         id: createSummaryId(),
         chatId: selected.window.chatId,
-        covers: Object.freeze({
+        covers: {
           firstId: selected.eligibleMessages[0]!.id,
           lastId: selected.eligibleMessages.at(-1)!.id,
           count: selected.eligibleMessages.length,
-        }),
+        },
         text: outcome.finalText,
         createdAt: now(),
-      }),
-    });
+      },
+    };
   }
   if (!outcome.action.startsWith("SKIP_")) {
     throw new TypeError("Reusable skipped outcome has a non-skip action.");
   }
-  return Object.freeze({
+  return {
     kind: "skipped" as const,
     reason: outcome.action as SkipReason,
-  });
+  };
 }
 
 function requireOllama(

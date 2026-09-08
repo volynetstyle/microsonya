@@ -38,14 +38,14 @@ export function parseTelegramChatMessageUpdate(
   const parentId = positiveInteger(
     record(message.reply_to_message)?.message_id,
   );
-  return Object.freeze({
+  return {
     id: asMessageId(messageId),
     chatId: asChatId(chatId),
-    author: Object.freeze({ id: asAuthorId(source.id), label: source.label }),
+    author: { id: asAuthorId(source.id), label: source.label },
     time: asTimestampMs(date * 1_000),
     parentId: parentId === undefined ? null : asMessageId(parentId),
     text,
-  });
+  };
 }
 function isControlMessage(message: RecordValue, text: string): boolean {
   if (/^\s*\//u.test(text)) return true;

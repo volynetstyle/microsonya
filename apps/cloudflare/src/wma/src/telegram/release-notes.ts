@@ -1,14 +1,16 @@
 import type { TelegramWebApp } from "../api/types";
 
-export const WMA_RELEASE = Object.freeze({
+export const WMA_RELEASE = {
   version: "2026.09.07.1",
   title: "Що нового",
   message: [
     "Підсумки тепер краще зберігають імена учасників і конкретні факти.",
     "Внутрішні позначки авторів більше не потрапляють у готовий текст.",
     "Навігація між чатами та підсумками стала плавнішою.",
-  ].map((item) => `• ${item}`).join("\n"),
-});
+  ]
+    .map((item) => `• ${item}`)
+    .join("\n"),
+};
 
 const STORAGE_KEY = "microsonya.wma.release.seen";
 
@@ -16,7 +18,7 @@ export async function showLatestRelease(
   webApp: TelegramWebApp | undefined = window.Telegram?.WebApp,
   storage: Storage = window.localStorage,
 ): Promise<boolean> {
-  if (await readSeenVersion(webApp, storage) === WMA_RELEASE.version) {
+  if ((await readSeenVersion(webApp, storage)) === WMA_RELEASE.version) {
     return false;
   }
 

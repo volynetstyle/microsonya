@@ -33,7 +33,7 @@ export interface SummaryExecution {
 }
 const TRANSITIONS: Readonly<
   Record<SummaryExecutionStatus, readonly SummaryExecutionStatus[]>
-> = Object.freeze({
+> = {
   created: ["queued", "failed_permanent"],
   queued: ["processing", "retry_wait", "failed_permanent"],
   processing: ["summary_ready", "retry_wait", "failed_permanent"],
@@ -42,7 +42,7 @@ const TRANSITIONS: Readonly<
   retry_wait: ["queued", "processing", "delivering", "failed_permanent"],
   completed: [],
   failed_permanent: [],
-});
+};
 export function canTransitionSummaryExecution(
   from: SummaryExecutionStatus,
   to: SummaryExecutionStatus,

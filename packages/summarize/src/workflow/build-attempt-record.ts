@@ -34,7 +34,7 @@ export function buildAttemptRecord(
     consecutiveDeferCount,
     ...record
   } = input;
-  return Object.freeze({
+  return {
     ...record,
     policyHash: SUMMARY_POLICY_HASH,
     inputHash,
@@ -46,7 +46,7 @@ export function buildAttemptRecord(
       snapshots: messages,
       inputHash,
     }),
-  });
+  };
 }
 
 function mineDatasetCandidate(input: {
@@ -99,7 +99,5 @@ function mineDatasetCandidate(input: {
       priority += 1;
     }
   }
-  return reasons.size === 0
-    ? undefined
-    : Object.freeze({ priority, reasons: Object.freeze([...reasons]) });
+  return reasons.size === 0 ? undefined : { priority, reasons: [...reasons] };
 }

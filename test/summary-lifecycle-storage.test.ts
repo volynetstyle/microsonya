@@ -12,13 +12,13 @@ import {
 } from "../packages/shared/src/index.js";
 import { openTestDb } from "./dbTestUtils.js";
 
-const command = Object.freeze({
+const command = {
   chatId: asChatId("-100123456"),
   commandMessageId: asMessageId(42),
   messageThreadId: 77,
   date: asTimestampMs(1_800_000_000_000),
   mode: "recent" as const,
-});
+};
 
 describe("SummaryRun authoritative storage", () => {
   it("physically collapses concurrent duplicate ingress to one run", async () => {

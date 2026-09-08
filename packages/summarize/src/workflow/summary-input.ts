@@ -14,21 +14,17 @@ export const SUMMARY_POLICY_HASH = sha256(SUMMARY_POLICY_VERSION);
 export function snapshotMessages(
   messages: readonly WindowMessage[],
 ): SummaryAttempt["messages"] {
-  return Object.freeze(
-    messages.map(({ message, role }, ordinal) =>
-      Object.freeze({
-        ordinal,
-        chatId: message.chatId,
-        messageId: message.id,
-        role,
-        authorId: message.author.id,
-        authorName: message.author.label,
-        text: message.text,
-        sentAt: message.time,
-        replyToId: message.parentId,
-      }),
-    ),
-  );
+  return messages.map(({ message, role }, ordinal) => ({
+    ordinal,
+    chatId: message.chatId,
+    messageId: message.id,
+    role,
+    authorId: message.author.id,
+    authorName: message.author.label,
+    text: message.text,
+    sentAt: message.time,
+    replyToId: message.parentId,
+  }));
 }
 
 export function hashSummaryInput(messages: SummaryAttempt["messages"]): string {
@@ -39,14 +35,14 @@ export function identifySummaryInput(
   selected: SelectedConversation,
 ): SummaryInputIdentity {
   const snapshots = snapshotMessages(selected.messages);
-  return Object.freeze({
+  return {
     scope: selected.window.chatId,
     start: selected.eligibleMessages[0]!.id,
     end: selected.upperExclusive,
     eligibleCount: selected.eligibleMessages.length,
     inputHash: hashSummaryInput(snapshots),
     policyHash: SUMMARY_POLICY_HASH,
-  });
+  };
 }
 
 function sha256(value: string): string {

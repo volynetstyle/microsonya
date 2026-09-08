@@ -30,10 +30,7 @@ export async function isTelegramChatAccessible(
     },
   );
 
-  return (
-    isTelegramOk(body) &&
-    isCurrentTelegramMember(body.result, userId)
-  );
+  return isTelegramOk(body) && isCurrentTelegramMember(body.result, userId);
 }
 
 /**
@@ -45,14 +42,7 @@ export async function getAccessibleTelegramChat(
   userId: string,
   fetcher: Fetch = fetch,
 ): Promise<AccessibleTelegramChat | undefined> {
-  if (
-    !(await isTelegramChatAccessible(
-      token,
-      chatId,
-      userId,
-      fetcher,
-    ))
-  ) {
+  if (!(await isTelegramChatAccessible(token, chatId, userId, fetcher))) {
     return;
   }
 

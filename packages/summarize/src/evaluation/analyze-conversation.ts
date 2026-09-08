@@ -28,22 +28,20 @@ export function deriveTurns(
   for (const message of window.messages) {
     const previous = turns.at(-1);
     if (previous?.authorId === message.author.id) {
-      turns[turns.length - 1] = Object.freeze({
+      turns[turns.length - 1] = {
         authorId: previous.authorId,
-        messages: Object.freeze([...previous.messages, message]),
-      });
+        messages: [...previous.messages, message],
+      };
       continue;
     }
 
-    turns.push(
-      Object.freeze({
-        authorId: message.author.id,
-        messages: Object.freeze([message]),
-      }),
-    );
+    turns.push({
+      authorId: message.author.id,
+      messages: [message],
+    });
   }
 
-  return Object.freeze(turns);
+  return turns;
 }
 
 /** Computes deterministic evidence while leaving W byte-for-byte unchanged. */
@@ -57,7 +55,7 @@ export function analyzeStructure(
     0,
   );
 
-  return Object.freeze({
+  return {
     turnCount: turns.length,
     authorSwitches: Math.max(0, turns.length - 1),
     reactionLikeCount: window.messages.filter((message) =>
@@ -74,7 +72,7 @@ export function analyzeStructure(
     ),
     // This is evidence only. No policy decision is derived from this threshold.
     structurallyCompact: window.messages.length <= 3 && characterCount <= 280,
-  });
+  };
 }
 
 const POTENTIAL_ANAPHORA =

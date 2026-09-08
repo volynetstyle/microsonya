@@ -13,7 +13,10 @@ describe("WMA release notes", () => {
       isVersionAtLeast: () => true,
       showPopup,
       CloudStorage: {
-        getItem: (_key: string, callback: (error: null, value?: string) => void) => {
+        getItem: (
+          _key: string,
+          callback: (error: null, value?: string) => void,
+        ) => {
           callback(null, undefined);
         },
         setItem: vi.fn(),

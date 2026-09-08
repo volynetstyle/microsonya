@@ -26,7 +26,7 @@ export function createWindow<Position>(
   if (compare(start, end) >= 0) {
     throw new RangeError("Window start must precede its end.");
   }
-  return Object.freeze({ start, end });
+  return { start, end };
 }
 
 export function intersectWindows<Position>(
@@ -37,7 +37,7 @@ export function intersectWindows<Position>(
   const start =
     compare(left.start, right.start) >= 0 ? left.start : right.start;
   const end = compare(left.end, right.end) <= 0 ? left.end : right.end;
-  return compare(start, end) < 0 ? Object.freeze({ start, end }) : undefined;
+  return compare(start, end) < 0 ? { start, end } : undefined;
 }
 
 /** Convex hull, deliberately not a set union when the inputs are disjoint. */
@@ -46,10 +46,10 @@ export function hullWindows<Position>(
   right: Window<Position>,
   compare: ComparePosition<Position>,
 ): Window<Position> {
-  return Object.freeze({
+  return {
     start: compare(left.start, right.start) <= 0 ? left.start : right.start,
     end: compare(left.end, right.end) >= 0 ? left.end : right.end,
-  });
+  };
 }
 
 export function relateWindows<Position>(
@@ -71,14 +71,14 @@ export function subtractWindows<Position>(
   compare: ComparePosition<Position>,
 ): WindowSet<Position> {
   const intersection = intersectWindows(left, right, compare);
-  if (!intersection) return Object.freeze([left]);
+  if (!intersection) return [left];
 
   const result: Window<Position>[] = [];
   if (compare(left.start, intersection.start) < 0) {
-    result.push(Object.freeze({ start: left.start, end: intersection.start }));
+    result.push({ start: left.start, end: intersection.start });
   }
   if (compare(intersection.end, left.end) < 0) {
-    result.push(Object.freeze({ start: intersection.end, end: left.end }));
+    result.push({ start: intersection.end, end: left.end });
   }
-  return Object.freeze(result);
+  return result;
 }

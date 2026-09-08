@@ -268,17 +268,17 @@ async function runFixture(
 }
 
 function message(id: number, text: string): ChatMessage {
-  return Object.freeze({
+  return {
     id: asMessageId(id),
     chatId: asChatId("golden-live"),
-    author: Object.freeze({
+    author: {
       id: asAuthorId(String((id % 3) + 1)),
       label: `Participant ${(id % 3) + 1}`,
-    }),
+    },
     time: asTimestampMs(1_700_000_000_000 + id * 1_000),
     parentId: null,
     text,
-  });
+  };
 }
 
 function evaluateSummaryConstraints(

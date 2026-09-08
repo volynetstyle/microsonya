@@ -34,7 +34,7 @@ export interface E2EFixture {
   };
 }
 
-const fixture = (value: E2EFixture): E2EFixture => Object.freeze(value);
+const fixture = (value: E2EFixture): E2EFixture => value;
 
 export const goldenFixtures = [
   fixture({

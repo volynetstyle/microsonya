@@ -281,7 +281,7 @@ export function createConversationSummarizer({
         responseChars: response.message.content.length,
         summaryChars: summary.length,
       });
-      return Object.freeze({ text: summary });
+      return { text: summary };
     },
   };
 }

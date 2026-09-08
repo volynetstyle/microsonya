@@ -1004,10 +1004,7 @@
           "modelCalls": 2,
           "classifierCalls": 1,
           "summarizerCalls": 1,
-          "missingRequired": [
-            "public metadata",
-            "private profile fields"
-          ],
+          "missingRequired": ["public metadata", "private profile fields"],
           "forbiddenClaims": [],
           "extractionMetrics": {
             "requiredFactRecall": 0.75,
@@ -1054,10 +1051,7 @@
           "modelCalls": 2,
           "classifierCalls": 1,
           "summarizerCalls": 1,
-          "missingRequired": [
-            "public metadata",
-            "private profile fields"
-          ],
+          "missingRequired": ["public metadata", "private profile fields"],
           "forbiddenClaims": [],
           "extractionMetrics": {
             "requiredFactRecall": 1,
@@ -1104,9 +1098,7 @@
           "modelCalls": 2,
           "classifierCalls": 1,
           "summarizerCalls": 1,
-          "missingRequired": [
-            "private profile fields"
-          ],
+          "missingRequired": ["private profile fields"],
           "forbiddenClaims": [],
           "extractionMetrics": {
             "requiredFactRecall": 1,

@@ -347,16 +347,16 @@ export function evaluatePropositions(
   for (const { errorType } of violations) {
     errorsByType[errorType] = (errorsByType[errorType] ?? 0) + 1;
   }
-  return Object.freeze({
+  return {
     passed: assertions.length - violations.length,
     total: assertions.length,
     score:
       assertions.length === 0
         ? 1
         : (assertions.length - violations.length) / assertions.length,
-    violations: Object.freeze(violations),
-    errorsByType: Object.freeze(errorsByType),
-  });
+    violations: violations,
+    errorsByType: errorsByType,
+  };
 }
 
 function required(

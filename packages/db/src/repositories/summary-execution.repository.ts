@@ -544,7 +544,7 @@ export class SummaryExecutionRepository {
 
   private map(row: LifecycleRow): LifecycleRun {
     const chatId = asChatId(this.encryption.decrypt(row.chatIdCiphertext));
-    return Object.freeze({
+    return {
       id: asSummaryId(row.id),
       idempotencyKey: row.idempotencyKey,
       status: asLifecycleStatus(row.status),
@@ -552,7 +552,7 @@ export class SummaryExecutionRepository {
       updatedAt: asTimestampMs(row.updatedAt),
       attempt: row.attempt,
       deliveryAttempt: row.deliveryAttempt,
-      command: Object.freeze({
+      command: {
         chatId,
         commandMessageId: asMessageId(row.commandMessageId),
         ...(row.messageThreadId === null
@@ -561,7 +561,7 @@ export class SummaryExecutionRepository {
         date: asTimestampMs(row.commandDate),
         mode: asMode(row.mode),
         ...(row.requestedCount === null ? {} : { count: row.requestedCount }),
-      }),
+      },
       ...(row.leaseExpiresAt === null
         ? {}
         : { leaseExpiresAt: asTimestampMs(row.leaseExpiresAt) }),
@@ -593,7 +593,7 @@ export class SummaryExecutionRepository {
       ...(row.telegramMessageId === null
         ? {}
         : { telegramMessageId: row.telegramMessageId }),
-    });
+    };
   }
 }
 
