@@ -9,7 +9,6 @@ import {
 import {
   buildClassifierPrompt,
   buildSummaryMessages,
-  buildSummaryPrompt,
   encodePipeWindow,
   PIPE_FIELDS,
   PIPE_GUIDE,
@@ -65,7 +64,8 @@ describe("canonical model transcript", () => {
     const window = fixtureWindow();
     const encoded = encodePipeWindow(window);
     const classifierPrompt = buildClassifierPrompt(window);
-    const summaryPrompt = buildSummaryPrompt(window);
+    const summaryMessages = buildSummaryMessages(window);
+    const summaryPrompt = summaryMessages.map(({ content }) => content).join("\n\n");
 
     const classifierFormat = extractSection(
       classifierPrompt,
@@ -92,78 +92,79 @@ describe("canonical model transcript", () => {
         { message: window.messages[1]!, role: "eligible" },
         { message: window.messages[2]!, role: "eligible" },
       ],
-      { promptVariant: "V3" },
+      { currentDate: "2026-09-09", reasoningEffort: "low" },
     );
 
-    expect(messages.map(({ role }) => role)).toEqual(["system", "user"]);
-    expect(messages[0]!.content).toContain("SUMMARY_POLICY_BEGIN");
-    expect(messages[0]!.content).toContain("TRANSCRIPT_FORMAT_BEGIN");
-    expect(messages[0]!.content).toContain("SEMANTIC_COMPOSITION_POLICY_BEGIN");
-    expect(messages[0]!.content).toContain("SEMANTIC_CONTRAST_EXAMPLES_BEGIN");
-    expect(messages[0]!.content).toContain(
+    expect(messages.map(({ role }) => role)).toEqual([
+      "system",
+      "developer",
+      "user",
+    ]);
+    expect(messages[0]!.content).toContain("You are ChatGPT");
+    expect(messages[0]!.content).toContain("Current date: 2026-09-09");
+    expect(messages[1]!.content).toContain("SUMMARY_POLICY_BEGIN");
+    expect(messages[1]!.content).toContain("TRANSCRIPT_FORMAT_BEGIN");
+    expect(messages[1]!.content).toContain("SEMANTIC_COMPOSITION_POLICY_BEGIN");
+    expect(messages[1]!.content).not.toContain(
       'Correct final output:\n{"summary":"Реліз перенесли на четвер.',
     );
-    expect(messages[0]!.content).toContain(
+    expect(messages[1]!.content).toContain(
       "Do not fuse propositions from different speakers",
     );
-    expect(messages[0]!.content).not.toContain("TRANSCRIPT_BEGIN");
-    expect(messages[0]!.content).not.toContain("First | line");
+    expect(messages[1]!.content).not.toContain("TRANSCRIPT_BEGIN");
+    expect(messages[1]!.content).not.toContain("First | line");
 
-    expect(messages[1]!.content).toContain("INPUT_ROLES_BEGIN");
-    expect(messages[1]!.content).toContain("#101|context");
-    expect(messages[1]!.content).toContain("TRANSCRIPT_BEGIN");
-    expect(messages[1]!.content).toContain("First \\u007c line");
-    expect(messages[1]!.content).not.toContain("SUMMARY_POLICY_BEGIN");
-    expect(messages[1]!.content).not.toContain(
+    expect(messages[2]!.content).toContain("INPUT_ROLES_BEGIN");
+    expect(messages[2]!.content).toContain("#101|context");
+    expect(messages[2]!.content).toContain("TRANSCRIPT_BEGIN");
+    expect(messages[2]!.content).toContain("First \\u007c line");
+    expect(messages[2]!.content).not.toContain("SUMMARY_POLICY_BEGIN");
+    expect(messages[2]!.content).not.toContain(
       "SEMANTIC_COMPOSITION_POLICY_BEGIN",
     );
   });
 
   it("uses a plain-text output contract only for progressive streaming", () => {
     const window = fixtureWindow();
-    const structured = buildSummaryMessages(window, undefined, {
-      promptVariant: "V3",
-    });
+    const structured = buildSummaryMessages(window);
     const streaming = buildSummaryMessages(window, undefined, {
       outputMode: "plain-text",
-      promptVariant: "V3",
     });
 
-    expect(structured[0]!.content).toContain(
+    expect(structured[1]!.content).toContain(
       "Return only JSON matching the required output schema.",
     );
-    expect(streaming[0]!.content).toContain(
-      "Return only the summary as plain text.",
+    expect(streaming[1]!.content).toContain(
+      "Return only the summary as plain text",
     );
-    expect(streaming[0]!.content).not.toContain(
+    expect(streaming[1]!.content).not.toContain(
       "Return only JSON matching the required output schema.",
     );
-    expect(streaming[0]!.content).toContain(
+    expect(streaming[1]!.content).not.toContain(
       "Correct final output:\nРеліз перенесли на четвер.",
     );
-    expect(streaming[0]!.content).not.toContain(
+    expect(streaming[1]!.content).not.toContain(
       'Correct final output:\n{"summary":',
     );
-    expect(streaming[1]!.content).toBe(structured[1]!.content);
+    expect(streaming[2]!.content).toBe(structured[2]!.content);
   });
 
   it("requires concrete facts and visible speaker attribution", () => {
-    const [system] = buildSummaryMessages(fixtureWindow(), undefined, {
+    const [, system] = buildSummaryMessages(fixtureWindow(), undefined, {
       outputMode: "plain-text",
-      promptVariant: "V2",
     });
 
     expect(system!.content).toContain(
-      "Write the supported substance, not a catalogue of conversation topics.",
+      "Favor concrete propositions over topic labels",
     );
     expect(system!.content).toContain(
-      "never replace an available relevant name with generic wording",
+      "Keep visible names attached",
     );
     expect(system!.content).toContain(
-      "work titles, services, devices, quantities, elapsed time",
+      "numbers, dates, constraints, and",
     );
     expect(system!.content).toContain(
-      "write a meta-summary whose main claims are only that participants discussed",
+      "State the supported substance directly",
     );
     expect(system!.content).toContain("complete\nnon-redundant set of durable");
     expect(system!.content).toContain(
@@ -171,40 +172,6 @@ describe("canonical model transcript", () => {
     );
   });
 
-  it("exposes the V0-V3 ablation matrix while defaulting to proven V2", () => {
-    const window = fixtureWindow();
-    const variants = (["V0", "V1", "V2", "V3"] as const).map(
-      (promptVariant) => ({
-        promptVariant,
-        messages: buildSummaryMessages(window, undefined, { promptVariant }),
-      }),
-    );
-
-    expect(
-      variants.map(({ messages }) => messages.map(({ role }) => role)),
-    ).toEqual([
-      ["user"],
-      ["system", "user"],
-      ["system", "user"],
-      ["system", "user"],
-    ]);
-    expect(variants[0]!.messages[0]!.content).not.toContain(
-      "SEMANTIC_COMPOSITION_POLICY_BEGIN",
-    );
-    expect(variants[1]!.messages[0]!.content).not.toContain(
-      "SEMANTIC_COMPOSITION_POLICY_BEGIN",
-    );
-    expect(variants[2]!.messages[0]!.content).toContain(
-      "SEMANTIC_COMPOSITION_POLICY_BEGIN",
-    );
-    expect(variants[2]!.messages[0]!.content).not.toContain(
-      "SEMANTIC_CONTRAST_EXAMPLES_BEGIN",
-    );
-    expect(variants[3]!.messages[0]!.content).toContain(
-      "SEMANTIC_CONTRAST_EXAMPLES_BEGIN",
-    );
-    expect(buildSummaryMessages(window)).toEqual(variants[2]!.messages);
-  });
 });
 
 function fixtureWindow() {

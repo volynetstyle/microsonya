@@ -9,7 +9,11 @@ export function validateSemanticOutput(text: string): void {
       raw: text,
     });
   }
-  if (/\u0000/u.test(text) || /<\/?(?:system|assistant|tool)>/iu.test(text)) {
+  if (
+    /\u0000/u.test(text) ||
+    /<\/?(?:system|assistant|tool)>/iu.test(text) ||
+    /<\|(?:start|end|message|channel|constrain|return|call)\|>/iu.test(text)
+  ) {
     throw new ModelOutputError({
       code: "MODEL_OUTPUT_SCHEMA_MISMATCH",
       stage: "summarizer",

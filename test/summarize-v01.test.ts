@@ -129,7 +129,7 @@ describe("summarizer 0.1 workflow", () => {
           additionalProperties: false,
         },
         stream: false,
-        options: expect.objectContaining({ num_predict: 2_500 }),
+        options: expect.objectContaining({ num_predict: 8_192 }),
       }),
     );
     expect(chat.mock.calls[1]?.[0]).toEqual(
@@ -137,6 +137,10 @@ describe("summarizer 0.1 workflow", () => {
         messages: [
           expect.objectContaining({
             role: "system",
+            content: expect.stringContaining("You are ChatGPT"),
+          }),
+          expect.objectContaining({
+            role: "developer",
             content: expect.stringContaining("SUMMARY_POLICY_BEGIN"),
           }),
           expect.objectContaining({

@@ -17,7 +17,10 @@ export function createSummaryWorkflow(
 
   const conversationSummarizer =
     deps.conversationSummarizer ??
-    createConversationSummarizer({ ollama: requireOllama(deps) });
+    createConversationSummarizer({
+      ollama: requireOllama(deps),
+      currentDate: deps.summaryGeneration?.currentDate,
+    });
 
   const pendingByChat = new Map<ChatId, Promise<void>>();
   const deferStreakByChat = new Map<

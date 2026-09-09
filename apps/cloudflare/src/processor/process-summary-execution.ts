@@ -208,6 +208,9 @@ export class SummaryExecutionProcessor {
                 runId,
               ),
               progressive: progressiveSession,
+              summaryGeneration: {
+                currentDate: new Date().toISOString().slice(0, 10),
+              },
             });
             phase = "summary.generate";
             return tracing.enterSpan("summary.generate", (span) => {

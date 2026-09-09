@@ -112,7 +112,8 @@ export interface GenerateStreamEvent {
   eval_duration?: number;
 }
 
-export type ChatRole = "system" | "user" | "assistant" | "tool";
+/** Ollama forwards `developer` to model templates that support the role. */
+export type ChatRole = "system" | "developer" | "user" | "assistant" | "tool";
 
 export interface ToolCall {
   function: {

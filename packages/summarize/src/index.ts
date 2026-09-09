@@ -52,10 +52,8 @@ export {
 } from "./generation/instructions.js";
 export {
   buildSummaryMessages,
-  buildSummaryPrompt,
   type SummaryOutputMode,
   type SummaryPromptOptions,
-  type SummaryPromptVariant,
 } from "./generation/prompt.js";
 export {
   SUMMARY_RESPONSE_SCHEMA,

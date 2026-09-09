@@ -1,12 +1,16 @@
 import type { ChatMessage } from "@microsonya/model";
 import type { ConversationWindow } from "@microsonya/shared";
-import type { ModelWindowMessageRole } from "../model/prompt.js";
+import type {
+  ModelWindowMessageRole,
+  ReasoningEffort,
+} from "../model/prompt.js";
 import {
+  buildHarmonySystemMessage,
   buildModelInputPrompt,
   buildModelPolicyPrompt,
 } from "../model/prompt.js";
 import { SUMMARY_COMPOSITION_POLICY } from "./composition.js";
-import { buildSummaryContrastExamples } from "./examples.js";
+import { SUMMARY_RESPONSE_SCHEMA } from "./schema.js";
 import {
   SUMMARY_INSTRUCTIONS,
   SUMMARY_STREAM_OUTPUT_INSTRUCTIONS,
@@ -15,20 +19,27 @@ import {
 
 export type SummaryOutputMode = "structured" | "plain-text";
 
-export type SummaryPromptVariant = "V0" | "V1" | "V2" | "V3";
-
 export interface SummaryPromptOptions {
   readonly outputMode?: SummaryOutputMode;
-  readonly promptVariant?: SummaryPromptVariant;
+  /**
+   * gpt-oss / harmony reasoning-effort knob. Default "medium": this task is
+   * bounded extraction against a fixed constraint checklist, not open-ended
+   * multi-step reasoning — "high" mostly buys latency here until measured
+   * otherwise (see note below).
+   */
+  readonly reasoningEffort?: ReasoningEffort;
+  readonly currentDate?: string;
 }
 
-export function buildSummaryPrompt(
-  window: ConversationWindow,
-  roles?: readonly ModelWindowMessageRole[],
-): string {
-  return buildSummaryMessages(window, roles)
-    .map(({ content }) => content)
-    .join("\n\n");
+function structuredResponseFormat(): string {
+  return [
+    "# Response Formats",
+    "",
+    "## summary",
+    "",
+    "// The final conversation summary.",
+    JSON.stringify(SUMMARY_RESPONSE_SCHEMA),
+  ].join("\n");
 }
 
 export function buildSummaryMessages(
@@ -36,31 +47,40 @@ export function buildSummaryMessages(
   roles?: readonly ModelWindowMessageRole[],
   options: SummaryPromptOptions = {},
 ): ChatMessage[] {
-  const { outputMode = "structured", promptVariant = "V2" } = options;
+  const {
+    outputMode = "structured",
+    reasoningEffort = "medium",
+    currentDate,
+  } = options;
   const outputInstructions =
     outputMode === "structured"
       ? SUMMARY_STRUCTURED_OUTPUT_INSTRUCTIONS
       : SUMMARY_STREAM_OUTPUT_INSTRUCTIONS;
-  const trustedSections = [
+
+  const developerContent = [
+    "# Instructions",
     buildModelPolicyPrompt("SUMMARY_POLICY", SUMMARY_INSTRUCTIONS),
-    ...(promptVariant === "V2" || promptVariant === "V3"
-      ? [
-          `SEMANTIC_COMPOSITION_POLICY_BEGIN\n${SUMMARY_COMPOSITION_POLICY}\nSEMANTIC_COMPOSITION_POLICY_END`,
-        ]
-      : []),
+    `SEMANTIC_COMPOSITION_POLICY_BEGIN\n${SUMMARY_COMPOSITION_POLICY}\nSEMANTIC_COMPOSITION_POLICY_END`,
     outputInstructions,
-    ...(promptVariant === "V3"
-      ? [buildSummaryContrastExamples(outputMode)]
-      : []),
-  ].join("\n\n");
+    outputMode === "structured" ? structuredResponseFormat() : null,
+  ]
+    .filter((section): section is string => section !== null)
+    .join("\n\n");
+
   const input = buildModelInputPrompt(window, roles);
 
-  if (promptVariant === "V0") {
-    return [{ role: "user", content: `${trustedSections}\n\n${input}` }];
-  }
-
+  // NB: "developer" as a ChatMessage role isn't defined anywhere in this
+  // file — depends on @microsonya/model's role union actually including it,
+  // and on the serving stack (vLLM/Ollama/provider) mapping it into
+  // harmony's developer message rather than rejecting it as unknown. Verify
+  // both before relying on this split; if either doesn't hold, fall back to
+  // folding developerContent into the system message as before.
   return [
-    { role: "system", content: trustedSections },
+    {
+      role: "system",
+      content: buildHarmonySystemMessage({ reasoningEffort, currentDate }),
+    },
+    { role: "developer", content: developerContent },
     { role: "user", content: input },
   ];
 }

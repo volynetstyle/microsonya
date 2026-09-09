@@ -15,6 +15,7 @@ import type { SummaryDecisionClassifier } from "./classifier/classifier.js";
 import type { FastClassifier } from "./classifier/decision.js";
 import type { SummaryExecutionObserver } from "./execution/observer.js";
 import type { ConversationSummarizer } from "./generation/summarizer.js";
+import type { SummaryPromptOptions } from "./generation/prompt.js";
 import type { SummaryEvaluationDependencies } from "./summary.evaluation.js";
 import type { SummaryWindowSelector } from "./window/selection.js";
 
@@ -52,4 +53,5 @@ export interface SummaryWorkflowDependencies {
   readonly now?: () => TimestampMs;
   readonly windowSelector?: SummaryWindowSelector;
   readonly progressive?: SummaryEvaluationDependencies["progressive"];
+  readonly summaryGeneration?: Pick<SummaryPromptOptions, "currentDate">;
 }

@@ -42,7 +42,7 @@ describe("progressive summary runtime", () => {
     const fetch = vi.fn<typeof globalThis.fetch>(
       async () =>
         new Response(
-          `${JSON.stringify({ message: { content: "Перша " }, done: false })}\n${JSON.stringify({ message: { content: "частина." }, done: true, done_reason: "stop", prompt_eval_count: 120, eval_count: 12 })}\n`,
+          `${JSON.stringify({ message: { content: "Перша ", thinking: "private " }, done: false })}\n${JSON.stringify({ message: { content: "частина.", thinking: "reasoning" }, done: true, done_reason: "stop", prompt_eval_count: 120, eval_count: 12 })}\n`,
           { status: 200 },
         ),
     );
@@ -70,8 +70,12 @@ describe("progressive summary runtime", () => {
       messages: [
         {
           role: "system",
+          content: expect.stringContaining("You are ChatGPT"),
+        },
+        {
+          role: "developer",
           content: expect.stringContaining(
-            "Return only the summary as plain text.",
+            "Return only the summary as plain text",
           ),
         },
         {

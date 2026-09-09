@@ -4,22 +4,25 @@ import type { ConversationWindow } from "@microsonya/shared";
 import type { SummaryExecutionRecorder } from "../execution/observer.js";
 import type { ModelWindowMessageRole } from "../model/prompt.js";
 import { recordModelResponse } from "../model/response.js";
-import type { SummaryPromptVariant } from "./prompt.js";
 import { buildSummaryMessages } from "./prompt.js";
+import { validateSemanticOutput } from "./validation.js";
 
 export async function* streamSummary(
   ollama: Pick<OllamaClient, "chat">,
-  promptVariant: SummaryPromptVariant,
   window: ConversationWindow,
   signal?: AbortSignal,
   execution?: SummaryExecutionRecorder,
   roles?: readonly ModelWindowMessageRole[],
+  currentDate?: string,
 ): AsyncIterable<string> {
   signal?.throwIfAborted();
+
   const messages = buildSummaryMessages(window, roles, {
     outputMode: "plain-text",
-    promptVariant,
+    reasoningEffort: SUMMARIZER_PROFILE.think,
+    currentDate,
   });
+
   const prompt = messages.map(({ content }) => content).join("\n\n");
   execution?.record({
     type: "model.request",
@@ -29,6 +32,7 @@ export async function* streamSummary(
     promptChars: prompt.length,
     prompt,
   });
+
   const startedAt = performance.now();
   let content = "";
   let done = false;
@@ -36,6 +40,7 @@ export async function* streamSummary(
   let promptEvalCount: number | undefined;
   let evalCount: number | undefined;
   let thinking = "";
+
   for await (const event of ollama.chat(
     {
       ...SUMMARIZER_PROFILE,
@@ -58,9 +63,9 @@ export async function* streamSummary(
     }
   }
   const durationMs = performance.now() - startedAt;
-  if (content.trim().length === 0) {
-    throw new TypeError("Streaming summarizer returned empty output.");
-  }
+
+  validateSemanticOutput(content);
+
   recordModelResponse(
     execution,
     {

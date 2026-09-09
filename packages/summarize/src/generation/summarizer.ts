@@ -5,10 +5,10 @@ import type { SummaryExecutionRecorder } from "../execution/observer.js";
 import { parseModelOutput } from "../model/output.js";
 import type { ModelWindowMessageRole } from "../model/prompt.js";
 import { recordModelResponse } from "../model/response.js";
-import type { SummaryPromptVariant } from "./prompt.js";
 import { buildSummaryMessages } from "./prompt.js";
 import { SUMMARY_RESPONSE_SCHEMA, summaryOutputSchema } from "./schema.js";
 import { streamSummary } from "./stream.js";
+import { validateSemanticOutput } from "./validation.js";
 
 export interface ConversationSummarizer {
   summarize(
@@ -27,21 +27,23 @@ export interface ConversationSummarizer {
 
 export interface ConversationSummarizerDependencies {
   readonly ollama: Pick<OllamaClient, "chat">;
-  readonly promptVariant?: SummaryPromptVariant;
+  readonly currentDate?: string;
 }
 
 export function createConversationSummarizer({
   ollama,
-  promptVariant = "V2",
+  currentDate,
 }: ConversationSummarizerDependencies): ConversationSummarizer {
   return {
     stream: (window, signal, execution, roles) =>
-      streamSummary(ollama, promptVariant, window, signal, execution, roles),
+      streamSummary(ollama, window, signal, execution, roles, currentDate),
+
     summarize: async (window, signal, execution, roles) => {
       signal?.throwIfAborted();
       const messages = buildSummaryMessages(window, roles, {
         outputMode: "structured",
-        promptVariant,
+        reasoningEffort: SUMMARIZER_PROFILE.think,
+        currentDate,
       });
       const prompt = messages.map(({ content }) => content).join("\n\n");
       execution?.record({
@@ -75,6 +77,7 @@ export function createConversationSummarizer({
         },
         response,
       );
+
       const { summary } = parseModelOutput({
         raw: response.message.content,
         schema: summaryOutputSchema,
@@ -84,6 +87,8 @@ export function createConversationSummarizer({
         attempt: 1,
         execution,
       });
+      validateSemanticOutput(summary);
+
       execution?.record({
         type: "model.response",
         stage: "summarizer",
