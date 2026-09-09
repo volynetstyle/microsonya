@@ -1,4 +1,4 @@
-/** Semantic policy shared by structured and progressive generation. */
+/** Semantic policy for the canonical structured generation path. */
 export const SUMMARY_INSTRUCTIONS = `
   Summarize the visible conversation in concise, natural Ukrainian prose.
 
@@ -95,12 +95,10 @@ export const SUMMARY_INSTRUCTIONS = `
 `.trim();
 
 export const SUMMARY_STRUCTURED_OUTPUT_INSTRUCTIONS = `
-  Return only JSON matching the required output schema. Any summary text
-  inside it must follow SUMMARY_INSTRUCTIONS exactly — coherent natural
-  prose, never a bullet list, numbered list, or catalogue of items.
-`.trim();
-
-export const SUMMARY_STREAM_OUTPUT_INSTRUCTIONS = `
-  Return only the summary as plain text — no JSON, no Markdown. Coherent
-  natural prose, not bullets, numbered items, headings, or a fact catalogue.
+  Return only JSON matching the required output schema. Split the summary
+  into atomic claims. Each claim must cite only eligible #ID evidence, and an
+  author, when present, must exactly match an author label in that evidence.
+  The ordered claim texts must contain exactly the same words as summary.
+  Summary must follow SUMMARY_INSTRUCTIONS exactly: coherent natural prose,
+  never a bullet list, numbered list, or catalogue of items.
 `.trim();

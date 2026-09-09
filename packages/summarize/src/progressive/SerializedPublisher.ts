@@ -38,6 +38,18 @@ export class SerializedPublisher {
     await this.transport.fail();
   }
 
+  /** Stops local publication without creating another user-visible message. */
+  async abort(): Promise<void> {
+    if (this.terminal) return;
+    this.terminal = true;
+    try {
+      await this.draining;
+    } catch {
+      // The delivery error is handled by the caller holding the lifecycle
+      // lease; local cleanup must not replace it with a second failure.
+    }
+  }
+
   private startDrain(): void {
     if (this.draining || this.desired === this.published) return;
     this.draining = this.drain().finally(() => {

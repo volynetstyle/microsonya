@@ -13,14 +13,10 @@ import { SUMMARY_COMPOSITION_POLICY } from "./composition.js";
 import { SUMMARY_RESPONSE_SCHEMA } from "./schema.js";
 import {
   SUMMARY_INSTRUCTIONS,
-  SUMMARY_STREAM_OUTPUT_INSTRUCTIONS,
   SUMMARY_STRUCTURED_OUTPUT_INSTRUCTIONS,
 } from "./instructions.js";
 
-export type SummaryOutputMode = "structured" | "plain-text";
-
 export interface SummaryPromptOptions {
-  readonly outputMode?: SummaryOutputMode;
   /**
    * gpt-oss / harmony reasoning-effort knob. Default "medium": this task is
    * bounded extraction against a fixed constraint checklist, not open-ended
@@ -47,25 +43,15 @@ export function buildSummaryMessages(
   roles?: readonly ModelWindowMessageRole[],
   options: SummaryPromptOptions = {},
 ): ChatMessage[] {
-  const {
-    outputMode = "structured",
-    reasoningEffort = "medium",
-    currentDate,
-  } = options;
-  const outputInstructions =
-    outputMode === "structured"
-      ? SUMMARY_STRUCTURED_OUTPUT_INSTRUCTIONS
-      : SUMMARY_STREAM_OUTPUT_INSTRUCTIONS;
+  const { reasoningEffort = "medium", currentDate } = options;
 
   const developerContent = [
     "# Instructions",
     buildModelPolicyPrompt("SUMMARY_POLICY", SUMMARY_INSTRUCTIONS),
     `SEMANTIC_COMPOSITION_POLICY_BEGIN\n${SUMMARY_COMPOSITION_POLICY}\nSEMANTIC_COMPOSITION_POLICY_END`,
-    outputInstructions,
-    outputMode === "structured" ? structuredResponseFormat() : null,
-  ]
-    .filter((section): section is string => section !== null)
-    .join("\n\n");
+    SUMMARY_STRUCTURED_OUTPUT_INSTRUCTIONS,
+    structuredResponseFormat(),
+  ].join("\n\n");
 
   const input = buildModelInputPrompt(window, roles);
 

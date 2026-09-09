@@ -33,6 +33,7 @@ const network = setupServer(
       messages?: Array<{ content?: string }>;
     };
     const prompt = body.messages?.[0]?.content ?? "";
+    const transcript = body.messages?.at(-1)?.content ?? "";
     const content = prompt.includes("CLASSIFICATION_POLICY")
       ? JSON.stringify({
           durable: true,
@@ -46,6 +47,14 @@ const network = setupServer(
       : JSON.stringify({
           summary:
             "Staging pipeline confirmed the durable deployment plan and its verification gates.",
+          claims: [
+            {
+              text: "Staging pipeline confirmed the durable deployment plan and its verification gates.",
+              evidence: [Number(/#(\d+)\|/u.exec(transcript)?.[1] ?? 1)],
+              kind: "report",
+              author: "Pipeline",
+            },
+          ],
         });
     return HttpResponse.json({
       model: "pipeline-mock",

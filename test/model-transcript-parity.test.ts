@@ -67,7 +67,9 @@ describe("canonical model transcript", () => {
       .map(({ content }) => content)
       .join("\n\n");
     const summaryMessages = buildSummaryMessages(window);
-    const summaryPrompt = summaryMessages.map(({ content }) => content).join("\n\n");
+    const summaryPrompt = summaryMessages
+      .map(({ content }) => content)
+      .join("\n\n");
 
     const classifierFormat = extractSection(
       classifierPrompt,
@@ -97,10 +99,7 @@ describe("canonical model transcript", () => {
       { currentDate: "2026-09-09", reasoningEffort: "low" },
     );
 
-    expect(messages.map(({ role }) => role)).toEqual([
-      "system",
-      "user",
-    ]);
+    expect(messages.map(({ role }) => role)).toEqual(["system", "user"]);
     expect(messages[0]!.content).toContain("You are ChatGPT");
     expect(messages[0]!.content).toContain("Current date: 2026-09-09");
     expect(messages[0]!.content).toContain("SUMMARY_POLICY_BEGIN");
@@ -125,54 +124,61 @@ describe("canonical model transcript", () => {
     );
   });
 
-  it("uses a plain-text output contract only for progressive streaming", () => {
+  it("has one structured generation contract with claim evidence", () => {
     const window = fixtureWindow();
     const structured = buildSummaryMessages(window);
-    const streaming = buildSummaryMessages(window, undefined, {
-      outputMode: "plain-text",
-    });
 
     expect(structured[0]!.content).toContain(
       "Return only JSON matching the required output schema.",
     );
-    expect(streaming[0]!.content).toContain(
+    expect(structured[0]!.content).toContain("atomic claims");
+    expect(structured[0]!.content).toContain('"claims"');
+    expect(structured[0]!.content).not.toContain(
       "Return only the summary as plain text",
     );
-    expect(streaming[0]!.content).not.toContain(
-      "Return only JSON matching the required output schema.",
+  });
+
+  it("changes only the declared reasoning line across low, medium, and high", () => {
+    const variants = (["low", "medium", "high"] as const).map((effort) =>
+      buildSummaryMessages(fixtureWindow(), undefined, {
+        currentDate: "2026-09-09",
+        reasoningEffort: effort,
+      }),
     );
-    expect(streaming[0]!.content).not.toContain(
-      "Correct final output:\nРеліз перенесли на четвер.",
-    );
-    expect(streaming[0]!.content).not.toContain(
-      'Correct final output:\n{"summary":',
-    );
-    expect(streaming[1]!.content).toBe(structured[1]!.content);
+
+    expect(variants.map((messages) => messages[1]!.content)).toEqual([
+      variants[0]![1]!.content,
+      variants[0]![1]!.content,
+      variants[0]![1]!.content,
+    ]);
+    expect(
+      variants.map((messages) =>
+        messages[0]!.content.replace(
+          /Reasoning: (?:low|medium|high)/u,
+          "Reasoning: *",
+        ),
+      ),
+    ).toEqual([
+      variants[0]![0]!.content.replace("Reasoning: low", "Reasoning: *"),
+      variants[0]![0]!.content.replace("Reasoning: low", "Reasoning: *"),
+      variants[0]![0]!.content.replace("Reasoning: low", "Reasoning: *"),
+    ]);
   });
 
   it("requires concrete facts and visible speaker attribution", () => {
-    const [system] = buildSummaryMessages(fixtureWindow(), undefined, {
-      outputMode: "plain-text",
-    });
+    const [system] = buildSummaryMessages(fixtureWindow());
 
     expect(system!.content).toContain(
       "Favor concrete propositions over topic labels",
     );
-    expect(system!.content).toContain(
-      "Keep visible names attached",
-    );
-    expect(system!.content).toContain(
-      "numbers, dates, constraints, and",
-    );
-    expect(system!.content).toContain(
-      "State the supported substance directly",
-    );
+    expect(system!.content).toContain("Keep visible names attached");
+    expect(system!.content).toContain("numbers, dates, constraints, and");
+    expect(system!.content).toContain("State the supported substance directly");
     expect(system!.content).toContain("complete\nnon-redundant set of durable");
     expect(system!.content).toContain(
       "Do not append a generic concluding sentence",
     );
   });
-
 });
 
 function fixtureWindow() {

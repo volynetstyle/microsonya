@@ -12,6 +12,7 @@ import {
   GROUP_PROGRESSIVE_POLICY,
   PRIVATE_PROGRESSIVE_POLICY,
   ProgressiveSummarySession,
+  appendAcceptedSummary,
 } from "@microsonya/summarize";
 import {
   TelegramEditableMessageTransport,
@@ -132,11 +133,6 @@ export class SummaryExecutionProcessor {
     }
 
     let phase: ProcessingPhase = "services.bootstrap";
-    let progressiveSession: ProgressiveSummarySession | undefined;
-    let progressiveTransport:
-      | TelegramPrivateDraftTransport
-      | TelegramEditableMessageTransport
-      | undefined;
     try {
       const disposition = await withProcessingLeaseHeartbeat(
         () =>
@@ -158,29 +154,6 @@ export class SummaryExecutionProcessor {
 
             const attemptId = asSummaryId(
               `${runId}:attempt:${claimed.attempt}`,
-            );
-
-            const telegram = createTelegramApi(this.env.TELEGRAM_BOT_TOKEN);
-            const isPrivate = !claimed.command.chatId.startsWith("-");
-
-            progressiveTransport = isPrivate
-              ? new TelegramPrivateDraftTransport(
-                  telegram,
-                  claimed.command.chatId,
-                  claimed.command.commandMessageId,
-                )
-              : new TelegramEditableMessageTransport(telegram, {
-                  chatId: claimed.command.chatId,
-                  commandMessageId: claimed.command.commandMessageId,
-                  ...(claimed.command.messageThreadId === undefined
-                    ? {}
-                    : { messageThreadId: claimed.command.messageThreadId }),
-                });
-
-            progressiveSession = new ProgressiveSummarySession(
-              progressiveTransport,
-              undefined,
-              isPrivate ? PRIVATE_PROGRESSIVE_POLICY : GROUP_PROGRESSIVE_POLICY,
             );
 
             const summarizer = createSummaryWorkflow({
@@ -207,7 +180,6 @@ export class SummaryExecutionProcessor {
                 this.env.ANALYTICS,
                 runId,
               ),
-              progressive: progressiveSession,
               modelGeneration: {
                 currentDate: new Date().toISOString().slice(0, 10),
                 structuredOutput: "json",
@@ -229,9 +201,6 @@ export class SummaryExecutionProcessor {
                       error.result.status === "alreadyCommitted" &&
                       error.result.outcome !== undefined
                     ) {
-                      await progressiveSession?.fail(error);
-                      progressiveSession = undefined;
-                      progressiveTransport = undefined;
                       return presentAcceptedOutcome(error.result.outcome);
                     }
                     throw new LeaseLostError();
@@ -241,7 +210,6 @@ export class SummaryExecutionProcessor {
             });
           }),
       );
-      phase = "summary.present";
       const summary = presentGeneratedDisposition(disposition);
       phase = "summary.validate";
       const validationError = tracing.enterSpan("summary.validate", (span) => {
@@ -276,52 +244,65 @@ export class SummaryExecutionProcessor {
         );
       });
       if (!saved) return { disposition: "retry", retryAfterSeconds: 5 };
+
       phase = "delivery.claim";
       const ready = await this.env.SUMMARY_RUNS.claimDelivery(runId);
       if (ready === undefined) {
         return { disposition: "retry", retryAfterSeconds: 5 };
       }
-      if (
-        progressiveSession?.state === "finalizing" &&
-        progressiveTransport !== undefined
-      ) {
-        try {
-          await progressiveSession.commit();
-          const messageId = progressiveTransport.finalMessageId;
-          if (messageId === undefined) {
-            throw new DeliveryError("TELEGRAM_MALFORMED_RESPONSE", true);
-          }
-          const completed = await this.env.SUMMARY_RUNS.markCompleted(
-            runId,
-            ready.leaseToken,
-            messageId,
-          );
-          return completed
-            ? { disposition: "completed" }
-            : { disposition: "retry", retryAfterSeconds: 5 };
-        } catch (error) {
-          return this.handleClaimedDeliveryError(ready, error);
-        }
-      }
-      return this.deliver(ready);
-    } catch (error) {
-      if (
-        progressiveSession !== undefined &&
-        progressiveSession.state !== "completed" &&
-        progressiveSession.state !== "failed"
-      ) {
-        try {
-          await progressiveSession.fail(error);
-        } catch (presentationError) {
-          logTelemetry("warn", "processor", "summary.progressive.fail", {
-            runId,
-            errorName:
-              presentationError instanceof Error
-                ? presentationError.name
-                : "UNKNOWN_ERROR",
+
+      // Presentation begins only after the accepted canonical payload is
+      // durable and is covered by a delivery lease. Progressive transport is
+      // never a generation or acceptance source of truth.
+      phase = "summary.present";
+      const telegram = createTelegramApi(this.env.TELEGRAM_BOT_TOKEN);
+      const isPrivate = !claimed.command.chatId.startsWith("-");
+      const progressiveTransport = isPrivate
+        ? new TelegramPrivateDraftTransport(
+            telegram,
+            claimed.command.chatId,
+            claimed.command.commandMessageId,
+          )
+        : new TelegramEditableMessageTransport(telegram, {
+            chatId: claimed.command.chatId,
+            commandMessageId: claimed.command.commandMessageId,
+            ...(claimed.command.messageThreadId === undefined
+              ? {}
+              : { messageThreadId: claimed.command.messageThreadId }),
           });
+      const progressiveSession = new ProgressiveSummarySession(
+        progressiveTransport,
+        undefined,
+        isPrivate ? PRIVATE_PROGRESSIVE_POLICY : GROUP_PROGRESSIVE_POLICY,
+      );
+      try {
+        await progressiveSession.begin();
+        appendAcceptedSummary(
+          progressiveSession,
+          summary,
+          isPrivate
+            ? PRIVATE_PROGRESSIVE_POLICY.firstMinChars
+            : GROUP_PROGRESSIVE_POLICY.firstMinChars,
+        );
+        await progressiveSession.finalize();
+        await progressiveSession.commit();
+        const messageId = progressiveTransport.finalMessageId;
+        if (messageId === undefined) {
+          throw new DeliveryError("TELEGRAM_MALFORMED_RESPONSE", true);
         }
+        const completed = await this.env.SUMMARY_RUNS.markCompleted(
+          runId,
+          ready.leaseToken,
+          messageId,
+        );
+        return completed
+          ? { disposition: "completed" }
+          : { disposition: "retry", retryAfterSeconds: 5 };
+      } catch (error) {
+        await progressiveSession.abort();
+        return this.handleClaimedDeliveryError(ready, error);
       }
+    } catch (error) {
       return this.handleProcessingError(
         runId,
         claimed.leaseToken,

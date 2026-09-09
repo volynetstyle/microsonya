@@ -15,7 +15,6 @@ import type { SummaryDecisionClassifier } from "./classifier/classifier.js";
 import type { FastClassifier } from "./classifier/decision.js";
 import type { SummaryExecutionObserver } from "./execution/observer.js";
 import type { ConversationSummarizer } from "./generation/summarizer.js";
-import type { SummaryEvaluationDependencies } from "./summary.evaluation.js";
 import type { SummaryWindowSelector } from "./window/selection.js";
 
 export interface MessageHistoryReader {
@@ -51,7 +50,6 @@ export interface SummaryWorkflowDependencies {
   readonly createSummaryId?: () => SummaryId;
   readonly now?: () => TimestampMs;
   readonly windowSelector?: SummaryWindowSelector;
-  readonly progressive?: SummaryEvaluationDependencies["progressive"];
   readonly modelGeneration?: {
     readonly currentDate?: string;
     /** Ollama Cloud supports JSON mode but not schema-constrained output. */

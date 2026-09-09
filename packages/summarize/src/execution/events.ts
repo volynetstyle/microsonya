@@ -1,6 +1,7 @@
 import type { MessageId, SummaryAction, SummaryMode } from "@microsonya/shared";
 import type { ClassificationPredicates } from "../classifier/predicates.js";
 import type { StructuralAnalysis } from "../window/analysis.js";
+import type { SummarySemanticFailure } from "../generation/acceptance.js";
 
 export type ModelStage = "classifier" | "summarizer";
 
@@ -93,7 +94,7 @@ export type SummaryExecutionEvent =
       attempt?: number;
       durationMs: number;
       responseChars: number;
-      reason: ModelOutputFailure;
+      reason: ModelOutputFailure | SummarySemanticFailure;
     }
   | {
       type: "model.response";
@@ -104,6 +105,7 @@ export type SummaryExecutionEvent =
       responseChars: number;
       action?: SummaryAction;
       summaryChars?: number;
+      claimCount?: number;
       predicates?: ClassificationPredicates;
     }
   | {

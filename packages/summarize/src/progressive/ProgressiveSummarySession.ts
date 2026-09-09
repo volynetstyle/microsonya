@@ -2,7 +2,7 @@ import type { ProgressiveCadencePolicy } from "./cadence.js";
 import { GROUP_PROGRESSIVE_POLICY } from "./cadence.js";
 import { ProgressiveScheduler } from "./ProgressiveScheduler.js";
 import { SerializedPublisher } from "./SerializedPublisher.js";
-import type { ProgressiveState } from "./session.js";
+import type { ProgressiveState } from "./state.js";
 import type { ProgressiveTransport } from "./transport.js";
 
 export class ProgressiveSummarySession {
@@ -92,5 +92,13 @@ export class ProgressiveSummarySession {
     this.scheduler.cancel();
     this.stateValue = "failed";
     await this.publisher.fail();
+  }
+
+  /** Cancels presentation for a retry without emitting a failure payload. */
+  async abort(): Promise<void> {
+    if (this.stateValue === "completed" || this.stateValue === "failed") return;
+    this.scheduler.cancel();
+    this.stateValue = "failed";
+    await this.publisher.abort();
   }
 }

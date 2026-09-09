@@ -14,6 +14,7 @@ describe("semantic proposition contracts", () => {
     expect(
       hasPropositionContract("conversational-ellipsis-and-author-boundary"),
     ).toBe(true);
+    expect(hasPropositionContract("live-prod-balcony-wejherowo")).toBe(true);
   });
 
   it("distinguishes an 18:00 deadline from version 1.8", () => {
@@ -96,6 +97,25 @@ describe("semantic proposition contracts", () => {
       FACT_INVENTION: 1,
       PROVENANCE: 2,
       ENTITY_BINDING: 1,
+      SPEECH_ACT: 1,
+    });
+  });
+
+  it("keeps nearby places and tomato banter from becoming apartment facts or plans", () => {
+    const faithful = evaluatePropositions(
+      "live-prod-balcony-wejherowo",
+      "Квартира у Вейхерово коштує 1700 злотих, комуналка — десь 500 злотих. До Гданська приблизно година; Макдональдс і військова база розташовані неподалік. На балконі не можна курити.",
+    )!;
+    const fluentButFalse = evaluatePropositions(
+      "live-prod-balcony-wejherowo",
+      "Квартира у Вейхерово коштує 1700 злотих, комуналка — 500. До Гданська година. У будинку є Макдональдс і військова база, а на балконі планують вирощувати помідори.",
+    )!;
+
+    expect(faithful.score).toBe(1);
+    expect(fluentButFalse.score).toBeLessThan(0.6);
+    expect(fluentButFalse.errorsByType).toMatchObject({
+      ENTITY_BINDING: 4,
+      EPISTEMIC_STATE: 2,
       SPEECH_ACT: 1,
     });
   });

@@ -1,4 +1,5 @@
 import { OllamaError } from "@microsonya/model";
+import { SummaryAcceptanceError } from "../generation/acceptance.js";
 import { ModelOutputError } from "../model/output.js";
 import type { SummaryErrorCode } from "./events.js";
 
@@ -26,7 +27,9 @@ export function serializeError(
               ? { outputPreview: error.outputPreview }
               : {}),
           }
-        : {}),
+        : error instanceof SummaryAcceptanceError
+          ? { detailCode: error.code }
+          : {}),
       message: error.message,
       stack: error.stack,
     };
@@ -44,6 +47,7 @@ export function classifySummaryError(
       ? "MODEL_OUTPUT_EMPTY"
       : "MODEL_OUTPUT_INVALID";
   }
+  if (error instanceof SummaryAcceptanceError) return "MODEL_OUTPUT_INVALID";
   if (
     error instanceof DOMException
       ? error.name === "AbortError" || error.name === "TimeoutError"

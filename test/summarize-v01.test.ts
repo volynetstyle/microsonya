@@ -41,7 +41,17 @@ describe("summarizer 0.1 workflow", () => {
         }
         return {
           message: {
-            content: JSON.stringify({ summary: "Release is Friday." }),
+            content: JSON.stringify({
+              summary: "Release is Friday.",
+              claims: [
+                {
+                  text: "Release is Friday.",
+                  evidence: [1],
+                  kind: "report",
+                  author: "Olia",
+                },
+              ],
+            }),
           },
         };
       },
@@ -127,13 +137,17 @@ describe("summarizer 0.1 workflow", () => {
     expect(chat.mock.calls[1]?.[0]).toEqual(
       expect.objectContaining({
         model: "gpt-oss:120b-cloud",
-        think: "low",
+        think: "medium",
         format: {
           type: "object",
           properties: {
-            summary: { type: "string", minLength: 1 },
+            summary: expect.objectContaining({
+              type: "string",
+              minLength: 1,
+            }),
+            claims: expect.objectContaining({ type: "array", minItems: 1 }),
           },
-          required: ["summary"],
+          required: ["summary", "claims"],
           additionalProperties: false,
         },
         stream: false,
@@ -438,7 +452,17 @@ describe("summarizer 0.1 workflow", () => {
                     primarilyBanter: false,
                     requiresSynthesis: true,
                   })
-                : JSON.stringify({ summary: "Release is Friday." }),
+                : JSON.stringify({
+                    summary: "Release is Friday.",
+                    claims: [
+                      {
+                        text: "Release is Friday.",
+                        evidence: [1],
+                        kind: "report",
+                        author: "Olia",
+                      },
+                    ],
+                  }),
           },
         };
       },

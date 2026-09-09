@@ -15,7 +15,7 @@ import {
   ModelOutputError,
   evaluateSummaryWindow,
   shouldAdvanceCheckpoint,
-  type SummaryPromptVariant,
+  type ReasoningEffort,
 } from "../packages/summarize/src/index.js";
 import {
   adversarialE2E,
@@ -93,7 +93,7 @@ for (const fixture of selected) {
         client,
         args.timeoutMs,
         args.model,
-        args.promptVariant,
+        args.reasoningEffort,
         args.seed + index,
         args.summarizerOnly,
       ),
@@ -130,7 +130,7 @@ const report = {
   model: args.model,
   endpoint: redactEndpoint(endpoint),
   suite: args.suite,
-  promptVariant: args.promptVariant,
+  reasoningEffort: args.reasoningEffort,
   seed: args.seed,
   summarizerOnly: args.summarizerOnly,
   reports,
@@ -148,7 +148,7 @@ async function runFixture(
   ollama: OllamaClient,
   timeoutMs: number,
   model: string,
-  promptVariant: SummaryPromptVariant,
+  reasoningEffort: ReasoningEffort,
   seed: number,
   summarizerOnly: boolean,
 ): Promise<LiveResult> {
@@ -213,7 +213,7 @@ async function runFixture(
             }),
         summarizer: createConversationSummarizer({
           ollama: countedClient("summarizer") as never,
-          promptVariant,
+          reasoningEffort,
         }),
       },
       controller.signal,
@@ -342,9 +342,9 @@ function parseArgs(argv: readonly string[]) {
   if (minimumAccuracy < 0 || minimumAccuracy > 1) {
     throw new TypeError("minimum-accuracy must be between 0 and 1.");
   }
-  const promptVariant = read("--prompt-variant") ?? "V2";
-  if (!["V0", "V1", "V2", "V3"].includes(promptVariant)) {
-    throw new TypeError(`Unknown prompt variant: ${promptVariant}`);
+  const reasoningEffort = read("--reasoning-effort") ?? "medium";
+  if (!["low", "medium", "high"].includes(reasoningEffort)) {
+    throw new TypeError(`Unknown reasoning effort: ${reasoningEffort}`);
   }
   const seed = nonNegativeInteger(read("--seed") ?? "0", "seed");
   return {
@@ -361,7 +361,7 @@ function parseArgs(argv: readonly string[]) {
     output: read("--output"),
     json: argv.includes("--json"),
     model: read("--model") ?? "gpt-oss:120b-cloud",
-    promptVariant: promptVariant as SummaryPromptVariant,
+    reasoningEffort: reasoningEffort as ReasoningEffort,
     seed,
     summarizerOnly: argv.includes("--summarizer-only"),
   };

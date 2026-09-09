@@ -323,6 +323,66 @@ const definitions: Readonly<Record<string, readonly PropositionAssertion[]>> = {
       /oleksandr[^.\n]*(?:запропон|предлож|propos)[^.\n]*компроміс|олександр[^.\n]*(?:запропон|предлож)[^.\n]*компромисс/iu,
     ),
   ],
+  "live-prod-balcony-wejherowo": [
+    required("rent-1700", "FACT_OMISSION", "Rent is 1700 zł", [
+      /1700/iu,
+      /злот|zł|pln/iu,
+    ]),
+    required(
+      "utilities-uncertain-500",
+      "EPISTEMIC_STATE",
+      "Utilities are approximately 500 zł",
+      [/500/iu, /десь|приблиз|близько|орієнтов|~|about|around/iu],
+    ),
+    required("wejherowo", "ENTITY_BINDING", "The apartment is in Wejherowo", [
+      /вейхерово|wejherowo/iu,
+    ]),
+    required(
+      "gdansk-travel-time",
+      "EPISTEMIC_STATE",
+      "Travel to Gdańsk is approximately one hour",
+      [
+        /гданськ|гданск|gdańsk|gdansk/iu,
+        /приблиз|десь|близько|~|about|around/iu,
+        /годин|hour/iu,
+      ],
+    ),
+    required("mcdonalds-nearby", "ENTITY_BINDING", "McDonald's is nearby", [
+      /макдональдс|mcdonald/iu,
+      /неподалік|поруч|недалеко|nearby/iu,
+    ]),
+    required("base-nearby", "ENTITY_BINDING", "The military base is nearby", [
+      /(?:військов|военн).{0,30}баз/iu,
+      /неподалік|поруч|недалеко|nearby/iu,
+    ]),
+    required(
+      "balcony-smoking-restriction",
+      "FACT_OMISSION",
+      "Smoking is restricted on the balcony",
+      [
+        /балкон/iu,
+        /не\s+можна\s+кур|заборон.{0,20}кур|кур.{0,20}заборон|no\s+smoking/iu,
+      ],
+    ),
+    forbidden(
+      "mcdonalds-in-building",
+      "ENTITY_BINDING",
+      "McDonald's must not be placed in the apartment building",
+      /(?:макдональдс|mcdonald).{0,80}(?:у|в|in)\s+(?:цьому\s+)?(?:будин|дом|building)|(?:будин|дом|building).{0,80}(?:макдональдс|mcdonald)/iu,
+    ),
+    forbidden(
+      "base-in-building",
+      "ENTITY_BINDING",
+      "The military base must not be merged with the apartment building",
+      /(?:військов|военн).{0,30}баз.{0,80}(?:у|в)\s+(?:цьому\s+)?(?:будин|дом)|(?:будин|дом).{0,80}(?:військов|военн).{0,30}баз/iu,
+    ),
+    forbidden(
+      "tomato-plan",
+      "SPEECH_ACT",
+      "Tomato banter must not become an actual plan",
+      /(?:плану|збира(?:є|ю|ють)ся|буд(?:е|уть|у)).{0,80}(?:помідор|томат)|(?:помідор|томат).{0,80}(?:плану|збира(?:є|ю|ють)ся|буд(?:е|уть|у)\s+(?:сад|вирощ))/iu,
+    ),
+  ],
 };
 
 export function hasPropositionContract(fixtureId: string): boolean {

@@ -6,6 +6,7 @@ import type {
   WindowDisposition,
 } from "@microsonya/shared";
 import type { SummaryDecisionClassifier } from "../classifier/classifier.js";
+import { SummaryAcceptanceError } from "../generation/acceptance.js";
 import type { ConversationSummarizer } from "../generation/summarizer.js";
 import { validateSemanticOutput } from "../generation/validation.js";
 import { ModelOutputError } from "../model/output.js";
@@ -156,7 +157,6 @@ export async function executeSummaryAttempt(
         execution,
         roles: selected.messages,
         eligibleMessages: selected.eligibleMessages,
-        progressive: deps.progressive,
       },
       signal,
     );
@@ -229,7 +229,11 @@ export async function executeSummaryAttempt(
     execution.record({
       type: "summary.error",
       durationMs: elapsed(),
-      stage: error instanceof ModelOutputError ? error.stage : stage,
+      stage:
+        error instanceof ModelOutputError ||
+        error instanceof SummaryAcceptanceError
+          ? error.stage
+          : stage,
       error: serializeError(error, errorCode),
     });
     if (!attemptPersisted && stage !== "attempt.save") {

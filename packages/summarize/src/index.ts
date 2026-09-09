@@ -51,18 +51,26 @@ export {
 } from "./execution/telemetry.js";
 export {
   SUMMARY_INSTRUCTIONS,
-  SUMMARY_STREAM_OUTPUT_INSTRUCTIONS,
   SUMMARY_STRUCTURED_OUTPUT_INSTRUCTIONS,
 } from "./generation/instructions.js";
 export {
   buildSummaryMessages,
-  type SummaryOutputMode,
   type SummaryPromptOptions,
 } from "./generation/prompt.js";
 export {
+  SUMMARY_CLAIM_KINDS,
   SUMMARY_RESPONSE_SCHEMA,
+  summaryClaimSchema,
   summaryOutputSchema,
+  type SummaryCandidate,
+  type SummaryClaim,
 } from "./generation/schema.js";
+export {
+  SUMMARY_SEMANTIC_FAILURES,
+  SummaryAcceptanceError,
+  acceptSummaryCandidate,
+  type SummarySemanticFailure,
+} from "./generation/acceptance.js";
 export {
   createConversationSummarizer,
   type ConversationSummarizer,
@@ -75,6 +83,7 @@ export {
   buildModelPolicyPrompt,
   type ModelPolicySection,
   type ModelWindowMessageRole,
+  type ReasoningEffort,
 } from "./model/prompt.js";
 export {
   PIPE_FIELDS,
@@ -93,12 +102,8 @@ export {
 export { ProgressiveScheduler } from "./progressive/ProgressiveScheduler.js";
 export { ProgressiveSummarySession } from "./progressive/ProgressiveSummarySession.js";
 export { SerializedPublisher } from "./progressive/SerializedPublisher.js";
-export {
-  streamSummaryRun,
-  type ProgressiveState,
-  type SummaryStream,
-  type SummaryStreamEvent,
-} from "./progressive/session.js";
+export { appendAcceptedSummary } from "./progressive/presentation.js";
+export { type ProgressiveState } from "./progressive/state.js";
 export { type ProgressiveTransport } from "./progressive/transport.js";
 export {
   type MessageHistoryReader,

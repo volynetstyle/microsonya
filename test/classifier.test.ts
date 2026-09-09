@@ -18,9 +18,11 @@ import {
 
 describe("semantic summary-decision classifier", () => {
   it("uses JSON mode for Ollama Cloud while retaining the schema in Harmony", async () => {
-    const chat = vi.fn(async () => ({
-      message: { content: JSON.stringify(predicates()) },
-    }));
+    const chat = vi.fn(
+      async (_request: { messages: Array<{ content?: string }> }) => ({
+        message: { content: JSON.stringify(predicates()) },
+      }),
+    );
     const classifier = createClassifier({
       ollama: { chat: chat as never },
       structuredOutput: "json",
@@ -41,7 +43,7 @@ describe("semantic summary-decision classifier", () => {
         ],
       }),
     );
-    expect(chat.mock.calls[0]?.[0].messages[0]?.content).toContain(
+    expect(chat.mock.calls[0]![0].messages[0]?.content).toContain(
       JSON.stringify(CLASSIFIER_RESPONSE_SCHEMA),
     );
   });

@@ -3,6 +3,7 @@ import { OllamaError } from "../packages/model/src/index.js";
 import {
   classifySummaryError,
   ModelOutputError,
+  SummaryAcceptanceError,
 } from "../packages/summarize/src/index.js";
 
 describe("summary 0.1 error taxonomy", () => {
@@ -33,6 +34,14 @@ describe("summary 0.1 error taxonomy", () => {
         raw: "not-json",
       }),
       "summarizer.output",
+      "MODEL_OUTPUT_INVALID",
+    ],
+    [
+      new SummaryAcceptanceError(
+        "PROVENANCE",
+        "Claim references context-only evidence.",
+      ),
+      "window.process",
       "MODEL_OUTPUT_INVALID",
     ],
     [new Error("database unavailable"), "disposition.save", "STORAGE_ERROR"],

@@ -15,7 +15,7 @@ import {
   ProgressiveSummarySession,
   SerializedPublisher,
   SummaryExecutionJournal,
-  streamSummaryRun,
+  appendAcceptedSummary,
   type ProgressiveTransport,
 } from "../packages/summarize/src/index.js";
 import {
@@ -34,7 +34,7 @@ function transport(overrides: Partial<ProgressiveTransport> = {}) {
 }
 
 describe("progressive summary runtime", () => {
-  it("exposes model output as plain append-only chunks", async () => {
+  it("keeps model generation structured and non-streaming", async () => {
     const journal = new SummaryExecutionJournal(
       () => asSummaryId("invocation-1"),
       () => asTimestampMs(2),
@@ -42,7 +42,26 @@ describe("progressive summary runtime", () => {
     const fetch = vi.fn<typeof globalThis.fetch>(
       async () =>
         new Response(
-          `${JSON.stringify({ message: { content: "Перша ", thinking: "private " }, done: false })}\n${JSON.stringify({ message: { content: "частина.", thinking: "reasoning" }, done: true, done_reason: "stop", prompt_eval_count: 120, eval_count: 12 })}\n`,
+          JSON.stringify({
+            message: {
+              content: JSON.stringify({
+                summary: "Перша частина.",
+                claims: [
+                  {
+                    text: "Перша частина.",
+                    evidence: [1],
+                    kind: "fact",
+                    author: "A",
+                  },
+                ],
+              }),
+              thinking: "private reasoning",
+            },
+            done: true,
+            done_reason: "stop",
+            prompt_eval_count: 120,
+            eval_count: 12,
+          }),
           { status: 200 },
         ),
     );
@@ -60,18 +79,17 @@ describe("progressive summary runtime", () => {
       },
     ]);
 
-    const chunks: string[] = [];
-    for await (const chunk of summarizer.stream!(window, undefined, journal))
-      chunks.push(chunk);
-    expect(chunks).toEqual(["Перша ", "частина."]);
+    await expect(
+      summarizer.summarize(window, undefined, journal),
+    ).resolves.toEqual({ text: "Перша частина." });
     const request = JSON.parse(String(fetch.mock.calls[0]?.[1]?.body));
     expect(request).toMatchObject({
-      stream: true,
+      stream: false,
       messages: [
         {
           role: "system",
           content: expect.stringContaining(
-            "Return only the summary as plain text",
+            "Return only JSON matching the required output schema",
           ),
         },
         {
@@ -80,11 +98,13 @@ describe("progressive summary runtime", () => {
         },
       ],
     });
-    expect(request).not.toHaveProperty("format");
+    expect(request.format).toMatchObject({
+      required: ["summary", "claims"],
+    });
     expect(journal.snapshot().modelInvocations).toContainEqual(
       expect.objectContaining({
         stage: "summarizer",
-        outputText: chunks.join(""),
+        outputText: expect.stringContaining('"claims"'),
         inputTokens: 120,
         outputTokens: 12,
         status: "succeeded",
@@ -171,28 +191,37 @@ describe("progressive summary runtime", () => {
     expect(target.commit).toHaveBeenCalledExactlyOnceWith("short");
   });
 
-  it("orchestrates an AsyncIterable without coupling the producer to Telegram", async () => {
-    async function* chunks() {
-      yield "One ";
-      yield "logical ";
-      yield "summary";
-    }
+  it("reveals only accepted text in append-only presentation chunks", async () => {
     const target = transport();
     const session = new ProgressiveSummarySession(target, undefined, {
       firstMaxWaitMs: 60_000,
-      firstMinChars: 1_000,
+      firstMinChars: 5,
       minIntervalMs: 60_000,
       minDeltaChars: 1_000,
       maxStalenessMs: 60_000,
     });
+    const accepted = "Accepted summary text.";
 
-    await expect(streamSummaryRun(chunks(), session)).resolves.toBe(
-      "One logical summary",
-    );
-    expect(target.begin).toHaveBeenCalledOnce();
-    expect(target.commit).toHaveBeenCalledExactlyOnceWith(
-      "One logical summary",
-    );
+    await session.begin();
+    appendAcceptedSummary(session, accepted, 5);
+    await session.finalize();
+
+    expect(target.update).toHaveBeenNthCalledWith(1, "Accep");
+    expect(target.update).toHaveBeenLastCalledWith(accepted);
+    expect(session.state).toBe("finalizing");
+  });
+
+  it("aborts a presentation retry without emitting a false failure message", async () => {
+    const target = transport();
+    const session = new ProgressiveSummarySession(target);
+
+    await session.begin();
+    session.append("accepted");
+    await session.abort();
+
+    expect(target.fail).not.toHaveBeenCalled();
+    expect(target.commit).not.toHaveBeenCalled();
+    expect(session.state).toBe("failed");
   });
 
   it("publishes the first output when its maximum wait expires", () => {

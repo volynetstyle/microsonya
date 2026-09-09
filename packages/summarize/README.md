@@ -2,7 +2,7 @@
 
 `@microsonya/summarize` turns stored conversation history into a decision,
 optional summary, and durable attempt evidence. The host supplies history,
-persistence, model clients, and optional preview/observer adapters.
+persistence, model clients, and optional observer adapters.
 
 ## Where to make a change
 
@@ -17,7 +17,7 @@ modules import their dependencies directly, without intermediate barrels.
 | Host contracts and injection seams                     | [`summary.dependencies.ts`](src/summary.dependencies.ts)                       | Model, history, attempt store, selector, observer and preview contracts           |
 | Select eligible messages and reply context             | [`summary.window.ts`](src/summary.window.ts)                                   | `window/eligible.ts`, `ranking.ts`, `context.ts`, `chronology.ts`, `selection.ts` |
 | Decide whether to summarize and generate a disposition | [`summary.evaluation.ts`](src/summary.evaluation.ts)                           | `classifier/`, `generation/`                                                      |
-| Accept terminal semantic results                       | [`summary.outcome.ts`](src/summary.outcome.ts)                                 | `window/coverage.ts`, `window/consumption.ts`, `generation/validation.ts`         |
+| Accept terminal semantic results                       | [`generation/acceptance.ts`](src/generation/acceptance.ts)                     | `generation/schema.ts`, `generation/validation.ts`, `summary.outcome.ts`          |
 | Identify reusable input snapshots                      | [`summary.input.ts`](src/summary.input.ts)                                     | Policy identity, ordered role snapshots and input hash                            |
 | Render a disposition for the user                      | [`summary.presentation.ts`](src/summary.presentation.ts)                       | Shared skip/defer messages                                                        |
 | Collect and persist execution evidence                 | [`SummaryAttemptRecorder.ts`](src/execution/SummaryAttemptRecorder.ts)         | `SummaryExecutionJournal.ts`, `record.ts`, `dataset.ts`, `reuse.ts`               |
@@ -32,9 +32,9 @@ modules import their dependencies directly, without intermediate barrels.
   `classifier/classifier.ts` owns the model call and bounded output retry.
 - `generation/prompt.ts` composes the trusted policy and user input. Instructions,
   composition constraints, contrast examples and output schemas have named files.
-- `generation/summarizer.ts` handles structured output; `generation/stream.ts`
-  accumulates the exact streamed content. Both use the same prompt builder and
-  semantic policy. `model/response.ts` records their common response envelope.
+- `generation/summarizer.ts` is the only canonical generation path. It parses
+  structured claims and sends them through `generation/acceptance.ts` before a
+  `Summary` can exist. `model/response.ts` records the response envelope.
 
 Model code does not select messages or persist attempts. Prompt changes can alter
 cached-result validity: review `SUMMARY_POLICY_VERSION` in `summary.input.ts`
@@ -68,8 +68,9 @@ must not change the result or persisted evidence. Defer streaks remain local to
 the workflow instance. See the repository's
 [observability contract](../../docs/architecture/observability.md).
 
-Progressive `finalize()` flushes the preview. `commit()` performs final delivery
-only when the host has durably saved the accepted result. Telegram-specific
+Progressive presentation is downstream from acceptance and persistence.
+`finalize()` flushes a preview of already accepted text; `commit()` performs
+final delivery only after the host has durably saved that text. Telegram-specific
 transports belong to `@microsonya/telegram`.
 
 ## API changes in this refactor
@@ -104,7 +105,7 @@ pnpm exec vitest run test/summarize-boundaries.test.ts test/summarize-v01.test.t
 Selection tests compare bounded ranking against chronological selection over
 shuffled histories. Workflow tests cover chat isolation, recovery after a failed
 queued operation, snapshot reuse, historical coverage, persistence failures,
-observer isolation, and progressive output.
+observer isolation, semantic rejection, and progressive presentation.
 
 The design uses explicit responsibility boundaries and vocabulary
 ([Bounded Context](https://martinfowler.com/bliki/BoundedContext.html)), extraction

@@ -358,6 +358,48 @@ export const goldenFixtures = [
     },
   }),
   fixture({
+    id: "live-prod-balcony-wejherowo",
+    source: "reconstructed",
+    messages: [
+      "Карінка: Квартира 1700 злотих, комуналка десь 500.",
+      "KoteNya: Це у Вейхерово, до Гданська приблизно година.",
+      "Карінка: Десь недалеко Макдональдс. І тренажерки.",
+      "Meleys: Ще поруч військова база.",
+      "KoteNya: Балкон уже готова грядка 😄",
+      "Meleys: Навіює вайб, шо там будуть помідори.",
+      "Карінка: Ще я помідори не садила.",
+      "Карінка: На балконі не можна курити.",
+    ],
+    expected: {
+      action: "SUMMARIZE",
+      summary: {
+        mustInclude: [
+          "1700",
+          "десь 500",
+          "Вейхерово",
+          "приблизно година",
+          "Макдональдс",
+          "не можна курити",
+        ],
+        mustNotInvent: [
+          "Макдональдс у будинку",
+          "військова база у будинку",
+          "планують вирощувати помідори",
+          "Карінка планує садити помідори",
+          "усі твердження належать KoteNya",
+        ],
+        preserveRelations: [
+          "McDonald's is nearby, never in the apartment building",
+          "the military base is nearby and never merged with the apartment",
+          "tomatoes remain banter or a negated past action, never a plan",
+          "speaker claims retain their visible provenance",
+        ],
+        exactInvariants: ["1700", "500", "Вейхерово"],
+      },
+      checkpoint: { advance: true },
+    },
+  }),
+  fixture({
     id: "checkpoint-no-new-messages",
     source: "exact",
     messages: [],
@@ -503,6 +545,7 @@ export const smokeE2E = [
 
 export const adversarialE2E = [
   "conversational-ellipsis-and-author-boundary",
+  "live-prod-balcony-wejherowo",
   "long-fictional-spongebob-story",
   "banter-with-durable-technical-island",
   "wordplay-only-banter",

@@ -2,7 +2,7 @@
 
 ## How to read this document
 
-Проверка структуры и ownership `packages/summarize`: 2026-09-08, baseline `f0d26cf707b19d8a8e8c6c0df9c062b049fe64e0` плюс текущий dirty working tree этого рефакторинга. Проверены новый module graph, selection, model prompts и per-attempt evidence; эта запись не обновляет baseline остальных подсистем. Удаление runtime `Object.freeze` из `b83a23e` сохранено: readonly TypeScript-контракты не означают runtime freeze.
+Проверка структуры и ownership `packages/summarize`: 2026-09-09, baseline `f0d26cf707b19d8a8e8c6c0df9c062b049fe64e0` плюс текущий dirty working tree этого рефакторинга. Проверены новый module graph, structured claim/evidence acceptance, post-persistence progressive presentation, selection, model prompts и per-attempt evidence; эта запись не обновляет baseline остальных подсистем. Удаление runtime `Object.freeze` из `b83a23e` сохранено: readonly TypeScript-контракты не означают runtime freeze.
 
 Последняя проверка summary window/cache/checkpoint boundaries: 2026-09-07, baseline `4cbea1921b036a3c6e18a452337b7bb601d20571` плюс текущие незакоммиченные изменения. Telegram ingress parsing boundary проверена 2026-09-08 на `b83a23e890930b10620b624aa0c1843f1cca6d4a` плюс текущие незакоммиченные изменения. В текущем dirty tree дополнительно проверены exact snapshot reuse, historical read-only semantics, Processor → repository wiring и единая Telegram message/command projection; остальные workflow, ledger и lifecycle сохраняют предыдущие проверки 2026-09-05/07.
 
@@ -24,7 +24,7 @@ Ingress также является Queue consumer: он вызывает Proces
 
 Одна транзакция `recordAttempt` сохраняет результат, точные snapshots входа и сопутствующие evidence. Только catch-up intent `recent` (голая `/summary`) разрешает сохранённому `summarized` или `skipped` attempt стать основанием checkpoint. Исторические `today` и `count` сохраняют результат для чтения, но checkpoint не меняют.
 
-Затем Processor отдельно сохраняет текст доставки в lifecycle, получает delivery lease, завершает Telegram delivery и только после неё записывает `completed`. Preview может быть виден в Telegram ещё во время генерации. Cron восстанавливает зависшие runs из БД. Повторный запуск переиспользует уже сохранённый outcome; атомарности между PostgreSQL и Telegram нет.
+Затем Processor отдельно сохраняет текст доставки в lifecycle. Лишь после этого он открывает progressive presentation уже принятого текста, получает delivery lease, завершает Telegram delivery и записывает `completed`. Candidate model output не показывается и не становится summary до structured acceptance. Cron восстанавливает зависшие runs из БД. Повторный запуск переиспользует уже сохранённый outcome; атомарности между PostgreSQL и Telegram нет.
 
 ## System context
 
@@ -84,7 +84,7 @@ flowchart TD
     WS -->|"empty"| EA["saveAttempt: empty"]
     WS -->|"eligible plus context"| CL["Classifier: predicates to action"]
     CL --> D{"Disposition"}
-    D -->|"SUMMARIZE"| SU["Summarizer stream and Telegram preview"]
+    D -->|"SUMMARIZE"| SU["Structured candidate and claim/evidence acceptance"]
     D -->|"DEFER_*"| DF["deferred, preserve checkpoint"]
     D -->|"SKIP_*"| SK["skipped, consume only checkpoint mode"]
     SU --> SA["saveAttempt transaction: result and evidence"]
@@ -95,6 +95,7 @@ flowchart TD
     EA --> PR
     PR --> VA["Validate text, saveSummary CAS to summary_ready"]
     VA --> DC["claimDelivery CAS"]
+    DC --> PV["Progressive presentation of durable accepted text"]
     DC --> SEND
     SEND --> MC["markCompleted CAS"]
     MC --> ACK
@@ -154,14 +155,10 @@ sequenceDiagram
     S->>M: Classifier predicates request
     M-->>S: Predicates
     S->>S: decideFromPredicates: SUMMARIZE
-    S->>V: Begin preview
-    S->>M: Stream summary for same window and roles
-    loop Generated deltas
-        M-->>S: Text delta
-        S->>V: Coalesced preview update
-        V->>T: Draft or editable group message
-    end
-    S->>V: finalize: flush preview, do not commit final delivery
+    S->>M: Structured summary plus atomic claims/evidence
+    M-->>S: JSON candidate
+    S->>S: Validate schema, eligible evidence, author and numeric anchors
+    S->>S: Verify ordered claims cover all canonical prose
     S->>D: saveAttempt transaction with lease fence and child evidence
     Note over S,D: Checkpoint evidence is durable here
     S-->>P: summarized disposition with eligible-only coverage
@@ -170,6 +167,8 @@ sequenceDiagram
     L->>D: CAS to summary_ready with encrypted delivery text
     P->>L: claimDelivery(runId)
     L->>D: CAS to delivering with new leaseToken
+    P->>V: Begin and finalize preview of durable accepted text
+    V->>T: Draft or editable group message
     P->>V: progressiveSession.commit()
     V->>T: Private sendMessage or final group editMessageText
     V-->>P: Telegram message ID
@@ -179,7 +178,7 @@ sequenceDiagram
     I->>Q: ACK
 ```
 
-На обычном streaming пути группа получает редактируемое сообщение с ` ▍` до persistence, а финальный commit убирает маркер. Stream chunks собираются без переписывания уже опубликованного префикса; после последнего chunk итоговый content и доступные usage fields записываются в execution journal как model-response envelope. В личном чате preview использует `sendMessageDraft`, commit — `sendMessage`. После recovery process-local session отсутствует: Processor использует обычный `sendTelegramMessage()` с сохранённым текстом. Во время вычисления отдельный timer продлевает processing lease; для delivery аналогичного heartbeat в Processor нет.
+Progressive transport получает только текст, который уже прошёл structured candidate acceptance, сохранён как attempt и скопирован в lifecycle delivery payload. Его process-local buffer больше не является источником `WindowDisposition.summary.text`. В группе preview использует редактируемое сообщение с ` ▍`, а final commit убирает маркер; в личном чате preview использует `sendMessageDraft`, commit — `sendMessage`. После recovery process-local session отсутствует: Processor использует обычный `sendTelegramMessage()` с сохранённым текстом. Во время вычисления отдельный timer продлевает processing lease; для delivery аналогичного heartbeat в Processor нет.
 
 Evidence: [processor/worker.ts](../../apps/cloudflare/src/processor/worker.ts) — `processRun()`, `withProcessingLeaseHeartbeat()`, `deliverInsideSpan()`; [ProgressiveSummarySession.ts](../../packages/summarize/src/progressive/ProgressiveSummarySession.ts) — `finalize()`/`commit()`; [progressiveTransport.ts](../../packages/telegram/src/progressiveTransport.ts).
 
@@ -732,6 +731,16 @@ Evidence: [summary.input.ts](../../packages/summarize/src/summary.input.ts); [at
 
 Violation would cause: lossy summary одного окна подменял бы вычисление другого либо cache hit исторического запроса ошибочно управлял бы cursor.
 
+### INV-14 — Progressive presentation is not semantic acceptance
+
+Statement: единственный canonical generation path возвращает structured candidate с atomic claims и eligible evidence. Summary возникает только после schema validation и deterministic acceptance; progressive transport получает лишь уже принятый и durably сохранённый delivery payload.
+
+Enforced by: отсутствие `stream` в `ConversationSummarizer`, unconditional `summarize()` в `evaluateSummaryWindow()`, `acceptSummaryCandidate()` и создание `ProgressiveSummarySession` в Processor после `storeDeliveryPayload()`.
+
+Evidence: [summarizer.ts](../../packages/summarize/src/generation/summarizer.ts); [acceptance.ts](../../packages/summarize/src/generation/acceptance.ts); [summary.evaluation.ts](../../packages/summarize/src/summary.evaluation.ts); [process-summary-execution.ts](../../apps/cloudflare/src/processor/process-summary-execution.ts); [summary-acceptance.test.ts](../../test/summary-acceptance.test.ts).
+
+Violation would cause: unvalidated free-form preview становился бы durable outcome и обходил structured response contract.
+
 ## Component cards
 
 ### Ingress Worker
@@ -824,7 +833,7 @@ Does NOT own: message eligibility, checkpoint consumption, attempt persistence, 
 
 Reads: один и тот же immutable window плюс role annotations. Outputs: `SummaryDecision` и optional summary text. Durable writes отсутствуют; model-boundary events направляются в execution recorder, обязательный journal проецирует из них invocation evidence, а optional telemetry observer не участвует в persistence.
 
-Important invariants: fast classifier по умолчанию abstains; model predicates validated strictly; action выводится code; context-only rows помечены в prompt; structured и streaming generation получают одинаковые transcript/roles и semantic policy. Оба gpt-oss model boundary — classifier и summarizer — сохраняют Harmony ownership, но учитывают provider boundary: Ollama сам рендерит Harmony и его `/api/chat` принимает только `system/user/assistant/tool`, поэтому model metadata вместе с trusted developer policy и response format передаются одним `system`, а untrusted PIPECHAT transcript — отдельным `user`. Ollama `thinking` остаётся внутренним и наружу выходит только final content. Оба structured path объявляют свою response schema в trusted prompt; локальный Ollama дополнительно получает schema sampling grammar, а Processor для `ollama.com/api` использует поддерживаемый Cloud JSON mode и сохраняет Zod validation. Streaming summarizer использует plain-text contract и ту же semantic validation. Processor передаёт текущую UTC-дату в оба Harmony envelope. Summary сохраняет конкретные полезные propositions, релевантные visible author labels и named anchors вместо topic-only meta-summary.
+Important invariants: fast classifier по умолчанию abstains; model predicates validated strictly; action выводится code; context-only rows помечены в prompt. Оба gpt-oss model boundary — classifier и summarizer — сохраняют Harmony ownership, но учитывают provider boundary: Ollama сам рендерит Harmony и его `/api/chat` принимает только `system/user/assistant/tool`, поэтому model metadata вместе с trusted developer policy и response format передаются одним `system`, а untrusted PIPECHAT transcript — отдельным `user`. Ollama `thinking` остаётся внутренним и наружу выходит только final content. Оба structured path объявляют response schema в trusted prompt; локальный Ollama дополнительно получает schema sampling grammar, а Processor для `ollama.com/api` использует поддерживаемый Cloud JSON mode и сохраняет Zod validation. Summarizer принимает только structured candidate с atomic claims/evidence; acceptance проверяет eligible IDs, author provenance, numeric anchors и полное ordered-claim покрытие canonical prose. Processor передаёт текущую UTC-дату в оба Harmony envelope. Summary сохраняет конкретные полезные propositions, релевантные visible author labels и named anchors вместо topic-only meta-summary.
 
 Failure semantics: classifier повторяет один truncated/empty-output attempt с большим output budget; provider/schema failure пробрасывается facade/Processor.
 
@@ -894,7 +903,8 @@ Key entry points: [wma worker.ts](../../apps/cloudflare/src/wma/src-api/worker.t
 | Queue retry vs logical retry                      | Queue retry повторяет current transport message после RPC/Queue failure. Logical retry хранится в lifecycle и создаёт replacement message с delay; cron может восстановить его независимо.                        |
 | Canonical state vs WMA projection                 | Ledger/messages/lifecycle обслуживают correctness разных контуров. Catalog и caches ускоряют/представляют только summarized ledger rows и могут быть перестроены.                                                 |
 | Per-chat serialization vs DB single-chat claim    | `pendingByChat` сериализует только вызовы одного созданного Summarizer instance. Partial DB index и claim query обеспечивают distributed processing exclusion.                                                    |
-| Preview vs final delivery                         | Preview — draft/editable Telegram side effects во время streaming и process-local state. Final delivery происходит после `saveSummary`/delivery claim и только receipt переводит run в completed.                 |
+| Candidate vs accepted summary                     | Candidate — structured model output с claims/evidence. Accepted summary появляется после runtime checks и attempt persistence; model stream или Telegram buffer не являются semantic result.                      |
+| Preview vs final delivery                         | Preview — draft/editable side effect только для уже durable accepted payload. Final delivery происходит после `saveSummary`/delivery claim и только receipt переводит run в completed.                            |
 
 ## Mental execution examples
 
@@ -1116,19 +1126,19 @@ Relevant files: [telegram-delivery.ts](../../apps/cloudflare/src/processor/deliv
 
 ## Repository pointers
 
-| Если меняется…                  | Сначала проверить                                                                  | Затем проверить                                                             |
-| ------------------------------- | ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| Telegram syntax boundary        | `packages/telegram/src/telegram.message.ts`, `telegram.command.ts`                 | Telegram adapters and colocated boundary tests                              |
-| Telegram domain acceptance      | `packages/telegram/src/chatMessage.ts`, `appCommand.ts`, `summaryCommand.ts`       | `apps/cloudflare/src/ingress/worker.ts`, ingress tests                      |
-| Message durability/encryption   | `packages/db/src/repos/messages.repo.ts`, `encryption.ts`                          | schema/migrations, ledger/encryption tests                                  |
-| `recent`/`today`/`count` window | `packages/summarize/src/summary.window.ts`                                         | boundary/count tests, checkpoint reader                                     |
-| Classification labels           | `packages/summarize/src/classifier/predicates.ts`, `classifier/instructions.ts`    | classifier tests and `summary.evaluation.ts`                                |
-| Summary text semantics          | `packages/summarize/src/generation/prompt.ts`, `instructions.ts`, `composition.ts` | golden/semantic tests and model profiles                                    |
-| Checkpoint advancement          | `packages/summarize/src/execution/attempt.ts`, `window/consumption.ts`             | attempt repository, schema/tests                                            |
-| Attempt atomicity/evidence      | `packages/db/src/repos/summaries.repo.ts`                                          | schema/migrations, summary-ledger tests                                     |
-| Run/retry/lease states          | `SummaryLifecycleRepo`                                                             | `packages/run-lifecycle`, Lifecycle Worker, storage/reconciler tests        |
-| Queue ACK/retry                 | `apps/cloudflare/src/ingress/summary-queue-consumer.ts`                            | ingress wrangler config, Workers queue tests                                |
-| Delivery/progressive output     | Processor Worker, `telegram/progressiveTransport.ts`                               | `summarize/src/progressive/ProgressiveSummarySession.ts`, progressive tests |
-| WMA visibility/access           | `wma/src-api/bootstrap.ts`, `chat-access.ts`                                       | catalog writer, edge-cache policy, WMA tests                                |
+| Если меняется…                  | Сначала проверить                                                               | Затем проверить                                                             |
+| ------------------------------- | ------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| Telegram syntax boundary        | `packages/telegram/src/telegram.message.ts`, `telegram.command.ts`              | Telegram adapters and colocated boundary tests                              |
+| Telegram domain acceptance      | `packages/telegram/src/chatMessage.ts`, `appCommand.ts`, `summaryCommand.ts`    | `apps/cloudflare/src/ingress/worker.ts`, ingress tests                      |
+| Message durability/encryption   | `packages/db/src/repos/messages.repo.ts`, `encryption.ts`                       | schema/migrations, ledger/encryption tests                                  |
+| `recent`/`today`/`count` window | `packages/summarize/src/summary.window.ts`                                      | boundary/count tests, checkpoint reader                                     |
+| Classification labels           | `packages/summarize/src/classifier/predicates.ts`, `classifier/instructions.ts` | classifier tests and `summary.evaluation.ts`                                |
+| Summary text semantics          | `packages/summarize/src/generation/acceptance.ts`, `schema.ts`, `prompt.ts`     | golden/semantic tests, composition policy and model profiles                |
+| Checkpoint advancement          | `packages/summarize/src/execution/attempt.ts`, `window/consumption.ts`          | attempt repository, schema/tests                                            |
+| Attempt atomicity/evidence      | `packages/db/src/repos/summaries.repo.ts`                                       | schema/migrations, summary-ledger tests                                     |
+| Run/retry/lease states          | `SummaryLifecycleRepo`                                                          | `packages/run-lifecycle`, Lifecycle Worker, storage/reconciler tests        |
+| Queue ACK/retry                 | `apps/cloudflare/src/ingress/summary-queue-consumer.ts`                         | ingress wrangler config, Workers queue tests                                |
+| Delivery/progressive output     | Processor Worker, `telegram/progressiveTransport.ts`                            | `summarize/src/progressive/ProgressiveSummarySession.ts`, progressive tests |
+| WMA visibility/access           | `wma/src-api/bootstrap.ts`, `chat-access.ts`                                    | catalog writer, edge-cache policy, WMA tests                                |
 
 Основной executable evidence расположен в `test/summarize-v01.test.ts`, `test/summarize-boundaries.test.ts`, `test/count-checkpoint.test.ts`, `test/summary-ledger*.test.ts`, `test/summary-lifecycle-storage.test.ts`, `test/reconciler-matrix.test.ts`, `test/telegram-*.test.ts`, `test/runtime-e2e.test.ts` и `apps/cloudflare/test/queue-runtime.test.ts`. Physical schema задают [schema.ts](../../packages/db/src/schema.ts) и migrations `0000..0018`; текущее schema после всех migrations содержит `messages`, `summary_runs`, `summary_run_lifecycle`, `summary_run_messages`, `model_invocations`, `summary_feedback`, `dataset_candidates`, `wma_chat_catalog`.

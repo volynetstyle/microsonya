@@ -7,7 +7,7 @@ import type {
 } from "./window/selection.js";
 
 /** Bump when summary/classification semantics cease to be reusable. */
-export const SUMMARY_POLICY_VERSION = `summary-policy-v1:${CHECKPOINT_POLICY_VERSION}`;
+export const SUMMARY_POLICY_VERSION = `summary-policy-v2-claim-evidence:${CHECKPOINT_POLICY_VERSION}`;
 
 export const SUMMARY_POLICY_HASH = sha256(SUMMARY_POLICY_VERSION);
 

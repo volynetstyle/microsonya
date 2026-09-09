@@ -1,4 +1,8 @@
 import { OllamaError } from "@microsonya/model";
+import {
+  ModelOutputError,
+  SummaryAcceptanceError,
+} from "@microsonya/summarize";
 import { classifyUnknownFailure } from "./policy.js";
 import { DeliveryError } from "./delivery/telegram-delivery.js";
 
@@ -24,6 +28,18 @@ export function classifyFailure(error: unknown): {
       code: `MODEL_HTTP_${error.status ?? "UNKNOWN"}`,
       retryable: error.status === 429 || (error.status ?? 500) >= 500,
       retryAfterSeconds: DEFAULT_RETRY_SECONDS,
+    };
+  if (error instanceof SummaryAcceptanceError)
+    return {
+      code: `MODEL_SEMANTIC_${error.code}`,
+      retryable: true,
+      retryAfterSeconds: 5,
+    };
+  if (error instanceof ModelOutputError)
+    return {
+      code: error.code,
+      retryable: true,
+      retryAfterSeconds: 5,
     };
   if (error instanceof TypeError) {
     const code = KNOWN_TYPE_ERROR_CODES[error.message];
