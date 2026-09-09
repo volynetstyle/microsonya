@@ -70,10 +70,6 @@ describe("progressive summary runtime", () => {
       messages: [
         {
           role: "system",
-          content: expect.stringContaining("You are ChatGPT"),
-        },
-        {
-          role: "developer",
           content: expect.stringContaining(
             "Return only the summary as plain text",
           ),

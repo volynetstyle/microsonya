@@ -208,8 +208,9 @@ export class SummaryExecutionProcessor {
                 runId,
               ),
               progressive: progressiveSession,
-              summaryGeneration: {
+              modelGeneration: {
                 currentDate: new Date().toISOString().slice(0, 10),
+                structuredOutput: "json",
               },
             });
             phase = "summary.generate";

@@ -7,7 +7,7 @@ import {
   createConversationWindow,
 } from "../packages/shared/src/index.js";
 import {
-  buildClassifierPrompt,
+  buildClassifierMessages,
   buildSummaryMessages,
   encodePipeWindow,
   PIPE_FIELDS,
@@ -63,7 +63,9 @@ describe("canonical model transcript", () => {
   it("gives classifier and summarizer byte-for-byte identical format and transcript sections", () => {
     const window = fixtureWindow();
     const encoded = encodePipeWindow(window);
-    const classifierPrompt = buildClassifierPrompt(window);
+    const classifierPrompt = buildClassifierMessages(window)
+      .map(({ content }) => content)
+      .join("\n\n");
     const summaryMessages = buildSummaryMessages(window);
     const summaryPrompt = summaryMessages.map(({ content }) => content).join("\n\n");
 
@@ -97,29 +99,28 @@ describe("canonical model transcript", () => {
 
     expect(messages.map(({ role }) => role)).toEqual([
       "system",
-      "developer",
       "user",
     ]);
     expect(messages[0]!.content).toContain("You are ChatGPT");
     expect(messages[0]!.content).toContain("Current date: 2026-09-09");
-    expect(messages[1]!.content).toContain("SUMMARY_POLICY_BEGIN");
-    expect(messages[1]!.content).toContain("TRANSCRIPT_FORMAT_BEGIN");
-    expect(messages[1]!.content).toContain("SEMANTIC_COMPOSITION_POLICY_BEGIN");
-    expect(messages[1]!.content).not.toContain(
+    expect(messages[0]!.content).toContain("SUMMARY_POLICY_BEGIN");
+    expect(messages[0]!.content).toContain("TRANSCRIPT_FORMAT_BEGIN");
+    expect(messages[0]!.content).toContain("SEMANTIC_COMPOSITION_POLICY_BEGIN");
+    expect(messages[0]!.content).not.toContain(
       'Correct final output:\n{"summary":"Реліз перенесли на четвер.',
     );
-    expect(messages[1]!.content).toContain(
+    expect(messages[0]!.content).toContain(
       "Do not fuse propositions from different speakers",
     );
-    expect(messages[1]!.content).not.toContain("TRANSCRIPT_BEGIN");
-    expect(messages[1]!.content).not.toContain("First | line");
+    expect(messages[0]!.content).not.toContain("TRANSCRIPT_BEGIN");
+    expect(messages[0]!.content).not.toContain("First | line");
 
-    expect(messages[2]!.content).toContain("INPUT_ROLES_BEGIN");
-    expect(messages[2]!.content).toContain("#101|context");
-    expect(messages[2]!.content).toContain("TRANSCRIPT_BEGIN");
-    expect(messages[2]!.content).toContain("First \\u007c line");
-    expect(messages[2]!.content).not.toContain("SUMMARY_POLICY_BEGIN");
-    expect(messages[2]!.content).not.toContain(
+    expect(messages[1]!.content).toContain("INPUT_ROLES_BEGIN");
+    expect(messages[1]!.content).toContain("#101|context");
+    expect(messages[1]!.content).toContain("TRANSCRIPT_BEGIN");
+    expect(messages[1]!.content).toContain("First \\u007c line");
+    expect(messages[1]!.content).not.toContain("SUMMARY_POLICY_BEGIN");
+    expect(messages[1]!.content).not.toContain(
       "SEMANTIC_COMPOSITION_POLICY_BEGIN",
     );
   });
@@ -131,26 +132,26 @@ describe("canonical model transcript", () => {
       outputMode: "plain-text",
     });
 
-    expect(structured[1]!.content).toContain(
+    expect(structured[0]!.content).toContain(
       "Return only JSON matching the required output schema.",
     );
-    expect(streaming[1]!.content).toContain(
+    expect(streaming[0]!.content).toContain(
       "Return only the summary as plain text",
     );
-    expect(streaming[1]!.content).not.toContain(
+    expect(streaming[0]!.content).not.toContain(
       "Return only JSON matching the required output schema.",
     );
-    expect(streaming[1]!.content).not.toContain(
+    expect(streaming[0]!.content).not.toContain(
       "Correct final output:\nРеліз перенесли на четвер.",
     );
-    expect(streaming[1]!.content).not.toContain(
+    expect(streaming[0]!.content).not.toContain(
       'Correct final output:\n{"summary":',
     );
-    expect(streaming[2]!.content).toBe(structured[2]!.content);
+    expect(streaming[1]!.content).toBe(structured[1]!.content);
   });
 
   it("requires concrete facts and visible speaker attribution", () => {
-    const [, system] = buildSummaryMessages(fixtureWindow(), undefined, {
+    const [system] = buildSummaryMessages(fixtureWindow(), undefined, {
       outputMode: "plain-text",
     });
 

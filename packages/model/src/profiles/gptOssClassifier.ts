@@ -4,8 +4,6 @@ export const CLASSIFIER_PROFILE = {
   model: "gpt-oss:120b-cloud",
   think: "low",
 
-  format: "json",
-
   options: {
     temperature: 0,
     top_k: 1,

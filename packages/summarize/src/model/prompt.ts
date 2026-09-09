@@ -70,16 +70,6 @@ export function buildModelInputPrompt(
   return `${roleSection}TRANSCRIPT_BEGIN\n${encodePipeWindow(window)}\nTRANSCRIPT_END`;
 }
 
-/** Builds the classifier's canonical policy and transcript envelope. */
-export function buildModelPrompt(
-  policySection: ModelPolicySection,
-  policy: string,
-  window: ConversationWindow,
-  roles?: readonly ModelWindowMessageRole[],
-): string {
-  return `${buildModelPolicyPrompt(policySection, policy)}\n\n${buildModelInputPrompt(window, roles)}`;
-}
-
 function encodeInputRoles(roles: readonly ModelWindowMessageRole[]): string {
   return roles.map(({ message, role }) => `#${message.id}|${role}`).join("\n");
 }

@@ -12,7 +12,10 @@ import {
   selectSummaryWindow,
 } from "../packages/summarize/src/index.js";
 import { MAX_MESSAGES } from "../packages/summarize/src/window/limits.js";
-import { buildModelPrompt } from "../packages/summarize/src/model/prompt.js";
+import {
+  buildModelInputPrompt,
+  buildModelPolicyPrompt,
+} from "../packages/summarize/src/model/prompt.js";
 
 const command: SummaryCommand = {
   chatId: asChatId("chat"),
@@ -236,12 +239,7 @@ describe("summary conversation-window selection", () => {
       command: command,
       checkpointBefore: asMessageId(4),
     })!;
-    const prompt = buildModelPrompt(
-      "SUMMARY_POLICY",
-      "policy",
-      selected.window,
-      selected.messages,
-    );
+    const prompt = `${buildModelPolicyPrompt("SUMMARY_POLICY", "policy")}\n\n${buildModelInputPrompt(selected.window, selected.messages)}`;
 
     expect(prompt).toContain("INPUT_ROLES_BEGIN\n#4|context\n#9|eligible");
     expect(prompt).toContain(

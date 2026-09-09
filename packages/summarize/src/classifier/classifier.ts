@@ -5,8 +5,12 @@ import type { SummaryExecutionRecorder } from "../execution/observer.js";
 import { ModelOutputError, parseModelOutput } from "../model/output.js";
 import type { ModelWindowMessageRole } from "../model/prompt.js";
 import { recordModelResponse } from "../model/response.js";
-import { classifierOutputSchema, decideFromPredicates } from "./predicates.js";
-import { buildClassifierPrompt } from "./prompt.js";
+import {
+  CLASSIFIER_RESPONSE_SCHEMA,
+  classifierOutputSchema,
+  decideFromPredicates,
+} from "./predicates.js";
+import { buildClassifierMessages } from "./prompt.js";
 
 export interface SummaryDecisionClassifier {
   classify(
@@ -19,6 +23,8 @@ export interface SummaryDecisionClassifier {
 
 export interface ClassifierDependencies {
   readonly ollama: Pick<OllamaClient, "chat">;
+  readonly currentDate?: string;
+  readonly structuredOutput?: "schema" | "json";
 }
 
 export function createClassifier(
@@ -27,7 +33,11 @@ export function createClassifier(
   return {
     classify: async (window, signal, execution, roles) => {
       signal?.throwIfAborted();
-      const prompt = buildClassifierPrompt(window, roles);
+      const messages = buildClassifierMessages(window, roles, {
+        reasoningEffort: CLASSIFIER_PROFILE.think,
+        currentDate: deps.currentDate,
+      });
+      const prompt = messages.map(({ content }) => content).join("\n\n");
       for (let attempt = 1; attempt <= 2; attempt += 1) {
         const numPredict =
           CLASSIFIER_PROFILE.options.num_predict * (attempt === 1 ? 1 : 2);
@@ -45,12 +55,16 @@ export function createClassifier(
         const response = await deps.ollama.chat(
           {
             ...CLASSIFIER_PROFILE,
+            format:
+              deps.structuredOutput === "json"
+                ? "json"
+                : CLASSIFIER_RESPONSE_SCHEMA,
             options: {
               ...CLASSIFIER_PROFILE.options,
               num_predict: numPredict,
             },
             stream: false,
-            messages: [{ role: "user", content: prompt }],
+            messages,
           },
           { signal },
         );

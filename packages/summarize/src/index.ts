@@ -12,10 +12,14 @@ export {
 } from "./classifier/decision.js";
 export { COMPACTION_DECISION_INSTRUCTIONS } from "./classifier/instructions.js";
 export {
+  CLASSIFIER_RESPONSE_SCHEMA,
   decideFromPredicates,
   type ClassificationPredicates,
 } from "./classifier/predicates.js";
-export { buildClassifierPrompt } from "./classifier/prompt.js";
+export {
+  buildClassifierMessages,
+  type ClassifierPromptOptions,
+} from "./classifier/prompt.js";
 export { AttemptCommitConflict } from "./execution/AttemptCommitConflict.js";
 export { classifySummaryError } from "./execution/errors.js";
 export {
@@ -69,7 +73,6 @@ export { ModelOutputError, parseModelOutput } from "./model/output.js";
 export {
   buildModelInputPrompt,
   buildModelPolicyPrompt,
-  buildModelPrompt,
   type ModelPolicySection,
   type ModelWindowMessageRole,
 } from "./model/prompt.js";

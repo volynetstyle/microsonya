@@ -13,13 +13,19 @@ export function createSummaryWorkflow(
   deps: SummaryWorkflowDependencies,
 ): SummaryWorkflow {
   const classifier =
-    deps.classifier ?? createClassifier({ ollama: requireOllama(deps) });
+    deps.classifier ??
+    createClassifier({
+      ollama: requireOllama(deps),
+      currentDate: deps.modelGeneration?.currentDate,
+      structuredOutput: deps.modelGeneration?.structuredOutput,
+    });
 
   const conversationSummarizer =
     deps.conversationSummarizer ??
     createConversationSummarizer({
       ollama: requireOllama(deps),
-      currentDate: deps.summaryGeneration?.currentDate,
+      currentDate: deps.modelGeneration?.currentDate,
+      structuredOutput: deps.modelGeneration?.structuredOutput,
     });
 
   const pendingByChat = new Map<ChatId, Promise<void>>();

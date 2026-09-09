@@ -78,9 +78,8 @@ export function buildSummaryMessages(
   return [
     {
       role: "system",
-      content: buildHarmonySystemMessage({ reasoningEffort, currentDate }),
+      content: `${buildHarmonySystemMessage({ reasoningEffort, currentDate })}\n\n${developerContent}`,
     },
-    { role: "developer", content: developerContent },
     { role: "user", content: input },
   ];
 }

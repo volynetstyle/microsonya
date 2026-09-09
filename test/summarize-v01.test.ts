@@ -11,6 +11,7 @@ import {
   type AcceptedOutcomeRecord,
 } from "../packages/shared/src/index.js";
 import {
+  CLASSIFIER_RESPONSE_SCHEMA,
   createSummaryWorkflow,
   SummarizationTelemetryService,
   type SummarizationTelemetryEvent,
@@ -111,9 +112,16 @@ describe("summarizer 0.1 workflow", () => {
       expect.objectContaining({
         model: "gpt-oss:120b-cloud",
         think: "low",
-        format: "json",
+        format: CLASSIFIER_RESPONSE_SCHEMA,
         stream: false,
         options: expect.objectContaining({ num_predict: 512 }),
+        messages: [
+          expect.objectContaining({
+            role: "system",
+            content: expect.stringContaining("# Response Formats"),
+          }),
+          expect.objectContaining({ role: "user" }),
+        ],
       }),
     );
     expect(chat.mock.calls[1]?.[0]).toEqual(
@@ -137,10 +145,6 @@ describe("summarizer 0.1 workflow", () => {
         messages: [
           expect.objectContaining({
             role: "system",
-            content: expect.stringContaining("You are ChatGPT"),
-          }),
-          expect.objectContaining({
-            role: "developer",
             content: expect.stringContaining("SUMMARY_POLICY_BEGIN"),
           }),
           expect.objectContaining({

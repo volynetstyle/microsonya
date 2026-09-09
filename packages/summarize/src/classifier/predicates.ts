@@ -24,6 +24,29 @@ export const classifierOutputSchema = z
   })
   .strict();
 
+export const CLASSIFIER_RESPONSE_SCHEMA = {
+  type: "object",
+  properties: {
+    durable: { type: "boolean" },
+    essentialReferentsResolved: { type: "boolean" },
+    visiblyIncomplete: { type: "boolean" },
+    alreadyCompact: { type: "boolean" },
+    primarilyReaction: { type: "boolean" },
+    primarilyBanter: { type: "boolean" },
+    requiresSynthesis: { type: "boolean" },
+  },
+  required: [
+    "durable",
+    "essentialReferentsResolved",
+    "visiblyIncomplete",
+    "alreadyCompact",
+    "primarilyReaction",
+    "primarilyBanter",
+    "requiresSynthesis",
+  ],
+  additionalProperties: false,
+} as const;
+
 export type ClassificationPredicates = z.infer<typeof classifierOutputSchema>;
 
 /** Deterministic policy: semantic predicates are model evidence, action is code. */

@@ -28,11 +28,13 @@ export interface ConversationSummarizer {
 export interface ConversationSummarizerDependencies {
   readonly ollama: Pick<OllamaClient, "chat">;
   readonly currentDate?: string;
+  readonly structuredOutput?: "schema" | "json";
 }
 
 export function createConversationSummarizer({
   ollama,
   currentDate,
+  structuredOutput = "schema",
 }: ConversationSummarizerDependencies): ConversationSummarizer {
   return {
     stream: (window, signal, execution, roles) =>
@@ -58,7 +60,8 @@ export function createConversationSummarizer({
       const response = await ollama.chat(
         {
           ...SUMMARIZER_PROFILE,
-          format: SUMMARY_RESPONSE_SCHEMA,
+          format:
+            structuredOutput === "json" ? "json" : SUMMARY_RESPONSE_SCHEMA,
           stream: false,
           messages,
         },

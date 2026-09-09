@@ -1,7 +1,7 @@
 import type { ParentProps } from "solid-js";
 import { HydrationScript } from "@solidjs/web";
 
-import prepaintScript from "./api/prepaint.inline.js?inline-minified";
+import prepaintScript from "./telegram/prepaint.inline.js?inline-minified";
 import telegramBootScript from "./telegram/boot.inline.js?inline-minified";
 
 /** Static SPA shell. No placeholder app markup is emitted: it was creating a
