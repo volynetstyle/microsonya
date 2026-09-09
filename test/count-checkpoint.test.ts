@@ -1,3 +1,4 @@
+import { acceptingReviewer, candidateFixture } from "./summaryTestFixtures.js";
 import { describe, expect, it } from "vitest";
 import {
   SummaryAttemptRepository,
@@ -35,6 +36,7 @@ describe("read-only count checkpoint isolation", () => {
       }));
       const seen: number[][] = [];
       const summarizer = createSummaryWorkflow({
+        semanticReviewer: acceptingReviewer,
         messages: { listByChat: async () => messages },
         summaries: {
           findLatestConsumptionBoundary: (id) =>
@@ -52,7 +54,11 @@ describe("read-only count checkpoint isolation", () => {
           },
         },
         conversationSummarizer: {
-          summarize: async () => ({ text: "Stored summary" }),
+          summarize: async (window) =>
+            candidateFixture(
+              "Stored summary",
+              window.messages.map(({ id }) => Number(id)),
+            ),
         },
       });
       const command = (id: number, mode: SummaryMode) => ({

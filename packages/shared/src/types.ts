@@ -185,7 +185,7 @@ export interface SummaryAttemptMessageSnapshot {
 
 export interface ModelInvocationEvidence {
   readonly id: SummaryId;
-  readonly stage: "classifier" | "summarizer";
+  readonly stage: "classifier" | "summarizer" | "reviewer";
   readonly model: string;
   readonly promptHash: string;
   readonly inputTokens?: number;

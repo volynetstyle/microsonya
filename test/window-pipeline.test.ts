@@ -1,3 +1,4 @@
+import { acceptingReviewer, candidateFixture } from "./summaryTestFixtures.js";
 import { describe, expect, it, vi } from "vitest";
 import {
   SUMMARY_ACTIONS,
@@ -31,12 +32,13 @@ describe("conversation-window decision pipeline", () => {
       const summarize = vi.fn(async (receivedWindow, receivedSignal) => {
         expect(receivedWindow).toBe(window);
         expect(receivedSignal).toBe(signal);
-        return { text: "A concise summary." };
+        return candidateFixture("A concise summary.", [5, 9]);
       });
 
       const result = await evaluateSummaryWindow(
         window,
         {
+          semanticReviewer: acceptingReviewer,
           classifier: { classify },
           summarizer: { summarize },
           createSummaryId: () => asSummaryId("summary-1"),
@@ -80,6 +82,7 @@ describe("conversation-window decision pipeline", () => {
     const summarize = vi.fn<ConversationSummarizer["summarize"]>();
 
     const result = await evaluateSummaryWindow(window, {
+      semanticReviewer: acceptingReviewer,
       classifier: { classify },
       summarizer: { summarize },
       fastClassifier: {
@@ -128,7 +131,11 @@ describe("conversation-window decision pipeline", () => {
     await expect(
       evaluateSummaryWindow(
         fixtureWindow(),
-        { classifier: { classify }, summarizer: { summarize } },
+        {
+          semanticReviewer: acceptingReviewer,
+          classifier: { classify },
+          summarizer: { summarize },
+        },
         controller.signal,
       ),
     ).rejects.toMatchObject({ name: "AbortError" });

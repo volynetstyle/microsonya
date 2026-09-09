@@ -46,7 +46,8 @@ export class SummaryExecutionJournal implements SummaryExecutionRecorder {
     }
     if (event.type === "model.response.envelope") {
       if (event.stage === "classifier") this.classifierMs += event.durationMs;
-      else this.summarizerMs += event.durationMs;
+      else if (event.stage === "summarizer")
+        this.summarizerMs += event.durationMs;
       const invocation = this.invocations.get(
         invocationKey(event.stage, event.attempt),
       );
@@ -57,7 +58,10 @@ export class SummaryExecutionJournal implements SummaryExecutionRecorder {
         invocation.outputText = event.content;
       }
     }
-    if (event.type === "model.response.invalid") {
+    if (
+      event.type === "model.response.invalid" ||
+      event.type === "summary.acceptance.rejected"
+    ) {
       const invocation = this.invocations.get(
         invocationKey(event.stage, event.attempt ?? 1),
       );

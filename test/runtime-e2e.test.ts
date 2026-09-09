@@ -1,3 +1,4 @@
+import { acceptingReviewer, candidateFixture } from "./summaryTestFixtures.js";
 import { describe, expect, it, vi } from "vitest";
 import {
   asAuthorId,
@@ -16,6 +17,7 @@ describe("runtime summary invariants", () => {
   it("does not persist or advance after a provider failure", async () => {
     const saveRun = vi.fn();
     const summarizer = createSummaryWorkflow({
+      semanticReviewer: acceptingReviewer,
       messages: {
         listByChat: async () => [message(1, "Deploy moved to Thursday.")],
       },
@@ -49,6 +51,7 @@ describe("runtime summary invariants", () => {
 
     let observedText = "";
     const summarizer = createSummaryWorkflow({
+      semanticReviewer: acceptingReviewer,
       messages,
       summaries,
       classifier: {
@@ -82,6 +85,7 @@ describe("runtime summary invariants", () => {
       };
     });
     const summarizer = createSummaryWorkflow({
+      semanticReviewer: acceptingReviewer,
       messages: {
         listByChat: async () => [
           message(1, "Deploy завершили."),
@@ -96,7 +100,7 @@ describe("runtime summary invariants", () => {
       },
       classifier: { classify: classifier },
       conversationSummarizer: {
-        summarize: async () => ({ text: "Deploy і міграцію завершено." }),
+        summarize: async () => candidateFixture("Deploy і міграцію завершено."),
       },
       createSummaryId: () => asSummaryId("summary"),
       now: () => asTimestampMs(300_000_000),
@@ -139,6 +143,7 @@ describe("runtime summary invariants", () => {
 
     const observedWindows: ChatMessage[][] = [];
     const summarizer = createSummaryWorkflow({
+      semanticReviewer: acceptingReviewer,
       messages,
       summaries,
       classifier: {

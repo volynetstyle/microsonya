@@ -3,7 +3,7 @@ import type { ClassificationPredicates } from "../classifier/predicates.js";
 import type { StructuralAnalysis } from "../window/analysis.js";
 import type { SummarySemanticFailure } from "../generation/acceptance.js";
 
-export type ModelStage = "classifier" | "summarizer";
+export type ModelStage = "classifier" | "summarizer" | "reviewer";
 
 export type ModelOutputFailure =
   | "MODEL_OUTPUT_EMPTY"
@@ -19,6 +19,19 @@ export type SummaryErrorCode =
   | "STORAGE_ERROR";
 
 export type SummaryExecutionEvent =
+  | {
+      type: "summary.acceptance.rejected";
+      stage: "summarizer" | "reviewer";
+      attempt: number;
+      reason: ModelOutputFailure | SummarySemanticFailure;
+    }
+  | {
+      type: "summary.repair.requested";
+      stage: "summarizer" | "reviewer";
+      failedAttempt: number;
+      nextAttempt: number;
+      reason: ModelOutputFailure | SummarySemanticFailure;
+    }
   | {
       type: "summary.start";
       mode: SummaryMode;
@@ -76,7 +89,7 @@ export type SummaryExecutionEvent =
       model: string;
       failedAttempt: number;
       nextAttempt: number;
-      reason: ModelOutputFailure;
+      reason: ModelOutputFailure | SummarySemanticFailure;
     }
   | {
       type: "model.response.raw";
@@ -105,7 +118,7 @@ export type SummaryExecutionEvent =
       responseChars: number;
       action?: SummaryAction;
       summaryChars?: number;
-      claimCount?: number;
+      fragmentCount?: number;
       predicates?: ClassificationPredicates;
     }
   | {

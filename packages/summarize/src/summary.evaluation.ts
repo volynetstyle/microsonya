@@ -14,8 +14,11 @@ import type { SummaryExecutionRecorder } from "./execution/observer.js";
 import type { ConversationSummarizer } from "./generation/summarizer.js";
 import type { ModelWindowMessageRole } from "./model/prompt.js";
 import { coverageOf } from "./window/coverage.js";
+import { generateAcceptedSummary } from "./generation/generate-accepted.js";
+import type { SummarySemanticReviewer } from "./generation/reviewer.js";
 
 export interface SummaryEvaluationDependencies {
+  readonly semanticReviewer: SummarySemanticReviewer;
   readonly eligibleMessages?: readonly ChatMessage[];
   readonly classifier: SummaryDecisionClassifier;
   readonly summarizer: ConversationSummarizer;
@@ -56,8 +59,10 @@ export async function evaluateSummaryWindow(
   });
   let disposition: WindowDisposition;
   if (decision.action === "SUMMARIZE") {
-    const generated = await deps.summarizer.summarize(
+    const text = await generateAcceptedSummary(
       window,
+      deps.summarizer,
+      deps.semanticReviewer,
       signal,
       deps.execution,
       deps.roles,
@@ -70,7 +75,7 @@ export async function evaluateSummaryWindow(
         id: (deps.createSummaryId ?? defaultSummaryId)(),
         chatId: window.chatId,
         covers: coverageOf(messages),
-        text: generated.text,
+        text,
         createdAt: (deps.now ?? defaultNow)(),
       },
     };

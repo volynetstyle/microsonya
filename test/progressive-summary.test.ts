@@ -45,13 +45,11 @@ describe("progressive summary runtime", () => {
           JSON.stringify({
             message: {
               content: JSON.stringify({
-                summary: "Перша частина.",
-                claims: [
+                fragments: [
                   {
                     text: "Перша частина.",
                     evidence: [1],
-                    kind: "fact",
-                    author: "A",
+                    subjects: [{ author: "A", evidence: [1] }],
                   },
                 ],
               }),
@@ -81,7 +79,15 @@ describe("progressive summary runtime", () => {
 
     await expect(
       summarizer.summarize(window, undefined, journal),
-    ).resolves.toEqual({ text: "Перша частина." });
+    ).resolves.toEqual({
+      fragments: [
+        {
+          text: "Перша частина.",
+          evidence: [1],
+          subjects: [{ author: "A", evidence: [1] }],
+        },
+      ],
+    });
     const request = JSON.parse(String(fetch.mock.calls[0]?.[1]?.body));
     expect(request).toMatchObject({
       stream: false,
@@ -89,7 +95,7 @@ describe("progressive summary runtime", () => {
         {
           role: "system",
           content: expect.stringContaining(
-            "Return only JSON matching the required output schema",
+            "Return only JSON with grounded prose fragments",
           ),
         },
         {
@@ -99,12 +105,12 @@ describe("progressive summary runtime", () => {
       ],
     });
     expect(request.format).toMatchObject({
-      required: ["summary", "claims"],
+      required: ["fragments"],
     });
     expect(journal.snapshot().modelInvocations).toContainEqual(
       expect.objectContaining({
         stage: "summarizer",
-        outputText: expect.stringContaining('"claims"'),
+        outputText: expect.stringContaining('"fragments"'),
         inputTokens: 120,
         outputTokens: 12,
         status: "succeeded",

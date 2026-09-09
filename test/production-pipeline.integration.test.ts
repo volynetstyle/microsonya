@@ -34,28 +34,32 @@ const network = setupServer(
     };
     const prompt = body.messages?.[0]?.content ?? "";
     const transcript = body.messages?.at(-1)?.content ?? "";
-    const content = prompt.includes("CLASSIFICATION_POLICY")
-      ? JSON.stringify({
-          durable: true,
-          essentialReferentsResolved: true,
-          visiblyIncomplete: false,
-          alreadyCompact: false,
-          primarilyReaction: false,
-          primarilyBanter: false,
-          requiresSynthesis: true,
-        })
-      : JSON.stringify({
-          summary:
-            "Staging pipeline confirmed the durable deployment plan and its verification gates.",
-          claims: [
-            {
-              text: "Staging pipeline confirmed the durable deployment plan and its verification gates.",
-              evidence: [Number(/#(\d+)\|/u.exec(transcript)?.[1] ?? 1)],
-              kind: "report",
-              author: "Pipeline",
-            },
-          ],
-        });
+    const content = prompt.includes("Review every grounded prose fragment")
+      ? JSON.stringify({ fragments: [{ index: 0, failures: [] }] })
+      : prompt.includes("CLASSIFICATION_POLICY")
+        ? JSON.stringify({
+            durable: true,
+            essentialReferentsResolved: true,
+            visiblyIncomplete: false,
+            alreadyCompact: false,
+            primarilyReaction: false,
+            primarilyBanter: false,
+            requiresSynthesis: true,
+          })
+        : JSON.stringify({
+            fragments: [
+              {
+                text: "Staging pipeline confirmed the durable deployment plan and its verification gates.",
+                evidence: [Number(/#(\d+)\|/u.exec(transcript)?.[1] ?? 1)],
+                subjects: [
+                  {
+                    author: "Pipeline",
+                    evidence: [Number(/#(\d+)\|/u.exec(transcript)?.[1] ?? 1)],
+                  },
+                ],
+              },
+            ],
+          });
     return HttpResponse.json({
       model: "pipeline-mock",
       created_at: "2026-08-29T00:00:00.000Z",

@@ -1,6 +1,7 @@
 import type { ConversationWindow } from "@microsonya/shared";
+import { ModelOutputError } from "../model/output.js";
 import type { ModelWindowMessageRole } from "../model/prompt.js";
-import type { SummaryCandidate } from "./schema.js";
+import { summaryOutputSchema, type SummaryCandidate } from "./schema.js";
 import { validateSemanticOutput } from "./validation.js";
 
 export const SUMMARY_SEMANTIC_FAILURES = [
@@ -10,112 +11,106 @@ export const SUMMARY_SEMANTIC_FAILURES = [
   "SPEECH_ACT",
   "EPISTEMIC_STATE",
   "SUPERSESSION",
-  "UNSUPPORTED_SUMMARY_TEXT",
+  "ATTRIBUTION_RENDERING",
 ] as const;
-
 export type SummarySemanticFailure = (typeof SUMMARY_SEMANTIC_FAILURES)[number];
 
-/** A fail-closed runtime rejection at the candidate -> accepted boundary. */
 export class SummaryAcceptanceError extends Error {
   readonly stage = "summarizer" as const;
-
+  readonly detail: string;
   constructor(
     readonly code: SummarySemanticFailure,
     message: string,
-    readonly claimIndex?: number,
+    readonly fragmentIndex?: number,
   ) {
-    super(message);
+    super(`Summary candidate failed ${code}.`);
     this.name = "SummaryAcceptanceError";
+    this.detail = message;
   }
 }
 
-/**
- * Applies deterministic checks only. Semantic categories that require model
- * judgment remain part of the public failure vocabulary, not fake heuristics.
- */
+/** Validate injected candidates as well as provider output. */
+export function validateSummaryCandidate(candidate: unknown): SummaryCandidate {
+  const result = summaryOutputSchema.safeParse(candidate);
+  if (!result.success) {
+    throw new ModelOutputError({
+      code: "MODEL_OUTPUT_SCHEMA_MISMATCH",
+      stage: "summarizer",
+      raw: JSON.stringify(candidate) ?? "",
+      cause: result.error,
+    });
+  }
+  return result.data;
+}
+
+/** L1 only; workflow additionally requires a complete semantic review. */
 export function acceptSummaryCandidate(
-  candidate: SummaryCandidate,
+  input: SummaryCandidate,
   window: ConversationWindow,
   roles?: readonly ModelWindowMessageRole[],
 ): string {
-  validateSemanticOutput(candidate.summary);
-
-  const messageById = new Map(
-    window.messages.map((message) => [Number(message.id), message]),
-  );
+  const candidate = validateSummaryCandidate(input);
+  const messageById = new Map(window.messages.map((m) => [Number(m.id), m]));
   const eligibleIds = new Set(
     roles === undefined
-      ? window.messages.map((message) => Number(message.id))
+      ? window.messages.map((m) => Number(m.id))
       : roles
           .filter(({ role }) => role === "eligible")
           .map(({ message }) => Number(message.id)),
   );
 
-  for (const [claimIndex, claim] of candidate.claims.entries()) {
-    validateSemanticOutput(claim.text);
-    const evidence = claim.evidence.map((id) => {
+  for (const [index, fragment] of candidate.fragments.entries()) {
+    validateSemanticOutput(fragment.text);
+    const evidence = fragment.evidence.map((id) => {
       const message = messageById.get(id);
       if (message === undefined || !eligibleIds.has(id)) {
         throw new SummaryAcceptanceError(
           "PROVENANCE",
-          `Claim ${claimIndex} references missing or context-only evidence #${id}.`,
-          claimIndex,
+          `Fragment ${index} references missing or context-only evidence #${id}.`,
+          index,
         );
       }
       return message;
     });
-
-    if (
-      claim.author !== undefined &&
-      !evidence.some(({ author }) => author.label === claim.author)
-    ) {
-      throw new SummaryAcceptanceError(
-        "PROVENANCE",
-        `Claim ${claimIndex} author is not present in its evidence.`,
-        claimIndex,
-      );
+    for (const subject of fragment.subjects) {
+      for (const id of subject.evidence) {
+        if (
+          !fragment.evidence.includes(id) ||
+          messageById.get(id)?.author.label !== subject.author
+        ) {
+          throw new SummaryAcceptanceError(
+            "PROVENANCE",
+            `Fragment ${index} subject evidence #${id} does not belong to ${subject.author}.`,
+            index,
+          );
+        }
+      }
     }
-
-    const evidenceNumbers = new Set(
+    const numbers = new Set(
       evidence.flatMap(({ text }) => numericAnchors(text)),
     );
-    const unsupportedNumber = numericAnchors(claim.text).find(
-      (value) => !evidenceNumbers.has(value),
+    const unsupported = numericAnchors(fragment.text).find(
+      (value) => !numbers.has(value),
     );
-    if (unsupportedNumber !== undefined) {
+    if (unsupported !== undefined) {
       throw new SummaryAcceptanceError(
         "FACT_INVENTION",
-        `Claim ${claimIndex} contains unsupported numeric anchor ${unsupportedNumber}.`,
-        claimIndex,
+        `Fragment ${index} contains unsupported numeric anchor ${unsupported}.`,
+        index,
       );
     }
   }
-
-  const summaryTokens = lexicalTokens(candidate.summary);
-  const claimTokens = lexicalTokens(
-    candidate.claims.map(({ text }) => text).join(" "),
-  );
-  if (
-    summaryTokens.length !== claimTokens.length ||
-    summaryTokens.some((token, index) => token !== claimTokens[index])
-  ) {
-    throw new SummaryAcceptanceError(
-      "UNSUPPORTED_SUMMARY_TEXT",
-      "Canonical summary contains text not accounted for by its ordered claims.",
-    );
-  }
-
-  return candidate.summary;
+  const summary = composeSummary(candidate);
+  validateSemanticOutput(summary);
+  return summary;
 }
 
-function lexicalTokens(value: string): string[] {
-  return [...value.toLocaleLowerCase().matchAll(/[\p{L}\p{N}]+/gu)].map(
-    ([token]) => token,
-  );
+export function composeSummary(candidate: SummaryCandidate): string {
+  return candidate.fragments.map(({ text }) => text).join(" ");
 }
 
-function numericAnchors(value: string): string[] {
-  return [...value.matchAll(/\p{N}+(?:[.,:/-]\p{N}+)*/gu)].map(([anchor]) =>
+function numericAnchors(text: string): string[] {
+  return [...text.matchAll(/\p{N}+(?:[.,:/-]\p{N}+)*/gu)].map(([anchor]) =>
     anchor.replaceAll(",", "."),
   );
 }

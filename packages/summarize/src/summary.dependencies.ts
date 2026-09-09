@@ -15,6 +15,7 @@ import type { SummaryDecisionClassifier } from "./classifier/classifier.js";
 import type { FastClassifier } from "./classifier/decision.js";
 import type { SummaryExecutionObserver } from "./execution/observer.js";
 import type { ConversationSummarizer } from "./generation/summarizer.js";
+import type { SummarySemanticReviewer } from "./generation/reviewer.js";
 import type { SummaryWindowSelector } from "./window/selection.js";
 
 export interface MessageHistoryReader {
@@ -40,6 +41,7 @@ export interface SummaryWorkflow {
 }
 
 export interface SummaryWorkflowDependencies {
+  readonly semanticReviewer?: SummarySemanticReviewer;
   readonly messages: MessageHistoryReader;
   readonly summaries: SummaryAttemptStore;
   readonly ollama?: Pick<OllamaClient, "chat">;

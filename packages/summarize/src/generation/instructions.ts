@@ -41,8 +41,10 @@ export const SUMMARY_INSTRUCTIONS = `
   Every retained claim, including who owns it, must trace to visible
   evidence. Keep visible names attached to problems, facts, opinions,
   requests, plans, decisions, and actions — don't genericize ("учасник",
-  "хтось") when a distinguishing name is available; drop identity only when
-  it adds no useful distinction. Never transfer a statement between
+  "хтось") when a distinguishing name is available. Personal reports, opinions,
+  requests, plans and decisions must retain visible authorship in the prose,
+  explicitly or through an unambiguous continuation naming that author.
+  Never transfer a statement between
   speakers: "A каже X; B заперечує Y" stays two claims, never collapses into
   "A каже Y". A correction, rebuttal, or alternative belongs to whoever
   stated it unless another message visibly shows it was adopted. Merge
@@ -79,8 +81,9 @@ export const SUMMARY_INSTRUCTIONS = `
 
   Coherent prose only — no bullets, numbered lists, headings, per-speaker or
   per-topic labels, or a mechanical one-sentence-per-message mapping.
-  Connect related facts naturally and avoid an "A said... B said... C
-  said..." sequence. One compact paragraph for a short or simple
+  Connect related facts naturally while keeping each person's authorship clear.
+  First-person statements must become attributed prose, not an anonymous voice;
+  attributed quotations are allowed. One compact paragraph for a short or simple
   conversation; a few paragraphs — split at meaningful shifts, not per
   message or speaker — for a longer one with genuinely distinct
   developments. State the supported substance directly rather than writing
@@ -95,10 +98,17 @@ export const SUMMARY_INSTRUCTIONS = `
 `.trim();
 
 export const SUMMARY_STRUCTURED_OUTPUT_INSTRUCTIONS = `
-  Return only JSON matching the required output schema. Split the summary
-  into atomic claims. Each claim must cite only eligible #ID evidence, and an
-  author, when present, must exactly match an author label in that evidence.
-  The ordered claim texts must contain exactly the same words as summary.
-  Summary must follow SUMMARY_INSTRUCTIONS exactly: coherent natural prose,
-  never a bullet list, numbered list, or catalogue of items.
+  Return only JSON with grounded prose fragments, no separate summary field.
+  The final summary is exactly fragment texts joined by a space. Each fragment
+  may synthesize several related messages and several speakers. These are prose
+  fragments, not atomic claims or one fragment per message. Compose coherent
+  natural prose, never a bullet list, numbered list or catalogue of items.
+  Cite only eligible #ID evidence supporting every retained assertion.
+  Every fragment must include subjects: an array of {author, evidence} objects.
+  Each subject author must exactly match the visible author of every message
+  in that subject's evidence, which must be a subset of fragment evidence.
+  Personal reports, opinions, requests, plans and decisions require subjects
+  and clear authorship in visible prose; metadata alone is insufficient.
+  Use subjects: [] only for genuinely impersonal facts. Several subjects can
+  share a fragment without merging their positions or transferring statements.
 `.trim();

@@ -12,6 +12,7 @@ import { loadOllamaConfig, OllamaClient } from "../packages/model/src/index.js";
 import {
   createClassifier,
   createConversationSummarizer,
+  createSummarySemanticReviewer,
   ModelOutputError,
   evaluateSummaryWindow,
   shouldAdvanceCheckpoint,
@@ -53,6 +54,7 @@ interface LiveResult extends E2EResult {
   readonly modelCalls: number;
   readonly classifierCalls: number;
   readonly summarizerCalls: number;
+  readonly reviewerCalls: number;
   readonly missingRequired: readonly string[];
   readonly forbiddenClaims: readonly string[];
   readonly extractionMetrics?: ExtractionMetrics;
@@ -73,6 +75,8 @@ interface FixtureReport {
 const args = parseArgs(process.argv.slice(2));
 const ollamaConfig = loadOllamaConfig(process.env);
 const endpoint = ollamaConfig.baseUrl ?? "http://localhost:11434/api";
+const structuredOutput =
+  new URL(endpoint).hostname === "ollama.com" ? "json" : "schema";
 
 if (endpoint.includes("localhost") && !process.env.OLLAMA_API_KEY) {
   throw new Error(
@@ -156,11 +160,13 @@ async function runFixture(
   let modelCalls = 0;
   let classifierCalls = 0;
   let summarizerCalls = 0;
-  const countedClient = (kind: "classifier" | "summarizer") => ({
+  let reviewerCalls = 0;
+  const countedClient = (kind: "classifier" | "summarizer" | "reviewer") => ({
     chat: async (...chatArgs: Parameters<OllamaClient["chat"]>) => {
       modelCalls += 1;
       if (kind === "classifier") classifierCalls += 1;
-      else summarizerCalls += 1;
+      else if (kind === "summarizer") summarizerCalls += 1;
+      else reviewerCalls += 1;
       const [request, options] = chatArgs;
       return ollama.chat(
         {
@@ -183,6 +189,7 @@ async function runFixture(
       modelCalls,
       classifierCalls,
       summarizerCalls,
+      reviewerCalls,
       missingRequired: [],
       forbiddenClaims: [],
     };
@@ -193,11 +200,17 @@ async function runFixture(
 
   try {
     const window = createConversationWindow(
-      fixture.messages.map((text, index) => message(index + 1, text)),
+      fixture.messages.map((text, index) =>
+        message(index + 1, text, fixture.messageAuthors?.[index]),
+      ),
     );
     const result = await evaluateSummaryWindow(
       window,
       {
+        semanticReviewer: createSummarySemanticReviewer({
+          ollama: countedClient("reviewer") as never,
+          structuredOutput,
+        }),
         classifier: summarizerOnly
           ? {
               classify: async () => ({
@@ -210,9 +223,11 @@ async function runFixture(
             }
           : createClassifier({
               ollama: countedClient("classifier") as never,
+              structuredOutput,
             }),
         summarizer: createConversationSummarizer({
           ollama: countedClient("summarizer") as never,
+          structuredOutput,
           reasoningEffort,
         }),
       },
@@ -236,6 +251,7 @@ async function runFixture(
       modelCalls,
       classifierCalls,
       summarizerCalls,
+      reviewerCalls,
       ...constraints,
       ...(extractionFixture
         ? { extractionMetrics: evaluateExtraction(extractionFixture, summary) }
@@ -252,6 +268,7 @@ async function runFixture(
       modelCalls,
       classifierCalls,
       summarizerCalls,
+      reviewerCalls,
       missingRequired: fixture.expected.summary?.mustInclude ?? [],
       forbiddenClaims: [],
       error:
@@ -267,17 +284,20 @@ async function runFixture(
   }
 }
 
-function message(id: number, text: string): ChatMessage {
+function message(id: number, text: string, author?: string): ChatMessage {
   return {
     id: asMessageId(id),
     chatId: asChatId("golden-live"),
     author: {
-      id: asAuthorId(String((id % 3) + 1)),
-      label: `Participant ${(id % 3) + 1}`,
+      id: asAuthorId(author ?? String((id % 3) + 1)),
+      label: author ?? `Participant ${(id % 3) + 1}`,
     },
     time: asTimestampMs(1_700_000_000_000 + id * 1_000),
     parentId: null,
-    text,
+    text:
+      author && text.startsWith(`${author}: `)
+        ? text.slice(author.length + 2)
+        : text,
   };
 }
 
@@ -535,15 +555,18 @@ function aggregate(reports: readonly FixtureReport[]) {
       (sum, result) => sum + result.summarizerCalls,
       0,
     ),
+    reviewerCalls: runs.reduce((sum, result) => sum + result.reviewerCalls, 0),
     telemetryInvariants: {
       callsBalance: runs.every(
-        ({ modelCalls, classifierCalls, summarizerCalls }) =>
-          modelCalls === classifierCalls + summarizerCalls,
+        ({ modelCalls, classifierCalls, summarizerCalls, reviewerCalls }) =>
+          modelCalls === classifierCalls + summarizerCalls + reviewerCalls,
       ),
       summarizerMatchesActions: runs.every(
         ({ action, summarizerCalls, error }) =>
           error !== undefined ||
-          summarizerCalls === (action === "SUMMARIZE" ? 1 : 0),
+          (action === "SUMMARIZE"
+            ? summarizerCalls >= 1 && summarizerCalls <= 2
+            : summarizerCalls === 0),
       ),
     },
     errors,

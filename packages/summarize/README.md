@@ -32,14 +32,39 @@ modules import their dependencies directly, without intermediate barrels.
   `classifier/classifier.ts` owns the model call and bounded output retry.
 - `generation/prompt.ts` composes the trusted policy and user input. Instructions,
   composition constraints, contrast examples and output schemas have named files.
-- `generation/summarizer.ts` is the only canonical generation path. It parses
-  structured claims and sends them through `generation/acceptance.ts` before a
-  `Summary` can exist. `model/response.ts` records the response envelope.
+- `generation/summarizer.ts` returns a `SummaryCandidate` containing grounded
+  prose fragments, never an accepted summary. Each fragment has `text`, eligible
+  `evidence`, and `subjects` linking visible authors to their own evidence.
+- `generation/generate-accepted.ts`, called by the workflow after every generator
+  including injected implementations, owns mandatory acceptance and one shared
+  local repair budget. `acceptance.ts` checks schema, evidence, subject provenance,
+  numeric anchors and protocol leakage. `reviewer.ts` supplies an L2 model review;
+  `review.ts` requires exactly one verdict for every fragment and rejects any
+  semantic failure. Canonical text is composed only from accepted fragments.
+- L2 checks entailment, visible attribution, entity relations, speech acts,
+  epistemic state and supersession against the whole window. It is probabilistic
+  model judgment, not a deterministic guarantee of entailment. The standard path
+  adds one reviewer call; latency and rejection rates need live evaluation.
+
+Consumers injecting a generator must return `SummaryCandidate`, not `{ text }`.
+They must also provide `semanticReviewer` or an Ollama client for the standard
+reviewer. Injection never disables schema/evidence validation or verdict coverage.
 
 Model code does not select messages or persist attempts. Prompt changes can alter
 cached-result validity: review `SUMMARY_POLICY_VERSION` in `summary.input.ts`
-when changing semantic policy. This structural refactor preserves prompt bytes
-and the existing policy identity.
+when changing semantic policy. The grounded-fragment/review contract uses policy
+v3, preventing exact-input cache reuse of results accepted by the old policy.
+
+Invalid generation JSON/schema or rejected fragments get at most one local
+repair. A malformed review retries only the review, retaining the candidate.
+The budget is shared: a second output/acceptance failure terminates processing.
+The classifier independently allows one output repair (larger token budget only
+for empty/truncated output). The host does not retry model-output errors as a
+whole run; transient HTTP/network/timeout failures retain infrastructure retry.
+`ModelInvocationEvidence.stage` distinguishes classifier, summarizer and reviewer;
+review latency is available on its invocation and included in total latency,
+without inflating summarizer latency. Review rejection details stay in repair
+data and durable model evidence, not operational error messages.
 
 ## Execution and persistence
 

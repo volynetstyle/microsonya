@@ -140,7 +140,7 @@ describe("semantic summary-decision classifier", () => {
     await expect(
       classifier.classify(fixtureWindow(), undefined, telemetry),
     ).rejects.toMatchObject({ code: "MODEL_OUTPUT_INVALID_JSON" });
-    expect(chat).toHaveBeenCalledOnce();
+    expect(chat).toHaveBeenCalledTimes(2);
     expect(events).toEqual(
       expect.arrayContaining([
         expect.objectContaining({

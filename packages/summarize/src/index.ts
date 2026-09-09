@@ -58,13 +58,23 @@ export {
   type SummaryPromptOptions,
 } from "./generation/prompt.js";
 export {
-  SUMMARY_CLAIM_KINDS,
   SUMMARY_RESPONSE_SCHEMA,
-  summaryClaimSchema,
+  summaryFragmentSchema,
   summaryOutputSchema,
   type SummaryCandidate,
-  type SummaryClaim,
+  type SummaryFragment,
 } from "./generation/schema.js";
+export {
+  createSummarySemanticReviewer,
+  type SummarySemanticReviewer,
+  SUMMARY_REVIEW_INSTRUCTIONS,
+} from "./generation/reviewer.js";
+export {
+  acceptSummaryReview,
+  type SummaryReview,
+} from "./generation/review.js";
+export { composeSummary } from "./generation/acceptance.js";
+export { generateAcceptedSummary } from "./generation/generate-accepted.js";
 export {
   SUMMARY_SEMANTIC_FAILURES,
   SummaryAcceptanceError,

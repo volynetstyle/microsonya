@@ -1,6 +1,5 @@
-import type { OllamaClient } from "@microsonya/model";
-import { SUMMARIZER_PROFILE } from "@microsonya/model";
-import type { ConversationWindow, Summary } from "@microsonya/shared";
+import { SUMMARIZER_PROFILE, type OllamaClient } from "@microsonya/model";
+import type { ConversationWindow } from "@microsonya/shared";
 import type { SummaryExecutionRecorder } from "../execution/observer.js";
 import { parseModelOutput } from "../model/output.js";
 import type {
@@ -8,12 +7,13 @@ import type {
   ReasoningEffort,
 } from "../model/prompt.js";
 import { recordModelResponse } from "../model/response.js";
-import {
-  SummaryAcceptanceError,
-  acceptSummaryCandidate,
-} from "./acceptance.js";
 import { buildSummaryMessages } from "./prompt.js";
-import { SUMMARY_RESPONSE_SCHEMA, summaryOutputSchema } from "./schema.js";
+import {
+  SUMMARY_RESPONSE_SCHEMA,
+  summaryOutputSchema,
+  type SummaryCandidate,
+} from "./schema.js";
+import { SUMMARY_REPAIR_INSTRUCTIONS, type SummaryRepair } from "./repair.js";
 
 export interface ConversationSummarizer {
   summarize(
@@ -21,9 +21,9 @@ export interface ConversationSummarizer {
     signal?: AbortSignal,
     execution?: SummaryExecutionRecorder,
     roles?: readonly ModelWindowMessageRole[],
-  ): Promise<Summary>;
+    repair?: SummaryRepair,
+  ): Promise<SummaryCandidate>;
 }
-
 export interface ConversationSummarizerDependencies {
   readonly ollama: Pick<OllamaClient, "chat">;
   readonly currentDate?: string;
@@ -31,6 +31,7 @@ export interface ConversationSummarizerDependencies {
   readonly reasoningEffort?: ReasoningEffort;
 }
 
+/** Generates candidates only. Acceptance belongs to the workflow. */
 export function createConversationSummarizer({
   ollama,
   currentDate,
@@ -38,17 +39,26 @@ export function createConversationSummarizer({
   reasoningEffort = SUMMARIZER_PROFILE.think,
 }: ConversationSummarizerDependencies): ConversationSummarizer {
   return {
-    summarize: async (window, signal, execution, roles) => {
+    async summarize(window, signal, execution, roles, repair) {
       signal?.throwIfAborted();
+      const attempt = repair === undefined ? 1 : 2;
       const messages = buildSummaryMessages(window, roles, {
         reasoningEffort,
         currentDate,
       });
+      if (repair !== undefined) {
+        messages[0] = {
+          role: "system",
+          content: messages[0]!.content + "\n\n" + SUMMARY_REPAIR_INSTRUCTIONS,
+        };
+        messages.push({ role: "user", content: JSON.stringify({ repair }) });
+      }
       const prompt = messages.map(({ content }) => content).join("\n\n");
       execution?.record({
         type: "model.request",
         stage: "summarizer",
         model: SUMMARIZER_PROFILE.model,
+        attempt,
         messageCount: window.messages.length,
         promptChars: prompt.length,
         prompt,
@@ -66,57 +76,36 @@ export function createConversationSummarizer({
         { signal },
       );
       signal?.throwIfAborted();
-
       const durationMs = performance.now() - startedAt;
       recordModelResponse(
         execution,
         {
           stage: "summarizer",
           model: SUMMARIZER_PROFILE.model,
-          attempt: 1,
+          attempt,
           durationMs,
         },
         response,
       );
-
       const candidate = parseModelOutput({
         raw: response.message.content,
         schema: summaryOutputSchema,
         stage: "summarizer",
         model: SUMMARIZER_PROFILE.model,
         durationMs,
-        attempt: 1,
+        attempt,
         execution,
       });
-      let summary: string;
-      try {
-        summary = acceptSummaryCandidate(candidate, window, roles);
-      } catch (error) {
-        if (error instanceof SummaryAcceptanceError) {
-          execution?.record({
-            type: "model.response.invalid",
-            stage: "summarizer",
-            model: SUMMARIZER_PROFILE.model,
-            attempt: 1,
-            durationMs,
-            responseChars: response.message.content.length,
-            reason: error.code,
-          });
-        }
-        throw error;
-      }
-
       execution?.record({
         type: "model.response",
         stage: "summarizer",
         model: SUMMARIZER_PROFILE.model,
-        attempt: 1,
+        attempt,
         durationMs,
         responseChars: response.message.content.length,
-        summaryChars: summary.length,
-        claimCount: candidate.claims.length,
+        fragmentCount: candidate.fragments.length,
       });
-      return { text: summary };
+      return candidate;
     },
   };
 }

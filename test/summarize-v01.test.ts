@@ -1,3 +1,4 @@
+import { acceptingReviewer, candidateFixture } from "./summaryTestFixtures.js";
 import { describe, expect, it, vi } from "vitest";
 import {
   asAuthorId,
@@ -42,13 +43,11 @@ describe("summarizer 0.1 workflow", () => {
         return {
           message: {
             content: JSON.stringify({
-              summary: "Release is Friday.",
-              claims: [
+              fragments: [
                 {
                   text: "Release is Friday.",
                   evidence: [1],
-                  kind: "report",
-                  author: "Olia",
+                  subjects: [{ author: "Olia", evidence: [1] }],
                 },
               ],
             }),
@@ -57,6 +56,7 @@ describe("summarizer 0.1 workflow", () => {
       },
     );
     const summarizer = createSummaryWorkflow({
+      semanticReviewer: acceptingReviewer,
       messages: { listByChat },
       summaries: {
         findLatestConsumptionBoundary: async () => undefined,
@@ -137,17 +137,13 @@ describe("summarizer 0.1 workflow", () => {
     expect(chat.mock.calls[1]?.[0]).toEqual(
       expect.objectContaining({
         model: "gpt-oss:120b-cloud",
-        think: "medium",
+        think: "low",
         format: {
           type: "object",
           properties: {
-            summary: expect.objectContaining({
-              type: "string",
-              minLength: 1,
-            }),
-            claims: expect.objectContaining({ type: "array", minItems: 1 }),
+            fragments: expect.objectContaining({ type: "array", minItems: 1 }),
           },
-          required: ["summary", "claims"],
+          required: ["fragments"],
           additionalProperties: false,
         },
         stream: false,
@@ -183,6 +179,7 @@ describe("summarizer 0.1 workflow", () => {
   it("persists a skipped boundary so low-value messages are not reconsidered", async () => {
     const saveRun = vi.fn(async () => undefined);
     const summarizer = createSummaryWorkflow({
+      semanticReviewer: acceptingReviewer,
       messages: { listByChat: async () => [message(5, "👍")] },
       summaries: {
         findLatestConsumptionBoundary: async () => undefined,
@@ -195,7 +192,7 @@ describe("summarizer 0.1 workflow", () => {
         }),
       },
       conversationSummarizer: {
-        summarize: vi.fn(async () => ({ text: "must not run" })),
+        summarize: vi.fn(async () => candidateFixture("must not run")),
       },
     });
 
@@ -215,6 +212,7 @@ describe("summarizer 0.1 workflow", () => {
   it("does not persist a deferred window so it remains eligible later", async () => {
     const saveRun = vi.fn(async () => undefined);
     const summarizer = createSummaryWorkflow({
+      semanticReviewer: acceptingReviewer,
       messages: { listByChat: async () => [message(5, "Checking now")] },
       summaries: {
         findLatestConsumptionBoundary: async () => undefined,
@@ -227,7 +225,7 @@ describe("summarizer 0.1 workflow", () => {
         }),
       },
       conversationSummarizer: {
-        summarize: vi.fn(async () => ({ text: "must not run" })),
+        summarize: vi.fn(async () => candidateFixture("must not run")),
       },
     });
 
@@ -241,6 +239,7 @@ describe("summarizer 0.1 workflow", () => {
   it("reports a consecutive defer streak for the same persisted checkpoint", async () => {
     const events: SummarizationTelemetryEvent[] = [];
     const summarizer = createSummaryWorkflow({
+      semanticReviewer: acceptingReviewer,
       messages: { listByChat: async () => [message(5, "Checking now")] },
       summaries: {
         findLatestConsumptionBoundary: async () => undefined,
@@ -272,6 +271,7 @@ describe("summarizer 0.1 workflow", () => {
     const saveRun = vi.fn(async () => undefined);
     const previous = previousRun(1);
     const summarizer = createSummaryWorkflow({
+      semanticReviewer: acceptingReviewer,
       messages: {
         listByChat: async () => [
           message(1, "Deploy is blocked by migration 42"),
@@ -292,9 +292,8 @@ describe("summarizer 0.1 workflow", () => {
         },
       },
       conversationSummarizer: {
-        summarize: async () => ({
-          text: "Migration complete; deploy unblocked.",
-        }),
+        summarize: async () =>
+          candidateFixture("Migration complete; deploy unblocked.", [2]),
       },
       createSummaryId: () => asSummaryId("reply-summary"),
       now: () => asTimestampMs(200_000_001),
@@ -316,6 +315,7 @@ describe("summarizer 0.1 workflow", () => {
     const previous = previousRun(1);
     const saveFailure = new Error("database unavailable");
     const summarizer = createSummaryWorkflow({
+      semanticReviewer: acceptingReviewer,
       messages: {
         listByChat: async () => [message(1, "old"), message(2, "new")],
       },
@@ -353,6 +353,7 @@ describe("summarizer 0.1 workflow", () => {
   it("returns null without calling either model when selection is empty", async () => {
     const chat = vi.fn();
     const summarizer = createSummaryWorkflow({
+      semanticReviewer: acceptingReviewer,
       messages: { listByChat: async () => [] },
       summaries: {
         findLatestConsumptionBoundary: async () => undefined,
@@ -369,6 +370,7 @@ describe("summarizer 0.1 workflow", () => {
     const saveRun = vi.fn(async () => undefined);
     const previous = previousRun(1);
     const summarizer = createSummaryWorkflow({
+      semanticReviewer: acceptingReviewer,
       messages: {
         listByChat: async () => [
           message(2, "old history"),
@@ -396,6 +398,7 @@ describe("summarizer 0.1 workflow", () => {
     const events: SummarizationTelemetryEvent[] = [];
     const saveRun = vi.fn();
     const summarizer = createSummaryWorkflow({
+      semanticReviewer: acceptingReviewer,
       messages: { listByChat: async () => [message(1, "Release is Friday")] },
       summaries: {
         findLatestConsumptionBoundary: async () => undefined,
@@ -453,13 +456,11 @@ describe("summarizer 0.1 workflow", () => {
                     requiresSynthesis: true,
                   })
                 : JSON.stringify({
-                    summary: "Release is Friday.",
-                    claims: [
+                    fragments: [
                       {
                         text: "Release is Friday.",
                         evidence: [1],
-                        kind: "report",
-                        author: "Olia",
+                        subjects: [{ author: "Olia", evidence: [1] }],
                       },
                     ],
                   }),
@@ -468,6 +469,7 @@ describe("summarizer 0.1 workflow", () => {
       },
     };
     const summarizer = createSummaryWorkflow({
+      semanticReviewer: acceptingReviewer,
       messages: { listByChat: async () => [message(1, "Release is Friday")] },
       summaries: {
         findLatestConsumptionBoundary: async () => undefined,
@@ -492,11 +494,12 @@ describe("summarizer 0.1 workflow", () => {
         "Release is Friday at 15:00 UTC.",
         "Deploy owner is Olia; rollback is plan B.",
       ]);
-      return {
-        text: "Release: Friday 15:00 UTC. Owner: Olia. Rollback: plan B.",
-      };
+      return candidateFixture(
+        "Release: Friday 15:00 UTC. Owner: Olia. Rollback: plan B.",
+      );
     });
     const summarizer = createSummaryWorkflow({
+      semanticReviewer: acceptingReviewer,
       messages: {
         listByChat: async () => [
           message(1, "Release is Friday at 15:00 UTC."),

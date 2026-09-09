@@ -1,3 +1,4 @@
+import { acceptingReviewer, candidateFixture } from "./summaryTestFixtures.js";
 import { describe, expect, it } from "vitest";
 import { createSummaryWorkflow } from "../packages/summarize/src/index.js";
 import {
@@ -30,6 +31,7 @@ describe("semantic acceptance before ledger commit", () => {
       );
       const chatId = asChatId("acceptance-chat");
       const workflow = createSummaryWorkflow({
+        semanticReviewer: acceptingReviewer,
         messages: {
           listByChat: async () => [
             {
@@ -49,7 +51,9 @@ describe("semantic acceptance before ledger commit", () => {
             evidence: { source: "model", model: "test" },
           }),
         },
-        conversationSummarizer: { summarize: async () => ({ text }) },
+        conversationSummarizer: {
+          summarize: async () => candidateFixture(text),
+        },
       });
       await expect(
         workflow.process({
@@ -81,8 +85,9 @@ describe("semantic acceptance before ledger commit", () => {
         createDataEncryption(Buffer.alloc(32, 4)),
       );
       const chatId = asChatId("long-acceptance-chat");
-      const text = "Useful factual summary. ".repeat(300);
+      const text = "Useful factual summary. ".repeat(300).trim();
       const workflow = createSummaryWorkflow({
+        semanticReviewer: acceptingReviewer,
         messages: {
           listByChat: async () => [
             {
@@ -102,7 +107,9 @@ describe("semantic acceptance before ledger commit", () => {
             evidence: { source: "model", model: "test" },
           }),
         },
-        conversationSummarizer: { summarize: async () => ({ text }) },
+        conversationSummarizer: {
+          summarize: async () => candidateFixture(text),
+        },
       });
       await expect(
         workflow.process({

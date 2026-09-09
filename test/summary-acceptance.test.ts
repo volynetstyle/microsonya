@@ -39,14 +39,11 @@ describe("summary candidate acceptance", () => {
     expect(
       acceptSummaryCandidate(
         {
-          summary:
-            "Карінка повідомила, що квартира коштує 1700 злотих, а комуналка — десь 500.",
-          claims: [
+          fragments: [
             {
               text: "Карінка повідомила, що квартира коштує 1700 злотих, а комуналка — десь 500.",
               evidence: [41],
-              kind: "report",
-              author: "Карінка",
+              subjects: [{ author: "Карінка", evidence: [41] }],
             },
           ],
         },
@@ -62,13 +59,11 @@ describe("summary candidate acceptance", () => {
     expect(() =>
       acceptSummaryCandidate(
         {
-          summary: "На балконі планують вирощувати помідори.",
-          claims: [
+          fragments: [
             {
               text: "На балконі планують вирощувати помідори.",
               evidence: [42],
-              kind: "plan",
-              author: "Друг",
+              subjects: [{ author: "Друг", evidence: [42] }],
             },
           ],
         },
@@ -86,13 +81,11 @@ describe("summary candidate acceptance", () => {
     expect(() =>
       acceptSummaryCandidate(
         {
-          summary: "Ілон назвав ціну квартири.",
-          claims: [
+          fragments: [
             {
               text: "Ілон назвав ціну квартири.",
               evidence: [41],
-              kind: "report",
-              author: "Ілон",
+              subjects: [{ author: "Ілон", evidence: [41] }],
             },
           ],
         },
@@ -110,13 +103,11 @@ describe("summary candidate acceptance", () => {
     expect(() =>
       acceptSummaryCandidate(
         {
-          summary: "Квартира коштує 17 злотих.",
-          claims: [
+          fragments: [
             {
               text: "Квартира коштує 17 злотих.",
               evidence: [41],
-              kind: "report",
-              author: "Карінка",
+              subjects: [{ author: "Карінка", evidence: [41] }],
             },
           ],
         },
@@ -130,26 +121,27 @@ describe("summary candidate acceptance", () => {
     );
   });
 
-  it("rejects canonical prose not covered by ordered claims", () => {
+  it("rejects an independent summary field even when fragments are grounded", () => {
     expect(() =>
       acceptSummaryCandidate(
-        {
-          summary: "Квартира коштує 1700 злотих. Це остаточна ціна.",
-          claims: [
-            {
-              text: "Квартира коштує 1700 злотих.",
-              evidence: [41],
-              kind: "report",
-              author: "Карінка",
-            },
-          ],
-        },
+        Object.assign(
+          {
+            fragments: [
+              {
+                text: "Квартира коштує 1700 злотих.",
+                evidence: [41],
+                subjects: [{ author: "Карінка", evidence: [41] }],
+              },
+            ],
+          },
+          { summary: "Unverified extra prose" },
+        ),
         window,
         roles,
       ),
     ).toThrowError(
-      expect.objectContaining<Partial<SummaryAcceptanceError>>({
-        code: "UNSUPPORTED_SUMMARY_TEXT",
+      expect.objectContaining({
+        code: "MODEL_OUTPUT_SCHEMA_MISMATCH",
       }),
     );
   });

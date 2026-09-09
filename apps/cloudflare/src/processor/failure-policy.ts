@@ -32,14 +32,26 @@ export function classifyFailure(error: unknown): {
   if (error instanceof SummaryAcceptanceError)
     return {
       code: `MODEL_SEMANTIC_${error.code}`,
-      retryable: true,
+      retryable: false,
       retryAfterSeconds: 5,
     };
   if (error instanceof ModelOutputError)
     return {
       code: error.code,
-      retryable: true,
+      retryable: false,
       retryAfterSeconds: 5,
+    };
+  if (error instanceof Error && error.name === "TimeoutError")
+    return {
+      code: "EXECUTION_TIMEOUT",
+      retryable: true,
+      retryAfterSeconds: DEFAULT_RETRY_SECONDS,
+    };
+  if (error instanceof TypeError && error.message === "fetch failed")
+    return {
+      code: "NETWORK_ERROR",
+      retryable: true,
+      retryAfterSeconds: DEFAULT_RETRY_SECONDS,
     };
   if (error instanceof TypeError) {
     const code = KNOWN_TYPE_ERROR_CODES[error.message];

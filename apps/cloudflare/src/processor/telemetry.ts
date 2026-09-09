@@ -164,6 +164,15 @@ function projectEvent(event: SummarizationTelemetryEvent): Projection {
         errorCode: event.reason,
         modelCalls: event.nextAttempt,
       };
+    case "summary.repair.requested":
+    case "summary.acceptance.rejected":
+      return {
+        ...base,
+        status:
+          event.type === "summary.repair.requested" ? "repair" : "rejected",
+        stage: event.stage,
+        errorCode: event.reason,
+      };
     case "model.response.raw":
     case "model.response.invalid":
     case "model.response":

@@ -1,3 +1,4 @@
+import { acceptingReviewer } from "./summaryTestFixtures.js";
 import { describe, expect, it } from "vitest";
 import {
   asAuthorId,
@@ -31,6 +32,7 @@ describe("summary workflow concurrency", () => {
     const attempts: SummaryAttempt[] = [];
     let id = 0;
     const workflow = createSummaryWorkflow({
+      semanticReviewer: acceptingReviewer,
       now: () => now,
       createSummaryId: () => asSummaryId(`attempt-${++id}`),
       messages: {

@@ -2,6 +2,8 @@
 
 ## How to read this document
 
+Проверка grounded fragments/mandatory acceptance/retry: 2026-09-09, baseline `5f3b1d88b7e45b42941549c35c0c4d66a45c1a83` плюс текущий dirty working tree этой задачи. FACT: generator больше не возвращает отдельный summary; workflow применяет L1 и L2 после любого injected generator, затем compose. FACT: один общий local repair budget для generation/acceptance, отдельный bounded classifier repair; model-output errors больше не запускают outer processing retry. FACT: policy v3 исключает exact-input reuse по старому контракту; уже сохранённый outcome того же execution по-прежнему восстанавливается. Durable invocation evidence включает stage `reviewer` (существующая text column, migration не нужна); reviewer latency хранится на invocation и входит в total, но не в summarizerMs. UNKNOWN: live entailment quality, false-rejection rate и итоговая latency пока не подтверждены — cloud regression attempt завершился fetch failure до model response. Evidence: [generate-accepted.ts](../../packages/summarize/src/generation/generate-accepted.ts), [reviewer.ts](../../packages/summarize/src/generation/reviewer.ts), [review.ts](../../packages/summarize/src/generation/review.ts), [failure-policy.ts](../../apps/cloudflare/src/processor/failure-policy.ts), [grounded-summary.test.ts](../../test/grounded-summary.test.ts).
+
 Проверка структуры и ownership `packages/summarize`: 2026-09-09, baseline `f0d26cf707b19d8a8e8c6c0df9c062b049fe64e0` плюс текущий dirty working tree этого рефакторинга. Проверены новый module graph, structured claim/evidence acceptance, post-persistence progressive presentation, selection, model prompts и per-attempt evidence; эта запись не обновляет baseline остальных подсистем. Удаление runtime `Object.freeze` из `b83a23e` сохранено: readonly TypeScript-контракты не означают runtime freeze.
 
 Последняя проверка summary window/cache/checkpoint boundaries: 2026-09-07, baseline `4cbea1921b036a3c6e18a452337b7bb601d20571` плюс текущие незакоммиченные изменения. Telegram ingress parsing boundary проверена 2026-09-08 на `b83a23e890930b10620b624aa0c1843f1cca6d4a` плюс текущие незакоммиченные изменения. В текущем dirty tree дополнительно проверены exact snapshot reuse, historical read-only semantics, Processor → repository wiring и единая Telegram message/command projection; остальные workflow, ledger и lifecycle сохраняют предыдущие проверки 2026-09-05/07.
@@ -155,10 +157,12 @@ sequenceDiagram
     S->>M: Classifier predicates request
     M-->>S: Predicates
     S->>S: decideFromPredicates: SUMMARIZE
-    S->>M: Structured summary plus atomic claims/evidence
+    S->>M: Grounded prose fragments with evidence and subjects
     M-->>S: JSON candidate
     S->>S: Validate schema, eligible evidence, author and numeric anchors
-    S->>S: Verify ordered claims cover all canonical prose
+    S->>M: Review every fragment against evidence and full window
+    M-->>S: Complete per-fragment semantic verdicts
+    S->>S: Reject failures or compose only accepted fragment texts
     S->>D: saveAttempt transaction with lease fence and child evidence
     Note over S,D: Checkpoint evidence is durable here
     S-->>P: summarized disposition with eligible-only coverage
@@ -453,7 +457,7 @@ flowchart TD
 | Telegram preview/final send           | External side effect, вне DB transaction                                         | Нет atomic commit с PostgreSQL; delivery guarantee слабее exactly-once                                                                       |
 | Logs, traces, Analytics Engine        | `try/catch` или после Queue ACK в критических местах                             | Best effort observability не должна менять Queue disposition                                                                                 |
 
-DB connection failure до получения результата RPC может дойти до Queue handler как RPC exception и вызвать Queue retry. Внутри processing `classifyFailure()` распознаёт retryable `OllamaError` только для 429/5xx и Telegram delivery error для 429/5xx; известные validation/config TypeError и остальные unknown errors считаются permanent. Поэтому «DB failure всегда retryable» было бы неверным: исключение после успешного claim, попавшее в `handleProcessingError`, по умолчанию классифицируется как nonretryable и пытается перевести run в `failed_permanent`; если сама запись failure не удалась, consumer получает retry disposition.
+DB connection failure до получения результата RPC может дойти до Queue handler как RPC exception и вызвать Queue retry. Внутри processing `classifyFailure()` распознаёт retryable `OllamaError` только для 429/5xx и Telegram delivery error для 429/5xx; `ModelOutputError`/`SummaryAcceptanceError` после local repair, известные validation/config TypeError и остальные unknown errors считаются permanent. `TimeoutError` и `TypeError("fetch failed")` распознаются как transient execution failures. Поэтому «DB failure всегда retryable» было бы неверным: исключение после успешного claim, попавшее в `handleProcessingError`, по умолчанию классифицируется как nonretryable и пытается перевести run в `failed_permanent`; если сама запись failure не удалась, consumer получает retry disposition.
 
 Queue configuration принимает batch size 1, делает до трёх Queue retries и имеет DLQ. Это transport budget, независимый от `attempt`/`deliveryAttempt` в БД. Логический retry публикует новое Queue сообщение и ACK-ит старое, поэтому может пережить исчерпание retry count старого сообщения. Cron может восстановить durable nonterminal run даже после потери Queue message.
 
@@ -733,9 +737,9 @@ Violation would cause: lossy summary одного окна подменял бы
 
 ### INV-14 — Progressive presentation is not semantic acceptance
 
-Statement: единственный canonical generation path возвращает structured candidate с atomic claims и eligible evidence. Summary возникает только после schema validation и deterministic acceptance; progressive transport получает лишь уже принятый и durably сохранённый delivery payload.
+Statement: любой generator, включая injected implementation, возвращает candidate с grounded prose fragments, eligible evidence и subjects. Workflow обязательно выполняет L1 schema/provenance/numeric validation и L2 review с verdict для каждого fragment. Canonical summary — только composition принятых fragment.text; progressive transport получает лишь durably сохранённый delivery payload. L2 — вероятностное model judgment, не доказательство entailment.
 
-Enforced by: отсутствие `stream` в `ConversationSummarizer`, unconditional `summarize()` в `evaluateSummaryWindow()`, `acceptSummaryCandidate()` и создание `ProgressiveSummarySession` в Processor после `storeDeliveryPayload()`.
+Enforced by: `generateAcceptedSummary()` в `evaluateSummaryWindow()` после любого generator; `acceptSummaryCandidate()` и `acceptSummaryReview()`; `composeSummary()` без независимого model summary; создание `ProgressiveSummarySession` в Processor после `storeDeliveryPayload()`.
 
 Evidence: [summarizer.ts](../../packages/summarize/src/generation/summarizer.ts); [acceptance.ts](../../packages/summarize/src/generation/acceptance.ts); [summary.evaluation.ts](../../packages/summarize/src/summary.evaluation.ts); [process-summary-execution.ts](../../apps/cloudflare/src/processor/process-summary-execution.ts); [summary-acceptance.test.ts](../../test/summary-acceptance.test.ts).
 
@@ -833,9 +837,9 @@ Does NOT own: message eligibility, checkpoint consumption, attempt persistence, 
 
 Reads: один и тот же immutable window плюс role annotations. Outputs: `SummaryDecision` и optional summary text. Durable writes отсутствуют; model-boundary events направляются в execution recorder, обязательный journal проецирует из них invocation evidence, а optional telemetry observer не участвует в persistence.
 
-Important invariants: fast classifier по умолчанию abstains; model predicates validated strictly; action выводится code; context-only rows помечены в prompt. Оба gpt-oss model boundary — classifier и summarizer — сохраняют Harmony ownership, но учитывают provider boundary: Ollama сам рендерит Harmony и его `/api/chat` принимает только `system/user/assistant/tool`, поэтому model metadata вместе с trusted developer policy и response format передаются одним `system`, а untrusted PIPECHAT transcript — отдельным `user`. Ollama `thinking` остаётся внутренним и наружу выходит только final content. Оба structured path объявляют response schema в trusted prompt; локальный Ollama дополнительно получает schema sampling grammar, а Processor для `ollama.com/api` использует поддерживаемый Cloud JSON mode и сохраняет Zod validation. Summarizer принимает только structured candidate с atomic claims/evidence; acceptance проверяет eligible IDs, author provenance, numeric anchors и полное ordered-claim покрытие canonical prose. Processor передаёт текущую UTC-дату в оба Harmony envelope. Summary сохраняет конкретные полезные propositions, релевантные visible author labels и named anchors вместо topic-only meta-summary.
+Important invariants: fast classifier по умолчанию abstains; model predicates validated strictly; action выводится code; context-only rows помечены в prompt. Оба gpt-oss model boundary — classifier и summarizer — сохраняют Harmony ownership, но учитывают provider boundary: Ollama сам рендерит Harmony и его `/api/chat` принимает только `system/user/assistant/tool`, поэтому model metadata вместе с trusted developer policy и response format передаются одним `system`, а untrusted PIPECHAT transcript — отдельным `user`. Ollama `thinking` остаётся внутренним и наружу выходит только final content. Оба structured path объявляют response schema в trusted prompt; локальный Ollama дополнительно получает schema sampling grammar, а Processor для `ollama.com/api` использует поддерживаемый Cloud JSON mode и сохраняет Zod validation. Summarizer возвращает grounded prose fragments с evidence/subjects. Обязательная workflow acceptance проверяет eligible IDs, subject evidence ownership, numeric anchors и L2 verdict для каждого fragment; canonical prose составляется кодом только из принятых fragments. Processor передаёт текущую UTC-дату в оба Harmony envelope. Summary сохраняет конкретные полезные propositions, релевантные visible author labels и named anchors вместо topic-only meta-summary.
 
-Failure semantics: classifier повторяет один truncated/empty-output attempt с большим output budget; provider/schema failure пробрасывается facade/Processor.
+Failure semantics: classifier допускает одну local output repair, увеличивая budget только для empty/truncated output. Generation + L1 + L2 имеют один общий repair budget: ошибка review output повторяет только review того же candidate; semantic rejection исправляет candidate. Второй model-output failure terminal; HTTP 429/5xx, timeout и распознанный network failure остаются outer retry.
 
 Key entry points: [classifier.ts](../../packages/summarize/src/classifier/classifier.ts) — `createClassifier()`; [predicates.ts](../../packages/summarize/src/classifier/predicates.ts) — `decideFromPredicates()`; [summarizer.ts](../../packages/summarize/src/generation/summarizer.ts).
 
@@ -976,7 +980,7 @@ History после `checkpointBefore=m1`: `m2="👍"`, `m3="ага"`; command `c
 - **Attempt transaction ↔ lifecycle lease.** Ledger repo обновляет lifecycle `updated_at` как fence внутри transaction, хотя не владеет state machine в целом. Смена lease/token rules в одном repo может silently отвергать или принимать evidence другого.
 - **Attempt commit ↔ lifecycle summary persistence.** Между ними checkpoint/result уже durable, а operational run ещё processing. Recovery correctness зависит от outcome reuse до recomputation.
 - **Attempt commit ↔ presentation validation.** `saveAttempt` происходит до Processor checks на пустоту, Telegram length, NUL и protocol tags. Отклонённый для delivery summarized text уже может участвовать в checkpoint и WMA projection.
-- **DB commit ↔ Telegram preview.** Streaming preview начинается до attempt commit. Failure может оставить пользователю partial/failed message, хотя canonical outcome отсутствует.
+- **DB commit ↔ Telegram presentation.** Progressive presentation начинается после durable accepted payload; delivery failure может оставить partial/failed message, но candidate до acceptance не показывается.
 - **Telegram final side effect ↔ completion receipt.** Send/edit невозможно атомарно объединить с `markCompleted`; timeout/crash/CAS loss оставляет неоднозначность и возможный duplicate.
 - **Processing lease heartbeat ↔ long model call.** Timer renews lease через отдельные RPCs; lease loss обнаруживается после текущей operation/renewal chain. Model/preview effects могут уже произойти, но final attempt fence обязан отвергнуть stale owner.
 - **Delivery lease ↔ network latency.** У delivery нет heartbeat. Telegram call или последующая задержка может пережить двухминутный lease, после чего receipt CAS проиграет и recovery повторит send.
@@ -1062,7 +1066,7 @@ Evidence: [validation.ts](../../packages/summarize/src/generation/validation.ts)
 
 Invariant: семантически отвергнутый output не потребляет историю. Ограничение Telegram не определяет принятие semantic result. Legacy записи не исправляются ретроактивно; прямые legacy writers не приобретают новую acceptance policy автоматически.
 
-Confidence: high для workflow/ledger boundary, проверено на test DB. Streaming preview остаётся внешним эффектом до acceptance.
+Confidence: high для workflow/ledger boundary, проверено на test DB. Progressive presentation начинается только после acceptance и durable delivery payload.
 
 ### DRIFT-07 — Production defer streak is scoped to one processing invocation
 

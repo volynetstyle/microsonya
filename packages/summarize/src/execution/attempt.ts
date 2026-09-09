@@ -8,6 +8,7 @@ import type {
 import type { SummaryDecisionClassifier } from "../classifier/classifier.js";
 import { SummaryAcceptanceError } from "../generation/acceptance.js";
 import type { ConversationSummarizer } from "../generation/summarizer.js";
+import type { SummarySemanticReviewer } from "../generation/reviewer.js";
 import { validateSemanticOutput } from "../generation/validation.js";
 import { ModelOutputError } from "../model/output.js";
 import type { SummaryWorkflowDependencies } from "../summary.dependencies.js";
@@ -25,7 +26,9 @@ import {
 import { SummaryAttemptRecorder } from "./SummaryAttemptRecorder.js";
 
 export async function executeSummaryAttempt(
-  deps: SummaryWorkflowDependencies,
+  deps: SummaryWorkflowDependencies & {
+    readonly semanticReviewer: SummarySemanticReviewer;
+  },
   classifier: SummaryDecisionClassifier,
   conversationSummarizer: ConversationSummarizer,
   deferStreakByChat: Map<
@@ -151,6 +154,7 @@ export async function executeSummaryAttempt(
       {
         classifier,
         summarizer: conversationSummarizer,
+        semanticReviewer: deps.semanticReviewer,
         fastClassifier: deps.fastClassifier,
         createSummaryId: deps.createSummaryId,
         now: deps.now,

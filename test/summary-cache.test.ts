@@ -1,3 +1,4 @@
+import { acceptingReviewer } from "./summaryTestFixtures.js";
 import { describe, expect, it, vi } from "vitest";
 import {
   asAuthorId,
@@ -19,6 +20,7 @@ describe("semantic summary cache", () => {
     });
     const findReusableOutcome = vi.fn(async () => cachedOutcome());
     const workflow = createSummaryWorkflow({
+      semanticReviewer: acceptingReviewer,
       messages: { listByChat: async () => [message()] },
       summaries: {
         findLatestConsumptionBoundary: async () => undefined,
@@ -56,6 +58,7 @@ describe("semantic summary cache", () => {
   it("does not advance a historical query on the same cache hit", async () => {
     const attempts: SummaryAttempt[] = [];
     const workflow = createSummaryWorkflow({
+      semanticReviewer: acceptingReviewer,
       messages: { listByChat: async () => [message()] },
       summaries: {
         findLatestConsumptionBoundary: async () => ({

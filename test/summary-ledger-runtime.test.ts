@@ -1,3 +1,4 @@
+import { acceptingReviewer, candidateFixture } from "./summaryTestFixtures.js";
 import { createHash } from "node:crypto";
 import { describe, expect, it, vi } from "vitest";
 import {
@@ -138,6 +139,7 @@ describe("summary runtime ledger evidence", () => {
     const attempts: SummaryAttempt[] = [];
     const saveRun = vi.fn();
     const summarizer = createSummaryWorkflow({
+      semanticReviewer: acceptingReviewer,
       messages: { listByChat: async () => [message()] },
       summaries: {
         findLatestConsumptionBoundary: async () => undefined,
@@ -183,6 +185,7 @@ describe("summary runtime ledger evidence", () => {
   it("persists provider failure evidence while preserving the checkpoint", async () => {
     const attempts: SummaryAttempt[] = [];
     const summarizer = createSummaryWorkflow({
+      semanticReviewer: acceptingReviewer,
       messages: { listByChat: async () => [message()] },
       summaries: {
         findLatestConsumptionBoundary: async () => undefined,
@@ -195,7 +198,7 @@ describe("summary runtime ledger evidence", () => {
         },
       },
       conversationSummarizer: {
-        summarize: async () => ({ text: "unused" }),
+        summarize: async () => candidateFixture("unused"),
       },
     });
 
@@ -287,6 +290,7 @@ describe("summary runtime ledger evidence", () => {
   it("persists summary text for a non-checkpoint count run", async () => {
     const attempts: SummaryAttempt[] = [];
     const summarizer = createSummaryWorkflow({
+      semanticReviewer: acceptingReviewer,
       messages: { listByChat: async () => [message()] },
       summaries: {
         findLatestConsumptionBoundary: async () => undefined,
@@ -300,7 +304,8 @@ describe("summary runtime ledger evidence", () => {
         }),
       },
       conversationSummarizer: {
-        summarize: async () => ({ text: "Deployment is scheduled at 18:00." }),
+        summarize: async () =>
+          candidateFixture("Deployment is scheduled at 18:00."),
       },
     });
 

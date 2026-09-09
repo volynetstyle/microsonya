@@ -124,15 +124,16 @@ describe("canonical model transcript", () => {
     );
   });
 
-  it("has one structured generation contract with claim evidence", () => {
+  it("has one grounded fragment contract without a duplicate summary field", () => {
     const window = fixtureWindow();
     const structured = buildSummaryMessages(window);
 
     expect(structured[0]!.content).toContain(
-      "Return only JSON matching the required output schema.",
+      "Return only JSON with grounded prose fragments",
     );
-    expect(structured[0]!.content).toContain("atomic claims");
-    expect(structured[0]!.content).toContain('"claims"');
+    expect(structured[0]!.content).toContain("not atomic claims");
+    expect(structured[0]!.content).toContain('"fragments"');
+    expect(structured[0]!.content).not.toContain('"claims"');
     expect(structured[0]!.content).not.toContain(
       "Return only the summary as plain text",
     );

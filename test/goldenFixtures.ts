@@ -14,6 +14,8 @@ export interface E2EFixture {
   readonly scope?: "semantic" | "system";
   readonly status?: "accepted" | "under_review";
   readonly messages: readonly string[];
+  /** Explicit visible labels for reconstructed multi-speaker transcripts. */
+  readonly messageAuthors?: readonly string[];
   readonly expected: {
     readonly action: ExpectedAction;
     /** Product-safe alternatives. The preferred action remains `action`. */
@@ -285,6 +287,7 @@ export const goldenFixtures = [
   }),
   fixture({
     id: "conversational-ellipsis-and-author-boundary",
+    messageAuthors: ["Карінка", "Meleys", "Oleksandr", "Meleys", "Oleksandr"],
     source: "live",
     messages: [
       "Карінка: хліб 80 грн, і ще випадково купила лосьйон за 400 грн.",
@@ -359,6 +362,16 @@ export const goldenFixtures = [
   }),
   fixture({
     id: "live-prod-balcony-wejherowo",
+    messageAuthors: [
+      "Карінка",
+      "KoteNya",
+      "Карінка",
+      "Meleys",
+      "KoteNya",
+      "Meleys",
+      "Карінка",
+      "Карінка",
+    ],
     source: "reconstructed",
     messages: [
       "Карінка: Квартира 1700 злотих, комуналка десь 500.",

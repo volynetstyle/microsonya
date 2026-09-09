@@ -4,6 +4,7 @@ import { createClassifier } from "./classifier/classifier.js";
 import { executeSummaryAttempt } from "./execution/attempt.js";
 import { serializeByChat } from "./execution/serialization.js";
 import { createConversationSummarizer } from "./generation/summarizer.js";
+import { createSummarySemanticReviewer } from "./generation/reviewer.js";
 import type {
   SummaryWorkflow,
   SummaryWorkflowDependencies,
@@ -29,6 +30,13 @@ export function createSummaryWorkflow(
     });
 
   const pendingByChat = new Map<ChatId, Promise<void>>();
+  const semanticReviewer =
+    deps.semanticReviewer ??
+    createSummarySemanticReviewer({
+      ollama: requireOllama(deps),
+      currentDate: deps.modelGeneration?.currentDate,
+      structuredOutput: deps.modelGeneration?.structuredOutput,
+    });
   const deferStreakByChat = new Map<
     ChatId,
     { readonly checkpoint?: MessageId; readonly count: number }
@@ -36,7 +44,7 @@ export function createSummaryWorkflow(
   const process = (command: SummaryCommand, signal?: AbortSignal) =>
     serializeByChat(pendingByChat, command.chatId, () =>
       executeSummaryAttempt(
-        deps,
+        { ...deps, semanticReviewer },
         classifier,
         conversationSummarizer,
         deferStreakByChat,
