@@ -31,6 +31,7 @@ const errorTypes: readonly SemanticErrorType[] = [
   "PROVENANCE",
   "SUPERSESSION",
   "EPISTEMIC_STATE",
+  "SPEECH_ACT",
   "CONDITION_PRESERVATION",
 ];
 

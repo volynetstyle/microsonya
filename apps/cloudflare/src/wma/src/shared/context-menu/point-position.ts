@@ -67,19 +67,13 @@ export function resolvePointPlacement(
   const top = safe.top + config.marginTop;
   const bottom = viewport.height - safe.bottom - config.marginBottom;
 
-  const sideX: -1 | 1 =
-    point.x + config.gapX + popup.width <= right ? 1 : -1;
-  const sideY: -1 | 1 =
-    point.y + config.gapY + popup.height <= bottom ? 1 : -1;
+  const sideX: -1 | 1 = point.x + config.gapX + popup.width <= right ? 1 : -1;
+  const sideY: -1 | 1 = point.y + config.gapY + popup.height <= bottom ? 1 : -1;
 
   const initialX =
-    sideX === 1
-      ? point.x + config.gapX
-      : point.x - popup.width - config.gapX;
+    sideX === 1 ? point.x + config.gapX : point.x - popup.width - config.gapX;
   const initialY =
-    sideY === 1
-      ? point.y + config.gapY
-      : point.y - popup.height - config.gapY;
+    sideY === 1 ? point.y + config.gapY : point.y - popup.height - config.gapY;
 
   const maxX = Math.max(left, right - popup.width);
   const maxY = Math.max(top, bottom - popup.height);
@@ -87,9 +81,7 @@ export function resolvePointPlacement(
   const y = clamp(initialY, top, maxY);
 
   const availableHeight =
-    sideY === 1
-      ? bottom - point.y - config.gapY
-      : point.y - top - config.gapY;
+    sideY === 1 ? bottom - point.y - config.gapY : point.y - top - config.gapY;
 
   return {
     x,

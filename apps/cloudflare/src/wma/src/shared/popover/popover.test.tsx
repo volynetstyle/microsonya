@@ -77,9 +77,7 @@ describe("Popover", () => {
       movePoint = setPoint;
 
       return (
-        <Popover.Root
-          anchor={() => ({ type: "point", ...point() })}
-        >
+        <Popover.Root anchor={() => ({ type: "point", ...point() })}>
           <Popover.Content>
             <Popover.Surface>Moving point contents</Popover.Surface>
           </Popover.Content>
@@ -99,7 +97,9 @@ describe("Popover", () => {
 
     movePoint({ x: 120, y: 90 });
     await Promise.resolve();
-    await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+    await new Promise<void>((resolve) =>
+      requestAnimationFrame(() => resolve()),
+    );
 
     expect(positioner.style.inset).toBe("90px auto auto 123px");
   });

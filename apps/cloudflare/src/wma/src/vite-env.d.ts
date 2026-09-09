@@ -1,2 +1,6 @@
 /// <reference types="vite/client" />
-/// <reference types="../file-routes.d.ts" />
+
+declare module "*?inline-minified" {
+  const source: string;
+  export default source;
+}

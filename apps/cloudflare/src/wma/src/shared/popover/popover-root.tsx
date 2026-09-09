@@ -62,7 +62,9 @@ export function PopoverRoot(props: PopoverRootProps) {
       const configured =
         typeof props.anchor === "function" ? props.anchor() : props.anchor;
       if (configured) return configured;
-      return trigger ? { type: "element" as const, element: trigger } : undefined;
+      return trigger
+        ? { type: "element" as const, element: trigger }
+        : undefined;
     },
   };
 

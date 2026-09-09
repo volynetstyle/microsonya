@@ -1,16 +1,18 @@
 import { eq } from "drizzle-orm";
 import { describe, expect, it } from "vitest";
 import {
-  SummaryFeedbackRepo,
-  SummariesRepo,
-  MessagesRepo,
-  createLedgerEncryption,
+  SummaryFeedbackRepository,
+  SummaryAttemptRepository,
+  SummaryExecutionRepository,
+  MessageHistoryRepository,
+  createDataEncryption,
   datasetCandidates,
   messages as messageRows,
   modelInvocations,
   summaryFeedback,
   summaryRunMessages,
   summaryRuns,
+  wmaChatCatalog,
 } from "../packages/db/src/index.js";
 import {
   asAuthorId,
@@ -18,17 +20,136 @@ import {
   asMessageId,
   asSummaryId,
   asTimestampMs,
-  type SummaryRunAttempt,
+  type SummaryAttempt,
 } from "../packages/shared/src/index.js";
 import { openTestDb } from "./dbTestUtils.js";
 
 describe("production summary ledger", () => {
+  it("returns the existing outcome on duplicate commit without updating projections", async () => {
+    const client = await openTestDb();
+    const repo = new SummaryAttemptRepository(
+      client.db,
+      createDataEncryption(Buffer.alloc(32, 5)),
+    );
+    const original = fixtureAttempt();
+    try {
+      expect(await repo.recordAttempt(original)).toEqual({
+        status: "committed",
+      });
+      expect(
+        await repo.recordAttempt({
+          ...original,
+          summaryText: "A different generated result",
+        }),
+      ).toEqual({
+        status: "alreadyCommitted",
+        outcome: {
+          kind: "summarized",
+          action: "SUMMARIZE",
+          text: original.summaryText,
+        },
+      });
+      const catalog = await client.db.select().from(wmaChatCatalog);
+      expect(catalog).toHaveLength(1);
+      expect(catalog[0]?.summaryCount).toBe(1);
+      expect(await client.db.select().from(summaryRuns)).toHaveLength(1);
+    } finally {
+      await client.close();
+    }
+  });
+  it("reconstructs a count skip as a complete accepted outcome", async () => {
+    const client = await openTestDb();
+    const summaries = new SummaryAttemptRepository(
+      client.db,
+      createDataEncryption(Buffer.alloc(32, 5)),
+    );
+    const executionId = asSummaryId("execution-count-skip");
+    try {
+      await client.db.insert(summaryRuns).values({
+        id: "attempt-count-skip",
+        orchestrationRunId: executionId,
+        orchestrationAttempt: 1,
+        chatId: "encrypted-chat-key",
+        commandMessageId: 101,
+        createdAt: 1_700_000_000_000,
+        startedAt: 1_700_000_000_000,
+        completedAt: 1_700_000_000_010,
+        mode: "count",
+        status: "skipped",
+        action: "SKIP_NO_VALUE",
+        policyHash: "policy",
+        inputHash: "input",
+      });
+
+      await expect(
+        summaries.findAcceptedOutcomeByExecutionId(executionId),
+      ).resolves.toEqual({ kind: "skipped", reason: "SKIP_NO_VALUE" });
+    } finally {
+      await client.close();
+    }
+  });
+
+  it("does not accept orchestration evidence from an expired lease", async () => {
+    const client = await openTestDb();
+    const encryption = createDataEncryption(Buffer.alloc(32, 6));
+    const summaries = new SummaryAttemptRepository(client.db, encryption);
+    const lifecycle = new SummaryExecutionRepository(client.db, encryption);
+    const attempt = fixtureAttempt();
+    try {
+      const run = await lifecycle.create(
+        {
+          idempotencyKey: "ledger-stale-evidence",
+          command: {
+            chatId: attempt.chatId,
+            commandMessageId: attempt.commandMessageId,
+            date: attempt.completedAt,
+            mode: attempt.mode,
+          },
+        },
+        asTimestampMs(1_000),
+      );
+      await lifecycle.transition(
+        run.id,
+        "created",
+        "queued",
+        asTimestampMs(1_001),
+      );
+      const claim = await lifecycle.claimProcessing(
+        run.id,
+        asTimestampMs(1_002),
+        10,
+        "processor",
+      );
+      const recorded = await summaries.recordAttempt(attempt, {
+        runId: run.id,
+        attempt: claim!.attempt,
+        leaseToken: claim!.leaseToken,
+        acceptedAt: asTimestampMs(1_013),
+      });
+      expect(recorded).toEqual({ status: "ownershipLost" });
+      for (const table of [
+        summaryRuns,
+        summaryRunMessages,
+        modelInvocations,
+        datasetCandidates,
+        wmaChatCatalog,
+      ]) {
+        expect(await client.db.select().from(table)).toEqual([]);
+      }
+      expect(
+        await summaries.findAcceptedOutcomeByExecutionId(run.id),
+      ).toBeUndefined();
+    } finally {
+      await client.close();
+    }
+  });
+
   it("atomically stores encrypted immutable evidence and a review candidate", async () => {
     const client = await openTestDb();
-    const encryption = createLedgerEncryption(Buffer.alloc(32, 7));
-    const summaries = new SummariesRepo(client.db, encryption);
-    const messages = new MessagesRepo(client.db, encryption);
-    const feedback = new SummaryFeedbackRepo(client.db, encryption);
+    const encryption = createDataEncryption(Buffer.alloc(32, 7));
+    const summaries = new SummaryAttemptRepository(client.db, encryption);
+    const messages = new MessageHistoryRepository(client.db, encryption);
+    const feedback = new SummaryFeedbackRepository(client.db, encryption);
     const attempt = fixtureAttempt();
 
     try {
@@ -40,7 +161,7 @@ describe("production summary ledger", () => {
         parentId: asMessageId(10),
         text: "Deploy at 18:00",
       });
-      await summaries.saveAttempt(attempt);
+      await summaries.recordAttempt(attempt);
       await messages.save({
         id: asMessageId(11),
         chatId: attempt.chatId,
@@ -66,6 +187,10 @@ describe("production summary ledger", () => {
         .select()
         .from(datasetCandidates)
         .where(eq(datasetCandidates.runId, attempt.id));
+      const [catalog] = await client.db
+        .select()
+        .from(wmaChatCatalog)
+        .where(eq(wmaChatCatalog.chatId, run!.chatId));
 
       const [canonicalMessage] = await client.db
         .select()
@@ -80,6 +205,11 @@ describe("production summary ledger", () => {
         eligibleCount: 2,
         contextCount: 1,
         inputHash: encryption.lookup("input-sha256", "summary-input-hash"),
+      });
+      expect(catalog).toMatchObject({
+        summaryCount: 1,
+        messageCount: attempt.eligibleCount,
+        lastSummaryAt: attempt.completedAt,
       });
       expect(run!.chatId).toBe(
         encryption.lookup("chat-ledger", "telegram-chat-id"),
@@ -146,7 +276,9 @@ describe("production summary ledger", () => {
         expect(rawDatabaseEvidence).not.toContain(privateValue);
       }
 
-      await expect(summaries.saveAttempt(attempt)).resolves.toBeUndefined();
+      await expect(summaries.recordAttempt(attempt)).resolves.toMatchObject({
+        status: "alreadyCommitted",
+      });
       const unchanged = await client.db
         .select()
         .from(summaryRunMessages)
@@ -204,20 +336,20 @@ describe("production summary ledger", () => {
 
   it("records a defer without advancing the terminal checkpoint", async () => {
     const client = await openTestDb();
-    const encryption = createLedgerEncryption(Buffer.alloc(32, 8));
-    const summaries = new SummariesRepo(client.db, encryption);
+    const encryption = createDataEncryption(Buffer.alloc(32, 8));
+    const summaries = new SummaryAttemptRepository(client.db, encryption);
     const terminal = fixtureAttempt();
 
     try {
-      await summaries.saveAttempt(terminal);
-      await summaries.saveAttempt({
+      await summaries.recordAttempt(terminal);
+      await summaries.recordAttempt({
         ...terminal,
         id: asSummaryId("run-deferred"),
         commandMessageId: asMessageId(102),
         status: "deferred",
         action: "DEFER_INCOMPLETE",
         checkpointBefore: asMessageId(12),
-        checkpointAfter: asMessageId(12),
+        consumedThroughMessageId: asMessageId(12),
         summaryText: undefined,
         candidate: undefined,
         modelInvocations: terminal.modelInvocations.map((invocation) => ({
@@ -226,7 +358,9 @@ describe("production summary ledger", () => {
         })),
       });
 
-      const lastTerminal = await summaries.findLastRun(terminal.chatId);
+      const lastTerminal = await summaries.findLatestAcceptedOutcome(
+        terminal.chatId,
+      );
       expect(lastTerminal?.id).toBe(terminal.id);
       expect(lastTerminal?.covers.lastId).toBe(12);
 
@@ -243,9 +377,27 @@ describe("production summary ledger", () => {
       await client.close();
     }
   });
+  it("rejects summarized evidence without summary text", async () => {
+    const client = await openTestDb();
+    const summaries = new SummaryAttemptRepository(
+      client.db,
+      createDataEncryption(Buffer.alloc(32, 8)),
+    );
+    try {
+      await expect(
+        summaries.recordAttempt({
+          ...fixtureAttempt(),
+          id: asSummaryId("run-without-summary"),
+          summaryText: undefined,
+        }),
+      ).rejects.toThrow("must include summary text");
+    } finally {
+      await client.close();
+    }
+  });
 });
 
-function fixtureAttempt(): SummaryRunAttempt {
+function fixtureAttempt(): SummaryAttempt {
   const chatId = asChatId("chat-ledger");
   const createdAt = asTimestampMs(1_700_000_000_000);
   return {
@@ -255,7 +407,7 @@ function fixtureAttempt(): SummaryRunAttempt {
     startedAt: createdAt,
     completedAt: asTimestampMs(1_700_000_000_050),
     checkpointBefore: asMessageId(10),
-    checkpointAfter: asMessageId(12),
+    consumedThroughMessageId: asMessageId(12),
     eligibleCount: 2,
     contextCount: 1,
     mode: "recent",

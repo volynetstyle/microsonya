@@ -193,6 +193,14 @@ export interface ChatStreamEvent {
   created_at: string;
   message: ChatStreamMessage;
   done: boolean;
+  done_reason?: string;
+  total_duration?: number;
+  load_duration?: number;
+  prompt_eval_count?: number;
+  prompt_eval_duration?: number;
+  eval_count?: number;
+  eval_duration?: number;
+  logprobs?: Logprob[];
 }
 
 export interface EmbedRequest {

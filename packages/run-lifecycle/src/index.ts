@@ -10,15 +10,18 @@ export const SUMMARY_RUN_LIFECYCLE_STATUSES = [
   "retry_wait",
   "failed_permanent",
 ] as const;
-export type SummaryRunLifecycleStatus =
+export type SummaryExecutionStatus =
   (typeof SUMMARY_RUN_LIFECYCLE_STATUSES)[number];
-export interface OperationalSummaryRun {
+export type SummaryRunRetryStage = "processing" | "delivery";
+export interface SummaryExecution {
   readonly id: SummaryId;
   readonly idempotencyKey: string;
-  readonly status: SummaryRunLifecycleStatus;
+  readonly status: SummaryExecutionStatus;
   readonly createdAt: TimestampMs;
   readonly updatedAt: TimestampMs;
   readonly attempt: number;
+  readonly deliveryAttempt: number;
+  readonly retryStage?: SummaryRunRetryStage;
   readonly lastErrorCode?: string;
   readonly lastErrorAt?: TimestampMs;
   readonly nextRetryAt?: TimestampMs;
@@ -29,8 +32,8 @@ export interface OperationalSummaryRun {
   readonly telegramMessageId?: number;
 }
 const TRANSITIONS: Readonly<
-  Record<SummaryRunLifecycleStatus, readonly SummaryRunLifecycleStatus[]>
-> = Object.freeze({
+  Record<SummaryExecutionStatus, readonly SummaryExecutionStatus[]>
+> = {
   created: ["queued", "failed_permanent"],
   queued: ["processing", "retry_wait", "failed_permanent"],
   processing: ["summary_ready", "retry_wait", "failed_permanent"],
@@ -39,22 +42,24 @@ const TRANSITIONS: Readonly<
   retry_wait: ["queued", "processing", "delivering", "failed_permanent"],
   completed: [],
   failed_permanent: [],
-});
-export function canTransitionSummaryRun(
-  from: SummaryRunLifecycleStatus,
-  to: SummaryRunLifecycleStatus,
+};
+export function canTransitionSummaryExecution(
+  from: SummaryExecutionStatus,
+  to: SummaryExecutionStatus,
 ): boolean {
   return TRANSITIONS[from].includes(to);
 }
-export function assertSummaryRunTransition(
-  from: SummaryRunLifecycleStatus,
-  to: SummaryRunLifecycleStatus,
+export function assertSummaryExecutionTransition(
+  from: SummaryExecutionStatus,
+  to: SummaryExecutionStatus,
 ): void {
-  if (!canTransitionSummaryRun(from, to))
-    throw new TypeError(`Illegal SummaryRun transition: ${from} -> ${to}.`);
+  if (!canTransitionSummaryExecution(from, to))
+    throw new TypeError(
+      `Illegal SummaryExecution transition: ${from} -> ${to}.`,
+    );
 }
-export function isTerminalSummaryRunStatus(
-  status: SummaryRunLifecycleStatus,
+export function isTerminalSummaryExecutionStatus(
+  status: SummaryExecutionStatus,
 ): boolean {
   return status === "completed" || status === "failed_permanent";
 }
@@ -63,13 +68,13 @@ export type RunHealth =
   | { readonly kind: "active"; readonly ageMs: number }
   | { readonly kind: "stuck"; readonly ageMs: number };
 export function assessRunHealth(
-  run: Pick<OperationalSummaryRun, "status" | "updatedAt">,
+  run: Pick<SummaryExecution, "status" | "updatedAt">,
   now: TimestampMs,
   recoveryThresholdMs: number,
 ): RunHealth {
   if (!Number.isFinite(recoveryThresholdMs) || recoveryThresholdMs <= 0)
     throw new TypeError("recoveryThresholdMs must be positive.");
-  if (isTerminalSummaryRunStatus(run.status)) return { kind: "terminal" };
+  if (isTerminalSummaryExecutionStatus(run.status)) return { kind: "terminal" };
   const ageMs = Math.max(0, now - run.updatedAt);
   return ageMs >= recoveryThresholdMs
     ? { kind: "stuck", ageMs }
@@ -89,7 +94,7 @@ export type ReconciliationAction =
   | "expire-lease-and-enqueue"
   | "enqueue-retry";
 export function decideReconciliation(
-  run: Pick<OperationalSummaryRun, "status" | "updatedAt" | "nextRetryAt"> & {
+  run: Pick<SummaryExecution, "status" | "updatedAt" | "nextRetryAt"> & {
     readonly leaseExpiresAt?: TimestampMs;
   },
   staleBefore: TimestampMs,

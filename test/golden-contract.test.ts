@@ -23,6 +23,21 @@ describe("golden E2E specification", () => {
     );
   });
 
+  it("keeps the production ellipsis/provenance regression highly visible", () => {
+    expect(adversarialE2E).toContain(
+      "conversational-ellipsis-and-author-boundary",
+    );
+    const fixture = goldenFixtures.find(
+      ({ id }) => id === "conversational-ellipsis-and-author-boundary",
+    );
+    expect(fixture).toMatchObject({
+      source: "live",
+      expected: { action: "SUMMARIZE", checkpoint: { advance: true } },
+    });
+    expect(fixture?.expected.summary?.propositions).toHaveLength(4);
+    expect(fixture?.expected.summary?.mustNotInvent).toContain("блок живлення");
+  });
+
   it("pins checkpoint expectations to the irreversible transition contract", () => {
     for (const fixture of goldenFixtures) {
       const expected = fixture.expected.checkpoint?.advance;

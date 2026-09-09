@@ -1,4 +1,5 @@
 # Microsonya 0.1
+Source available. Free for noncommercial use. Commercial use requires a separate license.
 
 Telegram bot that keeps canonical text messages and creates on-demand Ukrainian
 summaries.
@@ -44,12 +45,13 @@ then summarization over the same W. A `DEFER_*` or `SKIP_*` result needs only th
 classifier call. The deterministic classifier contract exists but abstains in
 v0.1 until explicit fast rules are approved.
 
-Production consists of `apps/telegram/bot` and the `shared`, `model`,
-`summarize`, and `db` packages. PostgreSQL stores canonical messages plus an
-immutable summary attempt ledger. Development may omit `DATABASE_URL` and use
-in-memory storage; production requires `DATABASE_URL` and a base64-encoded
-32-byte `MICROSONYA_DATA_ENCRYPTION_KEY`. The former
-`SUMMARY_LEDGER_ENCRYPTION_KEY` name remains accepted during migration.
+Production runs on Cloudflare Workers in `apps/cloudflare`: a Telegram webhook
+ingress, durable lifecycle service, Queue consumer/processor, and WMA API with
+static assets. Domain logic remains in the workspace packages. PostgreSQL
+stores canonical messages plus an immutable summary attempt ledger. Runtime
+configuration and deployment instructions live in
+`apps/cloudflare/README.md` and the Wrangler configurations under
+`apps/cloudflare/workers`.
 
 PostgreSQL never stores raw Telegram chat IDs, author IDs, author names, message
 text, summaries, model text output, feedback comments, or corrections. Chat and
@@ -67,14 +69,13 @@ pnpm install
 pnpm db:migrate
 pnpm check
 pnpm build
-pnpm start
+pnpm release:gate
 ```
 
-The production bot is emitted as one self-contained Node.js ESM artifact:
-`apps/telegram/bot/dist/microsonya-bot.mjs`. It includes all workspace and
-third-party JavaScript dependencies; only Node.js built-ins remain external.
-The Docker runtime image copies this single file and does not contain
-`node_modules`.
+Deploy the individual Workers with the `deploy:*` scripts from the
+`@microsonya/cloudflare` workspace. Staging has separate Wrangler
+configurations and resources; it is the required proving ground before a
+production deployment.
 
 The bot exposes `/summary`; `today` and numeric count arguments are
 supported.
@@ -83,3 +84,13 @@ Set `SUMMARIZATION_LOG_PROMPT=1` temporarily to include the complete PIPECHAT
 window sent to the classifier and summarizer in telemetry. It contains chat
 content and should remain disabled outside diagnostics. Full prompt and model
 response logging is rejected when `NODE_ENV=production`.
+
+## License
+
+Microsonya is source-available under the
+PolyForm Noncommercial License 1.0.0.
+
+You are welcome to inspect, study, modify, and use the source code
+for permitted noncommercial purposes.
+
+Commercial use requires a separate license from the copyright holder.

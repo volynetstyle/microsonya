@@ -6,7 +6,12 @@ import {
 import { describe, expect, it, vi } from "vitest";
 import type { SummaryJob } from "@microsonya/contracts";
 import { asSummaryId } from "@microsonya/shared";
-import { handleSummaryQueue } from "../src/ingress/queue.js";
+import { handleSummaryQueue } from "../src/ingress/summary-queue-consumer.js";
+import {
+  EMPTY_SUMMARY_MESSAGE,
+  classifyUnknownFailure,
+} from "../src/processor/policy.js";
+import { isRetryableTelegramStatus } from "../src/ingress/policy.js";
 
 type ProcessorResult = Awaited<ReturnType<Env["SUMMARY_PROCESSOR"]["process"]>>;
 
@@ -21,14 +26,30 @@ function message(id: string): ServiceBindingQueueMessage<SummaryJob> {
 
 function environment(
   process: (runId: string) => Promise<ProcessorResult>,
-): Pick<Env, "SUMMARY_PROCESSOR" | "ANALYTICS"> {
+  writeDataPoint: ReturnType<typeof vi.fn> = vi.fn(),
+): Pick<Env, "SUMMARY_PROCESSOR" | "SUMMARY_JOBS" | "ANALYTICS"> {
+  const send = vi.fn(async () => undefined);
   return {
     SUMMARY_PROCESSOR: { process } as Env["SUMMARY_PROCESSOR"],
-    ANALYTICS: { writeDataPoint: vi.fn() } as unknown as AnalyticsEngineDataset,
+    SUMMARY_JOBS: { send } as unknown as Queue<SummaryJob>,
+    ANALYTICS: { writeDataPoint } as unknown as AnalyticsEngineDataset,
   };
 }
 
 describe("summary Queue protocol in Workers runtime", () => {
+  it("does not let a permanent Telegram launcher error poison webhook retries", () => {
+    expect(isRetryableTelegramStatus(400)).toBe(false);
+    expect(isRetryableTelegramStatus(403)).toBe(false);
+    expect(isRetryableTelegramStatus(429)).toBe(true);
+    expect(isRetryableTelegramStatus(500)).toBe(true);
+  });
+  it("renders the empty result in valid Ukrainian and does not retry code bugs", () => {
+    expect(EMPTY_SUMMARY_MESSAGE).toBe("Немає нових повідомлень для підсумку.");
+    expect(classifyUnknownFailure(new TypeError("bug"))).toMatchObject({
+      code: "TypeError",
+      retryable: false,
+    });
+  });
   it("ACKs completed and permanent work and RETRYs transient work", async () => {
     const batch = createMessageBatch("summary-jobs", [
       message("completed"),
@@ -50,7 +71,11 @@ describe("summary Queue protocol in Workers runtime", () => {
     expect(result.explicitAcks).toEqual(
       expect.arrayContaining(["completed", "permanent"]),
     );
-    expect(result.retryMessages).toContainEqual({ msgId: "retry" });
+    expect(result.explicitAcks).toContain("retry");
+    expect(env.SUMMARY_JOBS.send).toHaveBeenCalledWith(
+      { runId: "run-retry" },
+      { delaySeconds: 30 },
+    );
   });
 
   it("RETRYs an RPC exception without losing other batch outcomes", async () => {
@@ -69,5 +94,25 @@ describe("summary Queue protocol in Workers runtime", () => {
 
     expect(result.explicitAcks).toContain("success");
     expect(result.retryMessages).toContainEqual({ msgId: "throws" });
+  });
+
+  it("ACKs completed work even when Analytics Engine rejects a metric", async () => {
+    const batch = createMessageBatch("summary-jobs", [message("completed")]);
+    const ctx = createExecutionContext();
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const env = environment(
+      async () => ({ disposition: "completed" }),
+      vi.fn(() => {
+        throw new TypeError("writeDataPoint failed");
+      }),
+    );
+
+    await expect(handleSummaryQueue(batch, env)).resolves.toBeUndefined();
+    const result = await getQueueResult(batch, ctx);
+
+    expect(result.explicitAcks).toContain("completed");
+    expect(result.retryMessages).toEqual([]);
+    expect(warn).toHaveBeenCalledOnce();
+    warn.mockRestore();
   });
 });

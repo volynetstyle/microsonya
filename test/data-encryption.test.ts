@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { createDataEncryption } from "../packages/db/src/index.js";
+import {
+  createDataEncryption,
+  normalizeBytea,
+} from "../packages/db/src/index.js";
 
 describe("private data encryption", () => {
   it("uses randomized authenticated ciphertext", () => {
@@ -26,5 +29,24 @@ describe("private data encryption", () => {
       encryption.lookup("123", "telegram-author-id"),
     );
     expect(encryption.lookup("123", "telegram-chat-id")).not.toContain("123");
+  });
+});
+
+describe("PostgreSQL bytea normalization", () => {
+  const expected = Buffer.from([0, 1, 127, 128, 255]);
+
+  it.each([
+    ["Buffer", expected],
+    ["Uint8Array", new Uint8Array(expected)],
+    ["ArrayBuffer", new Uint8Array(expected).buffer],
+    ["hex string", "\\x00017f80ff"],
+  ])("normalizes %s driver values", (_label, value) => {
+    expect(normalizeBytea(value)).toEqual(expected);
+  });
+
+  it("rejects unknown driver values", () => {
+    expect(() => normalizeBytea("not-bytea")).toThrow(
+      "Unsupported PostgreSQL bytea driver value.",
+    );
   });
 });

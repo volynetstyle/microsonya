@@ -17,3 +17,11 @@ research/*
 packages/eval/results/
 .wrangler/
 *.patch
+.agents/
+# keep the repository architecture context skill versioned
+!.agents/
+.agents/*
+!.agents/skills/
+.agents/skills/*
+!.agents/skills/microsonya-architecture/
+!.agents/skills/microsonya-architecture/SKILL.md

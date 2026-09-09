@@ -74,13 +74,13 @@ export function createConversationWindow(
     copiedMessages.push(message);
   }
 
-  const immutableMessages = Object.freeze(copiedMessages);
+  const immutableMessages = copiedMessages;
 
-  return Object.freeze({
+  return {
     chatId: windowChatId!,
     messages: immutableMessages,
     [conversationWindowBrand]: true as const,
-  });
+  };
 }
 
 function copyAndValidateMessage(
@@ -105,14 +105,14 @@ function copyAndValidateMessage(
     );
   }
 
-  return Object.freeze({
+  return {
     id,
     chatId,
     author,
     time,
     parentId,
     text: candidate.text,
-  });
+  };
 }
 
 function copyAndValidateAuthor(author: AuthorRef, index: number): AuthorRef {
@@ -128,10 +128,10 @@ function copyAndValidateAuthor(author: AuthorRef, index: number): AuthorRef {
     );
   }
 
-  return Object.freeze({
+  return {
     id: asAuthorId(author.id),
     label: author.label,
-  });
+  };
 }
 
 function validateParentId(

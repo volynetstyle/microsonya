@@ -33,12 +33,32 @@ export function openDb(connectionString = requiredDatabaseUrl()): DbClient {
 export async function openWorkerDb(
   connectionString: string,
 ): Promise<WorkerDbClient> {
-  const client = new pg.Client({ connectionString });
+  let client: pg.Client;
+  try {
+    client = new pg.Client({ connectionString });
+  } catch (cause) {
+    throw new TypeError(
+      `Invalid Worker database connection string (${connectionStringMetadata(connectionString)}).`,
+      { cause },
+    );
+  }
   await client.connect();
   return {
     db: drizzle(client, { schema }),
     close: () => client.end(),
   } satisfies WorkerDbClient;
+}
+
+function connectionStringMetadata(value: unknown): string {
+  if (typeof value !== "string") return `type=${typeof value}`;
+  const protocol = value.match(/^([a-z][a-z0-9+.-]*):/iu)?.[1] ?? "missing";
+  return [
+    `length=${value.length}`,
+    `protocol=${protocol}`,
+    `leadingWhitespace=${/^\s/u.test(value)}`,
+    `trailingWhitespace=${/\s$/u.test(value)}`,
+    `invalidPercentEscape=${/%(?![0-9a-f]{2})/iu.test(value)}`,
+  ].join(", ");
 }
 
 function requiredDatabaseUrl(): string {

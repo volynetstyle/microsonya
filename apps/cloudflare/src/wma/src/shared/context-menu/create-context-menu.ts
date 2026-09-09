@@ -1,8 +1,5 @@
 import { createEffect, createSignal, onCleanup, untrack } from "solid-js";
-import type {
-  Point,
-  PointPositionConfig,
-} from "./point-position";
+import type { Point, PointPositionConfig } from "./point-position";
 
 export interface ContextMenuOptions {
   targets?: string;
@@ -91,7 +88,10 @@ export function createContextMenu(
 
   const disabledByLink = (resolved: HTMLElement) =>
     options.shouldDisableOnLink === true &&
-    Boolean(resolved.closest("a[href]") && root?.contains(resolved.closest("a[href]")));
+    Boolean(
+      resolved.closest("a[href]") &&
+      root?.contains(resolved.closest("a[href]")),
+    );
 
   const cancelPending = () => {
     if (pending !== undefined) window.clearTimeout(pending);
@@ -169,7 +169,8 @@ export function createContextMenu(
     }
 
     if (!untrack(open) || !menu || event.pointerType !== "mouse") return;
-    if (!pointerExit.enabled || !window.matchMedia("(hover: hover)").matches) return;
+    if (!pointerExit.enabled || !window.matchMedia("(hover: hover)").matches)
+      return;
     const now = performance.now();
     if (now - lastBoundaryCheck < pointerExit.throttleMs) return;
     lastBoundaryCheck = now;

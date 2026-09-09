@@ -1,21 +1,47 @@
+import { readFile } from "node:fs/promises";
+
+import { transform } from "esbuild";
 import { defineConfig } from "vitest/config";
 import solid from "@solidjs/vite-plugin";
+
+const inlineMinifiedQuery = "?inline-minified";
+
+const inlineMinified = {
+  name: "inline-minified",
+
+  async load(id: string) {
+    if (!id.endsWith(inlineMinifiedQuery)) return;
+
+    const filename = id.slice(0, -inlineMinifiedQuery.length);
+    const source = await readFile(filename, "utf8");
+    const loader = filename.endsWith(".ts") ? "ts" : "js";
+    const result = await transform(source, {
+      loader,
+      minify: true,
+      target: "es2020",
+    });
+
+    return `export default ${JSON.stringify(result.code)};`;
+  },
+};
 
 export default defineConfig({
   // Turnkey client mode: no index.html and no mount file — the plugin
   // generates the entries around src/App.tsx, wrapped in src/Document.tsx
   // (or a built-in shell). `vite build` prerenders the shell into
   // dist/client/index.html and emits a purely static dist/client.
-  plugins: [solid({ start: true })],
+  plugins: [inlineMinified, solid({ start: true })],
   server: {
-    // Keep the dev server and scripts/dev-webapp-tunnel.mjs readiness probe
-    // on the same address. On Windows, localhost may resolve to IPv6 ::1
-    // while the supervisor probes IPv4 127.0.0.1.
     host: "127.0.0.1",
     port: 3000,
-    // Quick `cloudflared tunnel` runs (see pnpm dev:webapp:tunnel) get a
-    // random *.trycloudflare.com host each time, which Vite's dev-server
-    // host check rejects by default.
+
+    proxy: {
+      "/api": {
+        target: "http://127.0.0.1:8787",
+        changeOrigin: true,
+      },
+    },
+
     allowedHosts: [".trycloudflare.com"],
   },
   test: {

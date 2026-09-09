@@ -99,3 +99,5 @@ canonical `ChatMessage` records before command dispatch. `/summary` and other
 slash commands are control input and never enter the semantic conversation
 window. The Node/Telegraf app remains a local/rollback adapter during migration,
 but must not have the production webhook while the Cloudflare edge is active.
+The production webhook is registered with `max_connections=1`; changing that
+value requires a durable Telegram `update_id` ingestion ledger first.

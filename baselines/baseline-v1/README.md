@@ -12,26 +12,26 @@ Source revision before baseline artifacts: `2d97aa478e9d5a944fbe4969510ac4a91119
 No classifier prompt, summary prompt, or policy changes were made while creating
 this baseline. The following hashes identify the frozen inputs:
 
-| Input | SHA-256 |
-| --- | --- |
-| `packages/summarize/src/classifier.ts` | `06ac0fa5ffec55a5c9dd25c676efffe375887245817c676a1e1b6cbf97e88965` |
+| Input                                              | SHA-256                                                            |
+| -------------------------------------------------- | ------------------------------------------------------------------ |
+| `packages/summarize/src/classifier.ts`             | `06ac0fa5ffec55a5c9dd25c676efffe375887245817c676a1e1b6cbf97e88965` |
 | `packages/summarize/src/conversationSummarizer.ts` | `f8f3809d55aa5b2e8035a3011966aece54f72e91ea75abb222003a9a466fc596` |
-| `packages/summarize/src/constants.ts` | `92ac87eaa92714bb26ce4d827715a283e69ec6332bc920b092a81c2d4a4ee87d` |
-| `packages/summarize/src/checkpointPolicy.ts` | `8a618c52ada8f227468b9807e2373eb9899990733cfa6136a322a23b3ca3b680` |
+| `packages/summarize/src/constants.ts`              | `92ac87eaa92714bb26ce4d827715a283e69ec6332bc920b092a81c2d4a4ee87d` |
+| `packages/summarize/src/checkpointPolicy.ts`       | `8a618c52ada8f227468b9807e2373eb9899990733cfa6136a322a23b3ca3b680` |
 
 Evaluator scope is frozen after this baseline. A `baseline-v2` may be opened only
 for a production defect, a new error class, or a product-contract change.
 
 ## Release gate
 
-| Gate | Required | Observed | Result |
-| --- | ---: | ---: | --- |
-| Critical errors | 0 | 1 | FAIL |
-| Irreversible losses | 0 | 1 | FAIL |
-| Runtime E2E | 4/4 | 4/4 | PASS |
-| Provider/parse failures | 0 | 0 across all final live reports | PASS |
-| Product-safe action rate | >= 90% | 92.68% full; 88.57% boundary; 100% long-context | FAIL on boundary |
-| Semantic proposition score | >= 90% | 90.54% full; 87.50% boundary; 92.00% long-context | FAIL on boundary |
+| Gate                       | Required |                                          Observed | Result           |
+| -------------------------- | -------: | ------------------------------------------------: | ---------------- |
+| Critical errors            |        0 |                                                 1 | FAIL             |
+| Irreversible losses        |        0 |                                                 1 | FAIL             |
+| Runtime E2E                |      4/4 |                                               4/4 | PASS             |
+| Provider/parse failures    |        0 |                   0 across all final live reports | PASS             |
+| Product-safe action rate   |   >= 90% |   92.68% full; 88.57% boundary; 100% long-context | FAIL on boundary |
+| Semantic proposition score |   >= 90% | 90.54% full; 87.50% boundary; 92.00% long-context | FAIL on boundary |
 
 Preferred-label accuracy is diagnostic and is not a release gate.
 

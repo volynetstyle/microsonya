@@ -12,7 +12,7 @@ import {
 } from "../packages/shared/src/index.js";
 import {
   decideWindow,
-  processWindow,
+  evaluateSummaryWindow,
   type ConversationSummarizer,
   type SummaryDecisionClassifier,
 } from "../packages/summarize/src/index.js";
@@ -34,7 +34,7 @@ describe("conversation-window decision pipeline", () => {
         return { text: "A concise summary." };
       });
 
-      const result = await processWindow(
+      const result = await evaluateSummaryWindow(
         window,
         {
           classifier: { classify },
@@ -79,7 +79,7 @@ describe("conversation-window decision pipeline", () => {
     const classify = vi.fn<SummaryDecisionClassifier["classify"]>();
     const summarize = vi.fn<ConversationSummarizer["summarize"]>();
 
-    const result = await processWindow(window, {
+    const result = await evaluateSummaryWindow(window, {
       classifier: { classify },
       summarizer: { summarize },
       fastClassifier: {
@@ -126,7 +126,7 @@ describe("conversation-window decision pipeline", () => {
     const summarize = vi.fn<ConversationSummarizer["summarize"]>();
 
     await expect(
-      processWindow(
+      evaluateSummaryWindow(
         fixtureWindow(),
         { classifier: { classify }, summarizer: { summarize } },
         controller.signal,

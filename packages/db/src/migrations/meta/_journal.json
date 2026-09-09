@@ -71,6 +71,69 @@
       "when": 1788022861457,
       "tag": "0009_unknown_dragon_lord",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1788097394061,
+      "tag": "0010_bouncy_bromley",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1788097419323,
+      "tag": "0011_curious_genesis",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1788097496770,
+      "tag": "0012_hesitant_gressill",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1788110000000,
+      "tag": "0013_wma_chat_catalog",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1788111000000,
+      "tag": "0014_wma_catalog_chat_ciphertext",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1788310000000,
+      "tag": "0015_wma_displayable_summaries",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1788345000000,
+      "tag": "0016_restore_lifecycle_summaries",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1788430065922,
+      "tag": "0017_amused_vermin",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1788796039404,
+      "tag": "0018_uneven_warbound",
+      "breakpoints": true
     }
   ]
 }

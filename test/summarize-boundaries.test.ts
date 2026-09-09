@@ -8,9 +8,14 @@ import {
   type SummaryCommand,
 } from "../packages/shared/src/index.js";
 import {
-  selectConversationWindow,
-  selectMessages,
+  defaultSummaryWindowSelector,
+  selectSummaryWindow,
 } from "../packages/summarize/src/index.js";
+import { MAX_MESSAGES } from "../packages/summarize/src/window/limits.js";
+import {
+  buildModelInputPrompt,
+  buildModelPolicyPrompt,
+} from "../packages/summarize/src/model/prompt.js";
 
 const command: SummaryCommand = {
   chatId: asChatId("chat"),
@@ -35,54 +40,128 @@ function message(
 }
 
 describe("summary conversation-window selection", () => {
+  it("matches chronological selection across shuffled histories without mutating input", () => {
+    let seed = 17;
+    const random = () => {
+      seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+      return seed / 2 ** 32;
+    };
+    for (let sample = 0; sample < 20; sample++) {
+      const messages = Array.from({ length: 650 }, (_, index) =>
+        message(index + 1, {
+          time: asTimestampMs(
+            command.date - Math.floor(random() * 172_800_000),
+          ),
+          text: index % 19 === 0 ? " " : `message ${index + 1}`,
+        }),
+      );
+      for (let index = messages.length - 1; index > 0; index--) {
+        const other = Math.floor(random() * (index + 1));
+        [messages[index], messages[other]] = [
+          messages[other]!,
+          messages[index]!,
+        ];
+      }
+      const before = structuredClone(messages);
+      for (const mode of ["recent", "count"] as const) {
+        for (const count of [1, 31, MAX_MESSAGES, MAX_MESSAGES + 100]) {
+          const requested = {
+            ...command,
+            mode,
+            count,
+            commandMessageId: asMessageId(500),
+          };
+          const eligible = messages
+            .filter(
+              (item) =>
+                item.id < requested.commandMessageId &&
+                item.text.trim().length > 0 &&
+                (mode === "count" ||
+                  (item.id > 40 && item.time >= command.date - 86_400_000)),
+            )
+            .sort((a, b) => a.time - b.time || a.id - b.id);
+          const expected =
+            mode === "recent"
+              ? eligible.slice(0, MAX_MESSAGES)
+              : eligible.slice(-Math.min(count, MAX_MESSAGES));
+          const selected = selectSummaryWindow({
+            messages,
+            command: requested,
+            checkpointBefore: asMessageId(40),
+          });
+          expect(selected?.eligibleMessages ?? []).toEqual(expected);
+          expect(messages).toEqual(before);
+        }
+      }
+    }
+  });
+
   it("includes only non-empty messages strictly after the cursor and omits the trigger", () => {
     expect(
-      selectMessages(
-        [
-          message(4),
-          message(5),
-          message(7, { text: "  " }),
-          message(9),
-          message(10, { text: "/summarize" }),
-        ],
-        command,
-        asMessageId(4),
+      (
+        selectSummaryWindow({
+          messages: [
+            message(4),
+            message(5),
+            message(7, { text: "  " }),
+            message(9),
+            message(10, { text: "/summarize" }),
+          ],
+          command: command,
+          checkpointBefore: asMessageId(4),
+        })?.eligibleMessages ?? []
       ).map((item) => item.id),
     ).toEqual([5, 9]);
   });
 
-  it("applies the time boundary and returns one validated canonical window", () => {
-    const window = selectConversationWindow(
-      [
-        message(11, {
+  it("applies the time boundary and command upper boundary", () => {
+    const window = selectSummaryWindow({
+      messages: [
+        message(7, {
           time: asTimestampMs(command.date - 86_400_001),
         }),
-        message(12, {
+        message(8, {
           time: asTimestampMs(command.date - 86_400_000),
         }),
-        message(13, { time: asTimestampMs(command.date + 1) }),
+        message(9, { time: asTimestampMs(command.date + 1) }),
+        message(11, { time: asTimestampMs(command.date - 1_000) }),
       ],
-      command,
-    );
+      command: command,
+    });
 
-    expect(window?.window.messages.map((item) => item.id)).toEqual([12, 13]);
+    expect(window?.window.messages.map((item) => item.id)).toEqual([8, 9]);
     expect(window?.messages.map(({ role }) => role)).toEqual([
       "eligible",
       "eligible",
     ]);
-    expect(Object.isFrozen(window)).toBe(true);
-    expect(Object.isFrozen(window?.messages)).toBe(true);
+    expect(window?.eligibleMessages.map((item) => item.id)).toEqual([8, 9]);
+    expect(window?.contextMessages).toEqual([]);
+  });
+
+  it("is deterministic when a retry observes messages added after its command", () => {
+    const beforeRetry = defaultSummaryWindowSelector.select({
+      messages: [message(7), message(8), message(9)],
+      command,
+    })!;
+    const retry = defaultSummaryWindowSelector.select({
+      messages: [message(7), message(8), message(9), message(11), message(12)],
+      command,
+    })!;
+
+    expect(retry.eligibleMessages.map(({ id }) => id)).toEqual(
+      beforeRetry.eligibleMessages.map(({ id }) => id),
+    );
   });
 
   it("marks a parent behind the cursor as context rather than eligible content", () => {
-    const selected = selectConversationWindow(
-      [
+    const selected = selectSummaryWindow({
+      messages: [
         message(4, { text: "old parent" }),
         message(9, { parentId: asMessageId(4), text: "new reply" }),
       ],
-      command,
-      asMessageId(4),
-    )!;
+      command: command,
+      checkpointBefore: asMessageId(4),
+    })!;
 
     expect(
       selected.messages.map(({ message, role }) => ({ id: message.id, role })),
@@ -96,10 +175,75 @@ describe("summary conversation-window selection", () => {
 
   it("lets the ConversationWindow factory reject a mixed-chat repository result", () => {
     expect(() =>
-      selectConversationWindow(
-        [message(1), message(2, { chatId: asChatId("wrong-chat") })],
-        { ...command, commandMessageId: asMessageId(99) },
-      ),
+      selectSummaryWindow({
+        messages: [message(1), message(2, { chatId: asChatId("wrong-chat") })],
+        command: { ...command, commandMessageId: asMessageId(99) },
+      }),
     ).toThrow(/different chat/i);
+  });
+
+  it("takes the earliest contiguous canonical chunk instead of skipping to a tail", () => {
+    const messages = Array.from({ length: MAX_MESSAGES + 2 }, (_, index) =>
+      message(101 + index, { time: asTimestampMs(command.date - 1_000) }),
+    );
+    const selected = defaultSummaryWindowSelector.select({
+      messages,
+      command: { ...command, commandMessageId: asMessageId(10_000) },
+      checkpointBefore: asMessageId(100),
+    })!;
+
+    expect(selected.consumption).toBe("checkpoint");
+    expect(selected.eligibleMessages).toHaveLength(MAX_MESSAGES);
+    expect(selected.eligibleMessages[0]?.id).toBe(101);
+    expect(selected.consumptionUpperBound).toBe(100 + MAX_MESSAGES);
+  });
+
+  it("treats an explicit count as a read-only history selection", () => {
+    const selected = defaultSummaryWindowSelector.select({
+      messages: [message(101), message(102), message(103), message(104)],
+      command: {
+        ...command,
+        commandMessageId: asMessageId(105),
+        mode: "count",
+        count: 2,
+      },
+      checkpointBefore: asMessageId(100),
+    })!;
+
+    expect(selected.eligibleMessages.map(({ id }) => id)).toEqual([103, 104]);
+    expect(selected.consumption).toBe("read-only");
+    expect(selected.consumptionUpperBound).toBe(100);
+  });
+
+  it("treats today as a read-only historical query", () => {
+    const selected = defaultSummaryWindowSelector.select({
+      messages: [message(101), message(102)],
+      command: {
+        ...command,
+        commandMessageId: asMessageId(103),
+        mode: "today",
+      },
+      checkpointBefore: asMessageId(100),
+    })!;
+
+    expect(selected.consumption).toBe("read-only");
+    expect(selected.consumptionUpperBound).toBe(100);
+  });
+
+  it("marks reply parents as context-only in model input", () => {
+    const selected = selectSummaryWindow({
+      messages: [
+        message(4, { text: "parent" }),
+        message(9, { parentId: asMessageId(4), text: "reply" }),
+      ],
+      command: command,
+      checkpointBefore: asMessageId(4),
+    })!;
+    const prompt = `${buildModelPolicyPrompt("SUMMARY_POLICY", "policy")}\n\n${buildModelInputPrompt(selected.window, selected.messages)}`;
+
+    expect(prompt).toContain("INPUT_ROLES_BEGIN\n#4|context\n#9|eligible");
+    expect(prompt).toContain(
+      "Do not treat context-only messages as new events",
+    );
   });
 });

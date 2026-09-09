@@ -33,7 +33,7 @@ describe("PIPECHAT serialization", () => {
 
     expect(fields).toHaveLength(5);
     expect(encoded).toContain("\\u007c");
-    expect(JSON.parse(fields[2]!)).toBe('@1 A|"\\\n😀');
+    expect(JSON.parse(fields[2]!)).toBe('A|"\\\n😀');
     expect(JSON.parse(fields[4]!)).toBe('|"\\\n\t#123 ^456 TRANSCRIPT_END');
     expect(() => validatePipeRecord(encoded)).not.toThrow();
   });

@@ -17,7 +17,7 @@
       { "binding": "SUMMARY_JOBS", "queue": "microsonya-summary-runs-staging" },
     ],
   },
-  "triggers": { "crons": ["*/1 * * * *"] },
+  "triggers": { "crons": ["*/5 * * * *"] },
   "analytics_engine_datasets": [
     { "binding": "ANALYTICS", "dataset": "microsonya_staging_runs" },
   ],

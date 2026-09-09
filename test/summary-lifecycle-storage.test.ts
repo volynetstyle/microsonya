@@ -1,7 +1,7 @@
 import { count, eq, sql } from "drizzle-orm";
 import { describe, expect, it } from "vitest";
 import {
-  SummaryLifecycleRepo,
+  SummaryExecutionRepository,
   createDataEncryption,
   summaryRunLifecycle,
 } from "../packages/db/src/index.js";
@@ -12,17 +12,18 @@ import {
 } from "../packages/shared/src/index.js";
 import { openTestDb } from "./dbTestUtils.js";
 
-const command = Object.freeze({
+const command = {
   chatId: asChatId("-100123456"),
   commandMessageId: asMessageId(42),
+  messageThreadId: 77,
   date: asTimestampMs(1_800_000_000_000),
   mode: "recent" as const,
-});
+};
 
 describe("SummaryRun authoritative storage", () => {
   it("physically collapses concurrent duplicate ingress to one run", async () => {
     const client = await openTestDb();
-    const repo = new SummaryLifecycleRepo(
+    const repo = new SummaryExecutionRepository(
       client.db,
       createDataEncryption(Buffer.alloc(32, 23)),
     );
@@ -46,6 +47,7 @@ describe("SummaryRun authoritative storage", () => {
       const [stored] = await client.db.select().from(summaryRunLifecycle);
       expect(stored.chatId).not.toBe(command.chatId);
       expect(stored.idempotencyKey).not.toContain(command.chatId);
+      expect(runs[0]?.command.messageThreadId).toBe(77);
     } finally {
       await client.close();
     }
@@ -53,7 +55,7 @@ describe("SummaryRun authoritative storage", () => {
 
   it("allows exactly one concurrent lease claim and persists delivery", async () => {
     const client = await openTestDb();
-    const repo = new SummaryLifecycleRepo(
+    const repo = new SummaryExecutionRepository(
       client.db,
       createDataEncryption(Buffer.alloc(32, 24)),
     );
@@ -72,7 +74,7 @@ describe("SummaryRun authoritative storage", () => {
 
       const claims = await Promise.all(
         Array.from({ length: 50 }, () =>
-          repo.claim(
+          repo.claimProcessing(
             created.id,
             asTimestampMs(1_800_000_000_300),
             60_000,
@@ -83,22 +85,27 @@ describe("SummaryRun authoritative storage", () => {
       expect(claims.filter((run) => run !== undefined)).toHaveLength(1);
       expect(claims.find((run) => run !== undefined)?.attempt).toBe(1);
 
+      const claim = claims.find((run) => run !== undefined);
+      expect(claim).toBeDefined();
       expect(
-        await repo.saveSummary(
+        await repo.storeDeliveryPayload(
           created.id,
+          claim!.leaseToken,
           "Durable result",
           asTimestampMs(1_800_000_000_400),
           { model: "test-model", promptVersion: "v1" },
         ),
       ).toBe(true);
-      await repo.beginDelivery(
+      const delivery = await repo.claimDelivery(
         created.id,
         asTimestampMs(1_800_000_000_500),
         60_000,
       );
+      expect(delivery).toBeDefined();
       expect(
         await repo.markCompleted(
           created.id,
+          delivery!.leaseToken,
           777,
           asTimestampMs(1_800_000_000_600),
         ),
@@ -118,7 +125,7 @@ describe("SummaryRun authoritative storage", () => {
 
   it("makes crashed processing and delivery leases recoverable", async () => {
     const client = await openTestDb();
-    const repo = new SummaryLifecycleRepo(
+    const repo = new SummaryExecutionRepository(
       client.db,
       createDataEncryption(Buffer.alloc(32, 25)),
     );
@@ -134,12 +141,13 @@ describe("SummaryRun authoritative storage", () => {
         "queued",
         asTimestampMs(2_000),
       );
-      await repo.claim(
+      const firstClaim = await repo.claimProcessing(
         created.id,
         asTimestampMs(3_000),
         1_000,
         "processor-test",
       );
+      expect(firstClaim).toBeDefined();
 
       expect(
         await repo.listStale(asTimestampMs(0), asTimestampMs(3_999)),
@@ -150,11 +158,10 @@ describe("SummaryRun authoritative storage", () => {
         ),
       ).toEqual(["processing"]);
 
-      await repo.markRetry(
+      await repo.expireLease(
         created.id,
         "processing",
         "LEASE_EXPIRED",
-        asTimestampMs(4_000),
         asTimestampMs(4_000),
       );
       await repo.transition(
@@ -163,14 +170,21 @@ describe("SummaryRun authoritative storage", () => {
         "queued",
         asTimestampMs(4_000),
       );
-      await repo.claim(
+      const secondClaim = await repo.claimProcessing(
         created.id,
         asTimestampMs(4_001),
         1_000,
         "processor-test",
       );
-      await repo.saveSummary(created.id, "Persisted", asTimestampMs(4_100), {});
-      await repo.beginDelivery(created.id, asTimestampMs(4_200), 1_000);
+      expect(secondClaim).toBeDefined();
+      await repo.storeDeliveryPayload(
+        created.id,
+        secondClaim!.leaseToken,
+        "Persisted",
+        asTimestampMs(4_100),
+        {},
+      );
+      await repo.claimDelivery(created.id, asTimestampMs(4_200), 1_000);
 
       expect(
         (await repo.listStale(asTimestampMs(0), asTimestampMs(5_200))).map(
@@ -186,6 +200,161 @@ describe("SummaryRun authoritative storage", () => {
         retryOverdue: 0,
         permanentFailures: 0,
       });
+    } finally {
+      await client.close();
+    }
+  });
+
+  it("fences an expired processing owner and renews only the current token", async () => {
+    const client = await openTestDb();
+    const repo = new SummaryExecutionRepository(
+      client.db,
+      createDataEncryption(Buffer.alloc(32, 26)),
+    );
+    try {
+      const created = await repo.create(
+        { idempotencyKey: "telegram:-100123456:lease", command },
+        asTimestampMs(1_000),
+      );
+      await repo.transition(
+        created.id,
+        "created",
+        "queued",
+        asTimestampMs(1_001),
+      );
+      const stale = await repo.claimProcessing(
+        created.id,
+        asTimestampMs(2_000),
+        1_000,
+        "processor-a",
+      );
+      expect(stale).toBeDefined();
+      expect(
+        await repo.renewLease(
+          created.id,
+          stale!.leaseToken,
+          "processing",
+          asTimestampMs(2_500),
+          1_000,
+        ),
+      ).toBe(true);
+      expect(
+        await repo.expireLease(
+          created.id,
+          "processing",
+          "LEASE_EXPIRED",
+          asTimestampMs(3_500),
+        ),
+      ).toBe(true);
+      await repo.transition(
+        created.id,
+        "retry_wait",
+        "queued",
+        asTimestampMs(3_500),
+      );
+      const current = await repo.claimProcessing(
+        created.id,
+        asTimestampMs(3_501),
+        1_000,
+        "processor-b",
+      );
+      expect(current).toBeDefined();
+      expect(current!.leaseToken).not.toBe(stale!.leaseToken);
+      expect(
+        await repo.storeDeliveryPayload(
+          created.id,
+          stale!.leaseToken,
+          "stale",
+          asTimestampMs(3_600),
+          {},
+        ),
+      ).toBe(false);
+      expect(
+        await repo.storeDeliveryPayload(
+          created.id,
+          current!.leaseToken,
+          "current",
+          asTimestampMs(3_600),
+          {},
+        ),
+      ).toBe(true);
+    } finally {
+      await client.close();
+    }
+  });
+
+  it("allows exactly one concurrent delivery claim", async () => {
+    const client = await openTestDb();
+    const repo = new SummaryExecutionRepository(
+      client.db,
+      createDataEncryption(Buffer.alloc(32, 27)),
+    );
+    try {
+      const created = await repo.create(
+        { idempotencyKey: "telegram:-100123456:delivery", command },
+        asTimestampMs(1_000),
+      );
+      await repo.transition(
+        created.id,
+        "created",
+        "queued",
+        asTimestampMs(1_001),
+      );
+      const processing = await repo.claimProcessing(
+        created.id,
+        asTimestampMs(1_002),
+        10_000,
+        "processor",
+      );
+      await repo.storeDeliveryPayload(
+        created.id,
+        processing!.leaseToken,
+        "summary",
+        asTimestampMs(1_003),
+        {},
+      );
+      const deliveries = await Promise.all(
+        Array.from({ length: 50 }, () =>
+          repo.claimDelivery(created.id, asTimestampMs(1_004), 10_000),
+        ),
+      );
+      expect(deliveries.filter(Boolean)).toHaveLength(1);
+      expect(deliveries.find(Boolean)?.deliveryAttempt).toBe(1);
+    } finally {
+      await client.close();
+    }
+  });
+
+  it("enforces one processing lease per chat for different commands", async () => {
+    const client = await openTestDb();
+    const repo = new SummaryExecutionRepository(
+      client.db,
+      createDataEncryption(Buffer.alloc(32, 28)),
+    );
+    try {
+      const first = await repo.create(
+        { idempotencyKey: "telegram:-100123456:first", command },
+        asTimestampMs(1_000),
+      );
+      const second = await repo.create(
+        {
+          idempotencyKey: "telegram:-100123456:second",
+          command: { ...command, commandMessageId: asMessageId(43) },
+        },
+        asTimestampMs(1_000),
+      );
+      await Promise.all([
+        repo.transition(first.id, "created", "queued", asTimestampMs(1_001)),
+        repo.transition(second.id, "created", "queued", asTimestampMs(1_001)),
+      ]);
+      const claims = await Promise.allSettled([
+        repo.claimProcessing(first.id, asTimestampMs(1_002), 10_000, "a"),
+        repo.claimProcessing(second.id, asTimestampMs(1_002), 10_000, "b"),
+      ]);
+      const acquired = claims.filter(
+        (result) => result.status === "fulfilled" && result.value !== undefined,
+      );
+      expect(acquired).toHaveLength(1);
     } finally {
       await client.close();
     }

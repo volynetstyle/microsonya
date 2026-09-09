@@ -1,13 +1,8 @@
-import type {
-  ChatMessage,
-  SummaryCommand,
-  SummaryId,
-} from "@microsonya/shared";
+import type { SummaryCommand, SummaryId } from "@microsonya/shared";
 
 /** Portable protocol for idempotent creation of one logical summary run. */
 export interface CreateSummaryRunRequest {
   readonly idempotencyKey: string;
-  readonly message?: ChatMessage;
   readonly command: SummaryCommand;
 }
 

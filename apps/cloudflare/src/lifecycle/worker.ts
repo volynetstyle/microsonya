@@ -1,9 +1,5 @@
 import { WorkerEntrypoint } from "cloudflare:workers";
-import {
-  SummaryLifecycleRepo,
-  dataEncryptionFromBase64,
-  openWorkerDb,
-} from "@microsonya/db";
+import { SummaryExecutionRepository } from "@microsonya/db";
 import { asSummaryId, asTimestampMs, type SummaryId } from "@microsonya/shared";
 import type {
   CreateSummaryRunRequest,
@@ -12,27 +8,22 @@ import type {
 } from "@microsonya/contracts";
 import {
   decideReconciliation,
-  type SummaryRunLifecycleStatus,
+  type ReconciliationAction,
+  type SummaryExecutionStatus,
 } from "@microsonya/run-lifecycle";
+import { errorName, logTelemetry } from "../observability.js";
+import { withWorkerDatabase } from "../runtime/worker-db.js";
 
 const STALE_AFTER_MS = 5 * 60_000;
 const DEFAULT_LEASE_MS = 2 * 60_000;
 
 async function withRepository<T>(
   env: Env,
-  operation: (repository: SummaryLifecycleRepo) => Promise<T>,
+  operation: (repository: SummaryExecutionRepository) => Promise<T>,
 ): Promise<T> {
-  const client = await openWorkerDb(env.HYPERDRIVE.connectionString);
-  try {
-    return await operation(
-      new SummaryLifecycleRepo(
-        client.db,
-        dataEncryptionFromBase64(env.MICROSONYA_DATA_ENCRYPTION_KEY),
-      ),
-    );
-  } finally {
-    await client.close();
-  }
+  return withWorkerDatabase(env, (db, encryption) =>
+    operation(new SummaryExecutionRepository(db, encryption)),
+  );
 }
 
 export class SummaryRunsEntrypoint extends WorkerEntrypoint<Env> {
@@ -65,13 +56,69 @@ export class SummaryRunsEntrypoint extends WorkerEntrypoint<Env> {
     );
   }
 
-  async get(runId: SummaryId) {
-    return withRepository(this.env, (repository) => repository.get(runId));
+  async status(
+    runId: SummaryId,
+  ): Promise<"missing" | "pending" | "completed" | "failed_permanent"> {
+    const run = await withRepository(this.env, (repository) =>
+      repository.get(runId),
+    );
+    if (run === undefined) return "missing";
+    if (run.status === "completed" || run.status === "failed_permanent") {
+      return run.status;
+    }
+    return "pending";
   }
 
-  async claim(runId: SummaryId, processorVersion: string) {
+  /**
+   * Resolves terminal state, resumable delivery, or a processing claim using
+   * one Service Binding invocation and one Hyperdrive connection.
+   */
+  async claimWork(runId: SummaryId, processorVersion: string) {
+    return withRepository(this.env, async (repository) => {
+      const run = await repository.get(runId);
+      if (run === undefined) return { kind: "missing" as const };
+      if (run.status === "completed") return { kind: "completed" as const };
+      if (run.status === "failed_permanent") {
+        return { kind: "failed_permanent" as const };
+      }
+
+      const now = asTimestampMs(Date.now());
+      const delivery = await repository.claimDelivery(
+        runId,
+        now,
+        DEFAULT_LEASE_MS,
+      );
+      if (delivery !== undefined) {
+        return {
+          kind: "delivery" as const,
+          claim: {
+            runId: delivery.id,
+            chatId: delivery.command.chatId,
+            ...(delivery.command.messageThreadId === undefined
+              ? {}
+              : { messageThreadId: delivery.command.messageThreadId }),
+            summary: delivery.summary,
+            deliveryAttempt: delivery.deliveryAttempt,
+            leaseToken: delivery.leaseToken,
+          },
+        };
+      }
+
+      const processing = await repository.claimProcessing(
+        runId,
+        now,
+        DEFAULT_LEASE_MS,
+        processorVersion,
+      );
+      return processing === undefined
+        ? { kind: "pending" as const }
+        : { kind: "processing" as const, claim: processing };
+    });
+  }
+
+  async claimProcessing(runId: SummaryId, processorVersion: string) {
     return withRepository(this.env, (repository) =>
-      repository.claim(
+      repository.claimProcessing(
         runId,
         asTimestampMs(Date.now()),
         DEFAULT_LEASE_MS,
@@ -80,24 +127,32 @@ export class SummaryRunsEntrypoint extends WorkerEntrypoint<Env> {
     );
   }
 
-  async transition(
+  async renewLease(
     runId: SummaryId,
-    from: SummaryRunLifecycleStatus,
-    to: SummaryRunLifecycleStatus,
+    leaseToken: string,
+    stage: "processing" | "delivering",
   ): Promise<boolean> {
     return withRepository(this.env, (repository) =>
-      repository.transition(runId, from, to, asTimestampMs(Date.now())),
+      repository.renewLease(
+        runId,
+        leaseToken,
+        stage,
+        asTimestampMs(Date.now()),
+        DEFAULT_LEASE_MS,
+      ),
     );
   }
 
-  async saveSummary(
+  async storeDeliveryPayload(
     runId: SummaryId,
+    leaseToken: string,
     summary: string,
     metadata: { readonly model?: string; readonly promptVersion?: string },
   ): Promise<boolean> {
     return withRepository(this.env, (repository) =>
-      repository.saveSummary(
+      repository.storeDeliveryPayload(
         runId,
+        leaseToken,
         summary,
         asTimestampMs(Date.now()),
         metadata,
@@ -105,23 +160,37 @@ export class SummaryRunsEntrypoint extends WorkerEntrypoint<Env> {
     );
   }
 
-  async beginDelivery(runId: SummaryId): Promise<boolean> {
-    return withRepository(this.env, (repository) =>
-      repository.beginDelivery(
+  async claimDelivery(runId: SummaryId) {
+    return withRepository(this.env, async (repository) => {
+      const claim = await repository.claimDelivery(
         runId,
         asTimestampMs(Date.now()),
         DEFAULT_LEASE_MS,
-      ),
-    );
+      );
+      return claim === undefined
+        ? undefined
+        : {
+            runId: claim.id,
+            chatId: claim.command.chatId,
+            ...(claim.command.messageThreadId === undefined
+              ? {}
+              : { messageThreadId: claim.command.messageThreadId }),
+            summary: claim.summary,
+            deliveryAttempt: claim.deliveryAttempt,
+            leaseToken: claim.leaseToken,
+          };
+    });
   }
 
   async markCompleted(
     runId: SummaryId,
+    leaseToken: string,
     telegramMessageId: number,
   ): Promise<boolean> {
     return withRepository(this.env, (repository) =>
       repository.markCompleted(
         runId,
+        leaseToken,
         telegramMessageId,
         asTimestampMs(Date.now()),
       ),
@@ -130,6 +199,7 @@ export class SummaryRunsEntrypoint extends WorkerEntrypoint<Env> {
 
   async markRetry(
     runId: SummaryId,
+    leaseToken: string,
     from: "processing" | "delivering",
     errorCode: string,
     retryAfterSeconds: number,
@@ -138,6 +208,7 @@ export class SummaryRunsEntrypoint extends WorkerEntrypoint<Env> {
     return withRepository(this.env, (repository) =>
       repository.markRetry(
         runId,
+        leaseToken,
         from,
         errorCode,
         now,
@@ -146,9 +217,20 @@ export class SummaryRunsEntrypoint extends WorkerEntrypoint<Env> {
     );
   }
 
-  async markFailed(runId: SummaryId, errorCode: string): Promise<boolean> {
+  async markFailed(
+    runId: SummaryId,
+    leaseToken: string,
+    from: "processing" | "delivering",
+    errorCode: string,
+  ): Promise<boolean> {
     return withRepository(this.env, (repository) =>
-      repository.markFailed(runId, errorCode, asTimestampMs(Date.now())),
+      repository.markFailed(
+        runId,
+        leaseToken,
+        from,
+        errorCode,
+        asTimestampMs(Date.now()),
+      ),
     );
   }
 
@@ -163,7 +245,7 @@ export class SummaryRunsEntrypoint extends WorkerEntrypoint<Env> {
 export default {
   async scheduled(_controller, env): Promise<void> {
     const now = asTimestampMs(Date.now());
-    const requeued = await withRepository(env, async (repository) => {
+    const jobs = await withRepository(env, async (repository) => {
       const stale = await repository.listStale(
         asTimestampMs(now - STALE_AFTER_MS),
         now,
@@ -172,18 +254,12 @@ export default {
         asTimestampMs(now - STALE_AFTER_MS),
         now,
       );
-      env.ANALYTICS.writeDataPoint({
-        indexes: ["production-health"],
-        blobs: ["lifecycle.health"],
-        doubles: [
-          health.stuckRuns,
-          health.deliveryStuck,
-          health.retryOverdue,
-          health.permanentFailures,
-        ],
+      recordLifecycleHealth(env.ANALYTICS, health);
+      logTelemetry("info", "lifecycle", "summary.reconcile.scan", {
+        staleCount: stale.length,
       });
 
-      const runIds: SummaryId[] = [];
+      const preparedJobs: SummaryJob[] = [];
       for (const run of stale) {
         const action = decideReconciliation(
           run,
@@ -191,54 +267,104 @@ export default {
           now,
         );
         if (action === "none") continue;
-        if (action === "enqueue-created") {
-          const queued = await repository.transition(
-            run.id,
-            "created",
-            "queued",
+
+        try {
+          // Claim the reconciliation action in PostgreSQL before enqueueing.
+          // A concurrent cron invocation that loses the CAS must not publish
+          // a duplicate job from the same stale snapshot.
+          const prepared = await prepareRunForEnqueue(
+            repository,
+            run,
+            action,
             now,
           );
-          if (!queued) continue;
-        } else if (action === "reenqueue") {
-          if (run.status !== "queued" && run.status !== "summary_ready") {
-            continue;
-          }
-          const touched = await repository.touch(run.id, run.status, now);
-          if (!touched) continue;
-        } else if (action === "expire-lease-and-enqueue") {
-          if (run.status !== "processing" && run.status !== "delivering") {
-            continue;
-          }
-          const retrying = await repository.markRetry(
-            run.id,
-            run.status,
-            "LEASE_EXPIRED",
-            now,
-            now,
-          );
-          if (!retrying) continue;
-          const queued = await repository.transition(
-            run.id,
-            "retry_wait",
-            "queued",
-            now,
-          );
-          if (!queued) continue;
-        } else {
-          const queued = await repository.transition(
-            run.id,
-            "retry_wait",
-            "queued",
-            now,
-          );
-          if (!queued) continue;
+          if (!prepared) continue;
+
+          preparedJobs.push({ runId: run.id } satisfies SummaryJob);
+        } catch (error) {
+          // The run remains in a recoverable queued state. A later cron scan
+          // will retry it if the Queue binding is temporarily unavailable.
+          logTelemetry("error", "lifecycle", "summary.reconcile.error", {
+            runId: run.id,
+            errorName: errorName(error),
+          });
         }
-        runIds.push(run.id);
       }
-      return runIds;
+      return preparedJobs;
     });
-    for (const runId of requeued) {
-      await env.SUMMARY_JOBS.send({ runId } satisfies SummaryJob);
+    if (jobs.length === 0) return;
+    try {
+      await env.SUMMARY_JOBS.sendBatch(jobs.map((body) => ({ body })));
+    } catch (error) {
+      // Prepared runs remain recoverable in queued state and will be selected
+      // by a later reconciliation pass if Queue is temporarily unavailable.
+      logTelemetry("error", "lifecycle", "summary.reconcile.batch_error", {
+        errorName: errorName(error),
+        messageCount: jobs.length,
+      });
     }
   },
 } satisfies ExportedHandler<Env, unknown>;
+
+async function prepareRunForEnqueue(
+  repository: SummaryExecutionRepository,
+  run: {
+    readonly id: SummaryId;
+    readonly status: SummaryExecutionStatus;
+  },
+  action: ReconciliationAction,
+  now: ReturnType<typeof asTimestampMs>,
+): Promise<boolean> {
+  switch (action) {
+    case "none":
+      return false;
+    case "enqueue-created":
+      return repository.transition(run.id, "created", "queued", now);
+    case "reenqueue":
+      return run.status === "queued" || run.status === "summary_ready"
+        ? repository.touch(run.id, run.status, now)
+        : false;
+    case "enqueue-retry":
+      return repository.transition(run.id, "retry_wait", "queued", now);
+    case "expire-lease-and-enqueue": {
+      if (run.status !== "processing" && run.status !== "delivering") {
+        return false;
+      }
+      const expired = await repository.expireLease(
+        run.id,
+        run.status,
+        "LEASE_EXPIRED",
+        now,
+      );
+      if (!expired) return false;
+      return repository.transition(run.id, "retry_wait", "queued", now);
+    }
+  }
+}
+
+function recordLifecycleHealth(
+  analytics: AnalyticsEngineDataset,
+  health: {
+    readonly stuckRuns: number;
+    readonly deliveryStuck: number;
+    readonly retryOverdue: number;
+    readonly permanentFailures: number;
+  },
+): void {
+  try {
+    analytics.writeDataPoint({
+      indexes: ["lifecycle:health"],
+      blobs: ["lifecycle.health"],
+      doubles: [
+        health.stuckRuns,
+        health.deliveryStuck,
+        health.retryOverdue,
+        health.permanentFailures,
+      ],
+    });
+  } catch (error) {
+    logTelemetry("warn", "lifecycle", "telemetry.metric_write_failed", {
+      errorName: errorName(error),
+    });
+  }
+}

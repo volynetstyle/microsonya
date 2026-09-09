@@ -50,5 +50,4 @@ describe("legacy motion reference oracle", () => {
       expect(accordionEdgeSeparated(before, after)).toBe(separated);
     },
   );
-
 });

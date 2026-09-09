@@ -129,7 +129,7 @@ export function evaluateRuns(
   }
 
   const total = results.length;
-  return Object.freeze({
+  return {
     accuracy: correct / total,
     acceptedActionRate: accepted / total,
     stability: dominantShare(results.map(({ action }) => action)),
@@ -137,7 +137,7 @@ export function evaluateRuns(
     irreversibleLossRate: irreversibleLosses / total,
     unsupportedClaimRate: unsupported / total,
     checkpointCorrectness: checkpointMatches / total,
-  });
+  };
 }
 
 export function isAcceptedAction(
@@ -195,5 +195,5 @@ function actionDistribution(
 ): Readonly<Partial<Record<ExpectedAction, number>>> {
   const counts: Partial<Record<ExpectedAction, number>> = {};
   for (const action of actions) counts[action] = (counts[action] ?? 0) + 1;
-  return Object.freeze(counts);
+  return counts;
 }

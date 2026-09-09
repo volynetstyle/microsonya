@@ -7,8 +7,8 @@ import {
   createConversationWindow,
 } from "../packages/shared/src/index.js";
 import {
-  buildClassifierPrompt,
-  buildSummaryPrompt,
+  buildClassifierMessages,
+  buildSummaryMessages,
   encodePipeWindow,
   PIPE_FIELDS,
   PIPE_GUIDE,
@@ -17,7 +17,7 @@ import {
 } from "../packages/summarize/src/index.js";
 
 describe("canonical model transcript", () => {
-  it("keeps the fixed field order, hostile strings, local aliases, and external parent", () => {
+  it("keeps the fixed field order, hostile strings, visible names, and external parent", () => {
     const window = fixtureWindow();
     const encoded = encodePipeWindow(window);
     const records = encoded.split("\n");
@@ -47,14 +47,15 @@ describe("canonical model transcript", () => {
 
     expect(first[0]).toBe("#101");
     expect(first[1]).toBe("^77");
-    expect(JSON.parse(first[2]!)).toBe('@1 Vlad | "\\\n😀');
+    expect(JSON.parse(first[2]!)).toBe('Vlad | "\\\n😀');
     expect(JSON.parse(first[4]!)).toBe(
       'First | line\n"quoted" \\ TRANSCRIPT_END 😀',
     );
 
-    // Equal display labels remain distinct; a repeated identity reuses its alias.
-    expect(JSON.parse(second[2]!)).toBe('@2 Vlad | "\\\n😀');
-    expect(JSON.parse(third[2]!)).toBe('@1 Vlad | "\\\n😀');
+    // The model sees exactly the visible attribution and no synthetic IDs.
+    expect(JSON.parse(second[2]!)).toBe('Vlad | "\\\n😀');
+    expect(JSON.parse(third[2]!)).toBe('Vlad | "\\\n😀');
+    expect(encoded).not.toMatch(/@\d+/u);
     expect(encoded).not.toContain("telegram-user-111");
     expect(encoded).not.toContain("telegram-user-222");
   });
@@ -62,8 +63,11 @@ describe("canonical model transcript", () => {
   it("gives classifier and summarizer byte-for-byte identical format and transcript sections", () => {
     const window = fixtureWindow();
     const encoded = encodePipeWindow(window);
-    const classifierPrompt = buildClassifierPrompt(window);
-    const summaryPrompt = buildSummaryPrompt(window);
+    const classifierPrompt = buildClassifierMessages(window)
+      .map(({ content }) => content)
+      .join("\n\n");
+    const summaryMessages = buildSummaryMessages(window);
+    const summaryPrompt = summaryMessages.map(({ content }) => content).join("\n\n");
 
     const classifierFormat = extractSection(
       classifierPrompt,
@@ -80,6 +84,95 @@ describe("canonical model transcript", () => {
     expect(summaryTranscript).toBe(encoded);
     expect(classifierTranscript).toBe(summaryTranscript);
   });
+
+  it("keeps trusted summary policy in system and untrusted transcript in user", () => {
+    const window = fixtureWindow();
+    const messages = buildSummaryMessages(
+      window,
+      [
+        { message: window.messages[0]!, role: "context" },
+        { message: window.messages[1]!, role: "eligible" },
+        { message: window.messages[2]!, role: "eligible" },
+      ],
+      { currentDate: "2026-09-09", reasoningEffort: "low" },
+    );
+
+    expect(messages.map(({ role }) => role)).toEqual([
+      "system",
+      "user",
+    ]);
+    expect(messages[0]!.content).toContain("You are ChatGPT");
+    expect(messages[0]!.content).toContain("Current date: 2026-09-09");
+    expect(messages[0]!.content).toContain("SUMMARY_POLICY_BEGIN");
+    expect(messages[0]!.content).toContain("TRANSCRIPT_FORMAT_BEGIN");
+    expect(messages[0]!.content).toContain("SEMANTIC_COMPOSITION_POLICY_BEGIN");
+    expect(messages[0]!.content).not.toContain(
+      'Correct final output:\n{"summary":"Реліз перенесли на четвер.',
+    );
+    expect(messages[0]!.content).toContain(
+      "Do not fuse propositions from different speakers",
+    );
+    expect(messages[0]!.content).not.toContain("TRANSCRIPT_BEGIN");
+    expect(messages[0]!.content).not.toContain("First | line");
+
+    expect(messages[1]!.content).toContain("INPUT_ROLES_BEGIN");
+    expect(messages[1]!.content).toContain("#101|context");
+    expect(messages[1]!.content).toContain("TRANSCRIPT_BEGIN");
+    expect(messages[1]!.content).toContain("First \\u007c line");
+    expect(messages[1]!.content).not.toContain("SUMMARY_POLICY_BEGIN");
+    expect(messages[1]!.content).not.toContain(
+      "SEMANTIC_COMPOSITION_POLICY_BEGIN",
+    );
+  });
+
+  it("uses a plain-text output contract only for progressive streaming", () => {
+    const window = fixtureWindow();
+    const structured = buildSummaryMessages(window);
+    const streaming = buildSummaryMessages(window, undefined, {
+      outputMode: "plain-text",
+    });
+
+    expect(structured[0]!.content).toContain(
+      "Return only JSON matching the required output schema.",
+    );
+    expect(streaming[0]!.content).toContain(
+      "Return only the summary as plain text",
+    );
+    expect(streaming[0]!.content).not.toContain(
+      "Return only JSON matching the required output schema.",
+    );
+    expect(streaming[0]!.content).not.toContain(
+      "Correct final output:\nРеліз перенесли на четвер.",
+    );
+    expect(streaming[0]!.content).not.toContain(
+      'Correct final output:\n{"summary":',
+    );
+    expect(streaming[1]!.content).toBe(structured[1]!.content);
+  });
+
+  it("requires concrete facts and visible speaker attribution", () => {
+    const [system] = buildSummaryMessages(fixtureWindow(), undefined, {
+      outputMode: "plain-text",
+    });
+
+    expect(system!.content).toContain(
+      "Favor concrete propositions over topic labels",
+    );
+    expect(system!.content).toContain(
+      "Keep visible names attached",
+    );
+    expect(system!.content).toContain(
+      "numbers, dates, constraints, and",
+    );
+    expect(system!.content).toContain(
+      "State the supported substance directly",
+    );
+    expect(system!.content).toContain("complete\nnon-redundant set of durable");
+    expect(system!.content).toContain(
+      "Do not append a generic concluding sentence",
+    );
+  });
+
 });
 
 function fixtureWindow() {

@@ -20,7 +20,7 @@ export function evaluateExtraction(
   const leaked = fixture.forbidden.filter(({ anyOf }) =>
     anyOf.some((value) => text.includes(normalize(value))),
   );
-  return Object.freeze({
+  return {
     requiredFactRecall: ratio(presentRequired.length, fixture.required.length),
     unsupportedFactRate: rateFor(leaked, "unsupported", fixture),
     supersededFactLeakRate: rateFor(leaked, "superseded", fixture),
@@ -35,7 +35,7 @@ export function evaluateExtraction(
         1 -
         rateFor(leaked, "epistemic", fixture)) /
       2,
-  });
+  };
 }
 
 function recallFor(
